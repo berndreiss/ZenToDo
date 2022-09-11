@@ -2,6 +2,7 @@ package com.bdreiss.zentodo;
 
 import android.os.Bundle;
 
+import com.bdreiss.zentodo.dataManipulation.Data;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -74,4 +75,5 @@ public class MainActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
 }
