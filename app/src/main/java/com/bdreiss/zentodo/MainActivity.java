@@ -3,6 +3,7 @@ package com.bdreiss.zentodo;
 import android.os.Bundle;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
+import com.bdreiss.zentodo.dataManipulation.SQLite;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,8 @@ import com.bdreiss.zentodo.databinding.ActivityMainBinding;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        Data data = new Data();
+        addData(data);
+
     }
 
     @Override
@@ -73,6 +79,18 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    public static void addData(Data data){
+
+        data.add("Waschen","Haushalt",20220908, "");
+
+        data.add("Buegeln","Haushalt",20220909,"");
+
+        data.add("Gleichungen ueben","Mathe",20220910,"");
+
+        data.add("Computer einschalten","Computersysteme",20210910,"");
+
     }
 
 }

@@ -234,6 +234,18 @@ public class Data{
 
     }
 
+    public ArrayList<String> getEntriesAsString(){
+
+        ArrayList<String> items = new ArrayList<>();
+        int dataLength = this.entries.size();
+
+        for (int i=0; i<dataLength;i++){
+            items.add(this.entries.get(i).getTask());
+        }
+
+        return items;
+    }
+
     public List<List<Entry>> getLists(){
 
         return this.lists;
