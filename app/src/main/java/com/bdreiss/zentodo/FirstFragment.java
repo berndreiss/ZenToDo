@@ -26,25 +26,7 @@ public class FirstFragment extends Fragment {
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
-        Data data = new Data();
-
-        ArrayList<String> items = data.getEntriesAsString();
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1);
-
-        int dataSize = items.size();
-
-        for (int i=0;i<dataSize;i++){
-            adapter.add(items.get(i));
-
-        }
-
-
         binding = FragmentFirstBinding.inflate(inflater, container, false);
-
-        ListView list = (ListView) binding.listView.findViewById(R.id.list_view);
-        list.setAdapter(adapter);
-
         return binding.getRoot();
 
     }
