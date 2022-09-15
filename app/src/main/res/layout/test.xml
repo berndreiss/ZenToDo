@@ -14,24 +14,37 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"/>
 
-        <ListView
-        android:id="@+id/list_view_test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
 
-    <TextView
-        android:id="@+id/text_view_test"
-        android:text="Hello"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
+        <EditText
+            android:id="@+id/edit_text_test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="new Task"
+            />
+        <Button
+            android:id="@+id/button_test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add"
+
+            />
 
         <ListView
-            android:id="@+id/list_view_test2"
+            android:id="@+id/list_view_test"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
+        <TextView
+            android:id="@+id/text_view_test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+        <TextView
+            android:id="@+id/text_view_test2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

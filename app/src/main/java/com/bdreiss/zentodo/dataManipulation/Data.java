@@ -1,4 +1,7 @@
 package com.bdreiss.zentodo.dataManipulation;
+import android.content.Context;
+import android.widget.TextView;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -15,8 +18,8 @@ public class Data{
 
 
     private static final String saveFilePath = "Data"; //Path for save file
-    private static final String delimiter = "%&!%";    //Delimiter for fields of entries in save file
-    private static final String lineDelimiter = "!!!" + delimiter + "!!!"; //Delimiter for entries in save file
+    private static final String delimiter = "------";    //Delimiter for fields of entries in save file
+    private static final String lineDelimiter = "%%%%%%%"; //Delimiter for entries in save file
 
     private List<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     private List<Entry> todays = new ArrayList<>(); //list of tasks who are todo today -> set by this.setTodays
@@ -24,13 +27,15 @@ public class Data{
     private List<String> listNames = new ArrayList<>(); //list of all the names of the lists in this.lists (this.lists and this.listNames are in the same order)
     private int id; //running id, which is inizialized at 0 upon loading and incremented by one for each task
 
-    private SaveFile saveFile;
+    public SaveFile saveFile;//TODO reset to private
 
-    public Data(){
+    private TextView textView;//REMOVE TEXTVIEW!!!
+
+    public Data(Context context, TextView textView){//REMOVE TEXTVIEW!!!
         //initialize instance of Data, set id to 0, create save file and load data from save file
-
+        this.textView = textView;//REMOVE TEXTVIEW!!!
         this.id=0;
-        this.saveFile = new SaveFile(this.saveFilePath);
+        this.saveFile = new SaveFile(context, this.saveFilePath, textView);//REMOVE TEXTVIEW!!!
         this.load();
 
     }
@@ -49,21 +54,22 @@ public class Data{
                     String.valueOf(entry.getDue()) + this.delimiter + entry.getRecurrence() + this.lineDelimiter;
         }
 
+        //this.textView.setText(text);//REMOVE TEXTVIEW!!!
+
         this.saveFile.save(text); //Writes contents to file
 
     }
 
     public void load(){
         //loads data into this.entries from save file
-
         String data = this.saveFile.load();
+//        this.textView.setText(data);//REMOVE TEXTVIEW!!!
         String[] lines = data.split(this.lineDelimiter);
         int linesLength = lines.length;
 
         for (int i=0; i < linesLength;i++){//loop through lines to retrieve fields for entry
             String[] fields = lines[i].split(this.delimiter);
             int fieldsLength = fields.length;
-
             if (fieldsLength==4){//loop through fields of entry and add them to this.entries
                 Entry entry = new Entry(this.getID(),//create ID and increment counter
                         fields[0],fields[1],Integer.parseInt(fields[2]),fields[3]);//create entry
@@ -71,6 +77,7 @@ public class Data{
                 this.addToList(entry);//add entry to according list in this.lists
             }
         }
+
     }
 
 

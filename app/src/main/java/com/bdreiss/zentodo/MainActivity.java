@@ -23,9 +23,12 @@ import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -55,13 +58,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });*/
 
-        setListView(this);
+  //      TextView textView = (TextView) findViewById(R.id.text_view_test);
+
+//        Data data = new Data(textView);
+
+        //addData(data);
+
+        setViews(this);
 
     }
 
-    public void setListView(Context context){
-        Data data = new Data();
-        addData(data);
+    public void setViews(Context context){
+        TextView textView = (TextView) findViewById(R.id.text_view_test);
+        TextView textView2 = (TextView) findViewById(R.id.text_view_test2);
+        Data data = new Data(context, textView);//REMOVE TEXTVIEW!!!
+        //addData(data);
+        //textView.setText(String.valueOf(data.load()));
+        //textView2.setText(data.saveFile.load());
+        //textView.setText(String.valueOf(data.getEntries().size()));
         final List<String> items = data.getEntriesAsString();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,items);
         ListView listView = (ListView) findViewById(R.id.list_view_test);
@@ -69,20 +83,25 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long id) {
-                TextView textView = (TextView) findViewById(R.id.text_view_test);
-                textView.setText("Test");
-                data.remove(i);
-                items.remove(i);
+                data.remove(i-1);//TODO
+                items.remove(i);//TODO
                 adapter.notifyDataSetChanged();
-                final List<String> items2 = data.getEntriesAsString();
-                ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,items2);
-                ListView listView2 = (ListView) findViewById(R.id.list_view_test2);
-                listView2.setAdapter(adapter);
-
             }
         });
-    }
+        final EditText editText = (EditText) findViewById(R.id.edit_text_test);
+        Button button = (Button) findViewById(R.id.button_test);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String task = editText.getText().toString();
+                editText.setText("");
+                data.add(task," ",data.getDate()," ");
+                items.add(task);
+                adapter.notifyDataSetChanged();
+            }
+        });
 
+    }
 /*    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
