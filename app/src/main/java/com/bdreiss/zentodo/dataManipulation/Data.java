@@ -71,7 +71,7 @@ public class Data{
             String[] fields = lines[i].split(this.delimiter);
             int fieldsLength = fields.length;
             if (fieldsLength==4){//loop through fields of entry and add them to this.entries
-                Entry entry = new Entry(this.getID(),//create ID and increment counter
+                Entry entry = new Entry(this.createId(),//create ID and increment counter
                         fields[0],fields[1],Integer.parseInt(fields[2]),fields[3]);//create entry
                 this.entries.add(entry);//add entry
                 this.addToList(entry);//add entry to according list in this.lists
@@ -85,7 +85,7 @@ public class Data{
     public void add(String task,String list,int due,String recurrence){
         //add new entry to database
 
-        Entry entry = new Entry(this.getID(),task,list,due,recurrence); //generate ID and create entry
+        Entry entry = new Entry(this.createId(),task,list,due,recurrence); //generate ID and create entry
         this.entries.add(entry); //add entry to this.entries
         this.addToList(entry); //add entry to according list in this.lists
         this.save(); //write changes to save file
@@ -196,10 +196,25 @@ public class Data{
 
     }
 
-    public int getID(){
+    public int createId(){
         //returns id and increments the counter
         this.id++;
         return this.id;
+
+    }
+
+    public int getIdByTask(String task){
+        int id = 0;
+
+        int data_length = this.entries.size();
+
+        for (int i=0;i<data_length;i++){
+            if (this.entries.get(i).getTask().equals(task)){
+                return this.entries.get(i).getID();
+            }
+
+        }
+        return -1;
 
     }
 

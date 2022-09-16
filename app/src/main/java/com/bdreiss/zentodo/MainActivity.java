@@ -1,5 +1,6 @@
 package com.bdreiss.zentodo;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setViews(Context context){
+        //TODO when adding tasks empty lines apparently get added too
         TextView textView = (TextView) findViewById(R.id.text_view_test);
         TextView textView2 = (TextView) findViewById(R.id.text_view_test2);
         Data data = new Data(context, textView);//REMOVE TEXTVIEW!!!
@@ -83,9 +85,16 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long id) {
-                data.remove(i-1);//TODO
-                items.remove(i);//TODO
-                adapter.notifyDataSetChanged();
+                //textView.setText(items.get(i));
+                int itemId = data.getIdByTask(items.get(i));
+
+                if (id >= 0) {
+                    data.remove(itemId);//TODO
+                    items.remove(i);//TODO
+                    adapter.notifyDataSetChanged();
+                }
+                setViews(context);
+
             }
         });
         final EditText editText = (EditText) findViewById(R.id.edit_text_test);
@@ -95,11 +104,21 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String task = editText.getText().toString();
                 editText.setText("");
-                data.add(task," ",data.getDate()," ");
-                items.add(task);
-                adapter.notifyDataSetChanged();
+                if (!task.equals("")) {
+                    data.add(task, " ", data.getDate(), " ");
+                    items.add(task);
+                    adapter.notifyDataSetChanged();
+                }
+                setViews(context);
+
             }
         });
+
+    }
+
+    public void setListView(Context context){
+
+
 
     }
 /*    @Override
