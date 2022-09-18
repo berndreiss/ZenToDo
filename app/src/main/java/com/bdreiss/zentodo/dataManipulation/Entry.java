@@ -22,12 +22,6 @@ public class Entry{
         this.recurrence=recurrence;
     }
 
-    public void print(){
-        //prints an entry to the command line for testing purposes
-
-        System.out.println(this.id + "-" + this.task + "-"  + this.list + "-"  + this.due);
-    }
-
     //the following functions simply return the different fields of the entry
     public int getID(){
         return this.id;

@@ -1,5 +1,8 @@
 package com.bdreiss.zentodo;
-
+/*
+*   A custom ArrayAdapter<Entry> that creates rows with checkboxes that
+*   when checked remove the associated task.
+*/
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -16,24 +19,21 @@ import java.util.ArrayList;
 
 public class TaskListAdapter extends ArrayAdapter<Entry>{
 
-    private ArrayList<Entry> entries;
+    private ArrayList<Entry> entries;//list of entries (see Entry.java)
+
     Context context;
 
-    private Data data;
+    private Data data;//database from which entries are derived (see Data.java)
 
-    private TextView textView; //REMOVE
+    private class ViewHolder {//temporary view
 
-
-    private class ViewHolder {
-
-        protected CheckBox checkBox;
-        private TextView task;
+        protected CheckBox checkBox;//Checkbox to remove entry
+        private TextView task;//Description of the task
 
     }
 
-    public TaskListAdapter(Context context, Data data, TextView textView){//REMOVE TextView
+    public TaskListAdapter(Context context, Data data, TextView textView){
         super(context, R.layout.row,data.getEntries());
-        this.textView = textView;//REMOVE
         this.context = context;
         this.data = data;
         this.entries = data.getEntries();
@@ -41,6 +41,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+
         final ViewHolder holder;
 
         if (convertView == null) {
@@ -57,21 +58,23 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder = (ViewHolder)convertView.getTag();
         }
 
-
+        //set Text of the task
         holder.task.setText(entries.get(position).getTask());
 
         holder.checkBox.setChecked(false);
 
         holder.checkBox.setTag( position);
+
+        //establish routine to remove task when checkbox is clicked
         holder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                View tempview = (View) holder.checkBox;
-                TextView tv = (TextView) tempview.findViewById(R.id.task);
+                View viewHolder = (View) holder.checkBox;
+                TextView textView = (TextView) viewHolder.findViewById(R.id.task);
                 Integer position = (Integer)  holder.checkBox.getTag();
-                data.remove(entries.get(position).getID());
-                notifyDataSetChanged();
+                data.remove(entries.get(position).getID());//remove entry from dataset by ID
+                notifyDataSetChanged();//update the adapter
 
             }
         });
@@ -79,6 +82,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         return convertView;
     }
 
+    //returns the entry at specified position
     public Entry getEntry(int position){
         return entries.get(position);
     }

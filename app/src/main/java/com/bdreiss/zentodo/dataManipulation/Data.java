@@ -1,41 +1,38 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.content.Context;
-import android.widget.TextView;
 
 import java.util.List;
 import java.util.ArrayList;
 
 import java.util.Date;
-import java.util.Calendar;
 import java.text.SimpleDateFormat;
 
 public class Data{
-//Creates an instance of all relevant data, stored in several lists
-//Data manipulation includes:
-//-saving (save()) and loading (load()) data,
-//-adding (add(String task,String list,int due)) and removing entries
-//-returning tasks that are due (getPotentials()) and updating todays tasks (setTodays(List<Entry> todays))
+/*
+*   Creates an instance of all relevant data, stored in several lists
+*   Data manipulation includes:
+*       -saving (save()) and loading (load()) data,
+*       -adding (add(String task,String list,int due)) and removing entries
+*       -returning tasks that are due (getPotentials()) and updating todays tasks (setTodays(List<Entry> todays))
+*/
 
-
-    private static final String saveFilePath = "Data"; //Path for save file
-    private static final String delimiter = "------";    //Delimiter for fields of entries in save file
-    private static final String lineDelimiter = "%%%%%%%"; //Delimiter for entries in save file
+    private final String saveFilePath = "Data"; //Path for save file
+    private final String delimiter = "------";    //Delimiter for fields of entries in save file
+    private final String lineDelimiter = "%%%%%%%"; //Delimiter for entries in save file
 
     private ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     private ArrayList<Entry> todays = new ArrayList<>(); //list of tasks who are todo today -> set by this.setTodays
     private ArrayList<List<Entry>> lists = new ArrayList<>(); //list of all lists in which are tasks categorized in
     private ArrayList<String> listNames = new ArrayList<>(); //list of all the names of the lists in this.lists (this.lists and this.listNames are in the same order)
-    private int id; //running id, which is inizialized at 0 upon loading and incremented by one for each task
+    private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
 
     public SaveFile saveFile;//TODO reset to private
 
-    private TextView textView;//REMOVE TEXTVIEW!!!
 
-    public Data(Context context, TextView textView){//REMOVE TEXTVIEW!!!
+    public Data(Context context){
         //initialize instance of Data, set id to 0, create save file and load data from save file
-        this.textView = textView;//REMOVE TEXTVIEW!!!
         this.id=0;
-        this.saveFile = new SaveFile(context, this.saveFilePath, textView);//REMOVE TEXTVIEW!!!
+        this.saveFile = new SaveFile(context, this.saveFilePath);
         this.load();
 
     }
@@ -43,37 +40,30 @@ public class Data{
 
     public void save(){
         //saves all entries in this.entries to save file
-        String text = "";
+        StringBuilder text = new StringBuilder();
 
         int dataLength = this.entries.size();
 
         for (int i=0; i<dataLength; i++){//gets all the fields of every entry except for id, which is generated programmatically upon loading
             Entry entry = entries.get(i);
-            text += entry.getTask() + this.delimiter +
-                    entry.getList() + this.delimiter +
-                    String.valueOf(entry.getDue()) + this.delimiter + entry.getRecurrence() + this.lineDelimiter;
+            text.append(entry.getTask()).append(this.delimiter).append(entry.getList()).append(this.delimiter).append(entry.getDue()).append(this.delimiter).append(entry.getRecurrence()).append(this.lineDelimiter);
         }
 
-        //this.textView.setText(text);//REMOVE TEXTVIEW!!!
-
-        this.saveFile.save(text); //Writes contents to file
+        this.saveFile.save(text.toString()); //Writes contents to file
 
     }
 
     public void load(){
-        //loads data into this.entries from save file
         String data = this.saveFile.load();
-//        this.textView.setText(data);//REMOVE TEXTVIEW!!!
         String[] lines = data.split(this.lineDelimiter);
-        int linesLength = lines.length;
 
-        for (int i=0; i < linesLength;i++){//loop through lines to retrieve fields for entry
-            String[] fields = lines[i].split(this.delimiter);
+        for (String line : lines) {//loop through lines to retrieve fields for entry
+            String[] fields = line.split(this.delimiter);
             int fieldsLength = fields.length;
 
-            if (fieldsLength==4){//loop through fields of entry and add them to this.entries
+            if (fieldsLength == 4) {//loop through fields of entry and add them to this.entries
                 Entry entry = new Entry(this.createId(),//create ID and increment counter
-                        fields[0],fields[1],Integer.parseInt(fields[2]),fields[3]);//create entry
+                        fields[0], fields[1], Integer.parseInt(fields[2]), fields[3]);//create entry
                 this.entries.add(entry);//add entry
                 this.addToList(entry);//add entry to according list in this.lists
             }
@@ -116,8 +106,6 @@ public class Data{
 
         boolean added = false;
 
-        textView.setText(String.valueOf(listLength)+ " - " + String.valueOf(entries.size()));
-
 
         for (int i=0;i<listLength;i++){//loop through this.listNames until name matches list in entry
 
@@ -130,7 +118,7 @@ public class Data{
         }
 
         if (!added){//if entry has not been added it means, there was no according list and it has to be created
-            List<Entry> newList = new ArrayList<Entry>();//create new list
+            List<Entry> newList = new ArrayList<>();//create new list
             newList.add(entry);//add the entry
             this.lists.add(newList);//add new list to this.lists
             this.listNames.add(entry.getList());//add the name of the new list to this.listNames
@@ -174,10 +162,10 @@ public class Data{
 
 
 
-    public List<Entry> getPotentials(){
+    public ArrayList<Entry> getPotentials(){
         //return a list of all entries for which the due date is <=today
 
-        List<Entry> potentials = new ArrayList<Entry>();//create new list
+        ArrayList<Entry> potentials = new ArrayList<>();//create new list
 
         int dataLength = this.entries.size();
 
@@ -195,7 +183,7 @@ public class Data{
     }
 
     public void setTodays(ArrayList<Entry> todays){
-
+        //sets the ArrayList<Entry> todays
         this.todays = todays;
 
     }
@@ -207,43 +195,16 @@ public class Data{
 
     }
 
-    public int getIdByTask(String task){
-        int id = 0;
-
-        int data_length = this.entries.size();
-
-        for (int i=0;i<data_length;i++){
-            if (this.entries.get(i).getTask().equals(task)){
-                return this.entries.get(i).getID();
-            }
-
-        }
-        return -1;
-
-    }
 
     public int getDate(){
         //returns current date as "yyyyMMdd"
 
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 
-        Calendar c = Calendar.getInstance();
-
         Date date = new Date();
 
         return Integer.parseInt(df.format(date));
 
-
-    }
-
-    public void print(List<Entry> list){
-        //prints a list to command line for testing purposes
-
-        int dataLength = list.size();
-
-        for (int i=0; i<dataLength;i++){
-            list.get(i).print();
-        }
 
     }
 
