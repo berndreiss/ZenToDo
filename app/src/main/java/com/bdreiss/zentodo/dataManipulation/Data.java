@@ -21,10 +21,10 @@ public class Data{
     private static final String delimiter = "------";    //Delimiter for fields of entries in save file
     private static final String lineDelimiter = "%%%%%%%"; //Delimiter for entries in save file
 
-    private List<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
-    private List<Entry> todays = new ArrayList<>(); //list of tasks who are todo today -> set by this.setTodays
-    private List<List<Entry>> lists = new ArrayList<>(); //list of all lists in which are tasks categorized in
-    private List<String> listNames = new ArrayList<>(); //list of all the names of the lists in this.lists (this.lists and this.listNames are in the same order)
+    private ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
+    private ArrayList<Entry> todays = new ArrayList<>(); //list of tasks who are todo today -> set by this.setTodays
+    private ArrayList<List<Entry>> lists = new ArrayList<>(); //list of all lists in which are tasks categorized in
+    private ArrayList<String> listNames = new ArrayList<>(); //list of all the names of the lists in this.lists (this.lists and this.listNames are in the same order)
     private int id; //running id, which is inizialized at 0 upon loading and incremented by one for each task
 
     public SaveFile saveFile;//TODO reset to private
@@ -70,6 +70,7 @@ public class Data{
         for (int i=0; i < linesLength;i++){//loop through lines to retrieve fields for entry
             String[] fields = lines[i].split(this.delimiter);
             int fieldsLength = fields.length;
+
             if (fieldsLength==4){//loop through fields of entry and add them to this.entries
                 Entry entry = new Entry(this.createId(),//create ID and increment counter
                         fields[0],fields[1],Integer.parseInt(fields[2]),fields[3]);//create entry
@@ -114,6 +115,9 @@ public class Data{
         int listLength = this.listNames.size();
 
         boolean added = false;
+
+        textView.setText(String.valueOf(listLength)+ " - " + String.valueOf(entries.size()));
+
 
         for (int i=0;i<listLength;i++){//loop through this.listNames until name matches list in entry
 
@@ -190,7 +194,7 @@ public class Data{
 
     }
 
-    public void setTodays(List<Entry> todays){
+    public void setTodays(ArrayList<Entry> todays){
 
         this.todays = todays;
 
@@ -244,13 +248,13 @@ public class Data{
     }
 
     //the following functions simply return the associated lists
-    public List<Entry> getEntries(){
+    public ArrayList<Entry> getEntries(){
 
         return this.entries;
 
     }
 
-    public List<Entry> getTodays(){
+    public ArrayList<Entry> getTodays(){
 
         return this.todays;
 

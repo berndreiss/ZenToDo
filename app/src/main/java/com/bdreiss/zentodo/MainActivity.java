@@ -6,7 +6,9 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
+import com.bdreiss.zentodo.dataManipulation.Entry;
 import com.bdreiss.zentodo.dataManipulation.SQLite;
+import com.bdreiss.zentodo.dataManipulation.SaveFile;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,6 +27,7 @@ import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListAdapter;
@@ -33,6 +36,7 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -62,12 +66,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });*/
 
-  //      TextView textView = (TextView) findViewById(R.id.text_view_test);
-
-//        Data data = new Data(textView);
-
-        //addData(data);
-
         setViews(this);
 
     }
@@ -77,29 +75,12 @@ public class MainActivity extends AppCompatActivity {
         TextView textView = (TextView) findViewById(R.id.text_view_test);
         TextView textView2 = (TextView) findViewById(R.id.text_view_test2);
         Data data = new Data(context, textView);//REMOVE TEXTVIEW!!!
-        //addData(data);
-        //textView.setText(String.valueOf(data.load()));
-        //textView2.setText(data.saveFile.load());
-        //textView.setText(String.valueOf(data.getEntries().size()));
-        final List<String> items = data.getEntriesAsString();
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,items);
+  //      addData(data);//adds TestData
+        final ArrayList<Entry> items = data.getEntries();
+        TaskListAdapter adapter = new TaskListAdapter(this,data,textView2);
         ListView listView = (ListView) findViewById(R.id.list_view_test);
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long id) {
-                //textView.setText(items.get(i));
-                int itemId = data.getIdByTask(items.get(i));
 
-                if (id >= 0) {
-                    data.remove(itemId);//TODO
-                    items.remove(i);//TODO
-                    adapter.notifyDataSetChanged();
-                }
-                setViews(context);
-
-            }
-        });
         final EditText editText = (EditText) findViewById(R.id.edit_text_test);
         Button button = (Button) findViewById(R.id.button_test);
         button.setOnClickListener(new View.OnClickListener() {
@@ -108,10 +89,10 @@ public class MainActivity extends AppCompatActivity {
                 String task = editText.getText().toString();
                 editText.setText("");
                 if (!task.equals("")) {
-                    openDatePickerDialog(context);
+                    //openDatePickerDialog(context);
+                    Data data = new Data(context, textView);
                     data.add(task, " ", data.getDate(), " ");
-                    items.add(task);
-                    adapter.notifyDataSetChanged();
+                    //items.add(task);
                 }
                 setViews(context);
 
@@ -171,13 +152,13 @@ public class MainActivity extends AppCompatActivity {
 
     public static void addData(Data data){
 
-        data.add("Waschen","Haushalt",20220908, "");
+        data.add("Waschen","Haushalt",20220908, " ");
 
-        data.add("Buegeln","Haushalt",20220909,"");
+        data.add("Buegeln","Haushalt",20220909," ");
 
-        data.add("Gleichungen ueben","Mathe",20220910,"");
+        data.add("Gleichungen ueben","Mathe",20220910," ");
 
-        data.add("Computer einschalten","Computersysteme",20210910,"");
+        data.add("Computer einschalten","Computersysteme",20210910," ");
 
     }
 
