@@ -73,7 +73,7 @@ public class SaveFile{
                 StringBuilder stringBuilder = new StringBuilder();
 
                 while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append("\n").append(receiveString);
+                    stringBuilder.append(receiveString);
                 }
 
                 inputStream.close();
