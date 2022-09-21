@@ -9,7 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
@@ -27,9 +29,15 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     private class ViewHolder {//temporary view
 
+        private LinearLayout linearLayout;
+        private LinearLayout linearLayoutAlt;
         protected CheckBox checkBox;//Checkbox to remove entry
         private TextView task;//Description of the task
-
+        private Button edit;
+        private Button setDate;
+        private Button setList;
+        private Button remove;
+        private Button editAlt;
     }
 
     public TaskListAdapter(Context context, Data data, TextView textView){
@@ -49,9 +57,14 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.row, null, true);
 
+            holder.linearLayout = (LinearLayout) convertView.findViewById(R.id.linear_layout);
+            holder.linearLayoutAlt = (LinearLayout) convertView.findViewById(R.id.linear_layout_alt);
             holder.checkBox = (CheckBox) convertView.findViewById(R.id.checkbox);
             holder.task = (TextView) convertView.findViewById(R.id.task);
-
+            holder.edit = (Button) convertView.findViewById(R.id.button_edit);
+            holder.setDate = (Button) convertView.findViewById(R.id.button_calendar);
+            holder.setList = (Button) convertView.findViewById(R.id.button_list);
+            holder.editAlt = (Button) convertView.findViewById(R.id.button_edit_alt);
             convertView.setTag(holder);
         }else {
             // the getTag returns the viewHolder object set as a tag to the view
@@ -76,6 +89,48 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                 data.remove(entries.get(position).getID());//remove entry from dataset by ID
                 notifyDataSetChanged();//update the adapter
 
+            }
+        });
+
+        holder.linearLayout.setAlpha(1);
+        holder.linearLayout.bringToFront();
+        holder.linearLayoutAlt.setAlpha(0);
+        holder.linearLayoutAlt.invalidate();
+       // holder.linearLayoutAlt.disable();
+        holder.edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                holder.linearLayoutAlt.bringToFront();
+                holder.linearLayoutAlt.setAlpha(1);
+                holder.linearLayout.setAlpha(0);
+                holder.linearLayout.invalidate();
+
+                holder.editAlt.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        notifyDataSetChanged();
+                    }
+                });
+/*
+                holder.setDate.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+
+                holder.setList.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+                holder.remove.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });*/
             }
         });
 
