@@ -1,9 +1,10 @@
 package com.bdreiss.zentodo;
 /*
-*   A custom ArrayAdapter<Entry> that creates rows with checkboxes that
-*   when checked remove the associated task.
-*/
+ *   A custom ArrayAdapter<Entry> that creates rows with checkboxes that
+ *   when checked remove the associated task.
+ */
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,20 +34,21 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private LinearLayout linearLayoutAlt;
         protected CheckBox checkBox;//Checkbox to remove entry
         private TextView task;//Description of the task
+        private Button menu;
         private Button edit;
         private Button setDate;
         private Button setList;
-        private Button remove;
-        private Button editAlt;
+        private Button back;
     }
 
-    public TaskListAdapter(Context context, Data data, TextView textView){
+    public TaskListAdapter(Context context, Data data){
         super(context, R.layout.row,data.getEntries());
         this.context = context;
         this.data = data;
         this.entries = data.getEntries();
- }
+    }
 
+    @SuppressLint("InflateParams")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -61,10 +63,12 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder.linearLayoutAlt = (LinearLayout) convertView.findViewById(R.id.linear_layout_alt);
             holder.checkBox = (CheckBox) convertView.findViewById(R.id.checkbox);
             holder.task = (TextView) convertView.findViewById(R.id.task);
+            holder.menu = (Button) convertView.findViewById(R.id.button_menu);
+
             holder.edit = (Button) convertView.findViewById(R.id.button_edit);
             holder.setDate = (Button) convertView.findViewById(R.id.button_calendar);
             holder.setList = (Button) convertView.findViewById(R.id.button_list);
-            holder.editAlt = (Button) convertView.findViewById(R.id.button_edit_alt);
+            holder.back = (Button) convertView.findViewById(R.id.button_back);
             convertView.setTag(holder);
         }else {
             // the getTag returns the viewHolder object set as a tag to the view
@@ -76,41 +80,44 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
         holder.checkBox.setChecked(false);
 
-        holder.checkBox.setTag( position);
+        holder.checkBox.setTag(position);
 
         //establish routine to remove task when checkbox is clicked
         holder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-
+            public void onClick(View view) {
                 View viewHolder = (View) holder.checkBox;
-                TextView textView = (TextView) viewHolder.findViewById(R.id.task);
-                Integer position = (Integer)  holder.checkBox.getTag();
-                data.remove(entries.get(position).getID());//remove entry from dataset by ID
+                Integer positionTask = (Integer)  holder.checkBox.getTag();
+                data.remove(entries.get(positionTask).getID());//remove entry from dataset by ID
                 notifyDataSetChanged();//update the adapter
 
             }
         });
 
+        //setting "normal" row visible and active
         holder.linearLayout.setAlpha(1);
         holder.linearLayout.bringToFront();
         holder.linearLayoutAlt.setAlpha(0);
         holder.linearLayoutAlt.invalidate();
-       // holder.linearLayoutAlt.disable();
-        holder.edit.setOnClickListener(new View.OnClickListener() {
+
+
+        //listener that changes to alternative row layout on click
+        holder.menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //setting alternative row visible and active
                 holder.linearLayoutAlt.bringToFront();
                 holder.linearLayoutAlt.setAlpha(1);
                 holder.linearLayout.setAlpha(0);
                 holder.linearLayout.invalidate();
 
-                holder.editAlt.setOnClickListener(new View.OnClickListener() {
+                holder.back.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         notifyDataSetChanged();
                     }
                 });
+
 /*
                 holder.setDate.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -125,7 +132,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
                     }
                 });
-                holder.remove.setOnClickListener(new View.OnClickListener() {
+                holder.back.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 

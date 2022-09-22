@@ -1,5 +1,8 @@
 package com.bdreiss.zentodo;
 
+//TODO add comments
+
+
 import android.app.ActivityManager;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -7,7 +10,6 @@ import android.os.Bundle;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
-import com.bdreiss.zentodo.dataManipulation.SQLite;
 import com.bdreiss.zentodo.dataManipulation.SaveFile;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -52,11 +54,11 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-  //      setSupportActionBar(binding.toolbar);
+        //      setSupportActionBar(binding.toolbar);
 
-  //      NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-  //      appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-  //      NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        //      NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        //      appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
+        //      NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
     /*    binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,19 +67,18 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });*/
-
         setViews(this);
 
     }
 
     public void setViews(Context context){
-        //TODO when adding tasks empty lines apparently get added too
+
         TextView textView = (TextView) findViewById(R.id.text_view_test);
         TextView textView2 = (TextView) findViewById(R.id.text_view_test2);
-        Data data = new Data(context, textView);//REMOVE TEXTVIEW!!!
-  //      addData(data);//adds TestData
+        Data data = new Data(context);
+        //      addData(data);//adds TestData
         final ArrayList<Entry> items = data.getEntries();
-        TaskListAdapter adapter = new TaskListAdapter(this,data,textView2);
+        TaskListAdapter adapter = new TaskListAdapter(this,data);
         ListView listView = (ListView) findViewById(R.id.list_view_test);
         listView.setAdapter(adapter);
 
@@ -89,10 +90,9 @@ public class MainActivity extends AppCompatActivity {
                 String task = editText.getText().toString();
                 editText.setText("");
                 if (!task.equals("")) {
-                    //openDatePickerDialog(context);
-                    Data data = new Data(context, textView);
+                    Data data = new Data(context);
                     data.add(task, " ", data.getDate(), " ");
-                    //items.add(task);
+
                 }
                 setViews(context);
 

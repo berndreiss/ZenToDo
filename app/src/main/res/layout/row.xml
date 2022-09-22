@@ -4,40 +4,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/linear_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
 
-    <CheckBox
-        android:id="@+id/checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"/>
+        <CheckBox
+            android:id="@+id/checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"/>
 
 
-    <TextView
-        android:id="@+id/task"
-        android:layout_width="260dp"
-        android:layout_height="wrap_content"
-        android:onClick="onClick"
-        android:clickable="true"
-        />
+        <TextView
+            android:id="@+id/task"
+            android:layout_width="260dp"
+            android:layout_height="wrap_content"
+            />
 
-    <Button
-        android:id="@+id/button_edit"
-        android:shape="rectangle"
-        android:layout_width="40dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        style="?android:attr/borderlessButtonStyle"
-        android:drawableEnd="@drawable/ic_action_edit"
-        android:backgroundTint="@color/white"
-        />
+        <Button
+            android:id="@+id/button_menu"
+            android:shape="rectangle"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            style="?android:attr/borderlessButtonStyle"
+            android:drawableEnd="@drawable/ic_action_menu"
+            android:backgroundTint="@color/white"
+            />
 
-</LinearLayout>
+    </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/linear_layout_alt"
@@ -46,6 +44,19 @@
         android:orientation="horizontal"
         android:background="@color/button_alt_background_color">
 
+        <android.widget.Button
+            android:id="@+id/button_edit"
+            android:shape="rectangle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:paddingEnd="38dp"
+            android:drawableEnd="@drawable/ic_action_edit"
+            android:background="@drawable/button_alt"
+            />
 
         <android.widget.Button
             android:id="@+id/button_calendar"
@@ -76,7 +87,7 @@
             />
 
         <android.widget.Button
-            android:id="@+id/button_remove"
+            android:id="@+id/button_back"
             android:shape="rectangle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -85,21 +96,7 @@
             android:layout_weight="1"
             android:layout_gravity="center"
             android:paddingEnd="38dp"
-            android:drawableEnd="@drawable/ic_action_remove"
-            android:background="@drawable/button_alt"
-            />
-
-        <android.widget.Button
-            android:id="@+id/button_edit_alt"
-            android:shape="rectangle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:paddingEnd="38dp"
-            android:drawableEnd="@drawable/ic_action_return"
+            android:drawableEnd="@drawable/ic_action_back"
             android:background="@drawable/button_alt"
             />
 
