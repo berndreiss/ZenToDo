@@ -102,4 +102,31 @@
 
 
     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/linear_layout_edit"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/edit_text_list_view"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+
+            />
+
+        <android.widget.Button
+            android:id="@+id/button_back_edit"
+            android:shape="rectangle"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_gravity="center"
+            android:paddingEnd="18dp"
+            android:drawableEnd="@drawable/ic_action_back"
+            android:backgroundTint="@color/white"
+            />
+
+    </LinearLayout>
 </FrameLayout>

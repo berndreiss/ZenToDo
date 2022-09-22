@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                 editText.setText("");
                 if (!task.equals("")) {
                     Data data = new Data(context);
-                    data.add(task, " ", data.getDate(), " ");
+                    data.add(task, " ", data.getDate(), " ",-1);
 
                 }
                 setViews(context);
@@ -152,13 +152,13 @@ public class MainActivity extends AppCompatActivity {
 
     public static void addData(Data data){
 
-        data.add("Waschen","Haushalt",20220908, " ");
+        data.add("Waschen","Haushalt",20220908, " ", -1);
 
-        data.add("Buegeln","Haushalt",20220909," ");
+        data.add("Buegeln","Haushalt",20220909," ",-1);
 
-        data.add("Gleichungen ueben","Mathe",20220910," ");
+        data.add("Gleichungen ueben","Mathe",20220910," ",-1);
 
-        data.add("Computer einschalten","Computersysteme",20210910," ");
+        data.add("Computer einschalten","Computersysteme",20210910," ",-1);
 
     }
 

@@ -73,11 +73,15 @@ public class Data{
 
 
 
-    public void add(String task,String list,int due,String recurrence){
+    public void add(String task,String list,int due,String recurrence, int position){
         //add new entry to database
-
         Entry entry = new Entry(this.createId(),task,list,due,recurrence); //generate ID and create entry
-        this.entries.add(entry); //add entry to this.entries
+        if (position < 0){
+            this.entries.add(position, entry);
+        }
+        else {
+            this.entries.add(entry); //add entry to this.entries
+        }
         this.addToList(entry); //add entry to according list in this.lists
         this.save(); //write changes to save file
     }
