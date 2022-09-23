@@ -96,7 +96,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             @Override
             public void onClick(View view) {
                 Integer positionTask = (Integer)  holder.checkBox.getTag();
-                data.remove(entries.get(positionTask).getID());//remove entry from dataset by ID
+                data.remove(holder.task.getText().toString());//remove entry from dataset by ID
                 notifyDataSetChanged();//update the adapter
 
             }
@@ -140,20 +140,13 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                         holder.backEdit.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                Integer positionTask = (Integer)  holder.checkBox.getTag();
-                                Entry entry = entries.get(positionTask);
-                                String list = entry.getList();
-                                int due = entry.getDue();
-                                String recurrence = entry.getRecurrence();
-                                data.add(holder.editText.getText().toString(), list, due, recurrence,positionTask);
-//                                data.add(positionTask.toString()," ", 0," ",entries.get(positionTask).getID());
-                                data.remove(positionTask+1);
+                                int taskPosition = data.getPosition(holder.task.getText().toString());
+                                Entry entry = entries.get(taskPosition);
+                                data.editTask(entry.getTask(),holder.editText.getText().toString());
                                 notifyDataSetChanged();
                             }
                         });
 
-
-                        //
                     }
                 });
 

@@ -21,9 +21,6 @@ public class Data{
     private final String lineDelimiter = "%%%%%%%"; //Delimiter for entries in save file
 
     private ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
-    private ArrayList<Entry> todays = new ArrayList<>(); //list of tasks who are todo today -> set by this.setTodays
-    private ArrayList<List<Entry>> lists = new ArrayList<>(); //list of all lists in which are tasks categorized in
-    private ArrayList<String> listNames = new ArrayList<>(); //list of all the names of the lists in this.lists (this.lists and this.listNames are in the same order)
     private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
 
     public SaveFile saveFile;//TODO reset to private
@@ -46,7 +43,7 @@ public class Data{
 
         for (int i=0; i<dataLength; i++){//gets all the fields of every entry except for id, which is generated programmatically upon loading
             Entry entry = entries.get(i);
-            text.append(entry.getTask()).append(this.delimiter).append(entry.getList()).append(this.delimiter).append(entry.getDue()).append(this.delimiter).append(entry.getRecurrence()).append(this.lineDelimiter);
+            text.append(entry.getTask()).append(this.delimiter).append(entry.getToday()).append(this.delimiter).append(entry.getList()).append(this.delimiter).append(entry.getDue()).append(this.delimiter).append(entry.getRecurrence()).append(this.lineDelimiter);
         }
 
         this.saveFile.save(text.toString()); //Writes contents to file
@@ -61,11 +58,10 @@ public class Data{
             String[] fields = line.split(this.delimiter);
             int fieldsLength = fields.length;
 
-            if (fieldsLength == 4) {//loop through fields of entry and add them to this.entries
-                Entry entry = new Entry(this.createId(),//create ID and increment counter
-                        fields[0], fields[1], Integer.parseInt(fields[2]), fields[3]);//create entry
+            if (fieldsLength == 5) {//loop through fields of entry and add them to this.entries
+                Entry entry = new Entry(fields[0], Boolean.parseBoolean(fields[1]),
+                        fields[2], Integer.parseInt(fields[3]), fields[4]);//create entry
                 this.entries.add(entry);//add entry
-                this.addToList(entry);//add entry to according list in this.lists
             }
         }
 
@@ -75,94 +71,42 @@ public class Data{
 
     public void add(String task,String list,int due,String recurrence, int position){
         //add new entry to database
-        Entry entry = new Entry(this.createId(),task,list,due,recurrence); //generate ID and create entry
-        if (position < 0){
+        Entry entry = new Entry(task,false, list,due,recurrence); //generate ID and create entry
+        if (position > 0){
             this.entries.add(position, entry);
         }
         else {
             this.entries.add(entry); //add entry to this.entries
         }
-        this.addToList(entry); //add entry to according list in this.lists
         this.save(); //write changes to save file
     }
 
-    public void remove(int id){
+    public void remove(String task){
         //remove entry from database
+        this.entries.remove(getPosition(task));
 
+        this.save(); //write changes to save file
+    }
+
+    public void editTask(String task, String newTask){
+        this.entries.get(getPosition(task)).setTask(newTask);
+        this.save();
+    }
+
+    public int getPosition(String task){
         int dataLength = this.entries.size();
 
-        for (int i=0; i<dataLength;i++){//get entry in this.entries by ID
-            Entry entry = this.entries.get(i);
-            if (entry.getID()==id){//remove from this.entries if ID matches
-                this.removeFromList(entry); //remove entry from this.lists
-                this.entries.remove(i);
-                i=dataLength;//jump out of loop
+        for (int i=0;i<dataLength;i++){
+
+            if (this.entries.get(i).getTask().equals(task)){
+                return i;
+
+
             }
         }
-
-        this.save(); //write changes to save file
-    }
-
-    public void addToList(Entry entry){
-        //add entry to this.lists
-
-        int listLength = this.listNames.size();
-
-        boolean added = false;
-
-
-        for (int i=0;i<listLength;i++){//loop through this.listNames until name matches list in entry
-
-            if (this.listNames.get(i).equals(entry.getList())){
-
-                this.lists.get(i).add(entry);//add entry to according list
-                added = true;//set added flag
-            }
-
-        }
-
-        if (!added){//if entry has not been added it means, there was no according list and it has to be created
-            List<Entry> newList = new ArrayList<>();//create new list
-            newList.add(entry);//add the entry
-            this.lists.add(newList);//add new list to this.lists
-            this.listNames.add(entry.getList());//add the name of the new list to this.listNames
-        }
-
+        return -1;
 
     }
-
-    public void removeFromList(Entry entry){
-        //removes an entry from this.lists
-
-        int listsLength = this.lists.size();
-
-        for (int i=0;i<listsLength;i++){//loop through this.lists until the right list is found
-
-            if (this.listNames.get(i).equals(entry.getList())){//true if this.listName equals the list of the entry
-
-                int listLength = this.lists.get(i).size();
-
-
-                for (int j=0;j<listLength;j++){//loop through individual list in this.lists until ID of list entry matches sought entry
-
-                    if (this.lists.get(i).get(j).getID() == entry.getID()){
-
-                        this.lists.get(i).remove(j);//remove entry from list
-                        if (this.lists.get(i).size() == 0){//remove list if it is empty
-
-                            this.lists.remove(i);
-
-                        }
-                        j = listLength;//jump out of inner loop
-                        i = listsLength;//jump out of outer loop
-                    }
-                }
-            }
-
-        }
-
-    }
-
 
 
 
@@ -186,19 +130,6 @@ public class Data{
 
     }
 
-    public void setTodays(ArrayList<Entry> todays){
-        //sets the ArrayList<Entry> todays
-        this.todays = todays;
-
-    }
-
-    public int createId(){
-        //returns id and increments the counter
-        this.id++;
-        return this.id;
-
-    }
-
 
     public int getDate(){
         //returns current date as "yyyyMMdd"
@@ -219,12 +150,6 @@ public class Data{
 
     }
 
-    public ArrayList<Entry> getTodays(){
-
-        return this.todays;
-
-    }
-
     public ArrayList<String> getEntriesAsString(){
 
         ArrayList<String> items = new ArrayList<>();
@@ -237,14 +162,5 @@ public class Data{
         return items;
     }
 
-    public List<List<Entry>> getLists(){
 
-        return this.lists;
-
-    }
-
-    public List<String> getListNames(){
-
-        return this.listNames;
-    }
 }
