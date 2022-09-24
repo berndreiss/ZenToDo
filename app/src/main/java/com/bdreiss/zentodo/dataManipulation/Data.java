@@ -43,7 +43,7 @@ public class Data{
 
         for (int i=0; i<dataLength; i++){//gets all the fields of every entry except for id, which is generated programmatically upon loading
             Entry entry = entries.get(i);
-            text.append(entry.getTask()).append(this.delimiter).append(entry.getToday()).append(this.delimiter).append(entry.getList()).append(this.delimiter).append(entry.getDue()).append(this.delimiter).append(entry.getRecurrence()).append(this.lineDelimiter);
+            text.append(entry.getTask()).append(this.delimiter).append(entry.getToday()).append(this.delimiter).append(entry.getList()).append(this.delimiter).append(entry.getListPosition()).append(this.delimiter).append(entry.getDue()).append(this.delimiter).append(entry.getRecurrence()).append(this.lineDelimiter);
         }
 
         this.saveFile.save(text.toString()); //Writes contents to file
@@ -58,26 +58,30 @@ public class Data{
             String[] fields = line.split(this.delimiter);
             int fieldsLength = fields.length;
 
-            if (fieldsLength == 5) {//loop through fields of entry and add them to this.entries
-                Entry entry = new Entry(fields[0], Boolean.parseBoolean(fields[1]),
-                        fields[2], Integer.parseInt(fields[3]), fields[4]);//create entry
+            if (fieldsLength == 6) {//loop through fields of entry and add them to this.entries
+                Entry entry = new Entry(fields[0],//task
+                                        Boolean.parseBoolean(fields[1]),//isToday
+                                        fields[2], //list
+                                        Integer.parseInt(fields[3]),//listPosition
+                                        Integer.parseInt(fields[4]),//due
+                                        fields[5]);//recurrence
                 this.entries.add(entry);//add entry
             }
         }
 
     }
 
+    public void add(String task){
+        Entry entry = new Entry(task,false, " ", -1, 0," "); //generate ID and create entry
+        this.entries.add(entry); //add entry to this.entries
+        this.save(); //write changes to save file
+    }
 
 
-    public void add(String task,String list,int due,String recurrence, int position){
+    public void add(String task, int position){
         //add new entry to database
-        Entry entry = new Entry(task,false, list,due,recurrence); //generate ID and create entry
-        if (position > 0){
-            this.entries.add(position, entry);
-        }
-        else {
-            this.entries.add(entry); //add entry to this.entries
-        }
+        Entry entry = new Entry(task,false, " ", -1, 0," "); //generate ID and create entry
+        this.entries.add(entry); //add entry to this.entries
         this.save(); //write changes to save file
     }
 
