@@ -31,18 +31,21 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     private class ViewHolder {//temporary view
 
-        private LinearLayout linearLayout;
-        private LinearLayout linearLayoutAlt;
-        private LinearLayout linearLayoutEdit;
+        private LinearLayout linearLayout;//"normal" row layout that shows checkbox and task
         protected CheckBox checkBox;//Checkbox to remove entry
         private TextView task;//Description of the task
-        private Button menu;
-        private Button edit;
-        private Button setDate;
-        private Button setList;
-        private Button back;
-        private EditText editText;
-        private Button backEdit;
+        private Button menu;//activates alternative layout with menu elements
+
+        private LinearLayout linearLayoutAlt;//"alternative" layout with menu for modifying entries
+        private Button edit;//edits the task
+        private Button setDate;//sets the date the task is due
+        private Button recurrence;//sets the frequency with which the task repeats
+        private Button setList;//sets the list the task is assigned to
+        private Button back;//returns to normal row layout
+
+        private LinearLayout linearLayoutEdit;//row layout for task editing
+        private EditText editText;//field to edit text
+        private Button backEdit;//return to normal layout and save
     }
 
     public TaskListAdapter(Context context, Data data){
@@ -71,6 +74,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder.linearLayoutAlt = (LinearLayout) convertView.findViewById(R.id.linear_layout_alt);
             holder.edit = (Button) convertView.findViewById(R.id.button_edit);
             holder.setDate = (Button) convertView.findViewById(R.id.button_calendar);
+            holder.recurrence = (Button) convertView.findViewById(R.id.button_recurrence);
             holder.setList = (Button) convertView.findViewById(R.id.button_list);
             holder.back = (Button) convertView.findViewById(R.id.button_back);
 
@@ -95,14 +99,13 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         holder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Integer positionTask = (Integer)  holder.checkBox.getTag();
                 data.remove(holder.task.getText().toString());//remove entry from dataset by ID
                 notifyDataSetChanged();//update the adapter
 
             }
         });
 
-        //setting "normal" row visible and active
+        //setting "normal" row visible and active and all others to invisible and invalid
         holder.linearLayout.setAlpha(1);
         holder.linearLayout.bringToFront();
         holder.linearLayoutAlt.setAlpha(0);
@@ -151,6 +154,13 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                 });
 
                 holder.setDate.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        notifyDataSetChanged();
+                    }
+                });
+
+                holder.recurrence.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         notifyDataSetChanged();
