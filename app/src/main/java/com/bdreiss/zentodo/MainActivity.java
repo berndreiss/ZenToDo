@@ -101,20 +101,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void openDatePickerDialog(Context context) {
-        Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
-        DatePickerDialog datePickerDialog = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener(){
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int day)
-            {
-
-            }
-        }, year, month, day);
-        datePickerDialog.show();
-    }
 
     public void setListView(Context context){
 

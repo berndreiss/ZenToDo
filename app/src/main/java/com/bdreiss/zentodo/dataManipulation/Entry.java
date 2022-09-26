@@ -4,17 +4,19 @@ public class Entry{
 //this class represents the entry of a task
 //it consists of the following fields:
 
+    private int id;//id generated in data.java
     private String task;//a description of the task that has to be done
     private Boolean today;//stores the information if task has been chosen today
     private String list;//a list to which the task belongs to
-    private int listPosition;
+    private int listPosition;//position in according list
     private int due;//a date, when the task is due -> "yyyyMMdd"
     private String recurrence;//consisting of a String in the form of "y/m/w/d0-90-9" where the
                               //two digit number defines the offset in years (y), months(m),
                               //weeks (w) or days(d) when the task is going to reoccur
 
-    public Entry(String task, Boolean today, String list, int listPosition, int due, String recurrence){
+    public Entry(int id, String task, Boolean today, String list, int listPosition, int due, String recurrence){
         //creates a new instance and initializes the fields of the entry
+        this.id = id;
         this.today = today;
         this.task=task;
         this.list=list;
@@ -24,6 +26,8 @@ public class Entry{
     }
 
     //the following functions simply return the different fields of the entry
+    public int getId(){return this.id;}
+
     public String getTask(){
         return this.task;
     }

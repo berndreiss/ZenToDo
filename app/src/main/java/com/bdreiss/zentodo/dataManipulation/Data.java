@@ -59,7 +59,8 @@ public class Data{
             int fieldsLength = fields.length;
 
             if (fieldsLength == 6) {//loop through fields of entry and add them to this.entries
-                Entry entry = new Entry(fields[0],//task
+                Entry entry = new Entry(generateId(),//generate id
+                                        fields[0],//task
                                         Boolean.parseBoolean(fields[1]),//isToday
                                         fields[2], //list
                                         Integer.parseInt(fields[3]),//listPosition
@@ -72,7 +73,7 @@ public class Data{
     }
 
     public void add(String task){
-        Entry entry = new Entry(task,false, " ", -1, 0," "); //generate ID and create entry
+        Entry entry = new Entry(generateId(),task,false, " ", -1, 0," "); //generate ID and create entry
         this.entries.add(entry); //add entry to this.entries
         this.save(); //write changes to save file
     }
@@ -80,29 +81,29 @@ public class Data{
 
     public void add(String task, int position){
         //add new entry to database
-        Entry entry = new Entry(task,false, " ", -1, 0," "); //generate ID and create entry
+        Entry entry = new Entry(generateId(),task,false, " ", -1, 0," "); //generate ID and create entry
         this.entries.add(entry); //add entry to this.entries
         this.save(); //write changes to save file
     }
 
-    public void remove(String task){
+    public void remove(int id){
         //remove entry from database
-        this.entries.remove(getPosition(task));
+        this.entries.remove(getPosition(id));
 
         this.save(); //write changes to save file
     }
 
-    public void editTask(String task, String newTask){
-        this.entries.get(getPosition(task)).setTask(newTask);
+    public void editTask(int id, String newTask){
+        this.entries.get(getPosition(id)).setTask(newTask);
         this.save();
     }
 
-    public int getPosition(String task){
+    public int getPosition(int id){
         int dataLength = this.entries.size();
 
         for (int i=0;i<dataLength;i++){
 
-            if (this.entries.get(i).getTask().equals(task)){
+            if (this.entries.get(i).getId() == id){
                 return i;
 
 
@@ -134,6 +135,10 @@ public class Data{
 
     }
 
+    private int generateId(){
+        this.id += 1;
+        return this.id-1;
+    }
 
     public int getDate(){
         //returns current date as "yyyyMMdd"

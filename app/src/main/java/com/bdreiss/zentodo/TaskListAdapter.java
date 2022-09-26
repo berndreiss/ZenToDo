@@ -5,6 +5,7 @@ package com.bdreiss.zentodo;
  */
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -20,6 +22,7 @@ import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class TaskListAdapter extends ArrayAdapter<Entry>{
 
@@ -99,7 +102,8 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         holder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                data.remove(holder.task.getText().toString());//remove entry from dataset by ID
+                int id = entries.get(position).getId();
+                data.remove(id);//remove entry from dataset by ID
                 notifyDataSetChanged();//update the adapter
 
             }
@@ -143,9 +147,8 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                         holder.backEdit.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                int taskPosition = data.getPosition(holder.task.getText().toString());
-                                Entry entry = entries.get(taskPosition);
-                                data.editTask(entry.getTask(),holder.editText.getText().toString());
+                                int id = entries.get(position).getId();
+                                data.editTask(id,holder.editText.getText().toString());
                                 notifyDataSetChanged();
                             }
                         });
@@ -188,5 +191,20 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     //returns the entry at specified position
     public Entry getEntry(int position){
         return entries.get(position);
+    }
+
+    public void openDatePickerDialog(Context context,int id) {
+        Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener(){
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int day)
+            {
+
+            }
+        }, year, month, day);
+        datePickerDialog.show();
     }
 }
