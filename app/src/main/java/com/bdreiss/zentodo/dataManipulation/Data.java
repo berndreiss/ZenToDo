@@ -113,6 +113,10 @@ public class Data{
 
     }
 
+    public void editDate(int id, int date){
+        this.entries.get(getPosition(id)).setDue(date);
+        this.save();
+    }
 
 
     public ArrayList<Entry> getPotentials(){

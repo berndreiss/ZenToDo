@@ -4,9 +4,16 @@ package com.bdreiss.zentodo;
  *   when checked remove the associated task.
  */
 
+import static android.provider.Settings.System.getString;
+
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +23,11 @@ import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
@@ -28,7 +39,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     private ArrayList<Entry> entries;//list of entries (see Entry.java)
 
-    Context context;
+    private Context context;
 
     private Data data;//database from which entries are derived (see Data.java)
 
@@ -117,6 +128,11 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         holder.linearLayoutEdit.setAlpha(0);
         holder.linearLayoutEdit.invalidate();
 
+        /*
+        if ( entries.get(position).getDue()==0) {
+            holder.setDate.setBackgroundColor(context.getResources().getColor(R.color.white));
+        }*/
+
         //listener that changes to alternative row layout on click
         holder.menu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,7 +175,9 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                 holder.setDate.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        notifyDataSetChanged();
+                        Context context = getContext();
+                        openDatePickerDialog(context,data,entries.get(position));
+                        //notifyDataSetChanged();
                     }
                 });
 
@@ -193,18 +211,45 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         return entries.get(position);
     }
 
-    public void openDatePickerDialog(Context context,int id) {
-        Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
-        DatePickerDialog datePickerDialog = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener(){
+    public void openDatePickerDialog(Context context,Data data,Entry entry) {
+
+        int entryDate = entry.getDue();
+        int entryDay;
+        int entryMonth;
+        int entryYear;
+
+        if(entryDate>0) {
+            entryDay = entryDate%100;
+            entryMonth = ((entryDate%10000)-entryDay)/100;
+            entryYear = (entryDate-entryMonth*100-entryDay)/10000;
+        }
+        else {
+            Calendar c = Calendar.getInstance();
+            entryYear = c.get(Calendar.YEAR);
+            entryMonth = c.get(Calendar.MONTH);
+            entryDay = c.get(Calendar.DAY_OF_MONTH);
+        }
+
+        DatePickerDialog datePickerDialog;
+        datePickerDialog= new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener(){
             @Override
             public void onDateSet(DatePicker view, int year, int month, int day)
             {
-
+                int date = year*10000+month*100+day;
+                data.editDate(entry.getId(), date);
+                notifyDataSetChanged();
             }
-        }, year, month, day);
+        }, entryYear, entryMonth, entryDay);
+
+        datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,context.getResources().getString(R.string.cancel), new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int which){
+
+                data.editDate(entry.getId(),0);
+                notifyDataSetChanged();
+            }
+
+        });
+
         datePickerDialog.show();
     }
 }
