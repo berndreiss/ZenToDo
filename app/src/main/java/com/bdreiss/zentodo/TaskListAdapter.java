@@ -24,6 +24,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.content.res.AppCompatResources;
@@ -60,6 +61,12 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private LinearLayout linearLayoutEdit;//row layout for task editing
         private EditText editText;//field to edit text
         private Button backEdit;//return to normal layout and save
+
+        private LinearLayout linearLayoutRecurrence;
+        private TextView textViewRecurrence;
+        private EditText editTextRecurrence;
+        private Spinner spinnerRecurrence;
+        private Button backRecurrence;
     }
 
     public TaskListAdapter(Context context, Data data){
@@ -96,6 +103,13 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder.editText = (EditText) convertView.findViewById(R.id.edit_text_list_view);
             holder.backEdit = (Button) convertView.findViewById(R.id.button_back_edit);
 
+            holder.linearLayoutRecurrence = (LinearLayout) convertView.findViewById(R.id.linear_layout_recurrence);
+            holder.textViewRecurrence = (TextView) convertView.findViewById(R.id.text_view_recurrence);
+            holder.editTextRecurrence = (EditText) convertView.findViewById(R.id.edit_text_recurrence);
+            holder.spinnerRecurrence = (Spinner) convertView.findViewById(R.id.spinner_time_interval);
+            holder.backRecurrence = (Button) convertView.findViewById(R.id.button_back_recurrence);
+
+
             convertView.setTag(holder);
         }else {
             // the getTag returns the viewHolder object set as a tag to the view
@@ -121,27 +135,14 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         });
 
         //setting "normal" row visible and active and all others to invisible and invalid
-        holder.linearLayout.setAlpha(1);
-        holder.linearLayout.bringToFront();
-        holder.linearLayoutAlt.setAlpha(0);
-        holder.linearLayoutAlt.invalidate();
-        holder.linearLayoutEdit.setAlpha(0);
-        holder.linearLayoutEdit.invalidate();
-
-        /*
-        if ( entries.get(position).getDue()==0) {
-            holder.setDate.setBackgroundColor(context.getResources().getColor(R.color.white));
-        }*/
+        setOriginal(holder);//TODO: for some reason element of spinner is shown
 
         //listener that changes to alternative row layout on click
         holder.menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //setting alternative row visible and active
-                holder.linearLayoutAlt.bringToFront();
-                holder.linearLayoutAlt.setAlpha(1);
-                holder.linearLayout.setAlpha(0);
-                holder.linearLayout.invalidate();
+                setAlt(holder);
 
                 holder.back.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -153,10 +154,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                 holder.edit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        holder.linearLayoutEdit.bringToFront();
-                        holder.linearLayoutEdit.setAlpha(1);
-                        holder.linearLayoutAlt.setAlpha(0);
-                        holder.linearLayoutAlt.invalidate();
+                       setEdit(holder);
 
                         holder.editText.setText(holder.task.getText());
 
@@ -177,27 +175,39 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     public void onClick(View view) {
                         Context context = getContext();
                         openDatePickerDialog(context,data,entries.get(position));
-                        //notifyDataSetChanged();
-                    }
+                     }
                 });
 
                 holder.recurrence.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        notifyDataSetChanged();
+                        setRecurrence(holder);
+
+                        ArrayAdapter<CharSequence> adapterSpinner = ArrayAdapter.createFromResource(context,R.array.time_interval, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
+                        holder.spinnerRecurrence.setAdapter(adapterSpinner);
+
+                        holder.backRecurrence.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //TODO: implement data routine
+                                notifyDataSetChanged();
+                            }
+                        });
                     }
                 });
 
                 holder.setList.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        setList(holder);
                         notifyDataSetChanged();
+                        //TODO: implement data routine
                     }
                 });
                 holder.back.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        notifyDataSetChanged();
+                        setOriginal(holder);
                     }
                 });
             }
@@ -252,4 +262,72 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
         datePickerDialog.show();
     }
+    public void setOriginal(ViewHolder holder){
+
+        holder.linearLayout.setAlpha(1);
+        enable(holder.linearLayout);
+        holder.linearLayout.bringToFront();
+
+        holder.linearLayoutAlt.setAlpha(0);
+        disable(holder.linearLayoutAlt);
+
+        holder.linearLayoutEdit.setAlpha(0);
+        disable(holder.linearLayoutEdit);
+
+        holder.linearLayoutRecurrence.setAlpha(0);
+        disable(holder.linearLayoutRecurrence);
+    }
+
+    public void setAlt(ViewHolder holder){
+        holder.linearLayoutAlt.bringToFront();
+        holder.linearLayoutAlt.setAlpha(1);
+        enable(holder.linearLayoutAlt);
+
+        holder.linearLayout.setAlpha(0);
+        disable(holder.linearLayout);
+
+    }
+
+    public void setEdit(ViewHolder holder){
+        holder.linearLayoutEdit.bringToFront();
+        holder.linearLayoutEdit.setAlpha(1);
+        enable(holder.linearLayoutEdit);
+
+        holder.linearLayoutAlt.setAlpha(0);
+        disable(holder.linearLayoutAlt);
+
+    }
+
+
+    public void setRecurrence(ViewHolder holder){
+        holder.linearLayoutRecurrence.bringToFront();
+        holder.linearLayoutRecurrence.setAlpha(1);
+        enable(holder.linearLayoutRecurrence);
+
+        holder.linearLayoutAlt.setAlpha(0);
+        disable(holder.linearLayoutAlt);
+    }
+
+    public void setList(ViewHolder holder){
+
+
+    }
+
+    public void disable(LinearLayout layout){
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            View child = layout.getChildAt(i);
+            child.setEnabled(false);
+
+        }
+
+    }
+    public void enable(LinearLayout layout){
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            View child = layout.getChildAt(i);
+            child.setEnabled(true);
+        }
+
+    }
+
+
 }
