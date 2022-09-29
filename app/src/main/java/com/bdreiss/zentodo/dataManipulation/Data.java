@@ -118,6 +118,11 @@ public class Data{
         this.save();
     }
 
+    public void editRecurrence(int id, String recurrence){
+        this.entries.get(getPosition(id)).setRecurrence(recurrence);
+        this.save();
+    }
+
 
     public ArrayList<Entry> getPotentials(){
         //return a list of all entries for which the due date is <=today

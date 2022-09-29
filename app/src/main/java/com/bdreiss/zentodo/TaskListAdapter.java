@@ -186,11 +186,61 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                         ArrayAdapter<CharSequence> adapterSpinner = ArrayAdapter.createFromResource(context,R.array.time_interval, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
                         holder.spinnerRecurrence.setAdapter(adapterSpinner);
 
+                        Entry entry = entries.get(position);
+
+                        String rec = entry.getRecurrence();
+
+                        switch (rec.charAt(0)) {
+                            case 'd':
+                                holder.spinnerRecurrence.setSelection(0);
+                                break;
+                            case 'w':
+                                holder.spinnerRecurrence.setSelection(1);
+                                break;
+                            case 'm':
+                                holder.spinnerRecurrence.setSelection(2);
+                                break;
+                            case 'y':
+                                holder.spinnerRecurrence.setSelection(3);
+                                break;
+                            default:
+
+                        }
+                        String recEdit = "";
+
+                        for (int i=1;i<rec.length();i++){
+                            recEdit += rec.charAt(i);
+                        }
+
+                        holder.editTextRecurrence.setText(recEdit);
+
                         holder.backRecurrence.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                //TODO: implement data routine
+                                int id = entries.get(position).getId();
+
+                                String interval = holder.editTextRecurrence.getText().toString();
+                                int intervalInt;
+
+                                if (interval.equals("")){
+                                    intervalInt = 0;
+                                } else {
+                                     intervalInt = Integer.parseInt(interval);
+                                }
+                                String recurrence = "";
+
+                                if (intervalInt == 0){
+                                  data.editRecurrence(id, " ");
+                                }
+                                else{
+                                    recurrence += Character.toLowerCase(holder.spinnerRecurrence.getSelectedItem().toString().charAt(0));
+                                    recurrence += interval;
+
+                                   data.editRecurrence(id,recurrence);
+                                }
                                 notifyDataSetChanged();
+
+
                             }
                         });
                     }
