@@ -113,7 +113,7 @@ public class Data{
 
     }
 
-    public void editDate(int id, int date){
+    public void editDue(int id, int date){
         this.entries.get(getPosition(id)).setDue(date);
         this.save();
     }
@@ -144,6 +144,7 @@ public class Data{
 
     }
 
+    //Generates a running id
     private int generateId(){
         this.id += 1;
         return this.id-1;
@@ -168,6 +169,7 @@ public class Data{
 
     }
 
+    //Returns entries as an ArrayList<String> TODO: is this ever used?
     public ArrayList<String> getEntriesAsString(){
 
         ArrayList<String> items = new ArrayList<>();
