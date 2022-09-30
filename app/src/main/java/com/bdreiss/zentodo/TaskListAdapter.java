@@ -139,9 +139,12 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
         //Creating adapter for spinner with entries days/weeks/months/years
         /* Adapter has to be declared here so that the dropdown element of the spinner is not shown in the background */
-        /* I do not understand why, but this fixed it                                                                 */
+        /* I do not understand why, but this fixed it */
         ArrayAdapter<CharSequence> adapterSpinner = ArrayAdapter.createFromResource(context,R.array.time_interval, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
         holder.spinnerRecurrence.setAdapter(adapterSpinner);
+
+        //Sets buttons that have edited data that has been set to a different color
+        markSet(holder,this.entries.get(position));
 
         //listener that changes to alternative row layout on click
         holder.menu.setOnClickListener(new View.OnClickListener() {
@@ -437,5 +440,30 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     }
 
+    //Sets buttons that have edited data that has been set to a different color
+    public void markSet(ViewHolder holder,Entry entry){
+
+        //Set date button to alternative color if !=0, original color otherwise
+        if (entry.getDue()!=0){
+            holder.setDate.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+        }else{
+            holder.setDate.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
+        }
+
+        //Set recurrence button to alternative color if ==" ", original color otherwise
+        if (!entry.getRecurrence().equals(" ")){
+            holder.recurrence.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+        }else{
+            holder.recurrence.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
+        }
+
+        //Set list button to alternative color if ==" ", original color otherwise
+        if (!entry.getList().equals(" ")){
+            holder.setList.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+        }else{
+            holder.setList.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
+        }
+
+    }
 
 }
