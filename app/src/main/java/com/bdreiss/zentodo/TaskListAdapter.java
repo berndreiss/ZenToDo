@@ -133,8 +133,15 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             }
         });
 
+
         //setting "normal" row visible and active and all others to invisible and invalid
-        setOriginal(holder);//TODO: for some reason element of spinner is shown
+        setOriginal(holder);
+
+        //Creating adapter for spinner with entries days/weeks/months/years
+        /* Adapter has to be declared here so that the dropdown element of the spinner is not shown in the background */
+        /* I do not understand why, but this fixed it                                                                 */
+        ArrayAdapter<CharSequence> adapterSpinner = ArrayAdapter.createFromResource(context,R.array.time_interval, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
+        holder.spinnerRecurrence.setAdapter(adapterSpinner);
 
         //listener that changes to alternative row layout on click
         holder.menu.setOnClickListener(new View.OnClickListener() {
@@ -189,10 +196,6 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
                         //setting recurrence row visible and active, everything else disabled
                         setRecurrence(holder);
-
-                        //Creating adapter for spinner with entries days/weeks/months/years
-                        ArrayAdapter<CharSequence> adapterSpinner = ArrayAdapter.createFromResource(context,R.array.time_interval, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
-                        holder.spinnerRecurrence.setAdapter(adapterSpinner);
 
                         //get entry to set spinner on current recurrence
                         Entry entry = entries.get(position);
