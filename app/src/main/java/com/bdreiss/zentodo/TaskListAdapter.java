@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
@@ -62,11 +63,15 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private EditText editText;//field to edit text
         private Button backEdit;//return to normal layout and save
 
-        private LinearLayout linearLayoutRecurrence;//row layout for recurrence:
+        private LinearLayout linearLayoutRecurrence;//row layout for setting recurrence:
         private TextView textViewRecurrence;//"repeats every... TODO REMOVE?
         private EditText editTextRecurrence;//...number...
         private Spinner spinnerRecurrence;//...days/weeks/months/years"
         private Button backRecurrence;//write back result
+
+        private LinearLayout linearLayoutList;//row layout for setting lists
+        private AutoCompleteTextView autoCompleteList;//Autocomplete to set new list
+        private Button backList;//return to original layout and save
     }
 
     public TaskListAdapter(Context context, Data data){
@@ -82,8 +87,8 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
         final ViewHolder holder;
 
-
-        if (convertView == null) {//Connect all the views of different layouts to the holder
+        //Connect all the views of different layouts to the holder
+        if (convertView == null) {
             holder = new ViewHolder(); LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.row, null, true);
@@ -110,6 +115,9 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder.spinnerRecurrence = (Spinner) convertView.findViewById(R.id.spinner_time_interval);
             holder.backRecurrence = (Button) convertView.findViewById(R.id.button_back_recurrence);
 
+            holder.linearLayoutList = (LinearLayout) convertView.findViewById(R.id.linear_layout_list);
+            holder.autoCompleteList = (AutoCompleteTextView) convertView.findViewById(R.id.auto_complete_list);
+            holder.backList = (Button) convertView.findViewById(R.id.button_back_list);
 
             convertView.setTag(holder);
         }else {
@@ -274,8 +282,17 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     @Override
                     public void onClick(View view) {
                         setList(holder);
-                        notifyDataSetChanged();
                         //TODO: implement data routine
+
+                        holder.backList.setOnClickListener(new View.OnClickListener(){
+
+                            @Override
+                            public void onClick(View view) {
+                                notifyDataSetChanged();
+
+                            }
+                        });
+
                     }
                 });
 
@@ -369,6 +386,10 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         //Set recurrence row view to invisible and inactive
         holder.linearLayoutRecurrence.setAlpha(0);
         disable(holder.linearLayoutRecurrence);
+
+        //Set list row view to invisible and inactive
+        holder.linearLayoutList.setAlpha(0);
+        disable(holder.linearLayoutList);
     }
 
     //Setting alternative row view coming from original
@@ -414,8 +435,13 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     //Setting list row view coming from alternative view
     public void setList(ViewHolder holder){
         //Set list row view to visible and active
+        holder.linearLayoutList.bringToFront();
+        holder.linearLayoutList.setAlpha(1);
+        enable(holder.linearLayoutList);
 
         //Set alternative row view to invisible and inactive
+        holder.linearLayoutAlt.setAlpha(0);
+        disable(holder.linearLayoutAlt);
 
 
 
