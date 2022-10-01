@@ -291,12 +291,22 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     @Override
                     public void onClick(View view) {
                         setList(holder);
-                        //TODO: implement data routine
-
+                        //TODO: implement button to set AutoComplete to empty
+                        String array[] = data.returnListsAsArray();
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1,array);
+                        holder.autoCompleteList.setAdapter(adapter);
                         holder.backList.setOnClickListener(new View.OnClickListener(){
 
                             @Override
                             public void onClick(View view) {
+                                int id = entries.get(position).getId();
+                                String list = holder.autoCompleteList.getText().toString();
+                                if (list.equals("")){
+                                    data.editList(id," ");
+                                } else{
+                                    data.editList(id,list);
+                                }
+
                                 initialize(holder,position);//returning to original row view
 
                             }

@@ -1,6 +1,7 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.content.Context;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -123,6 +124,40 @@ public class Data{
         this.save();
     }
 
+    public void editList(int id, String list){
+        this.entries.get(getPosition(id)).setList(list);
+        this.save();
+    }
+
+    public String[] returnListsAsArray(){
+
+        ArrayList<String> lists = getLists();
+        String[] listsAsArray = new String[lists.size()];
+
+        for (int i=0;i<lists.size();i++){
+            listsAsArray[i] = lists.get(i);
+        }
+
+        return listsAsArray;
+
+    }
+
+    public ArrayList<String> getLists(){
+
+        ArrayList<String> lists = new ArrayList<>();
+
+        for(int i=0;i<entries.size();i++){
+            String list = entries.get(i).getList();
+
+            if (!list.equals(" ") && !lists.contains(list)){
+                lists.add(list);
+            }
+
+        }
+        Collections.sort(lists);
+
+        return lists;
+    }
 
     public ArrayList<Entry> getPotentials(){
         //return a list of all entries for which the due date is <=today
