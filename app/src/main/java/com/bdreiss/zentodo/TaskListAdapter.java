@@ -142,14 +142,21 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         });
 
 
-        //setting "normal" row visible and active and all others to invisible and invalid
-        setOriginal(holder);
 
         //Creating adapter for spinner with entries days/weeks/months/years
         /* Adapter has to be declared here so that the dropdown element of the spinner is not shown in the background */
         /* I do not understand why, but this fixed it */
         ArrayAdapter<CharSequence> adapterSpinner = ArrayAdapter.createFromResource(context,R.array.time_interval, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
         holder.spinnerRecurrence.setAdapter(adapterSpinner);
+
+        initialize(holder,position);
+
+        return convertView;
+    }
+
+    public void initialize(ViewHolder holder, int position){
+        //setting "normal" row visible and active and all others to invisible and invalid
+        setOriginal(holder);
 
         //Sets buttons that have edited data that has been set to a different color
         markSet(holder,this.entries.get(position));
@@ -164,7 +171,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                 holder.back.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        notifyDataSetChanged();//return
+                        initialize(holder,position);//return
                     }
                 });
 
@@ -183,8 +190,10 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                             @Override
                             public void onClick(View view) {
                                 int id = entries.get(position).getId();//getting the id of task
-                                data.editTask(id,holder.editText.getText().toString());//write changes into data set
-                                notifyDataSetChanged();//writing back changes and returning to "normal layout
+                                String newTask = holder.editText.getText().toString();//get new Task
+                                data.editTask(id,newTask);//save changes
+                                holder.task.setText(newTask);//set new Task in list
+                                initialize(holder,position);//returning to original row view
                             }
                         });
 
@@ -196,8 +205,8 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     @Override
                     public void onClick(View view) {
                         Context context = getContext();
-                        openDatePickerDialog(context,data,entries.get(position));//opens date pickerDialog
-                     }
+                        openDatePickerDialog(context,holder,position);//opens date pickerDialog
+                    }
                 });
 
                 //Listener to edit how often task repeats
@@ -253,12 +262,12 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                                 if (interval.equals("")){//if editText is empty number is set to 0 so data is reset
                                     intervalInt = 0;
                                 } else {
-                                     intervalInt = Integer.parseInt(interval);//assign content otherwise
+                                    intervalInt = Integer.parseInt(interval);//assign content otherwise
                                 }
                                 String recurrence = "";//String that will be written back
 
                                 if (intervalInt == 0){//if editText was empty or value=0 then recurrence is reset
-                                  data.editRecurrence(id, " ");
+                                    data.editRecurrence(id, " ");
                                 }
                                 else{//otherwise number and interval are written back
 
@@ -268,9 +277,9 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                                     recurrence += interval;
 
                                     //write back
-                                   data.editRecurrence(id,recurrence);
+                                    data.editRecurrence(id,recurrence);
                                 }
-                                notifyDataSetChanged();//update adapter and return
+                                initialize(holder,position);//returning to original row view
 
 
                             }
@@ -288,7 +297,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
                             @Override
                             public void onClick(View view) {
-                                notifyDataSetChanged();
+                                initialize(holder,position);//returning to original row view
 
                             }
                         });
@@ -307,7 +316,6 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             }
         });
 
-        return convertView;
     }
 
     //returns the entry at specified position
@@ -316,7 +324,10 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //chooses date task is due and writes back data, if cancel is pressed, date is set to 0
-    public void openDatePickerDialog(Context context,Data data,Entry entry) {
+    public void openDatePickerDialog(Context context,ViewHolder holder, int position) {
+
+        //Get entry
+        Entry entry = entries.get(position);
 
         //get current date when task is due
         int entryDate = entry.getDue();
@@ -351,7 +362,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             {
                 int date = year*10000+month*100+day;//Encode format "YYYYMMDD"
                 data.editDue(entry.getId(), date);//Write back data
-                notifyDataSetChanged();//return to "normal" row view
+                initialize(holder,position);//returning to original row view
             }
         }, entryYear, entryMonth, entryDay);
 
@@ -360,7 +371,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             public void onClick(DialogInterface dialog, int which){
 
                 data.editDue(entry.getId(),0);//set date when task is due to 0
-                notifyDataSetChanged();//return to "normal" row view
+                initialize(holder,position);//returning to original row view
             }
 
         });
