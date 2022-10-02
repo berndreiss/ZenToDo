@@ -67,10 +67,12 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private TextView textViewRecurrence;//"repeats every... TODO REMOVE?
         private EditText editTextRecurrence;//...number...
         private Spinner spinnerRecurrence;//...days/weeks/months/years"
+        private Button clearRecurrence;//clears all fields
         private Button backRecurrence;//write back result
 
         private LinearLayout linearLayoutList;//row layout for setting lists
-        private AutoCompleteTextView autoCompleteList;//Autocomplete to set new list
+        private AutoCompleteTextView autoCompleteList;//AutoComplete to set new list
+        private Button clearList;//clears AutoComplete
         private Button backList;//return to original layout and save
     }
 
@@ -113,10 +115,12 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder.textViewRecurrence = (TextView) convertView.findViewById(R.id.text_view_recurrence);
             holder.editTextRecurrence = (EditText) convertView.findViewById(R.id.edit_text_recurrence);
             holder.spinnerRecurrence = (Spinner) convertView.findViewById(R.id.spinner_time_interval);
+            holder.clearRecurrence = (Button) convertView.findViewById(R.id.button_recurrence_clear);
             holder.backRecurrence = (Button) convertView.findViewById(R.id.button_back_recurrence);
 
             holder.linearLayoutList = (LinearLayout) convertView.findViewById(R.id.linear_layout_list);
             holder.autoCompleteList = (AutoCompleteTextView) convertView.findViewById(R.id.auto_complete_list);
+            holder.clearList = (Button) convertView.findViewById(R.id.button_list_clear);
             holder.backList = (Button) convertView.findViewById(R.id.button_back_list);
 
             convertView.setTag(holder);
@@ -250,6 +254,9 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                         //set editText
                         holder.editTextRecurrence.setText(recEdit);
 
+                        //setting listener to clear fields
+                        setClearRecurrenceListener(holder);
+
                         //Listener for writing back data
                         holder.backRecurrence.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -290,21 +297,22 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                 holder.setList.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        setList(holder);
-                        //TODO: implement button to set AutoComplete to empty
-                        String array[] = data.returnListsAsArray();
+                        setList(holder);//set list row view
+                        String array[] = data.returnListsAsArray();//array of names of all lists in task (as singletons)
                         ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1,array);
-                        holder.autoCompleteList.setAdapter(adapter);
+                        holder.autoCompleteList.setAdapter(adapter);//edit Text that autocompletes already existing lists
+
+                        setClearListenerList(holder);//clears AutoComplete
                         holder.backList.setOnClickListener(new View.OnClickListener(){
 
                             @Override
                             public void onClick(View view) {
-                                int id = entries.get(position).getId();
-                                String list = holder.autoCompleteList.getText().toString();
+                                int id = entries.get(position).getId();//Get id of task
+                                String list = holder.autoCompleteList.getText().toString();//get list name
                                 if (list.equals("")){
-                                    data.editList(id," ");
+                                    data.editList(id," ");//reset to no list
                                 } else{
-                                    data.editList(id,list);
+                                    data.editList(id,list);//write back otherwise
                                 }
 
                                 initialize(holder,position);//returning to original row view
@@ -326,6 +334,30 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             }
         });
 
+    }
+
+    //clears all fields in recurrence row view
+    public void setClearRecurrenceListener(ViewHolder holder){
+        holder.clearRecurrence.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                holder.spinnerRecurrence.setSelection(0);
+                holder.editTextRecurrence.setText("");
+                setClearRecurrenceListener(holder);
+            }
+        });
+
+    }
+
+    //clears Autocomplete in list row view
+    public void setClearListenerList(ViewHolder holder){
+        holder.clearList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                holder.autoCompleteList.setText("");
+                setClearListenerList(holder);
+            }
+        });
     }
 
     //returns the entry at specified position

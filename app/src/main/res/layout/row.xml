@@ -179,6 +179,20 @@
             android:spinnerMode="dropdown"/>
 
         <android.widget.Button
+            android:id="@+id/button_recurrence_clear"
+            android:shape="rectangle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_gravity="center"
+            android:paddingEnd="18dp"
+            android:drawableEnd="@drawable/ic_action_clear"
+            android:backgroundTint="@color/white"
+            />
+
+        <android.widget.Button
             android:id="@+id/button_back_recurrence"
             android:shape="rectangle"
             android:layout_width="0dp"
@@ -205,6 +219,20 @@
             android:layout_width="0dp"
             android:layout_weight="6"
             android:layout_height="match_parent"/>
+
+        <android.widget.Button
+            android:id="@+id/button_list_clear"
+            android:shape="rectangle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_gravity="center"
+            android:paddingEnd="18dp"
+            android:drawableEnd="@drawable/ic_action_clear"
+            android:backgroundTint="@color/white"
+            />
         <android.widget.Button
             android:id="@+id/button_back_list"
             android:shape="rectangle"
