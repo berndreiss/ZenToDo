@@ -114,6 +114,12 @@ public class Data{
 
     }
 
+    public void setToday(int id, Boolean today){
+        this.entries.get(getPosition(id)).setToday(today);
+        this.save();
+
+    }
+
     public void editDue(int id, int date){
         this.entries.get(getPosition(id)).setDue(date);
         this.save();

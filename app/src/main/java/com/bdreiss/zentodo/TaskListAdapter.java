@@ -53,6 +53,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private Button menu;//activates alternative layout with menu elements
 
         private LinearLayout linearLayoutAlt;//"alternative" layout with menu for modifying entries
+        private Button toTodays;//Adds task to todays tasks
         private Button edit;//edits the task
         private Button setDate;//sets the date the task is due
         private Button recurrence;//sets the frequency with which the task repeats
@@ -101,6 +102,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder.menu = (Button) convertView.findViewById(R.id.button_menu);
 
             holder.linearLayoutAlt = (LinearLayout) convertView.findViewById(R.id.linear_layout_alt);
+            holder.toTodays = (Button) convertView.findViewById(R.id.button_to_todays);
             holder.edit = (Button) convertView.findViewById(R.id.button_edit);
             holder.setDate = (Button) convertView.findViewById(R.id.button_calendar);
             holder.recurrence = (Button) convertView.findViewById(R.id.button_recurrence);
@@ -176,6 +178,15 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     @Override
                     public void onClick(View view) {
                         initialize(holder,position);//return
+                    }
+                });
+
+                holder.toTodays.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        int id = entries.get(position).getId();
+                        data.setToday(id, !entries.get(position).getToday());
+                        initialize(holder,position);
                     }
                 });
 
@@ -541,6 +552,12 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder.setList.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
         }else{
             holder.setList.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
+        }
+
+        if (entry.getToday()){
+            holder.toTodays.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+        } else{
+            holder.toTodays.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
         }
 
     }
