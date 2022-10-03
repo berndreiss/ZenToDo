@@ -1,4 +1,4 @@
 <resources>
     <dimen name="fab_margin">48dp</dimen>
-    <dimen name="button_alt_offset">30dp</dimen>
+    <dimen name="button_alt_offset">10dp</dimen>
 </resources>

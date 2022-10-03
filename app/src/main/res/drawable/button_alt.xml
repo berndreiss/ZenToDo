@@ -9,6 +9,7 @@
         android:radius="0dp"/>
     <solid
         android:color="@color/button_alt_background_color"/>
+
     <gradient android:angle="270"
         android:centerColor="@color/button_alt_background_color"
         android:endColor="@color/button_alt_background_color"
