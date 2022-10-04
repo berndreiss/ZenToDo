@@ -40,23 +40,21 @@ public class Data{
         //saves all entries in this.entries to save file
         StringBuilder text = new StringBuilder();
 
-        int dataLength = this.entries.size();
+        for (Entry e : entries){//gets all the fields of every entry except for id, which is generated programmatically upon loading
 
-        for (int i=0; i<dataLength; i++){//gets all the fields of every entry except for id, which is generated programmatically upon loading
-            Entry entry = entries.get(i);
-            text.append(entry.getTask()).append(this.delimiter).append(entry.getToday()).append(this.delimiter).append(entry.getList()).append(this.delimiter).append(entry.getListPosition()).append(this.delimiter).append(entry.getDue()).append(this.delimiter).append(entry.getRecurrence()).append(this.lineDelimiter);
+            text.append(e.getTask()).append(delimiter).append(e.getToday()).append(delimiter).append(e.getList()).append(delimiter).append(e.getListPosition()).append(delimiter).append(e.getDue()).append(delimiter).append(e.getRecurrence()).append(lineDelimiter);
         }
 
-        this.saveFile.save(text.toString()); //Writes contents to file
+        saveFile.save(text.toString()); //Writes contents to file
 
     }
 
     public void load(){
-        String data = this.saveFile.load();
-        String[] lines = data.split(this.lineDelimiter);
+        String data = saveFile.load();
+        String[] lines = data.split(lineDelimiter);
 
         for (String line : lines) {//loop through lines to retrieve fields for entry
-            String[] fields = line.split(this.delimiter);
+            String[] fields = line.split(delimiter);
             int fieldsLength = fields.length;
 
             if (fieldsLength == 6) {//loop through fields of entry and add them to this.entries
@@ -67,7 +65,7 @@ public class Data{
                                         Integer.parseInt(fields[3]),//listPosition
                                         Integer.parseInt(fields[4]),//due
                                         fields[5]);//recurrence
-                this.entries.add(entry);//add entry
+                entries.add(entry);//add entry
             }
         }
 
@@ -75,38 +73,37 @@ public class Data{
 
     public void add(String task){
         Entry entry = new Entry(generateId(),task,false, " ", -1, 0," "); //generate ID and create entry
-        this.entries.add(entry); //add entry to this.entries
-        this.save(); //write changes to save file
+        entries.add(entry); //add entry to this.entries
+        save(); //write changes to save file
     }
 
 
     public void add(String task, int position){
         //add new entry to database
         Entry entry = new Entry(generateId(),task,false, " ", -1, 0," "); //generate ID and create entry
-        this.entries.add(entry); //add entry to this.entries
-        this.save(); //write changes to save file
+        entries.add(entry); //add entry to this.entries
+        save(); //write changes to save file
     }
 
     public void remove(int id){
         //remove entry from database
-        this.entries.remove(getPosition(id));
+        entries.remove(getPosition(id));
 
-        this.save(); //write changes to save file
+        save(); //write changes to save file
     }
 
     public void editTask(int id, String newTask){
-        this.entries.get(getPosition(id)).setTask(newTask);
-        this.save();
+        entries.get(getPosition(id)).setTask(newTask);
+        save();
     }
 
+    //Get position of entry by id, returns -1 if id not found
     public int getPosition(int id){
-        int dataLength = this.entries.size();
 
-        for (int i=0;i<dataLength;i++){
+        for (int i=0;i<entries.size();i++){
 
-            if (this.entries.get(i).getId() == id){
+            if (entries.get(i).getId() == id){
                 return i;
-
 
             }
         }
@@ -114,25 +111,27 @@ public class Data{
 
     }
 
+    /* the following functions edit different fields of entries by their id */
+
     public void setToday(int id, Boolean today){
-        this.entries.get(getPosition(id)).setToday(today);
-        this.save();
+        entries.get(getPosition(id)).setToday(today);
+        save();
 
     }
 
     public void editDue(int id, int date){
-        this.entries.get(getPosition(id)).setDue(date);
-        this.save();
+        entries.get(getPosition(id)).setDue(date);
+        save();
     }
 
     public void editRecurrence(int id, String recurrence){
-        this.entries.get(getPosition(id)).setRecurrence(recurrence);
-        this.save();
+        entries.get(getPosition(id)).setRecurrence(recurrence);
+        save();
     }
 
     public void editList(int id, String list){
-        this.entries.get(getPosition(id)).setList(list);
-        this.save();
+        entries.get(getPosition(id)).setList(list);
+        save();
     }
 
     public String[] returnListsAsArray(){
@@ -152,8 +151,8 @@ public class Data{
 
         ArrayList<String> lists = new ArrayList<>();
 
-        for(int i=0;i<entries.size();i++){
-            String list = entries.get(i).getList();
+        for(Entry e : entries){
+            String list = e.getList();
 
             if (!list.equals(" ") && !lists.contains(list)){
                 lists.add(list);
@@ -170,14 +169,12 @@ public class Data{
 
         ArrayList<Entry> potentials = new ArrayList<>();//create new list
 
-        int dataLength = this.entries.size();
-
         int date = getDate();//get current date as "yyyyMMdd"
 
-        for (int i=0;i<dataLength;i++){//loop through this.entries
+        for (Entry e : entries){//loop through this.entries
 
-            if (this.entries.get(i).getDue() <= date){//add entry if it is due
-                potentials.add(this.entries.get(i));
+            if (e.getDue() <= date){//add entry if it is due
+                potentials.add(e);
             }
 
         }
@@ -187,8 +184,8 @@ public class Data{
 
     //Generates a running id
     private int generateId(){
-        this.id += 1;
-        return this.id-1;
+        id += 1;
+        return id-1;
     }
 
     public int getDate(){
@@ -206,7 +203,7 @@ public class Data{
     //the following functions simply return the associated lists
     public ArrayList<Entry> getEntries(){
 
-        return this.entries;
+        return entries;
 
     }
 
@@ -214,10 +211,9 @@ public class Data{
     public ArrayList<String> getEntriesAsString(){
 
         ArrayList<String> items = new ArrayList<>();
-        int dataLength = this.entries.size();
 
-        for (int i=0; i<dataLength;i++){
-            items.add(this.entries.get(i).getTask());
+        for (Entry e : entries){
+            items.add(e.getTask());
         }
 
         return items;

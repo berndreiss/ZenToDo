@@ -2,6 +2,18 @@ package com.bdreiss.zentodo;
 /*
  *   A custom ArrayAdapter<Entry> that creates rows with checkboxes that
  *   when checked remove the associated task.
+ *
+ *   The row can have different views. It initially starts with an original view, that shows the task and the checkbox to remove it.
+ *   But there is also a menu button that opens an alternative row view. In this view different Buttons are shown through which certain
+ *   information of the task can be changed (for data fields associated with a task see Entry.java).
+ *
+ *   original view --(menu Button)--> alternative view --(today Button)--> original view
+ *                                                     --(edit Button)--> edit row view --(back Button)--> original view
+ *                                                     --(set date Button)--> datePickerDialog --(cancel/ok Button)-->original view
+ *                                                     --(recurrence Button)--> recurrence view --(back Button)--> original view
+ *                                                     --(set list Button)--> set list view --(back Button)-->  original view
+ *                                                     --(back Button)--> original view
+ *
  */
 
 import static android.provider.Settings.System.getString;

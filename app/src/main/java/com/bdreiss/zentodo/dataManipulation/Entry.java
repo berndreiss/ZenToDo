@@ -6,7 +6,8 @@ public class Entry{
 
     private int id;//id generated in data.java
     private String task;//a description of the task that has to be done
-    private Boolean today;//stores the information if task has been chosen today
+    private Boolean today;//true if task has been chosen today
+    private Boolean dropped;//true if task has been dropped and not been used in brainstorm and pick
     private String list;//a list to which the task belongs to
     private int listPosition;//position in according list
     private int due;//a date, when the task is due -> "yyyyMMdd"
@@ -17,7 +18,8 @@ public class Entry{
     public Entry(int id, String task, Boolean today, String list, int listPosition, int due, String recurrence){
         //creates a new instance and initializes the fields of the entry
         this.id = id;
-        this.today = today;
+        this.today = false;
+        this.dropped = true;
         this.task=task;
         this.list=list;
         this.listPosition=listPosition;
@@ -29,23 +31,25 @@ public class Entry{
     public int getId(){return this.id;}
 
     public String getTask(){
-        return this.task;
+        return task;
     }
 
-    public Boolean getToday(){return this.today;}
+    public Boolean getToday(){return today;}
+
+    public Boolean getDropped(){return dropped;}
 
     public String getList(){
-        return this.list;
+        return list;
     }
 
-    public int getListPosition(){return this.listPosition;}
+    public int getListPosition(){return listPosition;}
 
     public int getDue(){
-        return this.due;
+        return due;
     }
     
     public String getRecurrence(){
-        return this.recurrence;
+        return recurrence;
     }
     
     //The following functions are to update the different fields
@@ -54,6 +58,8 @@ public class Entry{
     }
 
     public void setToday(Boolean today){this.today = today;}
+
+    public void setDropped(Boolean dropped){this.dropped = dropped;}
 
     public void setList(String list){
         this.list=list;
