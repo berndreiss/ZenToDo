@@ -11,24 +11,75 @@
         android:layout_height="wrap_content"
         android:theme="@style/Theme.ZenToDo.AppBarOverlay">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/Theme.ZenToDo.PopupOverlay" />
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="@dimen/toolbar_height">
+
+           <android.widget.Button
+               android:id="@+id/toolbar_drop_your_thoughts"
+               android:shape="rectangle"
+               android:layout_width="0dp"
+               android:layout_height="match_parent"
+               android:layout_marginLeft="0dp"
+               android:layout_marginRight="0dp"
+               android:layout_weight="1"
+               android:layout_gravity="center"
+               android:paddingTop="@dimen/toolbar_offset"
+               style="?android:borderlessButtonStyle"
+               android:drawableTop="@drawable/ic_action_thoughts"
+               />
+
+
+           <android.widget.Button
+               android:id="@+id/toolbar_brainstorm"
+               android:shape="rectangle"
+               android:layout_width="0dp"
+               android:layout_height="match_parent"
+               android:layout_marginLeft="0dp"
+               android:layout_marginRight="0dp"
+               android:layout_weight="1"
+               android:layout_gravity="center"
+               android:paddingTop="@dimen/toolbar_offset"
+               style="?android:borderlessButtonStyle"
+               android:drawableTop="@drawable/ic_action_todays_brainstorm"
+               />
+
+           <android.widget.Button
+               android:id="@+id/toolbar_todays_focus"
+               android:shape="rectangle"
+               android:layout_width="0dp"
+               android:layout_height="match_parent"
+               android:layout_marginLeft="0dp"
+               android:layout_marginRight="0dp"
+               android:layout_weight="1"
+               android:layout_gravity="center"
+               android:paddingTop="@dimen/toolbar_offset"
+               style="?android:borderlessButtonStyle"
+               android:drawableTop="@drawable/ic_action_todays_toolbar"
+               />
+
+
+           <android.widget.Button
+               android:id="@+id/toolbar_lists"
+               android:shape="rectangle"
+               android:layout_width="0dp"
+               android:layout_height="match_parent"
+               android:layout_marginLeft="0dp"
+               android:layout_marginRight="0dp"
+               android:layout_weight="1"
+               android:layout_gravity="center"
+               android:paddingTop="@dimen/toolbar_offset"
+               style="?android:borderlessButtonStyle"
+               android:drawableTop="@drawable/ic_action_lists"
+               />
+
+       </LinearLayout>
+
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/test" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="16dp"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
-
+    <include layout="@layout/drop_your_thoughts" />
+    <include layout="@layout/brainstorm_and_pick"/>
+    <include layout="@layout/todays_focus"/>
+    <include layout="@layout/lists"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

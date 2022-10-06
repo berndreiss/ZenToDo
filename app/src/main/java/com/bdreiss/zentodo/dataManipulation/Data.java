@@ -182,6 +182,34 @@ public class Data{
 
     }
 
+    public ArrayList<Entry> getDropped(){
+
+        ArrayList<Entry> dropped = new ArrayList<>();
+
+        for (Entry e: entries){
+
+            if (e.getDropped()){
+                dropped.add(e);
+            }
+
+        }
+        return dropped;
+    }
+    public ArrayList<Entry> getTodays(){
+
+        ArrayList<Entry> todays = new ArrayList<>();
+
+        for (Entry e: entries){
+
+            if (e.getToday()){
+                todays.add(e);
+            }
+
+        }
+        return todays;
+    }
+
+
     //Generates a running id
     private int generateId(){
         id += 1;

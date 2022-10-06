@@ -21,6 +21,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bdreiss.zentodo.databinding.ActivityMainBinding;
 
@@ -32,9 +33,11 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import org.w3c.dom.Text;
 
@@ -47,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
 
+    Data data;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,11 +59,7 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        //      setSupportActionBar(binding.toolbar);
 
-        //      NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        //      appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        //      NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
     /*    binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,73 +68,66 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });*/
-        setViews(this);
+        data = new Data(this);
+
+        initialize(this);
 
     }
 
-    public void setViews(Context context){
+    public void initialize(Context context){
 
-        TextView textView = (TextView) findViewById(R.id.text_view_test);
-        TextView textView2 = (TextView) findViewById(R.id.text_view_test2);
-        Data data = new Data(context);
-        //      addData(data);//adds TestData
-        final ArrayList<Entry> items = data.getEntries();
+        initializeThougts(context);
+
+    }
+
+    public void initializeThougts(Context context){
+        LinearLayout dropYourThoughts = (LinearLayout) findViewById(R.id.layout_drop_thoughts);
+
+        enableLayout(dropYourThoughts);
+
+
         TaskListAdapter adapter = new TaskListAdapter(this,data);
-        ListView listView = (ListView) findViewById(R.id.list_view_test);
+        ListView listView = (ListView) findViewById(R.id.list_view_thoughts);
         listView.setAdapter(adapter);
 
-        final EditText editText = (EditText) findViewById(R.id.edit_text_test);
-        Button button = (Button) findViewById(R.id.button_test);
+        final EditText editText = (EditText) findViewById(R.id.edit_text_thoughts);
+        Button button = (Button) findViewById(R.id.button_add_thoughts);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String task = editText.getText().toString();
                 editText.setText("");
                 if (!task.equals("")) {
-                    Data data = new Data(context);
                     data.add(task);
-
+                    initializeThougts(context);
                 }
-                setViews(context);
+
 
             }
         });
 
-    }
-
-
-    public void setListView(Context context){
-
-
 
     }
-/*    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    public void enableLayout(LinearLayout layout){
+
+            for (int i = 0; i < layout.getChildCount(); i++) {
+                View child = layout.getChildAt(i);
+                child.setEnabled(true);
+                child.setAlpha(1);
+            }
+
+
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    public void disableLayout(LinearLayout layout){
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            View child = layout.getChildAt(i);
+            child.setEnabled(false);
+            child.setAlpha(0);
         }
 
-        return super.onOptionsItemSelected(item);
-    }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
-    }*/
+    }
 
 }

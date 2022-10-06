@@ -90,6 +90,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     public TaskListAdapter(Context context, Data data){
+
         super(context, R.layout.row,data.getEntries());
         this.context = context;
         this.data = data;
