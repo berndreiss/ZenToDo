@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="button_alt">#d4aca3</color>
     <color name="button_alt_edited">#c8cafa</color>
+    <color name="button_toolbar">#95b6cf</color>
+    <color name="button_toolbar_chosen">#000000</color>
 </resources>
