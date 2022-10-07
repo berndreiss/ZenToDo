@@ -18,6 +18,8 @@ package com.bdreiss.zentodo;
 
 import static android.provider.Settings.System.getString;
 
+import static java.lang.String.valueOf;
+
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -39,6 +41,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.graphics.drawable.DrawableCompat;
@@ -46,6 +49,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -56,6 +60,8 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     private Context context;
 
     private Data data;//database from which entries are derived (see Data.java)
+
+    private String mode;
 
     private class ViewHolder {//temporary view
 
@@ -89,17 +95,21 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private Button backList;//return to original layout and save
     }
 
-    public TaskListAdapter(Context context, Data data){
+    public TaskListAdapter(Context context, Data data, ArrayList<Entry> entries, String mode){
 
-        super(context, R.layout.row,data.getEntries());
+        //super(context, R.layout.row,data.getEntries());
+        super(context,R.layout.row,entries);
         this.context = context;
         this.data = data;
-        this.entries = data.getEntries();
+        //this.entries = data.getEntries();
+        this.entries = entries;
+        this.mode = mode;
     }
 
     @SuppressLint("InflateParams")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+
 
         final ViewHolder holder;
 
@@ -145,6 +155,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         }
 
         //set up checkbox of the task
+        //holder.task.setText(entries.get(position).getTask());
         holder.task.setText(entries.get(position).getTask());
         holder.checkBox.setChecked(false);
         holder.checkBox.setTag(position);
@@ -154,6 +165,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             @Override
             public void onClick(View view) {
                 int id = entries.get(position).getId();//get ID
+
                 data.remove(id);//remove entry from dataset by ID
                 notifyDataSetChanged();//update the adapter
 
@@ -169,7 +181,6 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         holder.spinnerRecurrence.setAdapter(adapterSpinner);
 
         initialize(holder,position);
-
         return convertView;
     }
 
@@ -199,7 +210,18 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     public void onClick(View view) {
                         int id = entries.get(position).getId();
                         data.setToday(id, !entries.get(position).getToday());
-                        initialize(holder,position);
+
+                        if(entries.get(position).getDropped()){
+                            data.setDropped(id, false);
+                            if (mode.equals("dropped")){
+                                notifyDataSetChanged();
+                            } else{
+                                initialize(holder, position);
+                            }
+                        }else {
+
+                            initialize(holder, position);
+                        }
                     }
                 });
 
@@ -325,7 +347,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                         String array[] = data.returnListsAsArray();//array of names of all lists in task (as singletons)
                         ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1,array);
                         holder.autoCompleteList.setAdapter(adapter);//edit Text that autocompletes already existing lists
-
+                        holder.autoCompleteList.setText(entries.get(position).getList());
                         setClearListenerList(holder);//clears AutoComplete
                         holder.backList.setOnClickListener(new View.OnClickListener(){
 
@@ -335,11 +357,28 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                                 String list = holder.autoCompleteList.getText().toString();//get list name
                                 if (list.equals("")){
                                     data.editList(id," ");//reset to no list
+                                    initialize(holder,position);//returning to original row view
+
                                 } else{
                                     data.editList(id,list);//write back otherwise
+                                    if (entries.get(position).getDropped()){
+                                        data.setDropped(id,false);
+                                        if (mode.equals("dropped")) {
+                                            notifyDataSetChanged();
+                                        } else{
+                                            initialize(holder,position);
+                                        }
+
+
+                                    } else{
+
+                                        initialize(holder,position);//returning to original row view
+
+                                    }
                                 }
 
-                                initialize(holder,position);//returning to original row view
+
+
 
                             }
                         });
@@ -428,7 +467,17 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             {
                 int date = year*10000+month*100+day;//Encode format "YYYYMMDD"
                 data.editDue(entry.getId(), date);//Write back data
-                initialize(holder,position);//returning to original row view
+                if(entries.get(position).getDropped()){
+                    data.setDropped(entries.get(position).getId(), false);
+                    if (mode.equals("dropped")){
+                        notifyDataSetChanged();
+                    } else{
+                        initialize(holder, position);
+                    }
+                }else {
+
+                    initialize(holder, position);
+                }
             }
         }, entryYear, entryMonth, entryDay);
 

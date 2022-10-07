@@ -86,7 +86,8 @@ public class MainActivity extends AppCompatActivity {
         enableLayout(dropYourThoughts);
 
 
-        TaskListAdapter adapter = new TaskListAdapter(this,data);
+
+        TaskListAdapter adapter = new TaskListAdapter(this,data,data.getDropped(), "dropped");
         ListView listView = (ListView) findViewById(R.id.list_view_thoughts);
         listView.setAdapter(adapter);
 

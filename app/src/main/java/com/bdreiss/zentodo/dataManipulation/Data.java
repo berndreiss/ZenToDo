@@ -22,6 +22,7 @@ public class Data{
     private final String lineDelimiter = "%%%%%%%"; //Delimiter for entries in save file
 
     private ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
+    private ArrayList<Entry> dropped = new ArrayList<>();
     private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
 
     public SaveFile saveFile;//TODO reset to private
@@ -42,7 +43,7 @@ public class Data{
 
         for (Entry e : entries){//gets all the fields of every entry except for id, which is generated programmatically upon loading
 
-            text.append(e.getTask()).append(delimiter).append(e.getToday()).append(delimiter).append(e.getList()).append(delimiter).append(e.getListPosition()).append(delimiter).append(e.getDue()).append(delimiter).append(e.getRecurrence()).append(lineDelimiter);
+            text.append(e.getTask()).append(delimiter).append(e.getToday()).append(delimiter).append(e.getDropped()).append(delimiter).append(e.getList()).append(delimiter).append(e.getListPosition()).append(delimiter).append(e.getDue()).append(delimiter).append(e.getRecurrence()).append(lineDelimiter);
         }
 
         saveFile.save(text.toString()); //Writes contents to file
@@ -57,39 +58,45 @@ public class Data{
             String[] fields = line.split(delimiter);
             int fieldsLength = fields.length;
 
-            if (fieldsLength == 6) {//loop through fields of entry and add them to this.entries
+            if (fieldsLength == 7) {//loop through fields of entry and add them to this.entries
                 Entry entry = new Entry(generateId(),//generate id
                                         fields[0],//task
                                         Boolean.parseBoolean(fields[1]),//isToday
-                                        fields[2], //list
-                                        Integer.parseInt(fields[3]),//listPosition
-                                        Integer.parseInt(fields[4]),//due
-                                        fields[5]);//recurrence
+                                        Boolean.parseBoolean(fields[2]),//isToday
+                                        fields[3], //list
+                                        Integer.parseInt(fields[4]),//listPosition
+                                        Integer.parseInt(fields[5]),//due
+                                        fields[6]);//recurrence
                 entries.add(entry);//add entry
             }
         }
 
+        initDropped();
+
     }
 
     public void add(String task){
-        Entry entry = new Entry(generateId(),task,false, " ", -1, 0," "); //generate ID and create entry
+        Entry entry = new Entry(generateId(),task,false,true, " ", -1, 0," "); //generate ID and create entry
         entries.add(entry); //add entry to this.entries
+        initDropped();
         save(); //write changes to save file
     }
 
 
     public void add(String task, int position){
         //add new entry to database
-        Entry entry = new Entry(generateId(),task,false, " ", -1, 0," "); //generate ID and create entry
+        Entry entry = new Entry(generateId(),task,false,true, " ", -1, 0," "); //generate ID and create entry
         entries.add(entry); //add entry to this.entries
+        initDropped();
         save(); //write changes to save file
     }
 
     public void remove(int id){
         //remove entry from database
         entries.remove(getPosition(id));
-
+        initDropped();
         save(); //write changes to save file
+
     }
 
     public void editTask(int id, String newTask){
@@ -115,6 +122,13 @@ public class Data{
 
     public void setToday(int id, Boolean today){
         entries.get(getPosition(id)).setToday(today);
+        save();
+
+    }
+
+    public void setDropped(int id, Boolean dropped){
+        entries.get(getPosition(id)).setDropped(dropped);
+        initDropped();
         save();
 
     }
@@ -184,16 +198,8 @@ public class Data{
 
     public ArrayList<Entry> getDropped(){
 
-        ArrayList<Entry> dropped = new ArrayList<>();
-
-        for (Entry e: entries){
-
-            if (e.getDropped()){
-                dropped.add(e);
-            }
-
-        }
         return dropped;
+
     }
     public ArrayList<Entry> getTodays(){
 
@@ -232,6 +238,16 @@ public class Data{
     public ArrayList<Entry> getEntries(){
 
         return entries;
+
+    }
+
+    public void initDropped(){
+        dropped.clear();
+        for (Entry e : entries){
+            if(e.getDropped()){
+                dropped.add(e);
+            }
+        }
 
     }
 
