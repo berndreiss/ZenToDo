@@ -8,8 +8,8 @@ The App is going to contain the following windows:
 
 -Brainstorm and Pick (still to  be implemented): presents all tasks that are due today and lets you choose which ones to get done
 
--Todays Focus (still to  be implemented): presents all tasks that you picked including a color mode, that marks all tasks belonging to one list in the same color
+-Todays Focus: presents all tasks that you picked including a color mode (still to be implemented), that marks all tasks belonging to one list in the same color
 
--Drop your Thoughts (still to  be implemented): add new tasks, so you don't have to worry about them
+-Drop your Thoughts: add new tasks, so you don't have to worry about them
 
 -Lists (still to  be implemented): shows all the lists and according tasks including a list called "All Tasks" which shows ALL tasks in increasing order of due date, in case you want to change anything
