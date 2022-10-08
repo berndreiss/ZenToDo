@@ -23,6 +23,7 @@ public class Data{
 
     private ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     private ArrayList<Entry> dropped = new ArrayList<>();
+    private ArrayList<Entry> todays = new ArrayList<>();
     private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
 
     public SaveFile saveFile;//TODO reset to private
@@ -72,6 +73,7 @@ public class Data{
         }
 
         initDropped();
+        initTodays();
 
     }
 
@@ -95,6 +97,7 @@ public class Data{
         //remove entry from database
         entries.remove(getPosition(id));
         initDropped();
+        initTodays();
         save(); //write changes to save file
 
     }
@@ -129,6 +132,7 @@ public class Data{
     public void setDropped(int id, Boolean dropped){
         entries.get(getPosition(id)).setDropped(dropped);
         initDropped();
+        initTodays();
         save();
 
     }
@@ -203,15 +207,6 @@ public class Data{
     }
     public ArrayList<Entry> getTodays(){
 
-        ArrayList<Entry> todays = new ArrayList<>();
-
-        for (Entry e: entries){
-
-            if (e.getToday()){
-                todays.add(e);
-            }
-
-        }
         return todays;
     }
 
@@ -249,6 +244,15 @@ public class Data{
             }
         }
 
+    }
+
+    public void initTodays(){
+        todays.clear();
+        for (Entry e: entries){
+            if (e.getToday()){
+                todays.add(e);
+            }
+        }
     }
 
     //Returns entries as an ArrayList<String> TODO: is this ever used?
