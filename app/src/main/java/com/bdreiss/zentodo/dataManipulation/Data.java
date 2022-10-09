@@ -125,6 +125,7 @@ public class Data{
 
     public void setToday(int id, Boolean today){
         entries.get(getPosition(id)).setToday(today);
+        initTodays();
         save();
 
     }
@@ -191,8 +192,15 @@ public class Data{
 
         for (Entry e : entries){//loop through this.entries
 
-            if (e.getDue() <= date){//add entry if it is due
-                potentials.add(e);
+            if (e.getDue() == 0){
+                if (e.getDropped() || e.getList().equals(" ")){
+                    potentials.add(e);
+                }
+            }
+            else {
+                if (e.getDue() <= date) {//add entry if it is due
+                    potentials.add(e);
+                }
             }
 
         }

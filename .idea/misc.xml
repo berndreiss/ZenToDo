@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable-anydpi/ic_action_back.xml" value="0.2655" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_brainstorm.xml" value="0.19" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_lists.xml" value="0.19" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_todays.xml" value="0.19" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_todays_brainstorm.xml" value="0.19" />

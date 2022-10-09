@@ -41,7 +41,7 @@
                android:layout_gravity="center"
                android:paddingTop="@dimen/toolbar_offset"
                style="?android:borderlessButtonStyle"
-               android:drawableTop="@drawable/ic_action_todays_brainstorm"
+               android:drawableTop="@drawable/ic_action_brainstorm"
                />
 
            <android.widget.Button

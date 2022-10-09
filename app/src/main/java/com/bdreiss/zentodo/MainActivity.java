@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout dropYourThoughts;
     private LinearLayout todaysFocus;
     private LinearLayout lists;
+    private LinearLayout brainstorm;
 
     private Button toolbarDropYourThoughts;
     private Button toolbarBrainstormAndPick;
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         dropYourThoughts = (LinearLayout) findViewById(R.id.layout_drop_thoughts);
         todaysFocus = (LinearLayout) findViewById(R.id.layout_todays);
         lists = (LinearLayout) findViewById(R.id.layout_lists);
+        brainstorm = (LinearLayout) findViewById(R.id.layout_brainstorm);
 
         toolbarDropYourThoughts = (Button) findViewById(R.id.toolbar_drop_your_thoughts);
         toolbarBrainstormAndPick = (Button) findViewById(R.id.toolbar_brainstorm);
@@ -112,12 +114,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        toolbarBrainstormAndPick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                initialize(context);
+                initializeBrainstorm(context);
+            }
+        });
+
     }
 
     public void initializeTodays(Context context){
         disableLayout(dropYourThoughts);
         enableLayout(todaysFocus);
         disableLayout(lists);
+        disableLayout(brainstorm);
 
         toolbarDropYourThoughts.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarBrainstormAndPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
@@ -135,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
         disableLayout(dropYourThoughts);
         disableLayout(todaysFocus);
         enableLayout(lists);
+        disableLayout(brainstorm);
 
         toolbarDropYourThoughts.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarBrainstormAndPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
@@ -148,12 +160,55 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void initializeBrainstorm(Context context){
+        enableLayout(brainstorm);
+        disableLayout(dropYourThoughts);
+        disableLayout(todaysFocus);
+        disableLayout(lists);
+
+        toolbarDropYourThoughts.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarBrainstormAndPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
+        toolbarTodaysFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+
+
+        TaskListAdapter adapter = new TaskListAdapter(this, data, data.getPotentials(), "potentials");
+        ListView listView = (ListView) findViewById(R.id.list_view_potentials);
+        listView.setAdapter(adapter);
+
+        Button pick = (Button) findViewById(R.id.button_pick);
+
+        pick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ArrayList<Integer> checked= adapter.getIdsChecked();
+
+                for (int id : checked){
+                    data.setToday(id, true);
+                    data.setDropped(id, false);
+                }
+
+                ArrayList<Integer> notChecked = adapter.getIdsNotChecked();
+
+                for (int id: notChecked){
+                    data.setToday(id, false);
+                }
+
+                initialize(context);
+                initializeTodays(context);
+
+            }
+        });
+
+    }
+
     public void initializeThoughts(Context context){
 
 
         enableLayout(dropYourThoughts);
         disableLayout(todaysFocus);
         disableLayout(lists);
+        disableLayout(brainstorm);
 
         toolbarDropYourThoughts.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
         toolbarBrainstormAndPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));

@@ -63,6 +63,8 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     private String mode;
 
+    private ArrayList<Integer> idsChecked;
+
     private class ViewHolder {//temporary view
 
         private LinearLayout linearLayout;//"normal" row layout that shows checkbox and task
@@ -104,6 +106,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         //this.entries = data.getEntries();
         this.entries = entries;
         this.mode = mode;
+        this.idsChecked = new ArrayList<>();
     }
 
     @SuppressLint("InflateParams")
@@ -166,8 +169,16 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             public void onClick(View view) {
                 int id = entries.get(position).getId();//get ID
 
-                data.remove(id);//remove entry from dataset by ID
-                notifyDataSetChanged();//update the adapter
+                if (!mode.equals("potentials")) {
+                    data.remove(id);//remove entry from dataset by ID
+                    notifyDataSetChanged();//update the adapter
+                }else{
+                    if (idsChecked.contains(id)){
+                        idsChecked.remove(id);
+                    } else{
+                        idsChecked.add(id);
+                    }
+                }
 
             }
         });
@@ -210,17 +221,21 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     public void onClick(View view) {
                         int id = entries.get(position).getId();
                         data.setToday(id, !entries.get(position).getToday());
-
-                        if(entries.get(position).getDropped()){
-                            data.setDropped(id, false);
-                            if (mode.equals("dropped")){
+                        if (mode.equals("todays")){
                                 notifyDataSetChanged();
-                            } else{
+                        } else {
+
+                            if (entries.get(position).getDropped()) {
+                                data.setDropped(id, false);
+                                if (mode.equals("dropped")) {
+                                    notifyDataSetChanged();
+                                } else {
+                                    initialize(holder, position);
+                                }
+                            } else {
+
                                 initialize(holder, position);
                             }
-                        }else {
-
-                            initialize(holder, position);
                         }
                     }
                 });
@@ -465,19 +480,19 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             @Override
             public void onDateSet(DatePicker view, int year, int month, int day)
             {
-                int date = year*10000+month*100+day;//Encode format "YYYYMMDD"
+                int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
                 data.editDue(entry.getId(), date);//Write back data
-                if(entries.get(position).getDropped()){
-                    data.setDropped(entries.get(position).getId(), false);
                     if (mode.equals("dropped")){
+                        data.setDropped(entries.get(position).getId(), false);
                         notifyDataSetChanged();
-                    } else{
+                    } else if( mode.equals("todays")){
+                        data.setToday(entries.get(position).getId(),false);
+                        notifyDataSetChanged();
+                    } else
+                    {
                         initialize(holder, position);
                     }
-                }else {
 
-                    initialize(holder, position);
-                }
             }
         }, entryYear, entryMonth, entryDay);
 
@@ -624,4 +639,18 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     }
 
+    public ArrayList<Integer> getIdsChecked(){
+        return idsChecked;
+    }
+
+    public ArrayList<Integer> getIdsNotChecked(){
+        ArrayList<Integer> notChecked = new ArrayList<>();
+
+        for (Entry e: entries){
+            if (!idsChecked.contains(e.getId())){
+                notChecked.add(e.getId());
+            }
+        }
+        return notChecked;
+    }
 }
