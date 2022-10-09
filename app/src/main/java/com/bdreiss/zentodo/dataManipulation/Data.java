@@ -23,7 +23,7 @@ public class Data{
 
     private ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     private ArrayList<Entry> dropped = new ArrayList<>();
-    private ArrayList<Entry> todays = new ArrayList<>();
+    private ArrayList<Entry> focus = new ArrayList<>();
     private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
 
     public SaveFile saveFile;//TODO reset to private
@@ -44,7 +44,7 @@ public class Data{
 
         for (Entry e : entries){//gets all the fields of every entry except for id, which is generated programmatically upon loading
 
-            text.append(e.getTask()).append(delimiter).append(e.getToday()).append(delimiter).append(e.getDropped()).append(delimiter).append(e.getList()).append(delimiter).append(e.getListPosition()).append(delimiter).append(e.getDue()).append(delimiter).append(e.getRecurrence()).append(lineDelimiter);
+            text.append(e.getTask()).append(delimiter).append(e.getFocus()).append(delimiter).append(e.getDropped()).append(delimiter).append(e.getList()).append(delimiter).append(e.getListPosition()).append(delimiter).append(e.getDue()).append(delimiter).append(e.getRecurrence()).append(lineDelimiter);
         }
 
         saveFile.save(text.toString()); //Writes contents to file
@@ -73,7 +73,7 @@ public class Data{
         }
 
         initDropped();
-        initTodays();
+        initFocus();
 
     }
 
@@ -97,7 +97,7 @@ public class Data{
         //remove entry from database
         entries.remove(getPosition(id));
         initDropped();
-        initTodays();
+        initFocus();
         save(); //write changes to save file
 
     }
@@ -123,9 +123,9 @@ public class Data{
 
     /* the following functions edit different fields of entries by their id */
 
-    public void setToday(int id, Boolean today){
-        entries.get(getPosition(id)).setToday(today);
-        initTodays();
+    public void setFocus(int id, Boolean focus){
+        entries.get(getPosition(id)).setFocus(focus);
+        initFocus();
         save();
 
     }
@@ -133,7 +133,7 @@ public class Data{
     public void setDropped(int id, Boolean dropped){
         entries.get(getPosition(id)).setDropped(dropped);
         initDropped();
-        initTodays();
+        initFocus();
         save();
 
     }
@@ -213,9 +213,9 @@ public class Data{
         return dropped;
 
     }
-    public ArrayList<Entry> getTodays(){
+    public ArrayList<Entry> getFocus(){
 
-        return todays;
+        return focus;
     }
 
 
@@ -254,11 +254,11 @@ public class Data{
 
     }
 
-    public void initTodays(){
-        todays.clear();
+    public void initFocus(){
+        focus.clear();
         for (Entry e: entries){
-            if (e.getToday()){
-                todays.add(e);
+            if (e.getFocus()){
+                focus.add(e);
             }
         }
     }

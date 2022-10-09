@@ -6,7 +6,7 @@ public class Entry{
 
     private int id;//id generated in data.java
     private String task;//a description of the task that has to be done
-    private Boolean today;//true if task has been chosen today
+    private Boolean focus;//true if task has been chosen today
     private Boolean dropped;//true if task has been dropped and not been used in brainstorm and pick
     private String list;//a list to which the task belongs to
     private int listPosition;//position in according list
@@ -15,10 +15,10 @@ public class Entry{
                               //two digit number defines the offset in years (y), months(m),
                               //weeks (w) or days(d) when the task is going to reoccur
 
-    public Entry(int id, String task, Boolean today,Boolean dropped, String list, int listPosition, int due, String recurrence){
+    public Entry(int id, String task, Boolean focus,Boolean dropped, String list, int listPosition, int due, String recurrence){
         //creates a new instance and initializes the fields of the entry
         this.id = id;
-        this.today = today;
+        this.focus = focus;
         this.dropped = dropped;
         this.task=task;
         this.list=list;
@@ -34,7 +34,7 @@ public class Entry{
         return task;
     }
 
-    public Boolean getToday(){return today;}
+    public Boolean getFocus(){return focus;}
 
     public Boolean getDropped(){return dropped;}
 
@@ -57,7 +57,7 @@ public class Entry{
         this.task=task;
     }
 
-    public void setToday(Boolean today){this.today = today;}
+    public void setFocus(Boolean focus){this.focus = focus;}
 
     public void setDropped(Boolean dropped){this.dropped = dropped;}
 

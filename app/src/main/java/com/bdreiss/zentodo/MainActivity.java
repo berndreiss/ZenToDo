@@ -50,14 +50,14 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
 
-    private LinearLayout dropYourThoughts;
-    private LinearLayout todaysFocus;
+    private LinearLayout drop;
+    private LinearLayout focus;
     private LinearLayout lists;
-    private LinearLayout brainstorm;
+    private LinearLayout pick;
 
-    private Button toolbarDropYourThoughts;
-    private Button toolbarBrainstormAndPick;
-    private Button toolbarTodaysFocus;
+    private Button toolbarDrop;
+    private Button toolbarPick;
+    private Button toolbarFocus;
     private Button toolbarLists;
 
     private Data data;
@@ -72,14 +72,14 @@ public class MainActivity extends AppCompatActivity {
         data = new Data(this);
 
 
-        dropYourThoughts = (LinearLayout) findViewById(R.id.layout_drop_thoughts);
-        todaysFocus = (LinearLayout) findViewById(R.id.layout_todays);
+        drop = (LinearLayout) findViewById(R.id.layout_drop);
+        focus = (LinearLayout) findViewById(R.id.layout_focus);
         lists = (LinearLayout) findViewById(R.id.layout_lists);
-        brainstorm = (LinearLayout) findViewById(R.id.layout_brainstorm);
+        pick = (LinearLayout) findViewById(R.id.layout_pick);
 
-        toolbarDropYourThoughts = (Button) findViewById(R.id.toolbar_drop_your_thoughts);
-        toolbarBrainstormAndPick = (Button) findViewById(R.id.toolbar_brainstorm);
-        toolbarTodaysFocus = (Button) findViewById(R.id.toolbar_todays_focus);
+        toolbarDrop = (Button) findViewById(R.id.toolbar_drop);
+        toolbarPick = (Button) findViewById(R.id.toolbar_pick);
+        toolbarFocus = (Button) findViewById(R.id.toolbar_focus);
         toolbarLists = (Button) findViewById(R.id.toolbar_lists);
 
         initialize(this);
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initialize(Context context){
-        toolbarDropYourThoughts.setOnClickListener(new View.OnClickListener() {
+        toolbarDrop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 initialize(context);
@@ -105,16 +105,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        toolbarTodaysFocus.setOnClickListener(new View.OnClickListener() {
+        toolbarFocus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 initialize(context);
-                initializeTodays(context);
+                initializeFocus(context);
 
             }
         });
 
-        toolbarBrainstormAndPick.setOnClickListener(new View.OnClickListener() {
+        toolbarPick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 initialize(context);
@@ -124,33 +124,33 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void initializeTodays(Context context){
-        disableLayout(dropYourThoughts);
-        enableLayout(todaysFocus);
+    public void initializeFocus(Context context){
+        disableLayout(drop);
+        enableLayout(focus);
         disableLayout(lists);
-        disableLayout(brainstorm);
+        disableLayout(pick);
 
-        toolbarDropYourThoughts.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarBrainstormAndPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarTodaysFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
-        TaskListAdapter adapter = new TaskListAdapter(this,data,data.getTodays(), "todays");
-        ListView listView = (ListView) findViewById(R.id.list_view_todays);
+        TaskListAdapter adapter = new TaskListAdapter(this,data,data.getFocus(), "focus");
+        ListView listView = (ListView) findViewById(R.id.list_view_focus);
         listView.setAdapter(adapter);
 
 
     }
 
     public void initializeLists(Context context){
-        disableLayout(dropYourThoughts);
-        disableLayout(todaysFocus);
+        disableLayout(drop);
+        disableLayout(focus);
         enableLayout(lists);
-        disableLayout(brainstorm);
+        disableLayout(pick);
 
-        toolbarDropYourThoughts.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarBrainstormAndPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarTodaysFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
 
         TaskListAdapter adapter = new TaskListAdapter(this,data,data.getEntries(), "");
@@ -161,19 +161,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initializeBrainstorm(Context context){
-        enableLayout(brainstorm);
-        disableLayout(dropYourThoughts);
-        disableLayout(todaysFocus);
+        enableLayout(pick);
+        disableLayout(drop);
+        disableLayout(focus);
         disableLayout(lists);
 
-        toolbarDropYourThoughts.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarBrainstormAndPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
-        toolbarTodaysFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
 
         TaskListAdapter adapter = new TaskListAdapter(this, data, data.getPotentials(), "potentials");
-        ListView listView = (ListView) findViewById(R.id.list_view_potentials);
+        ListView listView = (ListView) findViewById(R.id.list_view_pick);
         listView.setAdapter(adapter);
 
         Button pick = (Button) findViewById(R.id.button_pick);
@@ -184,18 +184,18 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<Integer> checked= adapter.getIdsChecked();
 
                 for (int id : checked){
-                    data.setToday(id, true);
+                    data.setFocus(id, true);
                     data.setDropped(id, false);
                 }
 
                 ArrayList<Integer> notChecked = adapter.getIdsNotChecked();
 
                 for (int id: notChecked){
-                    data.setToday(id, false);
+                    data.setFocus(id, false);
                 }
 
                 initialize(context);
-                initializeTodays(context);
+                initializeFocus(context);
 
             }
         });
@@ -205,14 +205,14 @@ public class MainActivity extends AppCompatActivity {
     public void initializeThoughts(Context context){
 
 
-        enableLayout(dropYourThoughts);
-        disableLayout(todaysFocus);
+        enableLayout(drop);
+        disableLayout(focus);
         disableLayout(lists);
-        disableLayout(brainstorm);
+        disableLayout(pick);
 
-        toolbarDropYourThoughts.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
-        toolbarBrainstormAndPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarTodaysFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
 
@@ -221,10 +221,10 @@ public class MainActivity extends AppCompatActivity {
         ListView listView = (ListView) findViewById(R.id.list_view_thoughts);
         listView.setAdapter(adapter);
 
-        final EditText editText = (EditText) findViewById(R.id.edit_text_thoughts);
-        Button buttonThoughts = (Button) findViewById(R.id.button_add_thoughts);
-        buttonThoughts.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        buttonThoughts.setOnClickListener(new View.OnClickListener() {
+        final EditText editText = (EditText) findViewById(R.id.edit_text_drop);
+        Button buttonDrop = (Button) findViewById(R.id.button_drop);
+        buttonDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        buttonDrop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String task = editText.getText().toString();

@@ -16,7 +16,7 @@
            android:layout_height="@dimen/toolbar_height">
 
            <android.widget.Button
-               android:id="@+id/toolbar_drop_your_thoughts"
+               android:id="@+id/toolbar_drop"
                android:shape="rectangle"
                android:layout_width="0dp"
                android:layout_height="match_parent"
@@ -26,12 +26,12 @@
                android:layout_gravity="center"
                android:paddingTop="@dimen/toolbar_offset"
                style="?android:borderlessButtonStyle"
-               android:drawableTop="@drawable/ic_action_thoughts"
+               android:drawableTop="@drawable/ic_action_drop"
                />
 
 
            <android.widget.Button
-               android:id="@+id/toolbar_brainstorm"
+               android:id="@+id/toolbar_pick"
                android:shape="rectangle"
                android:layout_width="0dp"
                android:layout_height="match_parent"
@@ -41,11 +41,11 @@
                android:layout_gravity="center"
                android:paddingTop="@dimen/toolbar_offset"
                style="?android:borderlessButtonStyle"
-               android:drawableTop="@drawable/ic_action_brainstorm"
+               android:drawableTop="@drawable/ic_action_pick"
                />
 
            <android.widget.Button
-               android:id="@+id/toolbar_todays_focus"
+               android:id="@+id/toolbar_focus"
                android:shape="rectangle"
                android:layout_width="0dp"
                android:layout_height="match_parent"
@@ -55,7 +55,7 @@
                android:layout_gravity="center"
                android:paddingTop="@dimen/toolbar_offset"
                style="?android:borderlessButtonStyle"
-               android:drawableTop="@drawable/ic_action_todays_toolbar"
+               android:drawableTop="@drawable/ic_action_focus_toolbar"
                />
 
 
@@ -78,8 +78,8 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/drop_your_thoughts" />
-    <include layout="@layout/brainstorm_and_pick"/>
-    <include layout="@layout/todays_focus"/>
+    <include layout="@layout/drop" />
+    <include layout="@layout/pick"/>
+    <include layout="@layout/focus"/>
     <include layout="@layout/lists"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

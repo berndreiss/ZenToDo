@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
-        android:id="@+id/layout_brainstorm"
+        android:id="@+id/layout_pick"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -16,7 +16,7 @@
 
 
         <ListView
-            android:id="@+id/list_view_potentials"
+            android:id="@+id/list_view_pick"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />

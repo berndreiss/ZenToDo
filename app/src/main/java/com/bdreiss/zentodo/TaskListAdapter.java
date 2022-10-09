@@ -73,7 +73,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private Button menu;//activates alternative layout with menu elements
 
         private LinearLayout linearLayoutAlt;//"alternative" layout with menu for modifying entries
-        private Button toTodays;//Adds task to todays tasks
+        private Button focus;//Adds task to todays tasks
         private Button edit;//edits the task
         private Button setDate;//sets the date the task is due
         private Button recurrence;//sets the frequency with which the task repeats
@@ -99,11 +99,9 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     public TaskListAdapter(Context context, Data data, ArrayList<Entry> entries, String mode){
 
-        //super(context, R.layout.row,data.getEntries());
         super(context,R.layout.row,entries);
         this.context = context;
         this.data = data;
-        //this.entries = data.getEntries();
         this.entries = entries;
         this.mode = mode;
         this.idsChecked = new ArrayList<>();
@@ -128,7 +126,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder.menu = (Button) convertView.findViewById(R.id.button_menu);
 
             holder.linearLayoutAlt = (LinearLayout) convertView.findViewById(R.id.linear_layout_alt);
-            holder.toTodays = (Button) convertView.findViewById(R.id.button_to_todays);
+            holder.focus = (Button) convertView.findViewById(R.id.button_focus);
             holder.edit = (Button) convertView.findViewById(R.id.button_edit);
             holder.setDate = (Button) convertView.findViewById(R.id.button_calendar);
             holder.recurrence = (Button) convertView.findViewById(R.id.button_recurrence);
@@ -216,12 +214,12 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     }
                 });
 
-                holder.toTodays.setOnClickListener(new View.OnClickListener() {
+                holder.focus.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         int id = entries.get(position).getId();
-                        data.setToday(id, !entries.get(position).getToday());
-                        if (mode.equals("todays")){
+                        data.setFocus(id, !entries.get(position).getFocus());
+                        if (mode.equals("focus")){
                                 notifyDataSetChanged();
                         } else {
 
@@ -462,7 +460,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
             //resolve format "yyyymmdd"
             entryDay = entryDate%100;
-            entryMonth = ((entryDate%10000)-entryDay)/100;
+            entryMonth = ((entryDate%10000)-entryDay)/100-1;
             entryYear = (entryDate-entryMonth*100-entryDay)/10000;
         }
         else {
@@ -485,8 +483,8 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     if (mode.equals("dropped")){
                         data.setDropped(entries.get(position).getId(), false);
                         notifyDataSetChanged();
-                    } else if( mode.equals("todays")){
-                        data.setToday(entries.get(position).getId(),false);
+                    } else if( mode.equals("focus")){
+                        data.setFocus(entries.get(position).getId(),false);
                         notifyDataSetChanged();
                     } else
                     {
@@ -631,10 +629,10 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder.setList.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
         }
 
-        if (entry.getToday()){
-            holder.toTodays.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+        if (entry.getFocus()){
+            holder.focus.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
         } else{
-            holder.toTodays.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
+            holder.focus.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
         }
 
     }
