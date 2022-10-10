@@ -24,6 +24,7 @@ public class Data{
     private ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     private ArrayList<Entry> dropped = new ArrayList<>();
     private ArrayList<Entry> focus = new ArrayList<>();
+    private ArrayList<String> lists = new ArrayList<>();
     private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
 
     public SaveFile saveFile;//TODO reset to private
@@ -74,6 +75,7 @@ public class Data{
 
         initDropped();
         initFocus();
+        initLists();
 
     }
 
@@ -98,6 +100,7 @@ public class Data{
         entries.remove(getPosition(id));
         initDropped();
         initFocus();
+        initLists();
         save(); //write changes to save file
 
     }
@@ -150,6 +153,7 @@ public class Data{
 
     public void editList(int id, String list){
         entries.get(getPosition(id)).setList(list);
+        initLists();
         save();
     }
 
@@ -166,9 +170,11 @@ public class Data{
 
     }
 
-    public ArrayList<String> getLists(){
+    public ArrayList<String> getLists() {
+        return lists;
+    }
 
-        ArrayList<String> lists = new ArrayList<>();
+    public void initLists(){
 
         for(Entry e : entries){
             String list = e.getList();
@@ -180,7 +186,6 @@ public class Data{
         }
         Collections.sort(lists);
 
-        return lists;
     }
 
     public ArrayList<Entry> getPotentials(){

@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
         initialize(this);
 
-        initializeThoughts(this);
+        initializeDrop(this);
 
     }
 
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 initialize(context);
-                initializeThoughts(context);
+                initializeDrop(context);
             }
         });
 
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 initialize(context);
-                initializeBrainstorm(context);
+                initializePick(context);
             }
         });
 
@@ -153,14 +153,18 @@ public class MainActivity extends AppCompatActivity {
         toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
 
-        TaskListAdapter adapter = new TaskListAdapter(this,data,data.getEntries(), "");
+        ListsListAdapter adapter = new ListsListAdapter(this,data,data.getLists());
         ListView listView = (ListView) findViewById(R.id.list_view_lists);
         listView.setAdapter(adapter);
+
+        TaskListAdapter adapterTemp = new TaskListAdapter(this,data,data.getEntries()," ");
+        ListView listviewTemp = (ListView) findViewById(R.id.list_view_lists_temp);
+        listviewTemp.setAdapter(adapterTemp);
 
 
     }
 
-    public void initializeBrainstorm(Context context){
+    public void initializePick(Context context){
         enableLayout(pick);
         disableLayout(drop);
         disableLayout(focus);
@@ -202,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void initializeThoughts(Context context){
+    public void initializeDrop(Context context){
 
 
         enableLayout(drop);
@@ -231,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 editText.setText("");
                 if (!task.equals("")) {
                     data.add(task);
-                    initializeThoughts(context);
+                    initializeDrop(context);
                 }
 
 
