@@ -441,7 +441,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         return entries.get(position);
     }
 
-    //chooses date task is due and writes back data, if cancel is pressed, date is set to 0
+    //chooses date task is due and writes back data, if "no date" is pressed, date is set to 0
     public void openDatePickerDialog(Context context,ViewHolder holder, int position) {
 
         //Get entry

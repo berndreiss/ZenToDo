@@ -9,7 +9,7 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <string name="cancel">Cancel</string>
+    <string name="cancel">No date</string>
     <string name="repeats">Repeats every</string>
 
     <!-- Strings used for spinner for choosing time interval of repeats -->
