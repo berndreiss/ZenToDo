@@ -1,6 +1,6 @@
 <resources>
     <dimen name="fab_margin">48dp</dimen>
     <dimen name="button_alt_offset">10dp</dimen>
-    <dimen name="toolbar_height">65dp</dimen>
+    <dimen name="toolbar_height">70dp</dimen>
     <dimen name="toolbar_offset">20dp</dimen>
 </resources>
