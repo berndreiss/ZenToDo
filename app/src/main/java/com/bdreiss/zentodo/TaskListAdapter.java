@@ -16,18 +16,11 @@ package com.bdreiss.zentodo;
  *
  */
 
-import static android.provider.Settings.System.getString;
-
-import static java.lang.String.valueOf;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,18 +31,12 @@ import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -368,26 +355,21 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                             public void onClick(View view) {
                                 int id = entries.get(position).getId();//Get id of task
                                 String list = holder.autoCompleteList.getText().toString();//get list name
-                                if (list.equals("")){
+                                if (list.equals(" ")){
                                     data.editList(id," ");//reset to no list
                                     initialize(holder,position);//returning to original row view
 
                                 } else{
+
                                     data.editList(id,list);//write back otherwise
-                                    if (entries.get(position).getDropped()){
-                                        data.setDropped(id,false);
-                                        if (mode.equals("dropped")) {
-                                            notifyDataSetChanged();
-                                        } else{
-                                            initialize(holder,position);
-                                        }
+                                    data.setDropped(id,false);
 
-
+                                    if (mode.equals("dropped")) {
+                                        notifyDataSetChanged();
                                     } else{
-
-                                        initialize(holder,position);//returning to original row view
-
+                                        initialize(holder,position);
                                     }
+
                                 }
 
 
