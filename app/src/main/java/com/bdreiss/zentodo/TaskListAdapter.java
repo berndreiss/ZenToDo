@@ -355,7 +355,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                             public void onClick(View view) {
                                 int id = entries.get(position).getId();//Get id of task
                                 String list = holder.autoCompleteList.getText().toString();//get list name
-                                if (list.equals(" ")){
+                                if (list.equals(" ") || list.equals("")){
                                     data.editList(id," ");//reset to no list
                                     initialize(holder,position);//returning to original row view
 

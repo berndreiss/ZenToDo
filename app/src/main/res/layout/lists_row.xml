@@ -8,10 +8,22 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent">
 
-        <TextView
-            android:id="@+id/text_view_lists_row"
+
+        <android.widget.Button
+            android:id="@+id/button_lists_row"
+            style="@style/Widget.AppCompat.ActionButton.CloseMode"
+            android:shape="rectangle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="match_parent"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:padding="10dp"
+            android:gravity="left"
+
+            android:background="@drawable/button_lists_row"
+            />
 
     </LinearLayout>
 </FrameLayout>

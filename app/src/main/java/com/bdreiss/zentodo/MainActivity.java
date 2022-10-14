@@ -153,13 +153,11 @@ public class MainActivity extends AppCompatActivity {
         toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
 
-        ListsListAdapter adapter = new ListsListAdapter(this,data,data.getLists());
         ListView listView = (ListView) findViewById(R.id.list_view_lists);
+        ListsListAdapter adapter = new ListsListAdapter(this,listView,data,data.getLists());
+
         listView.setAdapter(adapter);
 
-        TaskListAdapter adapterTemp = new TaskListAdapter(this,data,data.getEntries()," ");
-        ListView listviewTemp = (ListView) findViewById(R.id.list_view_lists_temp);
-        listviewTemp.setAdapter(adapterTemp);
 
 
     }

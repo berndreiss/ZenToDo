@@ -11,4 +11,5 @@
     <color name="button_alt_edited">#c8cafa</color>
     <color name="button_toolbar">#95b6cf</color>
     <color name="button_toolbar_chosen">#000000</color>
+    <color name="button_lists_row">#FFFFFF</color>
 </resources>

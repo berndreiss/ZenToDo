@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -14,20 +15,23 @@ import com.bdreiss.zentodo.dataManipulation.Data;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class ListsListAdapter extends ArrayAdapter<String> {
 
     private Context context;
+    private ListView listView;
     private ArrayList<String> lists;
     private Data data;
 
     private class ViewHolder{
-        private TextView textView;
+        private Button button;
         private ListView listView;
     }
-    public ListsListAdapter(Context context, Data data, ArrayList<String> lists){
+    public ListsListAdapter(Context context, ListView listview, Data data, ArrayList<String> lists){
         super(context,R.layout.lists_row,lists);
+        this.listView = listview;
         this.context=context;
         this.data = data;
         this.lists = lists;
@@ -44,7 +48,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.lists_row, null, true);
 
-            holder.textView = (TextView) convertView.findViewById(R.id.text_view_lists_row);
+            holder.button = (Button) convertView.findViewById(R.id.button_lists_row);
             holder.listView = (ListView) convertView.findViewById(R.id.list_view_lists);
 
             convertView.setTag(holder);
@@ -53,7 +57,22 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             holder = (ListsListAdapter.ViewHolder)convertView.getTag();
         }
 
-        holder.textView.setText(lists.get(position));
+        holder.button.setText(lists.get(position));
+
+        holder.button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (holder.button.getText().equals(context.getResources().getString(R.string.allTasks))){
+
+                    TaskListAdapter adapter =new TaskListAdapter(context,data, data.getEntries()," ");
+                    listView.setAdapter(adapter);
+
+                } else{
+                    TaskListAdapter adapter = new TaskListAdapter(context, data, data.getFromList(holder.button.getText().toString())," ");
+                    listView.setAdapter(adapter);
+                }
+            }
+        });
 
         return convertView;
     }

@@ -1,6 +1,9 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.content.Context;
 
+import com.bdreiss.zentodo.R;
+
+import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ public class Data{
     private ArrayList<Entry> focus = new ArrayList<>();
     private ArrayList<String> lists = new ArrayList<>();
     private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
+    private Context context;
 
     public SaveFile saveFile;//TODO reset to private
 
@@ -33,6 +37,7 @@ public class Data{
     public Data(Context context){
         //initialize instance of Data, set id to 0, create save file and load data from save file
         this.id=0;
+        this.context=context;
         this.saveFile = new SaveFile(context, this.saveFilePath);
         this.load();
 
@@ -176,6 +181,7 @@ public class Data{
 
     public void initLists(){
 
+        lists.clear();
         for(Entry e : entries){
             String list = e.getList();
 
@@ -186,6 +192,7 @@ public class Data{
         }
         Collections.sort(lists);
 
+        lists.add(context.getResources().getString(R.string.allTasks));
     }
 
     public ArrayList<Entry> getPotentials(){
@@ -210,6 +217,18 @@ public class Data{
 
         }
         return potentials;
+
+    }
+
+    public ArrayList<Entry> getFromList(String list){
+        ArrayList<Entry> listEntries = new ArrayList<>();
+
+        for (Entry e : entries){
+            if (e.getList().equals(list)){
+                listEntries.add(e);
+            }
+        }
+        return listEntries;
 
     }
 
