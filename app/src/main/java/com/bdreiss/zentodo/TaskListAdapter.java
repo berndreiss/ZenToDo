@@ -28,7 +28,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -42,17 +41,17 @@ import java.util.Calendar;
 
 public class TaskListAdapter extends ArrayAdapter<Entry>{
 
-    private ArrayList<Entry> entries;//list of entries (see Entry.java)
+    private final ArrayList<Entry> entries;//list of entries (see Entry.java)
 
-    private Context context;
+    private final Context context;
 
-    private Data data;//database from which entries are derived (see Data.java)
+    private final Data data;//database from which entries are derived (see Data.java)
 
-    private String mode;
+    private final String mode;
 
-    private ArrayList<Integer> idsChecked;
+    private final ArrayList<Integer> idsChecked;
 
-    private class ViewHolder {//temporary view
+    private static class ViewHolder {//temporary view
 
         private LinearLayout linearLayout;//"normal" row layout that shows checkbox and task
         protected CheckBox checkBox;//Checkbox to remove entry
@@ -72,7 +71,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private Button backEdit;//return to normal layout and save
 
         private LinearLayout linearLayoutRecurrence;//row layout for setting recurrence:
-        private TextView textViewRecurrence;//"repeats every... TODO REMOVE?
+        //TextView                                 //"repeats every...
         private EditText editTextRecurrence;//...number...
         private Spinner spinnerRecurrence;//...days/weeks/months/years"
         private Button clearRecurrence;//clears all fields
@@ -107,34 +106,33 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.row, null, true);
 
-            holder.linearLayout = (LinearLayout) convertView.findViewById(R.id.linear_layout);
-            holder.checkBox = (CheckBox) convertView.findViewById(R.id.checkbox);
-            holder.task = (TextView) convertView.findViewById(R.id.task);
-            holder.menu = (Button) convertView.findViewById(R.id.button_menu);
+            holder.linearLayout = convertView.findViewById(R.id.linear_layout);
+            holder.checkBox = convertView.findViewById(R.id.checkbox);
+            holder.task = convertView.findViewById(R.id.task);
+            holder.menu = convertView.findViewById(R.id.button_menu);
 
-            holder.linearLayoutAlt = (LinearLayout) convertView.findViewById(R.id.linear_layout_alt);
-            holder.focus = (Button) convertView.findViewById(R.id.button_focus);
-            holder.edit = (Button) convertView.findViewById(R.id.button_edit);
-            holder.setDate = (Button) convertView.findViewById(R.id.button_calendar);
-            holder.recurrence = (Button) convertView.findViewById(R.id.button_recurrence);
-            holder.setList = (Button) convertView.findViewById(R.id.button_list);
-            holder.back = (Button) convertView.findViewById(R.id.button_back);
+            holder.linearLayoutAlt = convertView.findViewById(R.id.linear_layout_alt);
+            holder.focus = convertView.findViewById(R.id.button_focus);
+            holder.edit = convertView.findViewById(R.id.button_edit);
+            holder.setDate = convertView.findViewById(R.id.button_calendar);
+            holder.recurrence = convertView.findViewById(R.id.button_recurrence);
+            holder.setList = convertView.findViewById(R.id.button_list);
+            holder.back = convertView.findViewById(R.id.button_back);
 
-            holder.linearLayoutEdit = (LinearLayout) convertView.findViewById(R.id.linear_layout_edit);
-            holder.editText = (EditText) convertView.findViewById(R.id.edit_text_list_view);
-            holder.backEdit = (Button) convertView.findViewById(R.id.button_back_edit);
+            holder.linearLayoutEdit = convertView.findViewById(R.id.linear_layout_edit);
+            holder.editText = convertView.findViewById(R.id.edit_text_list_view);
+            holder.backEdit = convertView.findViewById(R.id.button_back_edit);
 
-            holder.linearLayoutRecurrence = (LinearLayout) convertView.findViewById(R.id.linear_layout_recurrence);
-            holder.textViewRecurrence = (TextView) convertView.findViewById(R.id.text_view_recurrence);
-            holder.editTextRecurrence = (EditText) convertView.findViewById(R.id.edit_text_recurrence);
-            holder.spinnerRecurrence = (Spinner) convertView.findViewById(R.id.spinner_time_interval);
-            holder.clearRecurrence = (Button) convertView.findViewById(R.id.button_recurrence_clear);
-            holder.backRecurrence = (Button) convertView.findViewById(R.id.button_back_recurrence);
+            holder.linearLayoutRecurrence = convertView.findViewById(R.id.linear_layout_recurrence);
+            holder.editTextRecurrence = convertView.findViewById(R.id.edit_text_recurrence);
+            holder.spinnerRecurrence = convertView.findViewById(R.id.spinner_time_interval);
+            holder.clearRecurrence = convertView.findViewById(R.id.button_recurrence_clear);
+            holder.backRecurrence = convertView.findViewById(R.id.button_back_recurrence);
 
-            holder.linearLayoutList = (LinearLayout) convertView.findViewById(R.id.linear_layout_list);
-            holder.autoCompleteList = (AutoCompleteTextView) convertView.findViewById(R.id.auto_complete_list);
-            holder.clearList = (Button) convertView.findViewById(R.id.button_list_clear);
-            holder.backList = (Button) convertView.findViewById(R.id.button_back_list);
+            holder.linearLayoutList = convertView.findViewById(R.id.linear_layout_list);
+            holder.autoCompleteList = convertView.findViewById(R.id.auto_complete_list);
+            holder.clearList = convertView.findViewById(R.id.button_list_clear);
+            holder.backList = convertView.findViewById(R.id.button_back_list);
 
             convertView.setTag(holder);
         }else {
@@ -149,23 +147,23 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         holder.checkBox.setTag(position);
 
         //establish routine to remove task when checkbox is clicked
-        holder.checkBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int id = entries.get(position).getId();//get ID
+        holder.checkBox.setOnClickListener(view -> {
+            int id = entries.get(position).getId();//get ID
 
-                if (!mode.equals("potentials")) {
-                    data.remove(id);//remove entry from dataset by ID
-                    notifyDataSetChanged();//update the adapter
-                }else{
-                    if (idsChecked.contains(id)){
-                        idsChecked.remove(id);
-                    } else{
-                        idsChecked.add(id);
-                    }
+            if (!mode.equals("potentials")) {
+                if (mode.equals("list")){
+                    entries.remove(position);
                 }
-
+                data.remove(id);//remove entry from dataset by ID
+                notifyDataSetChanged();//update the adapter
+            }else{
+                if (idsChecked.contains(id)){
+                    idsChecked.remove(id);
+                } else{
+                    idsChecked.add(id);
+                }
             }
+
         });
 
 
@@ -188,239 +186,206 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         markSet(holder,this.entries.get(position));
 
         //listener that changes to alternative row layout on click
-        holder.menu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //setting alternative row visible and active, everything else disabled
-                setAlt(holder);
+        holder.menu.setOnClickListener(view -> {
+            //setting alternative row visible and active, everything else disabled
+            setAlt(holder);
 
-                holder.back.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        initialize(holder,position);//return
-                    }
-                });
+            holder.back.setOnClickListener(view1 -> {
+                initialize(holder,position);//return
+            });
 
-                holder.focus.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        int id = entries.get(position).getId();
-                        data.setFocus(id, !entries.get(position).getFocus());
-                        if (mode.equals("focus")){
-                                notifyDataSetChanged();
+            holder.focus.setOnClickListener(view12 -> {
+                int id = entries.get(position).getId();
+                data.setFocus(id, !entries.get(position).getFocus());
+                if (mode.equals("focus")){
+                        notifyDataSetChanged();
+                } else {
+
+                    if (entries.get(position).getDropped()) {
+                        data.setDropped(id, false);
+                        if (mode.equals("dropped")) {
+                            notifyDataSetChanged();
                         } else {
+                            initialize(holder, position);
+                        }
+                    } else {
 
-                            if (entries.get(position).getDropped()) {
-                                data.setDropped(id, false);
-                                if (mode.equals("dropped")) {
-                                    notifyDataSetChanged();
-                                } else {
-                                    initialize(holder, position);
-                                }
-                            } else {
+                        initialize(holder, position);
+                    }
+                }
+            });
 
-                                initialize(holder, position);
+            holder.edit.setOnClickListener(view13 -> {
+
+                //setting edit row visible and active, everything else disabled
+                setEdit(holder);
+
+                //setting editText to task
+                holder.editText.setText(holder.task.getText());
+
+                //Listener to write back changes
+                holder.backEdit.setOnClickListener(view131 -> {
+                    int id = entries.get(position).getId();//getting the id of task
+                    String newTask = holder.editText.getText().toString();//get new Task
+                    data.editTask(id,newTask);//save changes
+                    holder.task.setText(newTask);//set new Task in list
+                    initialize(holder,position);//returning to original row view
+                });
+
+            });
+
+            //Listener to add date when task is due
+            holder.setDate.setOnClickListener(view14 -> {
+                Context context = getContext();
+                openDatePickerDialog(context,holder,position);//opens date pickerDialog
+            });
+
+            //Listener to edit how often task repeats
+            holder.recurrence.setOnClickListener(view15 -> {
+
+                //setting recurrence row visible and active, everything else disabled
+                setRecurrence(holder);
+
+                //get entry to set spinner on current recurrence
+                Entry entry = entries.get(position);
+                String rec = entry.getRecurrence();
+
+                //set spinner according to first letter y/w/m/y
+                switch (rec.charAt(0)) {
+                    case 'd':
+                        holder.spinnerRecurrence.setSelection(0);
+                        break;
+                    case 'w':
+                        holder.spinnerRecurrence.setSelection(1);
+                        break;
+                    case 'm':
+                        holder.spinnerRecurrence.setSelection(2);
+                        break;
+                    case 'y':
+                        holder.spinnerRecurrence.setSelection(3);
+                        break;
+                    default://sets spinner to days
+
+                }
+
+                //String for editText
+                String recEdit = "";
+
+                //add all digits after the first char
+                for (int i=1;i<rec.length();i++){
+                    recEdit += rec.charAt(i);
+                }
+
+                //set editText
+                holder.editTextRecurrence.setText(recEdit);
+
+                //setting listener to clear fields
+                setClearRecurrenceListener(holder);
+
+                //Listener for writing back data
+                holder.backRecurrence.setOnClickListener(view151 -> {
+                    int id = entries.get(position).getId(); //get id
+
+                    String interval = holder.editTextRecurrence.getText().toString();//number of repeats
+                    int intervalInt;//the same number as Integer
+
+                    if (interval.equals("")){//if editText is empty number is set to 0 so data is reset
+                        intervalInt = 0;
+                    } else {
+                        intervalInt = Integer.parseInt(interval);//assign content otherwise
+                    }
+                    String recurrence = "";//String that will be written back
+
+                    if (intervalInt == 0){//if editText was empty or value=0 then recurrence is reset
+                        data.editRecurrence(id, " ");
+                    }
+                    else{//otherwise number and interval are written back
+
+                        //add spinner values first character as lower case (d/w/m/y)
+                        recurrence += Character.toLowerCase(holder.spinnerRecurrence.getSelectedItem().toString().charAt(0));
+                        //add number of editText
+                        recurrence += interval;
+
+                        //write back
+                        data.editRecurrence(id,recurrence);
+                    }
+                    initialize(holder,position);//returning to original row view
+
+
+                });
+            });
+
+            holder.setList.setOnClickListener(view16 -> {
+                setList(holder);//set list row view
+                String[] array = data.returnListsAsArray();//array of names of all lists in task (as singletons)
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, array);
+                holder.autoCompleteList.setAdapter(adapter);//edit Text that autocompletes already existing lists
+                holder.autoCompleteList.setText(entries.get(position).getList());
+                setClearListenerList(holder);//clears AutoComplete
+                holder.backList.setOnClickListener(view161 -> {
+                    int id = entries.get(position).getId();//Get id of task
+                    String list = holder.autoCompleteList.getText().toString();//get list name
+
+
+
+                    if (list.equals(" ") || list.equals("")) {
+
+                        data.editList(id, " ");//reset to no list
+
+                        if (mode.equals("list")){
+                            entries.remove(position);
+                            notifyDataSetChanged();
+                        }
+                        else {
+                            initialize(holder, position);//returning to original row view
+                        }
+
+                    } else {
+                        data.editList(id, list);//write back otherwise
+                        data.setDropped(id, false);
+
+                        if (mode.equals("dropped") || mode.equals("list")) {
+                            if (mode.equals("list") && !list.equals(entries.get(position).getList())){
+                                entries.remove(position);
                             }
+                            notifyDataSetChanged();
+                        } else {
+                            initialize(holder, position);
                         }
                     }
+
+
+
+
                 });
 
-                holder.edit.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
+            });
 
-                        //setting edit row visible and active, everything else disabled
-                        setEdit(holder);
+            //Listener to return to "normal" view
+            holder.back.setOnClickListener(view17 -> {
+                setOriginal(holder);//setting original row visible and active, everything else disabled
 
-                        //setting editText to task
-                        holder.editText.setText(holder.task.getText());
-
-                        //Listener to write back changes
-                        holder.backEdit.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                int id = entries.get(position).getId();//getting the id of task
-                                String newTask = holder.editText.getText().toString();//get new Task
-                                data.editTask(id,newTask);//save changes
-                                holder.task.setText(newTask);//set new Task in list
-                                initialize(holder,position);//returning to original row view
-                            }
-                        });
-
-                    }
-                });
-
-                //Listener to add date when task is due
-                holder.setDate.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Context context = getContext();
-                        openDatePickerDialog(context,holder,position);//opens date pickerDialog
-                    }
-                });
-
-                //Listener to edit how often task repeats
-                holder.recurrence.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                        //setting recurrence row visible and active, everything else disabled
-                        setRecurrence(holder);
-
-                        //get entry to set spinner on current recurrence
-                        Entry entry = entries.get(position);
-                        String rec = entry.getRecurrence();
-
-                        //set spinner according to first letter y/w/m/y
-                        switch (rec.charAt(0)) {
-                            case 'd':
-                                holder.spinnerRecurrence.setSelection(0);
-                                break;
-                            case 'w':
-                                holder.spinnerRecurrence.setSelection(1);
-                                break;
-                            case 'm':
-                                holder.spinnerRecurrence.setSelection(2);
-                                break;
-                            case 'y':
-                                holder.spinnerRecurrence.setSelection(3);
-                                break;
-                            default://sets spinner to days
-
-                        }
-
-                        //String for editText
-                        String recEdit = "";
-
-                        //add all digits after the first char
-                        for (int i=1;i<rec.length();i++){
-                            recEdit += rec.charAt(i);
-                        }
-
-                        //set editText
-                        holder.editTextRecurrence.setText(recEdit);
-
-                        //setting listener to clear fields
-                        setClearRecurrenceListener(holder);
-
-                        //Listener for writing back data
-                        holder.backRecurrence.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                int id = entries.get(position).getId(); //get id
-
-                                String interval = holder.editTextRecurrence.getText().toString();//number of repeats
-                                int intervalInt;//the same number as Integer
-
-                                if (interval.equals("")){//if editText is empty number is set to 0 so data is reset
-                                    intervalInt = 0;
-                                } else {
-                                    intervalInt = Integer.parseInt(interval);//assign content otherwise
-                                }
-                                String recurrence = "";//String that will be written back
-
-                                if (intervalInt == 0){//if editText was empty or value=0 then recurrence is reset
-                                    data.editRecurrence(id, " ");
-                                }
-                                else{//otherwise number and interval are written back
-
-                                    //add spinner values first character as lower case (d/w/m/y)
-                                    recurrence += Character.toLowerCase(holder.spinnerRecurrence.getSelectedItem().toString().charAt(0));
-                                    //add number of editText
-                                    recurrence += interval;
-
-                                    //write back
-                                    data.editRecurrence(id,recurrence);
-                                }
-                                initialize(holder,position);//returning to original row view
-
-
-                            }
-                        });
-                    }
-                });
-
-                holder.setList.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        setList(holder);//set list row view
-                        String array[] = data.returnListsAsArray();//array of names of all lists in task (as singletons)
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1,array);
-                        holder.autoCompleteList.setAdapter(adapter);//edit Text that autocompletes already existing lists
-                        holder.autoCompleteList.setText(entries.get(position).getList());
-                        setClearListenerList(holder);//clears AutoComplete
-                        holder.backList.setOnClickListener(new View.OnClickListener(){
-
-                            @Override
-                            public void onClick(View view) {
-                                int id = entries.get(position).getId();//Get id of task
-                                String list = holder.autoCompleteList.getText().toString();//get list name
-                                if (list.equals(" ") || list.equals("")){
-                                    data.editList(id," ");//reset to no list
-                                    initialize(holder,position);//returning to original row view
-
-                                } else{
-
-                                    data.editList(id,list);//write back otherwise
-                                    data.setDropped(id,false);
-
-                                    if (mode.equals("dropped")) {
-                                        notifyDataSetChanged();
-                                    } else{
-                                        initialize(holder,position);
-                                    }
-
-                                }
-
-
-
-
-                            }
-                        });
-
-                    }
-                });
-
-                //Listener to return to "normal" view
-                holder.back.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        setOriginal(holder);//setting original row visible and active, everything else disabled
-
-                    }
-                });
-            }
+            });
         });
 
     }
 
     //clears all fields in recurrence row view
     public void setClearRecurrenceListener(ViewHolder holder){
-        holder.clearRecurrence.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                holder.spinnerRecurrence.setSelection(0);
-                holder.editTextRecurrence.setText("");
-                setClearRecurrenceListener(holder);
-            }
+        holder.clearRecurrence.setOnClickListener(view -> {
+            holder.spinnerRecurrence.setSelection(0);
+            holder.editTextRecurrence.setText("");
+            setClearRecurrenceListener(holder);
         });
 
     }
 
     //clears Autocomplete in list row view
     public void setClearListenerList(ViewHolder holder){
-        holder.clearList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                holder.autoCompleteList.setText("");
-                setClearListenerList(holder);
-            }
+        holder.clearList.setOnClickListener(view -> {
+            holder.autoCompleteList.setText("");
+            setClearListenerList(holder);
         });
-    }
-
-    //returns the entry at specified position
-    public Entry getEntry(int position){
-        return entries.get(position);
     }
 
     //chooses date task is due and writes back data, if "no date" is pressed, date is set to 0
@@ -456,34 +421,27 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
         //create DatePickerDialog and set listener
         DatePickerDialog datePickerDialog;
-        datePickerDialog= new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener(){
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int day)
-            {
-                int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
-                data.editDue(entry.getId(), date);//Write back data
-                    if (mode.equals("dropped")){
-                        data.setDropped(entries.get(position).getId(), false);
-                        notifyDataSetChanged();
-                    } else if( mode.equals("focus")){
-                        data.setFocus(entries.get(position).getId(),false);
-                        notifyDataSetChanged();
-                    } else
-                    {
-                        initialize(holder, position);
-                    }
+        datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
+            int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
+            data.editDue(entry.getId(), date);//Write back data
+                if (mode.equals("dropped")){
+                    data.setDropped(entries.get(position).getId(), false);
+                    notifyDataSetChanged();
+                } else if( mode.equals("focus")){
+                    data.setFocus(entries.get(position).getId(),false);
+                    notifyDataSetChanged();
+                } else
+                {
+                    initialize(holder, position);
+                }
 
-            }
         }, entryYear, entryMonth, entryDay);
 
         //set listener for cancel button
-        datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,context.getResources().getString(R.string.cancel), new DialogInterface.OnClickListener(){
-            public void onClick(DialogInterface dialog, int which){
+        datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
-                data.editDue(entry.getId(),0);//set date when task is due to 0
-                initialize(holder,position);//returning to original row view
-            }
-
+            data.editDue(entry.getId(),0);//set date when task is due to 0
+            initialize(holder,position);//returning to original row view
         });
 
         datePickerDialog.show();//Show the dialog

@@ -48,8 +48,8 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.lists_row, null, true);
 
-            holder.button = (Button) convertView.findViewById(R.id.button_lists_row);
-            holder.listView = (ListView) convertView.findViewById(R.id.list_view_lists);
+            holder.button = convertView.findViewById(R.id.button_lists_row);
+            holder.listView = convertView.findViewById(R.id.list_view_lists);
 
             convertView.setTag(holder);
 
@@ -59,18 +59,15 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
         holder.button.setText(lists.get(position));
 
-        holder.button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (holder.button.getText().equals(context.getResources().getString(R.string.allTasks))){
+        holder.button.setOnClickListener(view -> {
+            if (holder.button.getText().equals(context.getResources().getString(R.string.allTasks))){
 
-                    TaskListAdapter adapter =new TaskListAdapter(context,data, data.getEntries()," ");
-                    listView.setAdapter(adapter);
+                TaskListAdapter adapter =new TaskListAdapter(context,data, data.getEntries()," ");
+                listView.setAdapter(adapter);
 
-                } else{
-                    TaskListAdapter adapter = new TaskListAdapter(context, data, data.getFromList(holder.button.getText().toString())," ");
-                    listView.setAdapter(adapter);
-                }
+            } else{
+                TaskListAdapter adapter = new TaskListAdapter(context, data, data.getFromList(holder.button.getText().toString()),"list");
+                listView.setAdapter(adapter);
             }
         });
 
