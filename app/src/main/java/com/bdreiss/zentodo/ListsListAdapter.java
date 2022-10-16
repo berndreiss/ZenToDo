@@ -25,16 +25,20 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private ArrayList<String> lists;
     private Data data;
 
+    private final TextView header;
+
     private class ViewHolder{
         private Button button;
         private ListView listView;
     }
-    public ListsListAdapter(Context context, ListView listview, Data data, ArrayList<String> lists){
+    public ListsListAdapter(Context context, ListView listview, TextView header, Data data, ArrayList<String> lists){
         super(context,R.layout.lists_row,lists);
         this.listView = listview;
         this.context=context;
         this.data = data;
         this.lists = lists;
+        this.header = header;
+        header.setVisibility(View.GONE);
     }
 
     @SuppressLint("InflateParams")
@@ -60,13 +64,19 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         holder.button.setText(lists.get(position));
 
         holder.button.setOnClickListener(view -> {
+
+
+            header.setVisibility(View.VISIBLE);
             if (holder.button.getText().equals(context.getResources().getString(R.string.allTasks))){
 
+                header.setText(context.getResources().getString(R.string.allTasks));
                 TaskListAdapter adapter =new TaskListAdapter(context,data, data.getEntries()," ");
                 listView.setAdapter(adapter);
 
             } else{
-                TaskListAdapter adapter = new TaskListAdapter(context, data, data.getFromList(holder.button.getText().toString()),"list");
+                String list = holder.button.getText().toString();
+                header.setText(list);
+                TaskListAdapter adapter = new TaskListAdapter(context, data, data.getFromList(list) ,"list");
                 listView.setAdapter(adapter);
             }
         });

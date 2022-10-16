@@ -82,49 +82,37 @@ public class MainActivity extends AppCompatActivity {
         toolbarFocus = (Button) findViewById(R.id.toolbar_focus);
         toolbarLists = (Button) findViewById(R.id.toolbar_lists);
 
-        initialize(this);
+        initialize();
 
-        initializeDrop(this);
+        initializeDrop();
 
     }
 
-    public void initialize(Context context){
-        toolbarDrop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                initialize(context);
-                initializeDrop(context);
-            }
+    public void initialize(){
+        toolbarDrop.setOnClickListener(view -> {
+            initialize();
+            initializeDrop();
         });
 
-        toolbarLists.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                initialize(context);
-                initializeLists(context);
-            }
+        toolbarLists.setOnClickListener(view -> {
+            initialize();
+            initializeLists();
         });
 
-        toolbarFocus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                initialize(context);
-                initializeFocus(context);
+        toolbarFocus.setOnClickListener(view -> {
+            initialize();
+            initializeFocus();
 
-            }
         });
 
-        toolbarPick.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                initialize(context);
-                initializePick(context);
-            }
+        toolbarPick.setOnClickListener(view -> {
+            initialize();
+            initializePick();
         });
 
     }
 
-    public void initializeFocus(Context context){
+    public void initializeFocus(){
         disableLayout(drop);
         enableLayout(focus);
         disableLayout(lists);
@@ -142,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void initializeLists(Context context){
+    public void initializeLists(){
         disableLayout(drop);
         disableLayout(focus);
         enableLayout(lists);
@@ -154,7 +142,8 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
 
         ListView listView = (ListView) findViewById(R.id.list_view_lists);
-        ListsListAdapter adapter = new ListsListAdapter(this,listView,data,data.getLists());
+        TextView header = (TextView) findViewById(R.id.text_view_lists_header);
+        ListsListAdapter adapter = new ListsListAdapter(this,listView,header,data,data.getLists());
 
         listView.setAdapter(adapter);
 
@@ -162,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void initializePick(Context context){
+    public void initializePick(){
         enableLayout(pick);
         disableLayout(drop);
         disableLayout(focus);
@@ -180,31 +169,28 @@ public class MainActivity extends AppCompatActivity {
 
         Button pick = (Button) findViewById(R.id.button_pick);
 
-        pick.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ArrayList<Integer> checked= adapter.getIdsChecked();
+        pick.setOnClickListener(view -> {
+            ArrayList<Integer> checked= adapter.getIdsChecked();
 
-                for (int id : checked){
-                    data.setFocus(id, true);
-                    data.setDropped(id, false);
-                }
-
-                ArrayList<Integer> notChecked = adapter.getIdsNotChecked();
-
-                for (int id: notChecked){
-                    data.setFocus(id, false);
-                }
-
-                initialize(context);
-                initializeFocus(context);
-
+            for (int id : checked){
+                data.setFocus(id, true);
+                data.setDropped(id, false);
             }
+
+            ArrayList<Integer> notChecked = adapter.getIdsNotChecked();
+
+            for (int id: notChecked){
+                data.setFocus(id, false);
+            }
+
+            initialize();
+            initializeFocus();
+
         });
 
     }
 
-    public void initializeDrop(Context context){
+    public void initializeDrop(){
 
 
         enableLayout(drop);
@@ -226,18 +212,15 @@ public class MainActivity extends AppCompatActivity {
         final EditText editText = (EditText) findViewById(R.id.edit_text_drop);
         Button buttonDrop = (Button) findViewById(R.id.button_drop);
         buttonDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        buttonDrop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String task = editText.getText().toString();
-                editText.setText("");
-                if (!task.equals("")) {
-                    data.add(task);
-                    initializeDrop(context);
-                }
-
-
+        buttonDrop.setOnClickListener(view -> {
+            String task = editText.getText().toString();
+            editText.setText("");
+            if (!task.equals("")) {
+                data.add(task);
+                initializeDrop();
             }
+
+
         });
 
 
