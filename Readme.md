@@ -2,9 +2,9 @@ ZenToDo
 
 A simple ToDo-List that let's you focus on what's really important
 
-This project aims to implement an Android-app which serves as a simple ToDo-List. Tasks added have a due date and optionally a list to which they are attached. Now every time you want to create a ToDo-List for the day there is a mode called "focus", which presents the tasks that are due and let's you choose the todos that you want to get done. Hence there are only the really important things in your list which ought to improve your focus.
+This project implements an Android-app which serves as a simple ToDo-List. The idea is simple: you drop tasks that come to your mind so you don't have to think about them anymore. In a next step you pick all the tasks you want to get done. These are shown in a focus mode that only represent tasks that are really important right now. Tasks can also have a date set which means they will not be shown until that date. There is also an option to make tasks recurring (still to be implemented). Tasks can also be added to lists.
 
-The App is going to contain the following windows:
+The App contains the following main layouts:
 
 -Drop: add new tasks, so you don't have to worry about them
 
