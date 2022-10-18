@@ -8,7 +8,7 @@ package com.bdreiss.zentodo;
 *   dropped. In this step you decide, which tasks you want to focus on. For all the tasks you don't
 *   want to get done right away, you can set a reminder date or add them to a list.
 *
-*   So basically the app has the following structure implemented in different layouts:
+*   Basically the app has the following structure implemented in different layouts:
 *   Drop -> Pick -> Focus
 *
 *   Lists: shows all the lists and upon choosing one shows all tasks assigned to the list
@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
         //initialize adapter for ListView with all tasks that have been dropped or are due today
-        TaskListAdapter adapter = new TaskListAdapter(this, data, data.getPotentials(), "potentials");
+        TaskListAdapter adapter = new TaskListAdapter(this, data, data.getTasksToPick(), "pick");
         //assign ListView
         ListView listView = findViewById(R.id.list_view_pick);
         //set adapter

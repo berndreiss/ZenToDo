@@ -3,16 +3,24 @@ package com.bdreiss.zentodo;
  *   A custom ArrayAdapter<Entry> that creates rows with checkboxes that
  *   when checked remove the associated task.
  *
- *   The row can have different views. It initially starts with an original view, that shows the task and the checkbox to remove it.
- *   But there is also a menu button that opens an alternative row view. In this view different Buttons are shown through which certain
+ *   The row can have different views. It initially starts with a default view, that shows the task and the checkbox to remove it.
+ *   There is also a menu button that opens an alternative row view. In this view different Buttons are shown through which certain
  *   information of the task can be changed (for data fields associated with a task see Entry.java).
  *
- *   original view --(menu Button)--> alternative view --(today Button)--> original view
- *                                                     --(edit Button)--> edit row view --(back Button)--> original view
+ *   original view --(menu Button)--> alternative view --(today Button)--> default view
+ *                                                     --(edit Button)--> edit task view --(back Button)--> original view
  *                                                     --(set date Button)--> datePickerDialog --(cancel/ok Button)-->original view
  *                                                     --(recurrence Button)--> recurrence view --(back Button)--> original view
  *                                                     --(set list Button)--> set list view --(back Button)-->  original view
  *                                                     --(back Button)--> original view
+ *
+ *  Furthermore there are 4 modes the list can be in, that have the following implications:
+ *
+ *  -dropped: Tasks are removed from ListView if date is set, list is assigned, or item is moved to focus
+ *  -pick: The checkboxes don't remove task from Data. Instead task is added to an ArrayList<Integer> that holds all checked tasks ids.
+ *  -focus: If the focus Button is pressed in the menu or a date is assigned tasks are removed from the ListView.
+ *  -list: Tasks are removed from ListView if attribute list is changed.
+ *
  *
  */
 
@@ -43,13 +51,13 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     private final ArrayList<Entry> entries;//list of entries (see Entry.java)
 
-    private final Context context;
+    private final Context context;//context inherited by MainActivity
 
     private final Data data;//database from which entries are derived (see Data.java)
 
-    private final String mode;
+    private final String mode;//{dropped,pick,focus,list}
 
-    private final ArrayList<Integer> idsChecked;
+    private final ArrayList<Integer> idsChecked;//if mode.equals("pick") it stores ids of all checked tasks
 
     private static class ViewHolder {//temporary view
 
@@ -83,6 +91,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private Button backList;//return to original layout and save
     }
 
+    //Initialize Adapter
     public TaskListAdapter(Context context, Data data, ArrayList<Entry> entries, String mode){
 
         super(context,R.layout.row,entries);
@@ -93,10 +102,12 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         this.idsChecked = new ArrayList<>();
     }
 
+
     @SuppressLint("InflateParams")
+
+    //returns View for row layout
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
 
         final ViewHolder holder;
 
@@ -135,14 +146,16 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             holder.backList = convertView.findViewById(R.id.button_back_list);
 
             convertView.setTag(holder);
+
         }else {
             // the getTag returns the viewHolder object set as a tag to the view
             holder = (ViewHolder)convertView.getTag();
         }
 
-        //set up checkbox of the task
-        //holder.task.setText(entries.get(position).getTask());
+        //set TextView to task
         holder.task.setText(entries.get(position).getTask());
+
+        //set up checkbox of the task
         holder.checkBox.setChecked(false);
         holder.checkBox.setTag(position);
 
@@ -150,13 +163,18 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         holder.checkBox.setOnClickListener(view -> {
             int id = entries.get(position).getId();//get ID
 
-            if (!mode.equals("potentials")) {
+            //remove task from database if !mode.equals("pick")
+            if (!mode.equals("pick")) {
+
+                //because lists are dynamically generated the DataSet has to be manually updated
                 if (mode.equals("list")){
-                    entries.remove(position);
+                    entries.remove(position);//remove task from DataSet
                 }
                 data.remove(id);//remove entry from dataset by ID
                 notifyDataSetChanged();//update the adapter
-            }else{
+            }else{//mode.equals("pick")
+
+                //remove id from idsChecked if task was checked, add otherwise
                 if (idsChecked.contains(id)){
                     idsChecked.remove(id);
                 } else{
@@ -174,47 +192,57 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         ArrayAdapter<CharSequence> adapterSpinner = ArrayAdapter.createFromResource(context,R.array.time_interval, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
         holder.spinnerRecurrence.setAdapter(adapterSpinner);
 
+        //initialize all row components and set onClickListeners on different Buttons
         initialize(holder,position);
         return convertView;
     }
 
-    public void initialize(ViewHolder holder, int position){
-        //setting "normal" row visible and active and all others to invisible and invalid
+
+    //setting default row layout and onClickListener
+    private void initialize(ViewHolder holder, int position){
+        //setting default row layout visible and active and all others to invisible and invalid
         setOriginal(holder);
 
-        //Sets buttons that have edited data that has been set to a different color
+        //sets buttons that have edited data that has been set to a different color
         markSet(holder,this.entries.get(position));
 
         //listener that changes to alternative row layout on click
         holder.menu.setOnClickListener(view -> {
-            //setting alternative row visible and active, everything else disabled
+            //setting alternative row layout visible and active, everything else disabled
             setAlt(holder);
 
+            //return to default row layout onCLick
             holder.back.setOnClickListener(view1 -> {
                 initialize(holder,position);//return
             });
 
+            //setting Entry.focus to true/false, which means the task is/is not listed in focus mode
             holder.focus.setOnClickListener(view12 -> {
-                int id = entries.get(position).getId();
-                data.setFocus(id, !entries.get(position).getFocus());
+                int id = entries.get(position).getId();//get id
+                data.setFocus(id, !entries.get(position).getFocus());//change state of focus in entry
+
+                //remove task from ListView if mode.equals("focus")
                 if (mode.equals("focus")){
                         notifyDataSetChanged();
-                } else {
+                } else {//reinitialize row layout otherwise
 
+                    //change dropped in entry to false if true
                     if (entries.get(position).getDropped()) {
-                        data.setDropped(id, false);
-                        if (mode.equals("dropped")) {
+                        data.setDropped(id, false);//change to false
+
+                        if (mode.equals("dropped")) {//remove task from ListView if mode.equals("dropped")
                             notifyDataSetChanged();
-                        } else {
+                        } else {//reinitialize otherwise
                             initialize(holder, position);
                         }
-                    } else {
+                    } else {//reinitialize otherwise
 
                         initialize(holder, position);
                     }
                 }
             });
 
+            //onClickListener for Button to change the task name
             holder.edit.setOnClickListener(view13 -> {
 
                 //setting edit row visible and active, everything else disabled
@@ -269,15 +297,15 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                 }
 
                 //String for editText
-                String recEdit = "";
+                StringBuilder recEdit = new StringBuilder();
 
                 //add all digits after the first char
                 for (int i=1;i<rec.length();i++){
-                    recEdit += rec.charAt(i);
+                    recEdit.append(rec.charAt(i));
                 }
 
                 //set editText
-                holder.editTextRecurrence.setText(recEdit);
+                holder.editTextRecurrence.setText(recEdit.toString());
 
                 //setting listener to clear fields
                 setClearRecurrenceListener(holder);
@@ -315,6 +343,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                 });
             });
 
+            //Listener for Button to change list task is assigned to
             holder.setList.setOnClickListener(view16 -> {
                 setList(holder);//set list row view
                 String[] array = data.returnListsAsArray();//array of names of all lists in task (as singletons)
@@ -326,13 +355,14 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     int id = entries.get(position).getId();//Get id of task
                     String list = holder.autoCompleteList.getText().toString();//get list name
 
-
-
+                    //set to no list if AutoComplete is empty
                     if (list.equals(" ") || list.equals("")) {
 
                         data.editList(id, " ");//reset to no list
 
+                        //remove task from ListView is mode.equals("list")
                         if (mode.equals("list")){
+                            //because lists are generated dynamically DataSet has to be changed manually
                             entries.remove(position);
                             notifyDataSetChanged();
                         }
@@ -342,26 +372,26 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
                     } else {
                         data.editList(id, list);//write back otherwise
-                        data.setDropped(id, false);
+                        data.setDropped(id, false);//set dropped to false
 
+                        //notifyDataSetChanged to remove task from ListView if mode.equals("dropped"||"list")
                         if (mode.equals("dropped") || mode.equals("list")) {
+
+                            //if mode.equals("list") and the name of the list has indeed been changed remove task from ListView
                             if (mode.equals("list") && !list.equals(entries.get(position).getList())){
                                 entries.remove(position);
                             }
                             notifyDataSetChanged();
-                        } else {
+                        } else {//initialize otherwise
                             initialize(holder, position);
                         }
                     }
-
-
-
 
                 });
 
             });
 
-            //Listener to return to "normal" view
+            //Listener to return to default layout
             holder.back.setOnClickListener(view17 -> {
                 setOriginal(holder);//setting original row visible and active, everything else disabled
 
@@ -370,8 +400,8 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     }
 
-    //clears all fields in recurrence row view
-    public void setClearRecurrenceListener(ViewHolder holder){
+    //reset all fields in recurrence row view
+    private void setClearRecurrenceListener(ViewHolder holder){
         holder.clearRecurrence.setOnClickListener(view -> {
             holder.spinnerRecurrence.setSelection(0);
             holder.editTextRecurrence.setText("");
@@ -380,16 +410,16 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     }
 
-    //clears Autocomplete in list row view
-    public void setClearListenerList(ViewHolder holder){
+    //rest Autocomplete in list row view
+    private void setClearListenerList(ViewHolder holder){
         holder.clearList.setOnClickListener(view -> {
             holder.autoCompleteList.setText("");
             setClearListenerList(holder);
         });
     }
 
-    //chooses date task is due and writes back data, if "no date" is pressed, date is set to 0
-    public void openDatePickerDialog(Context context,ViewHolder holder, int position) {
+    //choose date for which task is due and write back data, if "no date" is pressed, date is set to 0
+    private void openDatePickerDialog(Context context,ViewHolder holder, int position) {
 
         //Get entry
         Entry entry = entries.get(position);
@@ -424,14 +454,15 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
             int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
             data.editDue(entry.getId(), date);//Write back data
-                if (mode.equals("dropped")){
+
+            //notify dataSetChanged if mode.equals("dropped"||"focus") and set according attribute to false, so item is removed from ListView
+            if (mode.equals("dropped")){
                     data.setDropped(entries.get(position).getId(), false);
                     notifyDataSetChanged();
                 } else if( mode.equals("focus")){
                     data.setFocus(entries.get(position).getId(),false);
                     notifyDataSetChanged();
-                } else
-                {
+                } else {//reinitialize otherwise
                     initialize(holder, position);
                 }
 
@@ -448,7 +479,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Setting original row view
-    public void setOriginal(ViewHolder holder){
+    private void setOriginal(ViewHolder holder){
         //Set original row view to visible and active
         holder.linearLayout.setAlpha(1);
         enable(holder.linearLayout);
@@ -472,7 +503,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Setting alternative row view coming from original
-    public void setAlt(ViewHolder holder){
+    private void setAlt(ViewHolder holder){
         //Set alternative row view to visible and active
         holder.linearLayoutAlt.bringToFront();
         holder.linearLayoutAlt.setAlpha(1);
@@ -485,7 +516,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Setting edit row view coming from alternative view
-    public void setEdit(ViewHolder holder){
+    private void setEdit(ViewHolder holder){
 
         //Set edit row view to visible and active
         holder.linearLayoutEdit.bringToFront();
@@ -500,7 +531,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
 
     //Setting recurrence row view coming from alternative view
-    public void setRecurrence(ViewHolder holder){
+    private void setRecurrence(ViewHolder holder){
         //Set recurrence row view to visible and active
         holder.linearLayoutRecurrence.bringToFront();
         holder.linearLayoutRecurrence.setAlpha(1);
@@ -512,7 +543,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Setting list row view coming from alternative view
-    public void setList(ViewHolder holder){
+    private void setList(ViewHolder holder){
         //Set list row view to visible and active
         holder.linearLayoutList.bringToFront();
         holder.linearLayoutList.setAlpha(1);
@@ -527,7 +558,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Disables view and first generation children
-    public void disable(LinearLayout layout){
+    private void disable(LinearLayout layout){
         for (int i = 0; i < layout.getChildCount(); i++) {
             View child = layout.getChildAt(i);
             child.setEnabled(false);
@@ -537,7 +568,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Enables view and first generation children
-    public void enable(LinearLayout layout){
+    private void enable(LinearLayout layout){
         for (int i = 0; i < layout.getChildCount(); i++) {
             View child = layout.getChildAt(i);
             child.setEnabled(true);
@@ -546,7 +577,8 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Sets buttons that have edited data that has been set to a different color
-    public void markSet(ViewHolder holder,Entry entry){
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private void markSet(ViewHolder holder, Entry entry){
 
         //Set date button to alternative color if !=0, original color otherwise
         if (entry.getDue()!=0){
@@ -577,10 +609,12 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     }
 
+    //returns ids of checked tasks in mode pick
     public ArrayList<Integer> getIdsChecked(){
         return idsChecked;
     }
 
+    //returns ids of tasks that have not been checked in mode pick
     public ArrayList<Integer> getIdsNotChecked(){
         ArrayList<Integer> notChecked = new ArrayList<>();
 

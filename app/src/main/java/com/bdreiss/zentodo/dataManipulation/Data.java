@@ -1,4 +1,5 @@
 package com.bdreiss.zentodo.dataManipulation;
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.bdreiss.zentodo.R;
@@ -195,7 +196,7 @@ public class Data{
         lists.add(context.getResources().getString(R.string.allTasks));
     }
 
-    public ArrayList<Entry> getPotentials(){
+    public ArrayList<Entry> getTasksToPick(){
         //return a list of all entries for which the due date is <=today
 
         ArrayList<Entry> potentials = new ArrayList<>();//create new list
@@ -252,7 +253,7 @@ public class Data{
     public int getDate(){
         //returns current date as "yyyyMMdd"
 
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 
         Date date = new Date();
 
