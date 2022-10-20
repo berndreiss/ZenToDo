@@ -21,25 +21,21 @@ import java.io.InputStreamReader;
 
 public class SaveFile{
 
-    private String fileName;//Filepath for save file
+    private final File saveFile;
 
-    private File saveFile;
-
-    private Context context;
-
-    public SaveFile(Context context, String filepath){
+    public SaveFile(Context context){
         File path = context.getFilesDir();
 
+        //Filepath for save file
+        String fileName = "Data";
         this.saveFile = new File(path.toString() + fileName);
         if(!saveFile.exists()) {
             try {
                 this.saveFile.createNewFile();
             } catch (IOException e) {
-                Log.e("creating file", "IOE: " + e.toString());
+                Log.e("creating file", "IOE: " + e);
             }
         }
-
-        this.context = context;
 
     }
 
@@ -50,11 +46,11 @@ public class SaveFile{
             try{
                 stream.write(text.getBytes());
             } catch (IOException e){
-                Log.e("save file", "IOExcpetion: " + e.toString());
+                Log.e("save file", "IOException: " + e);
             }
 
         } catch(FileNotFoundException e){
-            Log.e("save file", "FNF: " + e.toString());
+            Log.e("save file", "FNF: " + e);
         }
 
 
@@ -64,27 +60,26 @@ public class SaveFile{
         //Reads the designated file contents and returns it as a String
             String data = "";
             try {
-            FileInputStream inputStream = new FileInputStream(new File(saveFile.toString()));
+            FileInputStream inputStream = new FileInputStream(saveFile.toString());
 
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String receiveString;
+            StringBuilder stringBuilder = new StringBuilder();
 
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                data = stringBuilder.toString();
-                //this.textView.setText("true load");
+            while ( (receiveString = bufferedReader.readLine()) != null ) {
+                stringBuilder.append(receiveString);
             }
+
+            inputStream.close();
+            data = stringBuilder.toString();
+            //this.textView.setText("true load");
+
         }
         catch (FileNotFoundException e) {
-            Log.e("load file", "File not found: " + e.toString());
+            Log.e("load file", "File not found: " + e);
         } catch (IOException e) {
-            Log.e("load file", "IOException: " + e.toString());
+            Log.e("load file", "IOException: " + e);
         }
         return data;
     }

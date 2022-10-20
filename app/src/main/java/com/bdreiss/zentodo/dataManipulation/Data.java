@@ -4,9 +4,7 @@ import android.content.Context;
 
 import com.bdreiss.zentodo.R;
 
-import java.lang.reflect.Array;
 import java.util.Collections;
-import java.util.List;
 import java.util.ArrayList;
 
 import java.util.Date;
@@ -21,16 +19,15 @@ public class Data{
 *       -returning tasks that are due (getPotentials()) and updating todays tasks (setTodays(List<Entry> todays))
 */
 
-    private final String saveFilePath = "Data"; //Path for save file
     private final String delimiter = "------";    //Delimiter for fields of entries in save file
     private final String lineDelimiter = "%%%%%%%"; //Delimiter for entries in save file
 
-    private ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
-    private ArrayList<Entry> dropped = new ArrayList<>();
-    private ArrayList<Entry> focus = new ArrayList<>();
-    private ArrayList<String> lists = new ArrayList<>();
+    private final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
+    private final ArrayList<Entry> dropped = new ArrayList<>();
+    private final ArrayList<Entry> focus = new ArrayList<>();
+    private final ArrayList<String> lists = new ArrayList<>();
     private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
-    private Context context;
+    private final Context context;
 
     public SaveFile saveFile;//TODO reset to private
 
@@ -39,7 +36,7 @@ public class Data{
         //initialize instance of Data, set id to 0, create save file and load data from save file
         this.id=0;
         this.context=context;
-        this.saveFile = new SaveFile(context, this.saveFilePath);
+        this.saveFile = new SaveFile(context);
         this.load();
 
     }

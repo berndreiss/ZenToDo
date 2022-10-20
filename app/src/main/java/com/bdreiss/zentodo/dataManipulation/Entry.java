@@ -4,7 +4,7 @@ public class Entry{
 //this class represents the entry of a task
 //it consists of the following fields:
 
-    private int id;//id generated in data.java
+    private final int id;//id generated in data.java
     private String task;//a description of the task that has to be done
     private Boolean focus;//true if task has been chosen today
     private Boolean dropped;//true if task has been dropped and not been used in brainstorm and pick
