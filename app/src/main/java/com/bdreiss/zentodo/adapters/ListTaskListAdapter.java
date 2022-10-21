@@ -18,18 +18,8 @@ public class ListTaskListAdapter extends TaskListAdapter{
         holder.checkBox.setOnClickListener(view -> {
             Entry entry = entries.get(position);
             int id = entry.getId();//get ID
-
-            Boolean recurring = !entry.getRecurrence().equals(" ");
-
-            //because lists are dynamically generated the DataSet has to be manually updated
-            if (recurring) {
-                data.setRecurring(id);
-                data.setFocus(id,false);
-            } else {
-                data.remove(id);
-                entries.remove(position);
-            }
-
+            data.remove(id);
+            entries.remove(position);
 
             notifyDataSetChanged();//update the adapter
 

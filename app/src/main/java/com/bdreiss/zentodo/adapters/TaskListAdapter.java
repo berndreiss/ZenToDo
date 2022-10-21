@@ -319,12 +319,13 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             Entry entry = entries.get(position);
             int id = entry.getId();//get ID
 
-            Boolean recurring = !entry.getRecurrence().equals(" ");
+            boolean recurring = !entry.getRecurrence().equals(" ");
 
                 //because lists are dynamically generated the DataSet has to be manually updated
                     if (recurring) {
                         data.setRecurring(id);
                         data.setFocus(id,false);
+                        data.setDropped(id,false);
                     } else {
                         data.remove(id);
                     }

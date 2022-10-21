@@ -77,7 +77,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 header.setText(context.getResources().getString(R.string.allTasks));//set header text
                 //initialize adapter
-                TaskListAdapter adapter =new TaskListAdapter(context,data, data.getEntries());
+                AllTaskListAdapter adapter =new AllTaskListAdapter(context,data, data.getEntries());
                 listView.setAdapter(adapter);//set adapter
 
             } else{

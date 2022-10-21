@@ -124,33 +124,27 @@ public class Data{
         int offSet = Integer.parseInt(offSetStr);
 
         int date = entry.getDue();
-        int[] dateArray = new int[3];
-        dateArray[0] = date%100;
-        dateArray[1] = (date-dateArray[0])/100-1;
-        dateArray[2] = (date-dateArray[1]*100-dateArray[0])/10000;
 
         int today = getToday();
 
-        int bufferDate=date;
+        if (date == 0){
+            date = today;
+        }
 
-        while (date < today){
-            bufferDate = date;
+        int[] dateArray = new int[3];
+        dateArray[0] = date%100;
+        dateArray[1] = ((date-dateArray[0])/100)%100;
+        dateArray[2] = ((date-dateArray[1]*100-dateArray[0])/10000);
+
+
+        while (date <= today){
             date = incrementRecurring(mode, dateArray, offSet);
         }
 
-        entry.setDue(bufferDate);
-
+        entry.setDue(date);
     }
 
-    private int getDate(int day, int month, int year){
-        int date = 0;
 
-        date += day;
-        date += month*100;
-        date += year*10000;
-
-        return date;
-    }
 
     private int incrementRecurring(char mode, int[] dateArray,int offSet){
 
@@ -193,18 +187,20 @@ public class Data{
 
     private int returnDaysOfTheMonth(int month,int year){
         switch (month){
-            case 1: return 31;
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+            case 8:
+            case 10:
+            case 12:
+                return 31;
             case 2: return isLeapYear(year) ? 29 : 28;
-            case 3: return 31;
-            case 4: return 30;
-            case 5: return 31;
-            case 6: return 30;
-            case 7: return 31;
-            case 8: return 31;
-            case 9: return 30;
-            case 10: return 31;
-            case 11: return 30;
-            case 12: return 31;
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+                return 30;
             default: return 0;
         }
 
@@ -213,9 +209,7 @@ public class Data{
 
     private Boolean isLeapYear(int year){
         if (year%4 == 0){
-            if(year%400 != 0){
-                return true;
-            }
+            return year % 400 != 0;
         }
         return false;
     }
@@ -312,7 +306,6 @@ public class Data{
                     for (Pair<String,ArrayList<Entry>> p : lists){
                         if (p.first.equals(list)){
                             p.second.add(e);
-                        }else{
                         }
                     }
                 }
@@ -415,17 +408,6 @@ public class Data{
         }
     }
 
-    //Returns entries as an ArrayList<String> TODO: is this ever used?
-    public ArrayList<String> getEntriesAsString(){
-
-        ArrayList<String> items = new ArrayList<>();
-
-        for (Entry e : entries){
-            items.add(e.getTask());
-        }
-
-        return items;
-    }
 
 
 }
