@@ -14,6 +14,32 @@ public class ListTaskListAdapter extends TaskListAdapter{
     }
 
     @Override
+    public void setCheckBoxListener(ViewHolder holder, int position){
+        holder.checkBox.setOnClickListener(view -> {
+            Entry entry = entries.get(position);
+            int id = entry.getId();//get ID
+
+            Boolean recurring = !entry.getRecurrence().equals(" ");
+
+            //because lists are dynamically generated the DataSet has to be manually updated
+            if (recurring) {
+                data.setRecurring(id);
+                data.setFocus(id,false);
+            } else {
+                data.remove(id);
+                entries.remove(position);
+            }
+
+
+            notifyDataSetChanged();//update the adapter
+
+
+        });
+
+    }
+
+
+    @Override
     public void setListListener(ViewHolder holder, int position){
 
         holder.backList.setOnClickListener(view161 -> {
@@ -22,19 +48,15 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
             //set to no list if AutoComplete is empty
             if (list.equals(" ") || list.equals("")) {
-
                 data.editList(id, " ");//reset to no list
-                entries.remove(position);
-                notifyDataSetChanged();
 
             } else {
-                data.editList(id, list);//write back otherwise
-                data.setDropped(id, false);//set dropped to false
-
-                 entries.remove(position);
-                    notifyDataSetChanged();
-
+                if (!list.equals(entries.get(position).getList())) {
+                    data.editList(id, list);//write back otherwise
+                    entries.remove(position);
+                }
             }
+            notifyDataSetChanged();
 
         });
     }

@@ -1,6 +1,7 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Pair;
 
 import com.bdreiss.zentodo.R;
 
@@ -25,12 +26,12 @@ public class Data{
     private final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     private final ArrayList<Entry> dropped = new ArrayList<>();
     private final ArrayList<Entry> focus = new ArrayList<>();
-    private final ArrayList<String> lists = new ArrayList<>();
+    private final ArrayList<String> listNames = new ArrayList<>();
+    private final ArrayList<Pair<String,ArrayList<Entry>>> lists = new ArrayList<>();
     private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
     private final Context context;
 
     public SaveFile saveFile;//TODO reset to private
-
 
     public Data(Context context){
         //initialize instance of Data, set id to 0, create save file and load data from save file
@@ -139,7 +140,6 @@ public class Data{
 
         entry.setDue(bufferDate);
 
-        entry.setTask("Test");
     }
 
     private int getDate(int day, int month, int year){
@@ -287,23 +287,40 @@ public class Data{
     }
 
     public ArrayList<String> getLists() {
-        return lists;
+        return listNames;
     }
 
     public void initLists(){
 
+        listNames.clear();
         lists.clear();
+
         for(Entry e : entries){
             String list = e.getList();
 
-            if (!list.equals(" ") && !lists.contains(list)){
-                lists.add(list);
+            if (!list.equals(" ")) {
+
+                if (!listNames.contains(list)) {
+
+                    listNames.add(list);
+                    ArrayList<Entry> newList = new ArrayList<>();
+                    newList.add(e);
+                    Pair newPair = new Pair(list, newList);
+                    lists.add(newPair);
+                } else{
+
+                    for (Pair<String,ArrayList<Entry>> p : lists){
+                        if (p.first.equals(list)){
+                            p.second.add(e);
+                        }else{
+                        }
+                    }
+                }
             }
-
         }
-        Collections.sort(lists);
+        Collections.sort(listNames);
 
-        lists.add(context.getResources().getString(R.string.allTasks));
+        listNames.add(context.getResources().getString(R.string.allTasks));
     }
 
     public ArrayList<Entry> getTasksToPick(){
@@ -332,15 +349,15 @@ public class Data{
     }
 
     public ArrayList<Entry> getFromList(String list){
-        ArrayList<Entry> listEntries = new ArrayList<>();
 
-        for (Entry e : entries){
-            if (e.getList().equals(list)){
-                listEntries.add(e);
+        ArrayList<Entry> listArray = new ArrayList<>();
+        for (Pair<String,ArrayList<Entry>> p: lists){
+            if (p.first.equals(list)){
+                return p.second;
             }
         }
-        return listEntries;
 
+        return listArray;
     }
 
     public ArrayList<Entry> getDropped(){

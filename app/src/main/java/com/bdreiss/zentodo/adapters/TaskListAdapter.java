@@ -325,7 +325,6 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                     if (recurring) {
                         data.setRecurring(id);
                         data.setFocus(id,false);
-                        entries.remove(position);
                     } else {
                         data.remove(id);
                     }
