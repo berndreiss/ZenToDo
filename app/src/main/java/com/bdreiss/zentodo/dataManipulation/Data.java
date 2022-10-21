@@ -108,6 +108,119 @@ public class Data{
 
     }
 
+    public void setRecurring(int id){
+        Entry entry = entries.get(getPosition(id));
+
+        String recurrence = entry.getRecurrence();
+        char mode = recurrence.charAt(0);
+        String offSetStr = "";
+        offSetStr += recurrence.charAt(1);
+
+        if (recurrence.length() == 3) {
+            offSetStr += recurrence.charAt(2);
+        }
+
+        int offSet = Integer.parseInt(offSetStr);
+
+        int date = entry.getDue();
+        int[] dateArray = new int[3];
+        dateArray[0] = date%100;
+        dateArray[1] = (date-dateArray[0])/100-1;
+        dateArray[2] = (date-dateArray[1]*100-dateArray[0])/10000;
+
+        int today = getToday();
+
+        int bufferDate=date;
+
+        while (date < today){
+            bufferDate = date;
+            date = incrementRecurring(mode, dateArray, offSet);
+        }
+
+        entry.setDue(bufferDate);
+
+        entry.setTask("Test");
+    }
+
+    private int getDate(int day, int month, int year){
+        int date = 0;
+
+        date += day;
+        date += month*100;
+        date += year*10000;
+
+        return date;
+    }
+
+    private int incrementRecurring(char mode, int[] dateArray,int offSet){
+
+
+        if (mode =='d' || mode =='w'){
+
+            if (mode == 'w'){
+                dateArray[0] += offSet * 7;
+
+            }else {
+                dateArray[0] += offSet;
+            }
+
+            if (returnDaysOfTheMonth(dateArray[1],dateArray[2]) < dateArray[0]){
+                dateArray[1]++;
+                if (dateArray[1] > 12){
+                    dateArray[2]++;
+                }
+            }
+
+        }
+
+        if (mode == 'm'){
+            dateArray[1]++;
+            if (dateArray[1] > 12){
+                dateArray[2]++;
+            }
+
+        }
+
+        if (mode == 'y'){
+
+            dateArray[2]++;
+
+        }
+
+
+        return dateArray[0] + dateArray[1]*100 + dateArray[2]*10000;
+    }
+
+    private int returnDaysOfTheMonth(int month,int year){
+        switch (month){
+            case 1: return 31;
+            case 2: return isLeapYear(year) ? 29 : 28;
+            case 3: return 31;
+            case 4: return 30;
+            case 5: return 31;
+            case 6: return 30;
+            case 7: return 31;
+            case 8: return 31;
+            case 9: return 30;
+            case 10: return 31;
+            case 11: return 30;
+            case 12: return 31;
+            default: return 0;
+        }
+
+
+    }
+
+    private Boolean isLeapYear(int year){
+        if (year%4 == 0){
+            if(year%400 != 0){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     public void editTask(int id, String newTask){
         entries.get(getPosition(id)).setTask(newTask);
         save();
@@ -198,7 +311,7 @@ public class Data{
 
         ArrayList<Entry> potentials = new ArrayList<>();//create new list
 
-        int date = getDate();//get current date as "yyyyMMdd"
+        int date = getToday();//get current date as "yyyyMMdd"
 
         for (Entry e : entries){//loop through this.entries
 
@@ -247,7 +360,7 @@ public class Data{
         return id-1;
     }
 
-    public int getDate(){
+    public int getToday(){
         //returns current date as "yyyyMMdd"
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");

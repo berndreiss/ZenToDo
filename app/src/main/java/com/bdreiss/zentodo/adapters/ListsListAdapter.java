@@ -1,4 +1,4 @@
-package com.bdreiss.zentodo;
+package com.bdreiss.zentodo.adapters;
 
 /*
 *   Simple ListView adapter that shows all lists in Data as Buttons. onClick it opens a TaskListAdapter in the same ListView
@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     }
 
     public ListsListAdapter(Context context, ListView listview, TextView header, Data data, ArrayList<String> lists){
-        super(context,R.layout.lists_row,lists);
+        super(context, R.layout.lists_row,lists);
         this.listView = listview;
         this.context=context;
         this.data = data;
@@ -76,14 +77,14 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 header.setText(context.getResources().getString(R.string.allTasks));//set header text
                 //initialize adapter
-                TaskListAdapter adapter =new TaskListAdapter(context,data, data.getEntries()," ");
+                TaskListAdapter adapter =new TaskListAdapter(context,data, data.getEntries());
                 listView.setAdapter(adapter);//set adapter
 
             } else{
                 String list = holder.button.getText().toString();//get list name
                 header.setText(list);//set header text
                 //initialize adapter
-                TaskListAdapter adapter = new TaskListAdapter(context, data, data.getFromList(list) ,"list");
+                ListTaskListAdapter adapter = new ListTaskListAdapter(context, data, data.getFromList(list));
                 listView.setAdapter(adapter);//set adapter
             }
         });

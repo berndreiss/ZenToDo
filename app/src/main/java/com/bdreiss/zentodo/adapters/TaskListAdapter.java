@@ -1,4 +1,4 @@
-package com.bdreiss.zentodo;
+package com.bdreiss.zentodo.adapters;
 /*
  *   A custom ArrayAdapter<Entry> that creates rows with checkboxes that
  *   when checked remove the associated task.
@@ -41,6 +41,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
@@ -49,17 +50,14 @@ import java.util.Calendar;
 
 public class TaskListAdapter extends ArrayAdapter<Entry>{
 
-    private final ArrayList<Entry> entries;//list of entries (see Entry.java)
+    public final ArrayList<Entry> entries;//list of entries (see Entry.java)
 
-    private final Context context;//context inherited by MainActivity
+    public final Context context;//context inherited by MainActivity
 
-    private final Data data;//database from which entries are derived (see Data.java)
+    public final Data data;//database from which entries are derived (see Data.java)
 
-    private final String mode;//{dropped,pick,focus,list}
 
-    private final ArrayList<Integer> idsChecked;//if mode.equals("pick") it stores ids of all checked tasks
-
-    private static class ViewHolder {//temporary view
+    public static class ViewHolder {//temporary view
 
         private LinearLayout linearLayout;//"normal" row layout that shows checkbox and task
         protected CheckBox checkBox;//Checkbox to remove entry
@@ -67,7 +65,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private Button menu;//activates alternative layout with menu elements
 
         private LinearLayout linearLayoutAlt;//"alternative" layout with menu for modifying entries
-        private Button focus;//Adds task to todays tasks
+        public Button focus;//Adds task to todays tasks
         private Button edit;//edits the task
         private Button setDate;//sets the date the task is due
         private Button recurrence;//sets the frequency with which the task repeats
@@ -86,20 +84,18 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         private Button backRecurrence;//write back result
 
         private LinearLayout linearLayoutList;//row layout for setting lists
-        private AutoCompleteTextView autoCompleteList;//AutoComplete to set new list
+        public AutoCompleteTextView autoCompleteList;//AutoComplete to set new list
         private Button clearList;//clears AutoComplete
-        private Button backList;//return to original layout and save
+        public Button backList;//return to original layout and save
     }
 
     //Initialize Adapter
-    public TaskListAdapter(Context context, Data data, ArrayList<Entry> entries, String mode){
+    public TaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
 
-        super(context,R.layout.row,entries);
+        super(context, R.layout.row,entries);
         this.context = context;
         this.data = data;
         this.entries = entries;
-        this.mode = mode;
-        this.idsChecked = new ArrayList<>();
     }
 
 
@@ -160,30 +156,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         holder.checkBox.setTag(position);
 
         //establish routine to remove task when checkbox is clicked
-        holder.checkBox.setOnClickListener(view -> {
-            int id = entries.get(position).getId();//get ID
-
-            //remove task from database if !mode.equals("pick")
-            if (!mode.equals("pick")) {
-
-                //because lists are dynamically generated the DataSet has to be manually updated
-                if (mode.equals("list")){
-                    entries.remove(position);//remove task from DataSet
-                }
-                data.remove(id);//remove entry from dataset by ID
-                notifyDataSetChanged();//update the adapter
-            }else{//mode.equals("pick")
-
-                //remove id from idsChecked if task was checked, add otherwise
-                if (idsChecked.contains(id)){
-                    idsChecked.remove(id);
-                } else{
-                    idsChecked.add(id);
-                }
-            }
-
-        });
-
+        setCheckBoxListener(holder, position);
 
 
         //Creating adapter for spinner with entries days/weeks/months/years
@@ -199,7 +172,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
 
     //setting default row layout and onClickListener
-    private void initialize(ViewHolder holder, int position){
+    public void initialize(ViewHolder holder, int position){
         //setting default row layout visible and active and all others to invisible and invalid
         setOriginal(holder);
 
@@ -217,30 +190,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
             });
 
             //setting Entry.focus to true/false, which means the task is/is not listed in focus mode
-            holder.focus.setOnClickListener(view12 -> {
-                int id = entries.get(position).getId();//get id
-                data.setFocus(id, !entries.get(position).getFocus());//change state of focus in entry
-
-                //remove task from ListView if mode.equals("focus")
-                if (mode.equals("focus")){
-                        notifyDataSetChanged();
-                } else {//reinitialize row layout otherwise
-
-                    //change dropped in entry to false if true
-                    if (entries.get(position).getDropped()) {
-                        data.setDropped(id, false);//change to false
-
-                        if (mode.equals("dropped")) {//remove task from ListView if mode.equals("dropped")
-                            notifyDataSetChanged();
-                        } else {//reinitialize otherwise
-                            initialize(holder, position);
-                        }
-                    } else {//reinitialize otherwise
-
-                        initialize(holder, position);
-                    }
-                }
-            });
+            setFocusListener(holder, position);
 
             //onClickListener for Button to change the task name
             holder.edit.setOnClickListener(view13 -> {
@@ -351,43 +301,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
                 holder.autoCompleteList.setAdapter(adapter);//edit Text that autocompletes already existing lists
                 holder.autoCompleteList.setText(entries.get(position).getList());
                 setClearListenerList(holder);//clears AutoComplete
-                holder.backList.setOnClickListener(view161 -> {
-                    int id = entries.get(position).getId();//Get id of task
-                    String list = holder.autoCompleteList.getText().toString();//get list name
-
-                    //set to no list if AutoComplete is empty
-                    if (list.equals(" ") || list.equals("")) {
-
-                        data.editList(id, " ");//reset to no list
-
-                        //remove task from ListView is mode.equals("list")
-                        if (mode.equals("list")){
-                            //because lists are generated dynamically DataSet has to be changed manually
-                            entries.remove(position);
-                            notifyDataSetChanged();
-                        }
-                        else {
-                            initialize(holder, position);//returning to original row view
-                        }
-
-                    } else {
-                        data.editList(id, list);//write back otherwise
-                        data.setDropped(id, false);//set dropped to false
-
-                        //notifyDataSetChanged to remove task from ListView if mode.equals("dropped"||"list")
-                        if (mode.equals("dropped") || mode.equals("list")) {
-
-                            //if mode.equals("list") and the name of the list has indeed been changed remove task from ListView
-                            if (mode.equals("list") && !list.equals(entries.get(position).getList())){
-                                entries.remove(position);
-                            }
-                            notifyDataSetChanged();
-                        } else {//initialize otherwise
-                            initialize(holder, position);
-                        }
-                    }
-
-                });
+                setListListener(holder, position);
 
             });
 
@@ -400,6 +314,58 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     }
 
+    public void setCheckBoxListener(ViewHolder holder, int position){
+        holder.checkBox.setOnClickListener(view -> {
+            Entry entry = entries.get(position);
+            int id = entry.getId();//get ID
+
+            Boolean recurring = !entry.getRecurrence().equals(" ");
+
+                //because lists are dynamically generated the DataSet has to be manually updated
+                    if (recurring) {
+                        data.setRecurring(id);
+                        data.setFocus(id,false);
+                        entries.remove(position);
+                    } else {
+                        data.remove(id);
+                    }
+
+
+                notifyDataSetChanged();//update the adapter
+
+
+        });
+
+    }
+
+    public void setFocusListener(ViewHolder holder,int position){
+        holder.focus.setOnClickListener(view12 -> {
+            Entry entry = entries.get(position);
+            int id = entry.getId();//get id
+            data.setFocus(id, !entry.getFocus());//change state of focus in entry
+            initialize(holder, position);
+
+        });
+
+    }
+
+    public void setListListener(ViewHolder holder, int position){
+
+        holder.backList.setOnClickListener(view161 -> {
+            int id = entries.get(position).getId();//Get id of task
+            String list = holder.autoCompleteList.getText().toString();//get list name
+
+            //set to no list if AutoComplete is empty
+            if (list.equals(" ") || list.equals("")) {
+                data.editList(id, " ");//reset to no list
+            } else {
+                data.editList(id, list);//write back otherwise
+            }
+            initialize(holder, position);//returning to original row view
+
+
+        });
+    }
     //reset all fields in recurrence row view
     private void setClearRecurrenceListener(ViewHolder holder){
         holder.clearRecurrence.setOnClickListener(view -> {
@@ -450,23 +416,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         }
 
         //create DatePickerDialog and set listener
-        DatePickerDialog datePickerDialog;
-        datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
-            int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
-            data.editDue(entry.getId(), date);//Write back data
-
-            //notify dataSetChanged if mode.equals("dropped"||"focus") and set according attribute to false, so item is removed from ListView
-            if (mode.equals("dropped")){
-                    data.setDropped(entries.get(position).getId(), false);
-                    notifyDataSetChanged();
-                } else if( mode.equals("focus")){
-                    data.setFocus(entries.get(position).getId(),false);
-                    notifyDataSetChanged();
-                } else {//reinitialize otherwise
-                    initialize(holder, position);
-                }
-
-        }, entryYear, entryMonth, entryDay);
+        DatePickerDialog datePickerDialog = getDatePickerDialog(entry, entryDay,entryMonth,entryYear,holder,position);
 
         //set listener for cancel button
         datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,context.getResources().getString(R.string.cancel), (dialog, which) -> {
@@ -476,6 +426,18 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         });
 
         datePickerDialog.show();//Show the dialog
+    }
+
+    public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
+        DatePickerDialog datePickerDialog;
+        datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
+            int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
+            data.editDue(entry.getId(), date);//Write back data
+            initialize(holder, position);
+
+
+        }, entryYear, entryMonth, entryDay);
+        return datePickerDialog;
     }
 
     //Setting original row view
@@ -609,20 +571,4 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     }
 
-    //returns ids of checked tasks in mode pick
-    public ArrayList<Integer> getIdsChecked(){
-        return idsChecked;
-    }
-
-    //returns ids of tasks that have not been checked in mode pick
-    public ArrayList<Integer> getIdsNotChecked(){
-        ArrayList<Integer> notChecked = new ArrayList<>();
-
-        for (Entry e: entries){
-            if (!idsChecked.contains(e.getId())){
-                notChecked.add(e.getId());
-            }
-        }
-        return notChecked;
-    }
 }

@@ -17,12 +17,17 @@ package com.bdreiss.zentodo;
 
 import android.os.Bundle;
 
+import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
+import com.bdreiss.zentodo.adapters.FocusTaskListAdapter;
+import com.bdreiss.zentodo.adapters.ListsListAdapter;
+import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
 
+import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.databinding.ActivityMainBinding;
 
 import android.widget.Button;
@@ -125,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
         //initialize adapter for ListView that shows tasks dropped
-        TaskListAdapter adapter = new TaskListAdapter(this,data,data.getDropped(), "dropped");
+        DropTaskListAdapter adapter = new DropTaskListAdapter(this,data,data.getDropped());
         //assign ListView
         ListView listView = findViewById(R.id.list_view_thoughts);
         //set adapter
@@ -170,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
         //initialize adapter for ListView with all tasks that have been dropped or are due today
-        TaskListAdapter adapter = new TaskListAdapter(this, data, data.getTasksToPick(), "pick");
+        PickTaskListAdapter adapter = new PickTaskListAdapter(this, data, data.getTasksToPick());
         //assign ListView
         ListView listView = findViewById(R.id.list_view_pick);
         //set adapter
@@ -223,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
         //initialize the adapter for the ListView to show the tasks to focus on
-        TaskListAdapter adapter = new TaskListAdapter(this,data,data.getFocus(), "focus");
+        FocusTaskListAdapter adapter = new FocusTaskListAdapter(this,data,data.getFocus());
         //assign View
         ListView listView = findViewById(R.id.list_view_focus);
         //set adapter
