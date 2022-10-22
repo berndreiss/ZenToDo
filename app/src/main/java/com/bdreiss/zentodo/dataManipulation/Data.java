@@ -325,14 +325,17 @@ public class Data{
 
         for (Entry e : entries){//loop through this.entries
 
-            if (e.getDue() == 0){
-                if (e.getDropped() || e.getList().equals(" ")){
-                    potentials.add(e);
-                }
-            }
-            else {
-                if (e.getDue() <= date) {//add entry if it is due
-                    potentials.add(e);
+            if (e.getFocus()){
+                potentials.add(e);
+            } else {
+                if (e.getDue() == 0) {
+                    if (e.getDropped() || e.getList().equals(" ")) {
+                        potentials.add(e);
+                    }
+                } else {
+                    if (e.getDue() <= date) {//add entry if it is due
+                        potentials.add(e);
+                    }
                 }
             }
 

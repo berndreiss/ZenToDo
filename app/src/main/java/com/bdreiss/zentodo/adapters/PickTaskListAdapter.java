@@ -53,5 +53,11 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
     }
 
+    @Override
+    public void setFocusListener(ViewHolder holder,int position){
+
+
+    }
+
 }
 
