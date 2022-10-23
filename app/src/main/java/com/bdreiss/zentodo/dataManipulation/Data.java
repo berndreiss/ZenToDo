@@ -109,110 +109,6 @@ public class Data{
 
     }
 
-    public void setRecurring(int id){
-        Entry entry = entries.get(getPosition(id));
-
-        String recurrence = entry.getRecurrence();
-        char mode = recurrence.charAt(0);
-        String offSetStr = "";
-        offSetStr += recurrence.charAt(1);
-
-        if (recurrence.length() == 3) {
-            offSetStr += recurrence.charAt(2);
-        }
-
-        int offSet = Integer.parseInt(offSetStr);
-
-        int date = entry.getDue();
-
-        int today = getToday();
-
-        if (date == 0){
-            date = today;
-        }
-
-        int[] dateArray = new int[3];
-        dateArray[0] = date%100;
-        dateArray[1] = ((date-dateArray[0])/100)%100;
-        dateArray[2] = ((date-dateArray[1]*100-dateArray[0])/10000);
-
-
-        while (date <= today){
-            date = incrementRecurring(mode, dateArray, offSet);
-        }
-
-        entry.setDue(date);
-    }
-
-
-
-    private int incrementRecurring(char mode, int[] dateArray,int offSet){
-
-
-        if (mode =='d' || mode =='w'){
-
-            if (mode == 'w'){
-                dateArray[0] += offSet * 7;
-
-            }else {
-                dateArray[0] += offSet;
-            }
-
-            if (returnDaysOfTheMonth(dateArray[1],dateArray[2]) < dateArray[0]){
-                dateArray[1]++;
-                if (dateArray[1] > 12){
-                    dateArray[2]++;
-                }
-            }
-
-        }
-
-        if (mode == 'm'){
-            dateArray[1]++;
-            if (dateArray[1] > 12){
-                dateArray[2]++;
-            }
-
-        }
-
-        if (mode == 'y'){
-
-            dateArray[2]++;
-
-        }
-
-
-        return dateArray[0] + dateArray[1]*100 + dateArray[2]*10000;
-    }
-
-    private int returnDaysOfTheMonth(int month,int year){
-        switch (month){
-            case 1:
-            case 3:
-            case 5:
-            case 7:
-            case 8:
-            case 10:
-            case 12:
-                return 31;
-            case 2: return isLeapYear(year) ? 29 : 28;
-            case 4:
-            case 6:
-            case 9:
-            case 11:
-                return 30;
-            default: return 0;
-        }
-
-
-    }
-
-    private Boolean isLeapYear(int year){
-        if (year%4 == 0){
-            return year % 400 != 0;
-        }
-        return false;
-    }
 
 
     public void editTask(int id, String newTask){
@@ -250,6 +146,123 @@ public class Data{
         save();
 
     }
+
+    public void setRecurring(int id){
+        Entry entry = entries.get(getPosition(id));
+
+        String recurrence = entry.getRecurrence();
+        char mode = recurrence.charAt(0);
+        StringBuilder offSetStr = new StringBuilder();
+        offSetStr.append(recurrence.charAt(1));
+
+        if (recurrence.length() > 2) {
+
+            for (int i = 2;i<recurrence.length();i++){
+                offSetStr.append(recurrence.charAt(i));
+            }
+        }
+
+        int offSet = Integer.parseInt(offSetStr.toString());
+
+        int date = entry.getDue();
+
+        int today = getToday();
+
+        if (date == 0){
+            date = today;
+        }
+
+        int[] dateArray = new int[3];
+        dateArray[0] = date%100;
+        dateArray[1] = ((date-dateArray[0])/100)%100;
+        dateArray[2] = ((date-dateArray[1]*100-dateArray[0])/10000);
+
+
+        while (date <= today){
+            date = incrementRecurring(mode, dateArray, offSet);
+        }
+
+        entry.setDue(date);
+    }
+
+
+
+    private int incrementRecurring(char mode, int[] dateArray,int offSet){
+
+
+        if (mode =='d' || mode =='w'){
+
+            if (mode == 'w'){
+                dateArray[0] += offSet * 7;
+
+            }else {
+                dateArray[0] += offSet;
+            }
+
+            int daysOfTheMonth = returnDaysOfTheMonth(dateArray[1],dateArray[2]);
+            while (daysOfTheMonth < dateArray[0]){
+                dateArray[0] -= daysOfTheMonth;
+                dateArray[1]++;
+
+                if (dateArray[1] > 12){
+                    dateArray[2]++;
+                    dateArray[1] -= 12;
+                }
+                daysOfTheMonth = returnDaysOfTheMonth(dateArray[1],dateArray[2]);
+            }
+
+        }
+
+        if (mode == 'm'){
+            dateArray[1] += offSet;
+            if (dateArray[1] > 12){
+                dateArray[2]++;
+                dateArray[1] -= 12;
+            }
+
+        }
+
+        if (mode == 'y'){
+
+            dateArray[2]+=offSet;
+
+        }
+
+
+        return dateArray[0] + dateArray[1]*100 + dateArray[2]*10000;
+    }
+
+
+    private int returnDaysOfTheMonth(int month,int year){
+        switch (month){
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+            case 8:
+            case 10:
+            case 12:
+                return 31;
+            case 2: return isLeapYear(year) ? 29 : 28;
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+                return 30;
+            default: return 0;
+        }
+
+
+    }
+
+    private Boolean isLeapYear(int year){
+        if (year%4 == 0){
+            return year % 400 != 0;
+        }
+        return false;
+    }
+
+
 
     public void editDue(int id, int date){
         entries.get(getPosition(id)).setDue(date);
