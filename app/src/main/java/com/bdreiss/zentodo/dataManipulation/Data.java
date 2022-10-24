@@ -20,9 +20,6 @@ public class Data{
 *       -returning tasks that are due (getPotentials()) and updating todays tasks (setTodays(List<Entry> todays))
 */
 
-    private final String delimiter = "------";    //Delimiter for fields of entries in save file
-    private final String lineDelimiter = "%%%%%%%"; //Delimiter for entries in save file
-
     private final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     private final ArrayList<Entry> dropped = new ArrayList<>();
     private final ArrayList<Entry> focus = new ArrayList<>();
@@ -31,51 +28,22 @@ public class Data{
     private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
     private final Context context;
 
-    public SaveFile saveFile;//TODO reset to private
+    private final DbHelper db;
 
     public Data(Context context){
         //initialize instance of Data, set id to 0, create save file and load data from save file
         this.id=0;
         this.context=context;
-        this.saveFile = new SaveFile(context);
+        this.db = new DbHelper(context);
         this.load();
 
     }
 
-
-    public void save(){
-        //saves all entries in this.entries to save file
-        StringBuilder text = new StringBuilder();
-
-        for (Entry e : entries){//gets all the fields of every entry except for id, which is generated programmatically upon loading
-
-            text.append(e.getTask()).append(delimiter).append(e.getFocus()).append(delimiter).append(e.getDropped()).append(delimiter).append(e.getList()).append(delimiter).append(e.getListPosition()).append(delimiter).append(e.getDue()).append(delimiter).append(e.getRecurrence()).append(lineDelimiter);
-        }
-
-        saveFile.save(text.toString()); //Writes contents to file
-
-    }
-
     public void load(){
-        String data = saveFile.load();
-        String[] lines = data.split(lineDelimiter);
+        ArrayList<Entry> newEntries = db.loadEntries();
+        entries.clear();
 
-        for (String line : lines) {//loop through lines to retrieve fields for entry
-            String[] fields = line.split(delimiter);
-            int fieldsLength = fields.length;
-
-            if (fieldsLength == 7) {//loop through fields of entry and add them to this.entries
-                Entry entry = new Entry(generateId(),//generate id
-                                        fields[0],//task
-                                        Boolean.parseBoolean(fields[1]),//isToday
-                                        Boolean.parseBoolean(fields[2]),//isToday
-                                        fields[3], //list
-                                        Integer.parseInt(fields[4]),//listPosition
-                                        Integer.parseInt(fields[5]),//due
-                                        fields[6]);//recurrence
-                entries.add(entry);//add entry
-            }
-        }
+        entries.addAll(newEntries);
 
         initDropped();
         initFocus();
@@ -87,7 +55,7 @@ public class Data{
         Entry entry = new Entry(generateId(),task,false,true, " ", -1, 0," "); //generate ID and create entry
         entries.add(entry); //add entry to this.entries
         initDropped();
-        save(); //write changes to save file
+        db.addEntry(entry); //write changes to save file
     }
 
 
@@ -96,7 +64,7 @@ public class Data{
         Entry entry = new Entry(generateId(),task,false,true, " ", -1, 0," "); //generate ID and create entry
         entries.add(entry); //add entry to this.entries
         initDropped();
-        save(); //write changes to save file
+        db.addEntry(entry); //write changes to save file
     }
 
     public void remove(int id){
@@ -105,15 +73,14 @@ public class Data{
         initDropped();
         initFocus();
         initLists();
-        save(); //write changes to save file
-
+        db.removeEntry(id);
     }
 
 
 
     public void editTask(int id, String newTask){
         entries.get(getPosition(id)).setTask(newTask);
-        save();
+        db.updateEntry(DbHelper.TASK_COL,id, newTask);
     }
 
     //Get position of entry by id, returns -1 if id not found
@@ -135,7 +102,7 @@ public class Data{
     public void setFocus(int id, Boolean focus){
         entries.get(getPosition(id)).setFocus(focus);
         initFocus();
-        save();
+        db.updateEntry(DbHelper.FOCUS_COL, id, DbHelper.boolToInt(focus));
 
     }
 
@@ -143,7 +110,7 @@ public class Data{
         entries.get(getPosition(id)).setDropped(dropped);
         initDropped();
         initFocus();
-        save();
+        db.updateEntry(DbHelper.DROPPED_COL, id, DbHelper.boolToInt(dropped));
 
     }
 
@@ -266,18 +233,18 @@ public class Data{
 
     public void editDue(int id, int date){
         entries.get(getPosition(id)).setDue(date);
-        save();
+        db.updateEntry(DbHelper.DUE_COL, id, date);
     }
 
     public void editRecurrence(int id, String recurrence){
         entries.get(getPosition(id)).setRecurrence(recurrence);
-        save();
+        db.updateEntry(DbHelper.RECURRENCE_COL, id, recurrence);
     }
 
     public void editList(int id, String list){
         entries.get(getPosition(id)).setList(list);
         initLists();
-        save();
+        db.updateEntry(DbHelper.LIST_COL, id, list);
     }
 
     public String[] returnListsAsArray(){

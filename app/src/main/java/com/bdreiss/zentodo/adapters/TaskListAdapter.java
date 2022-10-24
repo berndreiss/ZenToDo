@@ -14,14 +14,6 @@ package com.bdreiss.zentodo.adapters;
  *                                                     --(set list Button)--> set list view --(back Button)-->  original view
  *                                                     --(back Button)--> original view
  *
- *  Furthermore there are 4 modes the list can be in, that have the following implications:
- *
- *  -dropped: Tasks are removed from ListView if date is set, list is assigned, or item is moved to focus
- *  -pick: The checkboxes don't remove task from Data. Instead task is added to an ArrayList<Integer> that holds all checked tasks ids.
- *  -focus: If the focus Button is pressed in the menu or a date is assigned tasks are removed from the ListView.
- *  -list: Tasks are removed from ListView if attribute list is changed.
- *
- *
  */
 
 
@@ -313,7 +305,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         });
 
     }
-
+    
     public void setCheckBoxListener(ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {
             Entry entry = entries.get(position);
