@@ -1,13 +1,24 @@
+/*
+*
+*     Methods to interact with SQLite database:
+*
+*     public void addEntry(Entry entry) -> adds entry to database
+*     public void removeEntry(int id) -> removes entry from database by id
+*     public void updateEntry(String field, int id, String value) -> updates entry via id using String
+*     public void updateEntry(String field, int id, int value) -> update entry via id using Integer
+*     public ArrayList<Entry> loadEntries() -> returns all entries as ArrayList
+*     static boolean intToBool(int i) -> converts Integer to Boolean (false if 0, true otherwise)
+*     static int boolToInt(boolean b) -> converts Boolean to Integer (0 if false, 1 if true)
+*
+*/
+
 package com.bdreiss.zentodo.dataManipulation;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Bundle;
 
 import java.util.ArrayList;
 
@@ -39,6 +50,7 @@ public class DbHelper  extends SQLiteOpenHelper{
         super(context,DB_NAME,null, DB_VERSION);
     }
 
+    //Create new table for entries onCreate
     public void onCreate(SQLiteDatabase db){
         String query = "CREATE TABLE " + TABLE_ENTRIES + " ("
                 + ID_COL + " INTEGER , " + TASK_COL + " TEXT, " + FOCUS_COL + " INTEGER, " + DROPPED_COL + " INTEGER, "
@@ -53,6 +65,7 @@ public class DbHelper  extends SQLiteOpenHelper{
         onCreate(db);
     }
 
+    //adds new entry to database
     public void addEntry(Entry entry) {
 
         ContentValues values = new ContentValues();
@@ -70,6 +83,8 @@ public class DbHelper  extends SQLiteOpenHelper{
         db.insert(TABLE_ENTRIES,null,values);
         db.close();
     }
+
+    //removes entry from database by id
     public void removeEntry(int id){
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -80,12 +95,15 @@ public class DbHelper  extends SQLiteOpenHelper{
         db.close();
     }
 
+    //update entry by id using String
     public void updateEntry(String field, int id, String value){
         String query = "UPDATE " + TABLE_ENTRIES + " SET " + field + "='" + value + "' WHERE " + ID_COL + "=" + id + ";";
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(query);
         db.close();
     }
+
+    //update entry by id using Integer
     public void updateEntry(String field, int id, int value){
         String query = "UPDATE " + TABLE_ENTRIES + " SET " + field + "=" + value + " WHERE " + ID_COL + "=" + id + ";";
         SQLiteDatabase db = this.getWritableDatabase();
@@ -93,6 +111,7 @@ public class DbHelper  extends SQLiteOpenHelper{
         db.close();
     }
 
+    //load all entries from database and return as ArrayList
     public ArrayList<Entry> loadEntries(){
         ArrayList<Entry> entries = new ArrayList<>();
 
@@ -125,9 +144,12 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     }
 
+    //converts Integer to Boolean (false if 0, true otherwise)
     static boolean intToBool(int i){
         return i!=0;
     }
+
+    //converts Boolean to Integer (0 if false, 1 if true)
     static int boolToInt(boolean b){
         return b ? 1 : 0;
     }
