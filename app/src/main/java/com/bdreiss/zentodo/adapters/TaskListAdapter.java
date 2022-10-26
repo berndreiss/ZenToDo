@@ -33,6 +33,9 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
@@ -40,106 +43,101 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class TaskListAdapter extends ArrayAdapter<Entry>{
-
-    public final ArrayList<Entry> entries;//list of entries (see Entry.java)
-
-    public final Context context;//context inherited by MainActivity
-
-    public final Data data;//database from which entries are derived (see Data.java)
+public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHolder> {
 
 
-    public static class ViewHolder {//temporary view
-
-        private LinearLayout linearLayout;//"normal" row layout that shows checkbox and task
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public LinearLayout linearLayout;//"normal" row layout that shows checkbox and task
         protected CheckBox checkBox;//Checkbox to remove entry
-        private TextView task;//Description of the task
-        private Button menu;//activates alternative layout with menu elements
+        public TextView task;//Description of the task
+        public Button menu;//activates alternative layout with menu elements
 
-        private LinearLayout linearLayoutAlt;//"alternative" layout with menu for modifying entries
+        private final LinearLayout linearLayoutAlt;//"alternative" layout with menu for modifying entries
         public Button focus;//Adds task to todays tasks
-        private Button edit;//edits the task
-        private Button setDate;//sets the date the task is due
-        private Button recurrence;//sets the frequency with which the task repeats
-        private Button setList;//sets the list the task is assigned to
-        private Button back;//returns to normal row layout
+        public Button edit;//edits the task
+        public Button setDate;//sets the date the task is due
+        public Button recurrence;//sets the frequency with which the task repeats
+        public Button setList;//sets the list the task is assigned to
+        public Button back;//returns to normal row layout
 
-        private LinearLayout linearLayoutEdit;//row layout for task editing
-        private EditText editText;//field to edit text
-        private Button backEdit;//return to normal layout and save
+        public LinearLayout linearLayoutEdit;//row layout for task editing
+        public EditText editText;//field to edit text
+        public Button backEdit;//return to normal layout and save
 
-        private LinearLayout linearLayoutRecurrence;//row layout for setting recurrence:
+        public LinearLayout linearLayoutRecurrence;//row layout for setting recurrence:
         //TextView                                 //"repeats every...
-        private EditText editTextRecurrence;//...number...
-        private Spinner spinnerRecurrence;//...days/weeks/months/years"
-        private Button clearRecurrence;//clears all fields
-        private Button backRecurrence;//write back result
+        public EditText editTextRecurrence;//...number...
+        public Spinner spinnerRecurrence;//...days/weeks/months/years"
+        public Button clearRecurrence;//clears all fields
+        public Button backRecurrence;//write back result
 
-        private LinearLayout linearLayoutList;//row layout for setting lists
+        public LinearLayout linearLayoutList;//row layout for setting lists
         public AutoCompleteTextView autoCompleteList;//AutoComplete to set new list
-        private Button clearList;//clears AutoComplete
+        public Button clearList;//clears AutoComplete
         public Button backList;//return to original layout and save
+
+        public ViewHolder(View view){
+
+            super(view);
+
+            linearLayout = view.findViewById(R.id.linear_layout);
+            checkBox = view.findViewById(R.id.checkbox);
+            task = view.findViewById(R.id.task);
+            menu = view.findViewById(R.id.button_menu);
+
+            linearLayoutAlt = view.findViewById(R.id.linear_layout_alt);
+            focus = view.findViewById(R.id.button_focus);
+            edit = view.findViewById(R.id.button_edit);
+            setDate = view.findViewById(R.id.button_calendar);
+            recurrence = view.findViewById(R.id.button_recurrence);
+            setList = view.findViewById(R.id.button_list);
+            back = view.findViewById(R.id.button_back);
+
+            linearLayoutEdit = view.findViewById(R.id.linear_layout_edit);
+            editText = view.findViewById(R.id.edit_text_list_view);
+            backEdit = view.findViewById(R.id.button_back_edit);
+
+            linearLayoutRecurrence = view.findViewById(R.id.linear_layout_recurrence);
+            editTextRecurrence = view.findViewById(R.id.edit_text_recurrence);
+            spinnerRecurrence = view.findViewById(R.id.spinner_time_interval);
+            clearRecurrence = view.findViewById(R.id.button_recurrence_clear);
+            backRecurrence = view.findViewById(R.id.button_back_recurrence);
+
+            linearLayoutList = view.findViewById(R.id.linear_layout_list);
+            autoCompleteList = view.findViewById(R.id.auto_complete_list);
+            clearList = view.findViewById(R.id.button_list_clear);
+            backList = view.findViewById(R.id.button_back_list);
+        }
     }
 
-    //Initialize Adapter
+    public ArrayList<Entry> entries;
+
+    public Context context;
+
+    public Data data;
+
     public TaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
 
-        super(context, R.layout.row,entries);
+        this.entries = entries;
         this.context = context;
         this.data = data;
-        this.entries = entries;
     }
 
-
-    @SuppressLint("InflateParams")
-
-    //returns View for row layout
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-        final ViewHolder holder;
+        View view = inflater.inflate(R.layout.row, parent, false);
 
-        //Connect all the views of different layouts to the holder
-        if (convertView == null) {
-            holder = new ViewHolder(); LayoutInflater inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.row, null, true);
+        return new ViewHolder(view);
+    }
 
-            holder.linearLayout = convertView.findViewById(R.id.linear_layout);
-            holder.checkBox = convertView.findViewById(R.id.checkbox);
-            holder.task = convertView.findViewById(R.id.task);
-            holder.menu = convertView.findViewById(R.id.button_menu);
+    @Override
+    public void onBindViewHolder(TaskListAdapter.ViewHolder holder, int position) {
+        final Entry entry = entries.get(position);
 
-            holder.linearLayoutAlt = convertView.findViewById(R.id.linear_layout_alt);
-            holder.focus = convertView.findViewById(R.id.button_focus);
-            holder.edit = convertView.findViewById(R.id.button_edit);
-            holder.setDate = convertView.findViewById(R.id.button_calendar);
-            holder.recurrence = convertView.findViewById(R.id.button_recurrence);
-            holder.setList = convertView.findViewById(R.id.button_list);
-            holder.back = convertView.findViewById(R.id.button_back);
-
-            holder.linearLayoutEdit = convertView.findViewById(R.id.linear_layout_edit);
-            holder.editText = convertView.findViewById(R.id.edit_text_list_view);
-            holder.backEdit = convertView.findViewById(R.id.button_back_edit);
-
-            holder.linearLayoutRecurrence = convertView.findViewById(R.id.linear_layout_recurrence);
-            holder.editTextRecurrence = convertView.findViewById(R.id.edit_text_recurrence);
-            holder.spinnerRecurrence = convertView.findViewById(R.id.spinner_time_interval);
-            holder.clearRecurrence = convertView.findViewById(R.id.button_recurrence_clear);
-            holder.backRecurrence = convertView.findViewById(R.id.button_back_recurrence);
-
-            holder.linearLayoutList = convertView.findViewById(R.id.linear_layout_list);
-            holder.autoCompleteList = convertView.findViewById(R.id.auto_complete_list);
-            holder.clearList = convertView.findViewById(R.id.button_list_clear);
-            holder.backList = convertView.findViewById(R.id.button_back_list);
-
-            convertView.setTag(holder);
-
-        }else {
-            // the getTag returns the viewHolder object set as a tag to the view
-            holder = (ViewHolder)convertView.getTag();
-        }
-
+        holder.task.setText(entry.getTask());
         //set TextView to task
         holder.task.setText(entries.get(position).getTask());
 
@@ -159,12 +157,17 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
         //initialize all row components and set onClickListeners on different Buttons
         initialize(holder,position);
-        return convertView;
+
     }
 
+    // Returns the total count of items in the list
+    @Override
+    public int getItemCount() {
+        return entries.size();
+    }
 
     //setting default row layout and onClickListener
-    public void initialize(ViewHolder holder, int position){
+    public void initialize(TaskListAdapter.ViewHolder holder, int position){
         //setting default row layout visible and active and all others to invisible and invalid
         setOriginal(holder);
 
@@ -206,7 +209,6 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
             //Listener to add date when task is due
             holder.setDate.setOnClickListener(view14 -> {
-                Context context = getContext();
                 openDatePickerDialog(context,holder,position);//opens date pickerDialog
             });
 
@@ -305,32 +307,31 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         });
 
     }
-    
-    public void setCheckBoxListener(ViewHolder holder, int position){
+    public void setCheckBoxListener(TaskListAdapter.ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {
             Entry entry = entries.get(position);
             int id = entry.getId();//get ID
 
             boolean recurring = !entry.getRecurrence().equals(" ");
 
-                //because lists are dynamically generated the DataSet has to be manually updated
-                    if (recurring) {
-                        data.setRecurring(id);
-                        data.setFocus(id,false);
-                        data.setDropped(id,false);
-                    } else {
-                        data.remove(id);
-                    }
+            //because lists are dynamically generated the DataSet has to be manually updated
+            if (recurring) {
+                data.setRecurring(id);
+                data.setFocus(id,false);
+                data.setDropped(id,false);
+            } else {
+                data.remove(id);
+            }
 
 
-                notifyDataSetChanged();//update the adapter
+            notifyDataSetChanged();//update the adapter
 
 
         });
 
     }
 
-    public void setFocusListener(ViewHolder holder,int position){
+    public void setFocusListener(TaskListAdapter.ViewHolder holder, int position){
         holder.focus.setOnClickListener(view12 -> {
             Entry entry = entries.get(position);
             int id = entry.getId();//get id
@@ -341,7 +342,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     }
 
-    public void setListListener(ViewHolder holder, int position){
+    public void setListListener(TaskListAdapter.ViewHolder holder, int position){
 
         holder.backList.setOnClickListener(view161 -> {
             int id = entries.get(position).getId();//Get id of task
@@ -359,7 +360,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         });
     }
     //reset all fields in recurrence row view
-    private void setClearRecurrenceListener(ViewHolder holder){
+    private void setClearRecurrenceListener(TaskListAdapter.ViewHolder holder){
         holder.clearRecurrence.setOnClickListener(view -> {
             holder.spinnerRecurrence.setSelection(0);
             holder.editTextRecurrence.setText("");
@@ -369,7 +370,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //rest Autocomplete in list row view
-    private void setClearListenerList(ViewHolder holder){
+    private void setClearListenerList(TaskListAdapter.ViewHolder holder){
         holder.clearList.setOnClickListener(view -> {
             holder.autoCompleteList.setText("");
             setClearListenerList(holder);
@@ -377,7 +378,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //choose date for which task is due and write back data, if "no date" is pressed, date is set to 0
-    private void openDatePickerDialog(Context context,ViewHolder holder, int position) {
+    private void openDatePickerDialog(Context context, TaskListAdapter.ViewHolder holder, int position) {
 
         //Get entry
         Entry entry = entries.get(position);
@@ -420,7 +421,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
         datePickerDialog.show();//Show the dialog
     }
 
-    public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
+    public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, TaskListAdapter.ViewHolder holder, int position){
         DatePickerDialog datePickerDialog;
         datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
             int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
@@ -433,7 +434,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Setting original row view
-    private void setOriginal(ViewHolder holder){
+    private void setOriginal(TaskListAdapter.ViewHolder holder){
         //Set original row view to visible and active
         holder.linearLayout.setAlpha(1);
         enable(holder.linearLayout);
@@ -457,7 +458,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Setting alternative row view coming from original
-    private void setAlt(ViewHolder holder){
+    private void setAlt(TaskListAdapter.ViewHolder holder){
         //Set alternative row view to visible and active
         holder.linearLayoutAlt.bringToFront();
         holder.linearLayoutAlt.setAlpha(1);
@@ -470,7 +471,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Setting edit row view coming from alternative view
-    private void setEdit(ViewHolder holder){
+    private void setEdit(TaskListAdapter.ViewHolder holder){
 
         //Set edit row view to visible and active
         holder.linearLayoutEdit.bringToFront();
@@ -485,7 +486,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
 
     //Setting recurrence row view coming from alternative view
-    private void setRecurrence(ViewHolder holder){
+    private void setRecurrence(TaskListAdapter.ViewHolder holder){
         //Set recurrence row view to visible and active
         holder.linearLayoutRecurrence.bringToFront();
         holder.linearLayoutRecurrence.setAlpha(1);
@@ -497,7 +498,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
     }
 
     //Setting list row view coming from alternative view
-    private void setList(ViewHolder holder){
+    private void setList(TaskListAdapter.ViewHolder holder){
         //Set list row view to visible and active
         holder.linearLayoutList.bringToFront();
         holder.linearLayoutList.setAlpha(1);
@@ -532,7 +533,7 @@ public class TaskListAdapter extends ArrayAdapter<Entry>{
 
     //Sets buttons that have edited data that has been set to a different color
     @SuppressLint("UseCompatLoadingForDrawables")
-    private void markSet(ViewHolder holder, Entry entry){
+    private void markSet(TaskListAdapter.ViewHolder holder, Entry entry){
 
         //Set date button to alternative color if !=0, original color otherwise
         if (entry.getDue()!=0){

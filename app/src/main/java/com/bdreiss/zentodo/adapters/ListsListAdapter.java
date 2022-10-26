@@ -16,6 +16,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
@@ -25,7 +28,8 @@ import java.util.ArrayList;
 public class ListsListAdapter extends ArrayAdapter<String> {
 
     private final Context context;
-    private final ListView listView;//ListView to show lists/tasks
+    private final RecyclerView recyclerView;//ListView to show lists/tasks
+    private final ListView listView;
     private final ArrayList<String> lists;//Dynamically generated Array of all lists in data
     private final Data data;//Database
     private final TextView header;//header of ListView. setVisibility=GONE by default and =VISIBLE when TaskListAdapter is initialized.
@@ -34,14 +38,18 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         private Button button;//Button to choose list
     }
 
-    public ListsListAdapter(Context context, ListView listview, TextView header, Data data, ArrayList<String> lists){
+    public ListsListAdapter(Context context, ListView listView, RecyclerView recyclerView, TextView header, Data data, ArrayList<String> lists){
         super(context, R.layout.lists_row,lists);
-        this.listView = listview;
         this.context=context;
         this.data = data;
         this.lists = lists;
         this.header = header;
+        this.listView = listView;
+        this.recyclerView = recyclerView;
+        recyclerView.setVisibility(View.GONE);
+
         header.setVisibility(View.GONE);
+
     }
 
     @SuppressLint("InflateParams")
@@ -72,21 +80,26 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             //set header with list name visible
             header.setVisibility(View.VISIBLE);
 
+            recyclerView.setVisibility(View.VISIBLE);
+
+            listView.setVisibility(View.GONE);
             //fill ListView with all tasks or according list
             if (holder.button.getText().equals(context.getResources().getString(R.string.allTasks))){
 
                 header.setText(context.getResources().getString(R.string.allTasks));//set header text
                 //initialize adapter
                 AllTaskListAdapter adapter =new AllTaskListAdapter(context,data, data.getEntries());
-                listView.setAdapter(adapter);//set adapter
+                recyclerView.setAdapter(adapter);//set adapter
 
             } else{
                 String list = holder.button.getText().toString();//get list name
                 header.setText(list);//set header text
                 //initialize adapter
                 ListTaskListAdapter adapter = new ListTaskListAdapter(context, data, data.getFromList(list));
-                listView.setAdapter(adapter);//set adapter
+                recyclerView.setAdapter(adapter);//set adapter
+
             }
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
         });
 
         return convertView;

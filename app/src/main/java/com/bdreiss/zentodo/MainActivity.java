@@ -21,13 +21,15 @@ import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
 import com.bdreiss.zentodo.adapters.FocusTaskListAdapter;
 import com.bdreiss.zentodo.adapters.ListsListAdapter;
 import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
+import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.View;
 
-import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.databinding.ActivityMainBinding;
 
 import android.widget.Button;
@@ -130,11 +132,13 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
         //initialize adapter for ListView that shows tasks dropped
-        DropTaskListAdapter adapter = new DropTaskListAdapter(this,data,data.getDropped());
+        DropTaskListAdapter adapter = new DropTaskListAdapter(this, data, data.getDropped());
         //assign ListView
-        ListView listView = findViewById(R.id.list_view_thoughts);
+        RecyclerView listView = findViewById(R.id.list_view_drop);
         //set adapter
         listView.setAdapter(adapter);
+
+        listView.setLayoutManager(new LinearLayoutManager(this));
 
         //assign EditText to add new tasks
         final EditText editText = findViewById(R.id.edit_text_drop);
@@ -177,9 +181,10 @@ public class MainActivity extends AppCompatActivity {
         //initialize adapter for ListView with all tasks that have been dropped or are due today
         PickTaskListAdapter adapter = new PickTaskListAdapter(this, data, data.getTasksToPick());
         //assign ListView
-        ListView listView = findViewById(R.id.list_view_pick);
+        RecyclerView listView = findViewById(R.id.list_view_pick);
         //set adapter
         listView.setAdapter(adapter);
+        listView.setLayoutManager(new LinearLayoutManager(this));
 
         //button to pick tasks that have been checked
         Button pick = findViewById(R.id.button_pick);
@@ -230,9 +235,10 @@ public class MainActivity extends AppCompatActivity {
         //initialize the adapter for the ListView to show the tasks to focus on
         FocusTaskListAdapter adapter = new FocusTaskListAdapter(this,data,data.getFocus());
         //assign View
-        ListView listView = findViewById(R.id.list_view_focus);
+        RecyclerView listView = findViewById(R.id.list_view_focus);
         //set adapter
         listView.setAdapter(adapter);
+        listView.setLayoutManager(new LinearLayoutManager(this));
 
 
     }
@@ -254,11 +260,12 @@ public class MainActivity extends AppCompatActivity {
 
         //initialize ListView to show lists available
         ListView listView = findViewById(R.id.list_view_lists);
+        RecyclerView recyclerView = findViewById(R.id.recycle_view_lists);
         //TextView that shows the list your currently in as a header
         TextView header = findViewById(R.id.text_view_lists_header);
         //initialize adapter: each item represents a button that when pressed initializes a TaskListAdapter
         //with all the tasks of the list (see ListsListAdapter.java)
-        ListsListAdapter adapter = new ListsListAdapter(this,listView,header,data,data.getLists());
+        ListsListAdapter adapter = new ListsListAdapter(this, listView, recyclerView,header,data,data.getLists());
 
         //set adapter
         listView.setAdapter(adapter);

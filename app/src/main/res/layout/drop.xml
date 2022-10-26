@@ -18,8 +18,7 @@
             android:id="@+id/edit_text_drop"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="new Task"
-            />
+            android:hint="new Task" />
         <Button
             android:id="@+id/button_drop"
             android:layout_width="match_parent"
@@ -29,8 +28,8 @@
 
             />
 
-        <ListView
-            android:id="@+id/list_view_thoughts"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list_view_drop"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
