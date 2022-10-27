@@ -21,10 +21,11 @@ import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
 import com.bdreiss.zentodo.adapters.FocusTaskListAdapter;
 import com.bdreiss.zentodo.adapters.ListsListAdapter;
 import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
-import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -140,6 +141,8 @@ public class MainActivity extends AppCompatActivity {
 
         listView.setLayoutManager(new LinearLayoutManager(this));
 
+        getTouchHelper().attachToRecyclerView(listView);
+
         //assign EditText to add new tasks
         final EditText editText = findViewById(R.id.edit_text_drop);
         //button to drop task in EditText
@@ -185,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
         //set adapter
         listView.setAdapter(adapter);
         listView.setLayoutManager(new LinearLayoutManager(this));
+        getTouchHelper().attachToRecyclerView(listView);
 
         //button to pick tasks that have been checked
         Button pick = findViewById(R.id.button_pick);
@@ -239,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
         //set adapter
         listView.setAdapter(adapter);
         listView.setLayoutManager(new LinearLayoutManager(this));
-
+        getTouchHelper().attachToRecyclerView(listView);
 
     }
 
@@ -290,6 +294,29 @@ public class MainActivity extends AppCompatActivity {
             View child = layout.getChildAt(i);
             child.setVisibility(View.GONE);
         }
+    }
+
+    public ItemTouchHelper getTouchHelper(){
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(
+
+                ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, 0) {
+
+            @Override
+
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+
+                return false;
+
+            }
+
+            @Override
+
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+            }
+
+        } ;
+        return new ItemTouchHelper(simpleCallback);
     }
 
 }
