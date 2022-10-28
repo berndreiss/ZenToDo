@@ -21,8 +21,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
             data.remove(id);
             entries.remove(position);
 
-            notifyDataSetChanged();//update the adapter
-
+            notifyDataSetChanged();
 
         });
 
@@ -47,7 +46,6 @@ public class ListTaskListAdapter extends TaskListAdapter{
                 }
             }
             notifyDataSetChanged();
-
         });
     }
 }

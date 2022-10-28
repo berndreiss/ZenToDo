@@ -24,7 +24,6 @@ public class DropTaskListAdapter extends TaskListAdapter{
             //change dropped in entry to false
             data.setDropped(id, false);//change to false
             notifyDataSetChanged();
-
         });
 
     }

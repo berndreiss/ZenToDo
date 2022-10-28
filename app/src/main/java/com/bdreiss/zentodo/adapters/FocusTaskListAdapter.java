@@ -20,7 +20,8 @@ public class FocusTaskListAdapter extends TaskListAdapter{
             Entry entry = entries.get(position);
             int id = entry.getId();//get id
             data.setFocus(id, !entry.getFocus());//change state of focus in entry
-            notifyDataSetChanged();
+            if (!entry.getFocus()){
+                notifyDataSetChanged();            }
         });
 
     }

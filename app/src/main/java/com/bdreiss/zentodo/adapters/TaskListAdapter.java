@@ -42,8 +42,9 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 
-public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHolder> {
+public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHolder> implements ItemTouchHelperAdapter {
 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -324,8 +325,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             }
 
 
-            notifyDataSetChanged();//update the adapter
-
+            notifyDataSetChanged();
 
         });
 
@@ -512,6 +512,25 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
+    @Override
+    public void onItemMove(int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(entries, i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(entries, i, i - 1);
+            }
+        }
+        notifyItemMoved(fromPosition,toPosition);
+
+    }
+    @Override
+    public void onItemDismiss(int position) {
+        entries.remove(position);
+        notifyDataSetChanged();
+    }
     //Disables view and first generation children
     private void disable(LinearLayout layout){
         for (int i = 0; i < layout.getChildCount(); i++) {

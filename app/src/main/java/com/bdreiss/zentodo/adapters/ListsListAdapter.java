@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -47,8 +48,6 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         this.listView = listView;
         this.recyclerView = recyclerView;
         recyclerView.setVisibility(View.GONE);
-
-        header.setVisibility(View.GONE);
 
     }
 
@@ -90,6 +89,12 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //initialize adapter
                 AllTaskListAdapter adapter =new AllTaskListAdapter(context,data, data.getEntries());
                 recyclerView.setAdapter(adapter);//set adapter
+                ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(adapter);
+
+                ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
+
+                iTouchHelper.attachToRecyclerView(recyclerView);
+
 
             } else{
                 String list = holder.button.getText().toString();//get list name
@@ -97,9 +102,16 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //initialize adapter
                 ListTaskListAdapter adapter = new ListTaskListAdapter(context, data, data.getFromList(list));
                 recyclerView.setAdapter(adapter);//set adapter
+                ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(adapter);
+
+                ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
+
+                iTouchHelper.attachToRecyclerView(recyclerView);
+
 
             }
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
         });
 
         return convertView;

@@ -9,7 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="10dp"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:background="@android:color/white"
+        android:foreground="?attr/selectableItemBackground">
 
         <CheckBox
             android:id="@+id/checkbox"
