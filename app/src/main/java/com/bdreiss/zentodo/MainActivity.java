@@ -18,15 +18,12 @@ package com.bdreiss.zentodo;
 import android.os.Bundle;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
-import com.bdreiss.zentodo.adapters.CustomItemTouchHelperCallback;
+import com.bdreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import com.bdreiss.zentodo.adapters.FocusTaskListAdapter;
-import com.bdreiss.zentodo.adapters.ListTaskListAdapter;
 import com.bdreiss.zentodo.adapters.ListsListAdapter;
 import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
-import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -44,7 +41,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -218,8 +214,7 @@ public class MainActivity extends AppCompatActivity {
         pickItems.clear();
         ArrayList<Entry> temp = data.getTasksToPick();
 
-        for (Entry e : temp)
-            pickItems.add(e);
+        pickItems.addAll(temp);
 
         pickAdapter.notifyDataSetChanged();
 

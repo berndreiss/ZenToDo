@@ -29,7 +29,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
 
     @Override
-    public void setListListener(ViewHolder holder, int position){
+    public void setBackListListener(ViewHolder holder, int position){
 
         holder.backList.setOnClickListener(view161 -> {
             int id = entries.get(position).getId();//Get id of task
@@ -38,6 +38,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
             //set to no list if AutoComplete is empty
             if (list.equals(" ") || list.equals("")) {
                 data.editList(id, " ");//reset to no list
+                setBackListListener(holder,position);
 
             } else {
                 if (!list.equals(entries.get(position).getList())) {

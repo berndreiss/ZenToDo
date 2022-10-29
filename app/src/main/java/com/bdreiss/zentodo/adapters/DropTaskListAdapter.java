@@ -29,7 +29,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
     }
 
     @Override
-    public void setListListener(ViewHolder holder, int position){
+    public void setBackListListener(ViewHolder holder, int position){
 
         holder.backList.setOnClickListener(view161 -> {
             int id = entries.get(position).getId();//Get id of task
@@ -40,8 +40,8 @@ public class DropTaskListAdapter extends TaskListAdapter{
 
                 data.editList(id, " ");//reset to no list
                 //remove task from ListView is mode.equals("list")
-                super.initialize(holder, position);//returning to original row view
-
+                setOriginal(holder);
+                setBackListListener(holder, position);
 
             } else {
                 data.editList(id, list);//write back otherwise
