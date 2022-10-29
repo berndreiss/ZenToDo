@@ -222,9 +222,11 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         holder.focus.setOnClickListener(view12 -> {
             Entry entry = entries.get(position);
             int id = entry.getId();//get id
+            data.setDropped(id, false);
             data.setFocus(id, !entry.getFocus());//change state of focus in entry
             setOriginal(holder);
             setFocusListener(holder, position);
+            markSet(holder,entry);
 
         });
 
@@ -317,7 +319,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
             int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
             data.editDue(entry.getId(), date);//Write back data
-
+            setOriginal(holder);
 
         }, entryYear, entryMonth, entryDay);
         return datePickerDialog;
@@ -541,11 +543,11 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     public void onItemMove(int fromPosition, int toPosition) {
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                Collections.swap(entries, i, i + 1);
+                data.swap(i,i+1);
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                Collections.swap(entries, i, i - 1);
+                data.swap(i,i-1);
             }
         }
         notifyItemMoved(fromPosition,toPosition);

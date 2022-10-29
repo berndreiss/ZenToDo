@@ -65,5 +65,9 @@ public class DropTaskListAdapter extends TaskListAdapter{
         return datePickerDialog;
     }
 
+    public void add(String task){
+        data.add(task);
+        notifyDataSetChanged();
+    }
 
 }

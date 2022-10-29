@@ -20,19 +20,21 @@ public class Data{
 *       -returning tasks that are due (getPotentials()) and updating todays tasks (setTodays(List<Entry> todays))
 */
 
-    private final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
-    private final ArrayList<Entry> dropped = new ArrayList<>();
-    private final ArrayList<Entry> focus = new ArrayList<>();
-    private final ArrayList<String> listNames = new ArrayList<>();
-    private final ArrayList<Pair<String,ArrayList<Entry>>> lists = new ArrayList<>();
-    private int id; //running id, which is initialized at 0 upon loading and incremented by one for each task
+    protected static final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
+    protected static final ArrayList<Entry> entriesOrderedByDue = new ArrayList<>();
+    protected static final ArrayList<Entry> dropped = new ArrayList<>();
+    protected static final ArrayList<Entry> focus = new ArrayList<>();
+    protected static final ArrayList<Entry> tasksToPick = new ArrayList<>();
+    protected static final ArrayList<String> listNames = new ArrayList<>();
+    protected static final ArrayList<Pair<String,ArrayList<Entry>>> lists = new ArrayList<>();
+    protected static ArrayList<Integer> ids = new ArrayList<>();
+
     private final Context context;
 
     private final DbHelper db;
 
     public Data(Context context){
         //initialize instance of Data, set id to 0, create save file and load data from save file
-        this.id=0;
         this.context=context;
         this.db = new DbHelper(context);
         this.load();
@@ -43,40 +45,54 @@ public class Data{
         ArrayList<Entry> newEntries = db.loadEntries();
         entries.clear();
 
+        for (Entry e: newEntries)
+            ids.add(e.getId());
+
+        Collections.sort(ids);
+
         entries.addAll(newEntries);
 
         initDropped();
         initFocus();
         initLists();
-
+        initTasksToPick();
+        initOrderedByDue();
     }
 
     public void add(String task){
         Entry entry = new Entry(generateId(),task,false,true, " ", -1, 0," "); //generate ID and create entry
-        entries.add(entry); //add entry to this.entries
-        initDropped();
-        db.addEntry(entry); //write changes to save file
-    }
 
-
-    public void add(String task, int position){
-        //add new entry to database
-        Entry entry = new Entry(generateId(),task,false,true, " ", -1, 0," "); //generate ID and create entry
         entries.add(entry); //add entry to this.entries
-        initDropped();
+        dropped.add(entry);//add entry to this.dropped
+        tasksToPick.add(entry);
         db.addEntry(entry); //write changes to save file
+        initOrderedByDue();
     }
 
     public void remove(int id){
         //remove entry from database
         entries.remove(getPosition(id));
+        for (int i = 0; i < ids.size();i++){
+            if (ids.get(i) == id){
+                ids.remove(i);
+                break;
+            }
+        }
         initDropped();
         initFocus();
         initLists();
+        initTasksToPick();
+        initOrderedByDue();
         db.removeEntry(id);
     }
 
-
+    public void swap(int i, int j){
+        Collections.swap(entries,i,j);
+        initDropped();
+        initFocus();
+        initLists();
+        initTasksToPick();
+    }
 
     public void editTask(int id, String newTask){
         entries.get(getPosition(id)).setTask(newTask);
@@ -109,7 +125,6 @@ public class Data{
     public void setDropped(int id, Boolean dropped){
         entries.get(getPosition(id)).setDropped(dropped);
         initDropped();
-        initFocus();
         db.updateEntry(DbHelper.DROPPED_COL, id, DbHelper.boolToInt(dropped));
 
     }
@@ -150,9 +165,8 @@ public class Data{
         }
 
         entry.setDue(date);
+        initOrderedByDue();
     }
-
-
 
     private int incrementRecurring(char mode, int[] dateArray,int offSet){
 
@@ -199,7 +213,6 @@ public class Data{
         return dateArray[0] + dateArray[1]*100 + dateArray[2]*10000;
     }
 
-
     private int returnDaysOfTheMonth(int month,int year){
         switch (month){
             case 1:
@@ -229,10 +242,9 @@ public class Data{
         return false;
     }
 
-
-
     public void editDue(int id, int date){
         entries.get(getPosition(id)).setDue(date);
+        initOrderedByDue();
         db.updateEntry(DbHelper.DUE_COL, id, date);
     }
 
@@ -264,7 +276,7 @@ public class Data{
         return listNames;
     }
 
-    public void initLists(){
+    private void initLists(){
 
         listNames.clear();
         lists.clear();
@@ -296,33 +308,34 @@ public class Data{
         listNames.add(context.getResources().getString(R.string.allTasks));
     }
 
-    public ArrayList<Entry> getTasksToPick(){
+    private void initTasksToPick(){
         //return a list of all entries for which the due date is <=today
 
-        ArrayList<Entry> potentials = new ArrayList<>();//create new list
+        tasksToPick.clear();
 
         int date = getToday();//get current date as "yyyyMMdd"
 
         for (Entry e : entries){//loop through this.entries
 
             if (e.getFocus()){
-                potentials.add(e);
+                tasksToPick.add(e);
             } else {
                 if (e.getDue() == 0) {
                     if (e.getDropped() || e.getList().equals(" ")) {
-                        potentials.add(e);
+                        tasksToPick.add(e);
                     }
                 } else {
                     if (e.getDue() <= date) {//add entry if it is due
-                        potentials.add(e);
+                        tasksToPick.add(e);
                     }
                 }
             }
 
         }
-        return potentials;
 
     }
+
+    public ArrayList<Entry> getTasksToPick(){return tasksToPick;}
 
     public ArrayList<Entry> getFromList(String list){
 
@@ -349,8 +362,21 @@ public class Data{
 
     //Generates a running id
     private int generateId(){
-        id += 1;
-        return id-1;
+        int id = 0;
+
+        for (int i : ids){
+            if (i == id){
+                id++;
+            }
+            else{
+                ids.add(id);
+                Collections.sort(ids);
+                return id;
+            }
+        }
+        ids.add(id);
+        Collections.sort(ids);
+        return id;
     }
 
     public int getToday(){
@@ -369,6 +395,12 @@ public class Data{
     public ArrayList<Entry> getEntries(){
 
         return entries;
+
+    }
+    
+    public ArrayList<Entry> getEntriesOrderedByDate(){
+
+        return entriesOrderedByDue;
 
     }
 
@@ -391,6 +423,15 @@ public class Data{
         }
     }
 
+    public void initOrderedByDue(){
+        entriesOrderedByDue.clear();
+        entriesOrderedByDue.addAll(entries);
+        MergeSortByDue sort = new MergeSortByDue(entriesOrderedByDue);
+
+        sort.sort();
+
+
+    }
 
 
 }

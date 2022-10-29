@@ -200,9 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
             //add task to Data if it is not empty
             if (!task.equals("")) {
-                data.add(task);
-                dropAdapter.notifyDataSetChanged();
-                //re-initialize Drop layout
+                dropAdapter.add(task);
                 dropListener(editText, buttonDrop);
             }
         });
@@ -211,13 +209,8 @@ public class MainActivity extends AppCompatActivity {
 
     //initializes Pick layout
     public void showPick(){
-        pickItems.clear();
-        ArrayList<Entry> temp = data.getTasksToPick();
-
-        pickItems.addAll(temp);
 
         pickAdapter.notifyDataSetChanged();
-
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
         //disable components of all other layouts (setVisibility = GONE)
@@ -234,9 +227,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initializePick() {
-        pickItems = data.getTasksToPick();
         //initialize adapter for ListView with all tasks that have been dropped or are due today
-        pickAdapter = new PickTaskListAdapter(this, data, pickItems);
+        pickAdapter = new PickTaskListAdapter(this, data, data.getTasksToPick());
         //assign ListView
         RecyclerView listView = findViewById(R.id.list_view_pick);
         //set adapter
@@ -284,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
     //initializes the Focus layout
     public void showFocus(){
 
-        focusAdapter.notifyDataSetChanged();
+
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);
         //disable all components in all other layouts (setVisibility = GONE)
@@ -321,7 +313,6 @@ public class MainActivity extends AppCompatActivity {
 
     //initialize Lists layout
     public void showLists(){
-        listsListAdapter.notifyDataSetChanged();
         //enable all components in the Lists layout (setVisibility = VISIBLE)
         enableLayout(lists);
         //disable all components in all other layouts (setVisibility = GONE)

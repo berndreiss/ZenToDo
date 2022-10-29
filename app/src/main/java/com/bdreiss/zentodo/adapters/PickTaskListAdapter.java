@@ -8,12 +8,10 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 import java.util.ArrayList;
 
 public class PickTaskListAdapter extends TaskListAdapter{
-    private final ArrayList<Integer> idsChecked;//if mode.equals("pick") it stores ids of all checked tasks
+    private final ArrayList<Integer> idsChecked = new ArrayList<>();//if mode.equals("pick") it stores ids of all checked tasks
 
     public PickTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
         super(context, data, entries);
-        this.idsChecked = new ArrayList<>();
-
     }
 
 
@@ -54,10 +52,7 @@ public class PickTaskListAdapter extends TaskListAdapter{
     }
 
     @Override
-    public void setFocusListener(ViewHolder holder,int position){
-
-
-    }
+    public void setFocusListener(ViewHolder holder,int position){}
 
 }
 

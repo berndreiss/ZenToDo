@@ -88,14 +88,8 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 header.setText(context.getResources().getString(R.string.allTasks));//set header text
                 //initialize adapter
-                AllTaskListAdapter adapter =new AllTaskListAdapter(context,data, data.getEntries());
+                AllTaskListAdapter adapter =new AllTaskListAdapter(context,data, data.getEntriesOrderedByDate());
                 recyclerView.setAdapter(adapter);//set adapter
-                ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(adapter);
-
-                ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
-
-                iTouchHelper.attachToRecyclerView(recyclerView);
-
 
             } else{
                 String list = holder.button.getText().toString();//get list name
