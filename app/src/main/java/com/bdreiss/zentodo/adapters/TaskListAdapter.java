@@ -167,7 +167,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
         //setting Entry.focus to true/false, which means the task is/is not listed in focus mode
         setFocusListener(holder, position);
-        setEditListener(holder, position);
+        setEditListener(holder);
         setBackEditListener(holder, position);
         setSetDateListener(holder, position);
         setRecurrenceListener(holder, position);
@@ -232,7 +232,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
-    protected void setEditListener(TaskListAdapter.ViewHolder holder, int position){
+    protected void setEditListener(TaskListAdapter.ViewHolder holder){
         //onClickListener for Button to change the task name
         holder.edit.setOnClickListener(view13 -> {
 
@@ -242,7 +242,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             //setting editText to task
             holder.editText.setText(holder.task.getText());
 
-            setEditListener(holder, position);
+            setEditListener(holder);
 
         });
 
@@ -579,7 +579,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     //Sets buttons that have edited data that has been set to a different color
     @SuppressLint("UseCompatLoadingForDrawables")
-    private void markSet(TaskListAdapter.ViewHolder holder, Entry entry){
+    protected void markSet(TaskListAdapter.ViewHolder holder, Entry entry){
 
         //Set date button to alternative color if !=0, original color otherwise
         if (entry.getDue()!=0){

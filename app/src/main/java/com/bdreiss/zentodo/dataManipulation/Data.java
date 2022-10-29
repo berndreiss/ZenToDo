@@ -92,6 +92,7 @@ public class Data{
         initFocus();
         initLists();
         initTasksToPick();
+        initOrderedByDue();
     }
 
     public void editTask(int id, String newTask){

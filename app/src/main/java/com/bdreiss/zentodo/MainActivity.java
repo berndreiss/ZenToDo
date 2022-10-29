@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
 
     //initializes the Focus layout
     public void showFocus(){
-
+        focusAdapter.notifyDataSetChanged();
 
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);
