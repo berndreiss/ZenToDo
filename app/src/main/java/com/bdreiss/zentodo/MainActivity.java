@@ -15,6 +15,7 @@ package com.bdreiss.zentodo;
 *
  */
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
@@ -146,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Initialize Drop layout
+    @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
 
         dropAdapter.notifyDataSetChanged();
@@ -199,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
             editText.setText("");
 
             //add task to Data if it is not empty
-            if (!task.equals("")) {
+            if (!task.trim().isEmpty()) {
                 dropAdapter.add(task);
                 dropListener(editText, buttonDrop);
             }
@@ -208,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //initializes Pick layout
+    @SuppressLint("NotifyDataSetChanged")
     public void showPick(){
 
         pickAdapter.notifyDataSetChanged();
@@ -274,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //initializes the Focus layout
+    @SuppressLint("NotifyDataSetChanged")
     public void showFocus(){
         focusAdapter.notifyDataSetChanged();
 

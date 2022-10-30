@@ -1,5 +1,6 @@
 package com.bdreiss.zentodo.adapters;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
 
@@ -14,6 +15,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
         super(context, data, entries);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void setFocusListener(ViewHolder holder,int position){
         holder.focus.setOnClickListener(view12 -> {
@@ -28,6 +30,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void setBackListListener(ViewHolder holder, int position){
 
@@ -36,9 +39,9 @@ public class DropTaskListAdapter extends TaskListAdapter{
             String list = holder.autoCompleteList.getText().toString();//get list name
 
             //set to no list if AutoComplete is empty
-            if (list.equals(" ") || list.equals("")) {
+            if (list.trim().isEmpty()) {
 
-                data.editList(id, " ");//reset to no list
+                data.editList(id, null);//reset to no list
                 //remove task from ListView is mode.equals("list")
                 setOriginal(holder);
                 setBackListListener(holder, position);
@@ -52,6 +55,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
         });
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
         DatePickerDialog datePickerDialog;
@@ -65,6 +69,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
         return datePickerDialog;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void add(String task){
         data.add(task);
         notifyDataSetChanged();

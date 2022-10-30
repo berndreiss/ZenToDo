@@ -15,16 +15,13 @@ public class Entry{
                               //two digit number defines the offset in years (y), months(m),
                               //weeks (w) or days(d) when the task is going to reoccur
 
-    public Entry(int id, String task, Boolean focus,Boolean dropped, String list, int listPosition, int due, String recurrence){
+    public Entry(int id, String task){
         //creates a new instance and initializes the fields of the entry
         this.id = id;
-        this.focus = focus;
-        this.dropped = dropped;
         this.task=task;
-        this.list=list;
-        this.listPosition=listPosition;
-        this.due=due;
-        this.recurrence=recurrence;
+        this.dropped = true;
+        this.focus = false;
+        this.listPosition=-1;
     }
 
     //the following functions simply return the different fields of the entry

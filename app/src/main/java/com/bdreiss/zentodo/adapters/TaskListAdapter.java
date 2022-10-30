@@ -43,7 +43,6 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHolder> implements ItemTouchHelperAdapter {
 
@@ -163,7 +162,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
         //sets buttons that have edited data that has been set to a different color
         markSet(holder,this.entries.get(position));
-        setMenuListener(holder, position);
+        setMenuListener(holder);
 
         //setting Entry.focus to true/false, which means the task is/is not listed in focus mode
         setFocusListener(holder, position);
@@ -185,15 +184,15 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         return entries.size();
     }
 
-
+    @SuppressLint("NotifyDataSetChanged")
     protected void setCheckBoxListener(TaskListAdapter.ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {
             Entry entry = entries.get(position);
             int id = entry.getId();//get ID
 
-            boolean recurring = !entry.getRecurrence().equals(" ");
+            boolean recurring = entry.getRecurrence()!=null;
 
-            //because lists are dynamically generated the DataSet has to be manually updated
+
             if (recurring) {
                 data.setRecurring(id);
                 data.setFocus(id,false);
@@ -209,15 +208,16 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
-    protected void setMenuListener(TaskListAdapter.ViewHolder holder, int position){
+    protected void setMenuListener(TaskListAdapter.ViewHolder holder){
         //listener that changes to alternative row layout on click
         holder.menu.setOnClickListener(view -> {
             //setting alternative row layout visible and active, everything else disabled
             setAlt(holder);
-            setMenuListener(holder, position);
+            setMenuListener(holder);
         });
 
     }
+
     protected void setFocusListener(TaskListAdapter.ViewHolder holder, int position){
         holder.focus.setOnClickListener(view12 -> {
             Entry entry = entries.get(position);
@@ -253,9 +253,12 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         holder.backEdit.setOnClickListener(view131 -> {
             int id = entries.get(position).getId();//getting the id of task
             String newTask = holder.editText.getText().toString();//get new Task
-            data.editTask(id,newTask);//save changes
-            holder.task.setText(newTask);//set new Task in list
-            setOriginal(holder);
+            if (!newTask.isEmpty()) {
+                data.editTask(id, newTask);//save changes
+                holder.task.setText(newTask);//set new Task in list
+                setOriginal(holder);
+            }
+
             setBackEditListener(holder, position);
 
         });
@@ -308,7 +311,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
             data.editDue(entry.getId(),0);//set date when task is due to 0
             setOriginal(holder);
-
+            markSet(holder,entry);
         });
 
         datePickerDialog.show();//Show the dialog
@@ -320,6 +323,8 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
             data.editDue(entry.getId(), date);//Write back data
             setOriginal(holder);
+            markSet(holder,entry);
+
 
         }, entryYear, entryMonth, entryDay);
         return datePickerDialog;
@@ -335,35 +340,36 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             Entry entry = entries.get(position);
             String rec = entry.getRecurrence();
 
-            //set spinner according to first letter y/w/m/y
-            switch (rec.charAt(0)) {
-                case 'd':
-                    holder.spinnerRecurrence.setSelection(0);
-                    break;
-                case 'w':
-                    holder.spinnerRecurrence.setSelection(1);
-                    break;
-                case 'm':
-                    holder.spinnerRecurrence.setSelection(2);
-                    break;
-                case 'y':
-                    holder.spinnerRecurrence.setSelection(3);
-                    break;
-                default://sets spinner to days
+            if (rec!=null) {
+                //set spinner according to first letter y/w/m/y
+                switch (rec.charAt(0)) {
+                    case 'd':
+                        holder.spinnerRecurrence.setSelection(0);
+                        break;
+                    case 'w':
+                        holder.spinnerRecurrence.setSelection(1);
+                        break;
+                    case 'm':
+                        holder.spinnerRecurrence.setSelection(2);
+                        break;
+                    case 'y':
+                        holder.spinnerRecurrence.setSelection(3);
+                        break;
+                    default://sets spinner to days
 
+                }
+
+                //String for editText
+                StringBuilder recEdit = new StringBuilder();
+
+                //add all digits after the first char
+                for (int i = 1; i < rec.length(); i++) {
+                    recEdit.append(rec.charAt(i));
+                }
+
+                //set editText
+                holder.editTextRecurrence.setText(recEdit.toString());
             }
-
-            //String for editText
-            StringBuilder recEdit = new StringBuilder();
-
-            //add all digits after the first char
-            for (int i=1;i<rec.length();i++){
-                recEdit.append(rec.charAt(i));
-            }
-
-            //set editText
-            holder.editTextRecurrence.setText(recEdit.toString());
-
             setRecurrenceListener(holder, position);
         });
     }
@@ -394,7 +400,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             String recurrence = "";//String that will be written back
 
             if (intervalInt == 0){//if editText was empty or value=0 then recurrence is reset
-                data.editRecurrence(id, " ");
+                data.editRecurrence(id, null);
             }
             else{//otherwise number and interval are written back
 
@@ -406,6 +412,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
                 //write back
                 data.editRecurrence(id,recurrence);
             }
+            markSet(holder,entries.get(position));
             setOriginal(holder);
             setBackRecurrenceListener(holder, position);
 
@@ -439,14 +446,14 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             String list = holder.autoCompleteList.getText().toString();//get list name
 
             //set to no list if AutoComplete is empty
-            if (list.equals(" ") || list.equals("")) {
-                data.editList(id, " ");//reset to no list
+            if (list.trim().isEmpty()) {
+                data.editList(id, null);//reset to no list
             } else {
                 data.editList(id, list);//write back otherwise
             }
             setOriginal(holder);
             setBackListListener(holder, position);
-
+            markSet(holder,entries.get(position));
         });
     }
 
@@ -553,6 +560,8 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         notifyItemMoved(fromPosition,toPosition);
 
     }
+
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onItemDismiss(int position) {
         entries.remove(position);
@@ -588,15 +597,15 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             holder.setDate.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
         }
 
-        //Set recurrence button to alternative color if ==" ", original color otherwise
-        if (!entry.getRecurrence().equals(" ")){
+        //Set recurrence button to alternative color if !isEmpty(), original color otherwise
+        if (entry.getRecurrence()!=null){
             holder.recurrence.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
         }else{
             holder.recurrence.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
         }
 
-        //Set list button to alternative color if ==" ", original color otherwise
-        if (!entry.getList().equals(" ")){
+        //Set list button to alternative color if !isEmpty(), original color otherwise
+        if (entry.getList()!=null){
             holder.setList.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
         }else{
             holder.setList.setBackground(context.getResources().getDrawable(R.drawable.button_alt));

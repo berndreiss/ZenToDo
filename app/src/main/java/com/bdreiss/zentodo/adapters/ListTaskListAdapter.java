@@ -1,5 +1,6 @@
 package com.bdreiss.zentodo.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
@@ -13,6 +14,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
         super(context, data, entries);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void setCheckBoxListener(ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {
@@ -28,6 +30,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void setBackListListener(ViewHolder holder, int position){
 
@@ -36,8 +39,8 @@ public class ListTaskListAdapter extends TaskListAdapter{
             String list = holder.autoCompleteList.getText().toString();//get list name
 
             //set to no list if AutoComplete is empty
-            if (list.equals(" ") || list.equals("")) {
-                data.editList(id, " ");//reset to no list
+            if (list.trim().isEmpty()) {
+                data.editList(id, null);//reset to no list
                 setBackListListener(holder,position);
 
             } else {

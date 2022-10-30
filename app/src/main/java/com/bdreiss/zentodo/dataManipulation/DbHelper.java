@@ -132,7 +132,16 @@ public class DbHelper  extends SQLiteOpenHelper{
             int due = cursor.getInt(6);
             String recurrence = cursor.getString(7);
 
-            Entry entry = new Entry(id,task, focus, dropped, list, listPosition, due, recurrence);
+            Entry entry = new Entry(id,task);
+            entry.setFocus(focus);
+            entry.setDropped(dropped);
+            if (!list.equals("null"))
+                entry.setList(list);
+            entry.setListPosition(listPosition);
+            entry.setDue(due);
+            if (!recurrence.equals("null"))
+                entry.setRecurrence(recurrence);
+
             entries.add(entry);
             cursor.moveToNext();
         }

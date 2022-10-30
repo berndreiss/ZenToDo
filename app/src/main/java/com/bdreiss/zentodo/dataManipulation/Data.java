@@ -60,7 +60,7 @@ public class Data{
     }
 
     public void add(String task){
-        Entry entry = new Entry(generateId(),task,false,true, " ", -1, 0," "); //generate ID and create entry
+        Entry entry = new Entry(generateId(),task); //generate ID and create entry
 
         entries.add(entry); //add entry to this.entries
         dropped.add(entry);//add entry to this.dropped
@@ -285,7 +285,7 @@ public class Data{
         for(Entry e : entries){
             String list = e.getList();
 
-            if (!list.equals(" ")) {
+            if (list!=null) {
 
                 if (!listNames.contains(list)) {
 
@@ -322,7 +322,7 @@ public class Data{
                 tasksToPick.add(e);
             } else {
                 if (e.getDue() == 0) {
-                    if (e.getDropped() || e.getList().equals(" ")) {
+                    if (e.getDropped() || e.getList()==null) {
                         tasksToPick.add(e);
                     }
                 } else {

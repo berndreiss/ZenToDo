@@ -38,8 +38,6 @@ public class PickTaskListAdapter extends TaskListAdapter{
             Entry entry = entries.get(position);
             int id = entry.getId();//get ID
 
-            Boolean recurring = !entry.getRecurrence().equals(" ");
-
             if (idsChecked.contains(id)){
                 idsChecked.remove(id);
             } else{
