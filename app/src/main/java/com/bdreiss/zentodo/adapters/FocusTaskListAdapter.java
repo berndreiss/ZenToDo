@@ -1,5 +1,6 @@
 package com.bdreiss.zentodo.adapters;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
 
@@ -14,6 +15,7 @@ public class FocusTaskListAdapter extends TaskListAdapter{
         super(context, data, entries);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void setFocusListener(ViewHolder holder,int position){
         holder.focus.setOnClickListener(view12 -> {
@@ -26,6 +28,7 @@ public class FocusTaskListAdapter extends TaskListAdapter{
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
         DatePickerDialog datePickerDialog;
         datePickerDialog= new DatePickerDialog(super.context, (view, year, month, day) -> {

@@ -292,7 +292,7 @@ public class Data{
                     listNames.add(list);
                     ArrayList<Entry> newList = new ArrayList<>();
                     newList.add(e);
-                    Pair newPair = new Pair(list, newList);
+                    Pair<String,ArrayList<Entry>> newPair = new Pair<>(list, newList);
                     lists.add(newPair);
                 } else{
 
@@ -389,13 +389,6 @@ public class Data{
 
         return Integer.parseInt(df.format(date));
 
-
-    }
-
-    //the following functions simply return the associated lists
-    public ArrayList<Entry> getEntries(){
-
-        return entries;
 
     }
     

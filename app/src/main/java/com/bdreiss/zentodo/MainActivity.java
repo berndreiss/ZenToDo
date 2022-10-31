@@ -32,7 +32,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.View;
 
-import com.bdreiss.zentodo.dataManipulation.Entry;
 import com.bdreiss.zentodo.databinding.ActivityMainBinding;
 
 import android.widget.Button;
@@ -63,8 +62,6 @@ public class MainActivity extends AppCompatActivity {
     PickTaskListAdapter pickAdapter;
     FocusTaskListAdapter focusAdapter;
     ListsListAdapter listsListAdapter;
-
-    ArrayList<Entry> pickItems = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

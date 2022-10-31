@@ -5,11 +5,7 @@ package com.bdreiss.zentodo.dataManipulation;
 import java.util.ArrayList;
 
 public class MergeSortByDue {
-    private ArrayList<Entry> inputArray;
-
-    public ArrayList<Entry> getSortedArray() {
-        return inputArray;
-    }
+    private final ArrayList<Entry> inputArray;
 
     public MergeSortByDue(ArrayList<Entry> inputArray){
         this.inputArray = inputArray;
@@ -34,7 +30,7 @@ public class MergeSortByDue {
 
     public void merger(int startIndex,int midIndex,int endIndex){
 
-        //Below is the mergedarray that will be sorted array Array[i-midIndex] , Array[(midIndex+1)-endIndex]
+        //Below is the merged Array that will be sorted array Array[i-midIndex] , Array[(midIndex+1)-endIndex]
         ArrayList<Entry> mergedSortedArray = new ArrayList<>();
 
         int leftIndex = startIndex;

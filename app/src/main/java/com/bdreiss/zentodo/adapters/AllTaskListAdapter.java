@@ -1,5 +1,6 @@
 package com.bdreiss.zentodo.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
@@ -12,6 +13,7 @@ public class AllTaskListAdapter extends TaskListAdapter{
     AllTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
         super(context,data,entries);
     }
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void setCheckBoxListener(ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {
