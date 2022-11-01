@@ -167,6 +167,7 @@ public class Data{
 
         entry.setDue(date);
         initOrderedByDue();
+        initTasksToPick();
     }
 
     private int incrementRecurring(char mode, int[] dateArray,int offSet){
@@ -246,6 +247,7 @@ public class Data{
     public void editDue(int id, int date){
         entries.get(getPosition(id)).setDue(date);
         initOrderedByDue();
+        initTasksToPick();
         db.updateEntry(DbHelper.DUE_COL, id, date);
     }
 

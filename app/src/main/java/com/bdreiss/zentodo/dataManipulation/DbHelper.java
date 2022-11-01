@@ -135,11 +135,11 @@ public class DbHelper  extends SQLiteOpenHelper{
             Entry entry = new Entry(id,task);
             entry.setFocus(focus);
             entry.setDropped(dropped);
-            if (!list.equals("null"))
+            if (!(list==null))
                 entry.setList(list);
             entry.setListPosition(listPosition);
             entry.setDue(due);
-            if (!recurrence.equals("null"))
+            if (!(recurrence==null))
                 entry.setRecurrence(recurrence);
 
             entries.add(entry);
