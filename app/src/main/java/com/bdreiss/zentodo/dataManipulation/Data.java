@@ -86,13 +86,33 @@ public class Data{
         db.removeEntry(id);
     }
 
-    public void swap(int i, int j){
-        Collections.swap(entries,i,j);
+    public void swap(int id1, int id2){
+        int pos1 = getPosition(id1);
+        int pos2 = getPosition(id2);
+
+        if (pos1 > pos2){
+            for (int i = pos1; i > pos2; i--){
+
+                Collections.swap(entries,i,i-1);
+                db.swapEntries(entries.get(i),entries.get(i-1));
+
+            }
+        } else{
+            for (int i = pos1; i < pos2; i++){
+
+                Collections.swap(entries,i,i+1);
+                db.swapEntries(entries.get(i),entries.get(i+1));
+
+
+            }
+        }
+//        Collections.swap(entries,pos1,pos2);
         initDropped();
         initFocus();
         initLists();
         initTasksToPick();
         initOrderedByDue();
+
     }
 
     public void editTask(int id, String newTask){

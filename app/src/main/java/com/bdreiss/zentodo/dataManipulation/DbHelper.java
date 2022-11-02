@@ -111,6 +111,22 @@ public class DbHelper  extends SQLiteOpenHelper{
         db.close();
     }
 
+    public void updateAllFields(int id, Entry entry){
+        String query = "UPDATE " + TABLE_ENTRIES + " SET " + TASK_COL + "='" + entry.getTask() + "', " +
+                FOCUS_COL + "=" + entry.getFocus() + "," +
+                RECURRENCE_COL  + "='" + entry.getRecurrence() + "'," +
+                LIST_COL  + "='" + entry.getList() + "'," +
+                LIST_POSITION_COL  + "=" + entry.getListPosition() + "," +
+                DROPPED_COL  + "=" + entry.getDropped() + "," +
+                DUE_COL + "=" + entry.getDue() +
+                " WHERE " + ID_COL + "=" + id;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(query);
+        db.close();
+
+    }
+
     //load all entries from database and return as ArrayList
     public ArrayList<Entry> loadEntries(){
         ArrayList<Entry> entries = new ArrayList<>();
@@ -135,11 +151,11 @@ public class DbHelper  extends SQLiteOpenHelper{
             Entry entry = new Entry(id,task);
             entry.setFocus(focus);
             entry.setDropped(dropped);
-            if (!(list==null))
+            if (!(list==null) && !list.equals("null"))
                 entry.setList(list);
             entry.setListPosition(listPosition);
             entry.setDue(due);
-            if (!(recurrence==null))
+            if (!(recurrence==null) && !recurrence.equals("null"))
                 entry.setRecurrence(recurrence);
 
             entries.add(entry);
@@ -150,6 +166,15 @@ public class DbHelper  extends SQLiteOpenHelper{
         db.close();
         return entries;
 
+
+    }
+
+    public void swapEntries(Entry entry1, Entry entry2){
+        updateAllFields(entry1.getId(), entry2);
+        updateAllFields(entry2.getId(),entry1);
+        int temp = entry1.getId();
+        entry1.setId(entry2.getId());
+        entry2.setId(temp);
 
     }
 
