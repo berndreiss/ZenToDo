@@ -16,6 +16,7 @@ package com.bdreiss.zentodo;
  */
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
@@ -34,6 +35,7 @@ import android.view.View;
 
 import com.bdreiss.zentodo.databinding.ActivityMainBinding;
 
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -63,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     FocusTaskListAdapter focusAdapter;
     ListsListAdapter listsListAdapter;
 
+    EditText dropEditText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarFocus = findViewById(R.id.toolbar_focus);
         toolbarLists = findViewById(R.id.toolbar_lists);
 
+        dropEditText = findViewById(R.id.edit_text_drop);
         //Initializes the toolbar and sets an OnClickListener for every Button
         initializeToolbar();
 
@@ -121,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void toolbarListenerPick(){
         toolbarPick.setOnClickListener(view -> {
+            closeKeyboard();
             showPick();
             toolbarListenerPick();
         });
@@ -129,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void toolbarListenerFocus(){
         toolbarFocus.setOnClickListener(view -> {
+            closeKeyboard();
             showFocus();
             toolbarListenerFocus();
         });
@@ -137,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void toolbarListenerLists(){
         toolbarLists.setOnClickListener(view -> {
+            closeKeyboard();
             showLists();
             toolbarListenerLists();
         });
@@ -365,6 +373,31 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < layout.getChildCount(); i++) {
             View child = layout.getChildAt(i);
             child.setVisibility(View.GONE);
+        }
+    }
+
+    //https://www.geeksforgeeks.org/how-to-programmatically-hide-android-soft-keyboard/
+    private void closeKeyboard()
+    {
+        // this will give us the view
+        // which is currently focus
+        // in this layout
+        View view = this.getCurrentFocus();
+
+        // if nothing is currently
+        // focus then this will protect
+        // the app from crash
+        if (view != null) {
+
+            // now assign the system
+            // service to InputMethodManager
+            InputMethodManager manager
+                    = (InputMethodManager)
+                    getSystemService(
+                            Context.INPUT_METHOD_SERVICE);
+            manager
+                    .hideSoftInputFromWindow(
+                            view.getWindowToken(), 0);
         }
     }
 
