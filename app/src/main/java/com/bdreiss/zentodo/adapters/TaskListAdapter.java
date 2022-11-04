@@ -55,6 +55,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
         private final LinearLayout linearLayoutAlt;//"alternative" layout with menu for modifying entries
         public Button focus;//Adds task to todays tasks
+        public Button delete;//Adds task to todays tasks
         public Button edit;//edits the task
         public Button setDate;//sets the date the task is due
         public Button recurrence;//sets the frequency with which the task repeats
@@ -88,6 +89,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
             linearLayoutAlt = view.findViewById(R.id.linear_layout_alt);
             focus = view.findViewById(R.id.button_focus);
+            delete = view.findViewById(R.id.button_delete);
             edit = view.findViewById(R.id.button_edit);
             setDate = view.findViewById(R.id.button_calendar);
             recurrence = view.findViewById(R.id.button_recurrence);
@@ -176,6 +178,8 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         setClearListenerList(holder);
         setBackListListener(holder,position);
         setBackListener(holder);
+
+
     }
 
     // Returns the total count of items in the list
@@ -492,7 +496,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     }
 
     //Setting alternative row view coming from original
-    private void setAlt(TaskListAdapter.ViewHolder holder){
+    protected void setAlt(TaskListAdapter.ViewHolder holder){
         //Set alternative row view to visible and active
         holder.linearLayoutAlt.bringToFront();
         holder.linearLayoutAlt.setAlpha(1);

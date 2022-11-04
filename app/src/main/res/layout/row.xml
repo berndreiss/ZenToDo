@@ -11,7 +11,7 @@
         android:paddingTop="10dp"
         android:orientation="horizontal"
         android:background="@android:color/white"
-        android:foreground="?attr/selectableItemBackground">
+        >
 
         <CheckBox
             android:id="@+id/checkbox"
@@ -65,6 +65,21 @@
             android:background="@drawable/button_alt"
             />
 
+        <android.widget.Button
+            android:id="@+id/button_delete"
+            android:shape="rectangle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:paddingTop="@dimen/button_alt_offset"
+            android:visibility="gone"
+            style="?android:borderlessButtonStyle"
+            android:drawableTop="@drawable/ic_action_delete"
+            android:background="@drawable/button_alt"
+            />
 
         <android.widget.Button
             android:id="@+id/button_edit"
@@ -149,6 +164,8 @@
         android:orientation="horizontal">
 
         <EditText
+            android:autofillHints=""
+            android:inputType="text"
             android:id="@+id/edit_text_list_view"
             android:layout_width="0dp"
             android:layout_weight="5"
