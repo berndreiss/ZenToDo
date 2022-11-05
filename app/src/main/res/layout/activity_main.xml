@@ -72,8 +72,23 @@
                style="?android:borderlessButtonStyle"
                android:drawableTop="@drawable/ic_action_lists"
                />
+           <android.widget.Button
+               android:id="@+id/toolbar_settings"
+               android:text="menu"
+               android:textColor="@color/settings"
+               android:shape="rectangle"
+               android:layout_width="0dp"
+               android:layout_height="match_parent"
+               android:layout_marginLeft="0dp"
+               android:layout_marginRight="0dp"
+               android:layout_weight="1"
+               android:layout_gravity="center"
+               style="?android:borderlessButtonStyle"
+               android:drawableTop="@drawable/ic_action_settings"
+               />
 
        </LinearLayout>
+
 
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -82,4 +97,6 @@
     <include layout="@layout/pick"/>
     <include layout="@layout/focus"/>
     <include layout="@layout/lists"/>
+    <include layout="@layout/settings"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

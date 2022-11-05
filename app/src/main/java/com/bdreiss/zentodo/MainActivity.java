@@ -27,6 +27,7 @@ import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,6 +35,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 
 import com.bdreiss.zentodo.databinding.ActivityMainBinding;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -50,12 +52,14 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout pick;//Layout to pick tasks that have been dropped and show them in focus
     private LinearLayout focus;//Layout to show tasks to do today
     private LinearLayout lists;//Layout for all lists with tasks in it
+    private LinearLayout settings;
 
     //the following Buttons are components of the toolbar to switch between the different layouts
     private Button toolbarDrop;
     private Button toolbarPick;
     private Button toolbarFocus;
     private Button toolbarLists;
+    private Button toolbarSettings;
 
     //Data-object that stores all tasks, reminders, lists etc. (See Data.java and Entry.java)
     private Data data;
@@ -82,11 +86,13 @@ public class MainActivity extends AppCompatActivity {
         pick = findViewById(R.id.layout_pick);
         focus = findViewById(R.id.layout_focus);
         lists = findViewById(R.id.layout_lists);
+        settings = findViewById(R.id.layout_settings);
 
         toolbarDrop = findViewById(R.id.toolbar_drop);
         toolbarPick = findViewById(R.id.toolbar_pick);
         toolbarFocus = findViewById(R.id.toolbar_focus);
         toolbarLists = findViewById(R.id.toolbar_lists);
+        toolbarSettings = findViewById(R.id.toolbar_settings);
 
         dropEditText = findViewById(R.id.edit_text_drop);
         //Initializes the toolbar and sets an OnClickListener for every Button
@@ -114,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
         toolbarListenerLists();
 
+        toolbarListenerSettings();
     }
 
     public void toolbarListenerDrop(){
@@ -151,6 +158,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void toolbarListenerSettings() {
+        toolbarSettings.setOnClickListener(view -> {
+            showSettings();
+            toolbarListenerSettings();
+        });
+
+    }
+
     //Initialize Drop layout
     @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
@@ -162,12 +177,14 @@ public class MainActivity extends AppCompatActivity {
         disableLayout(pick);
         disableLayout(focus);
         disableLayout(lists);
+        disableLayout(settings);
 
         //set background color of Drop to chosen, all others to toolbar default
         toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
         toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
     }
 
     public void initializeDrop(){
@@ -225,13 +242,14 @@ public class MainActivity extends AppCompatActivity {
         disableLayout(drop);
         disableLayout(focus);
         disableLayout(lists);
+        disableLayout(settings);
 
         //set color of Pick-Button in toolbar to chosen, set all other Buttons to toolbar default
         toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
         toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-
+        toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
     }
 
     public void initializePick() {
@@ -292,13 +310,14 @@ public class MainActivity extends AppCompatActivity {
         disableLayout(drop);
         disableLayout(lists);
         disableLayout(pick);
+        disableLayout(settings);
 
         //set background color of Focus to chosen, all others to toolbar default
         toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
         toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-
+        toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
     }
 
@@ -328,12 +347,14 @@ public class MainActivity extends AppCompatActivity {
         disableLayout(drop);
         disableLayout(pick);
         disableLayout(focus);
+        disableLayout(settings);
 
         //set color of Lists-Button in toolbar to chosen, set all other Buttons to toolbar default
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
         toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
         TextView header = findViewById(R.id.text_view_lists_header);
         header.setVisibility(View.GONE);
@@ -353,6 +374,24 @@ public class MainActivity extends AppCompatActivity {
 
         //set adapter
         listView.setAdapter(listsListAdapter);
+    }
+
+    public void showSettings(){
+        //enable all components in the Lists layout (setVisibility = VISIBLE)
+        enableLayout(settings);
+        //disable all components in all other layouts (setVisibility = GONE)
+        disableLayout(drop);
+        disableLayout(pick);
+        disableLayout(focus);
+        disableLayout(lists);
+
+        //set color of Lists-Button in toolbar to chosen, set all other Buttons to toolbar default
+        toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
+
     }
 
     //set Visibility of all first generation children of layout to VISIBLE and bring layout to front
