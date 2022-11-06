@@ -327,7 +327,7 @@ public class Data{
             }
         }
         Collections.sort(listNames);
-
+        listNames.add(context.getResources().getString(R.string.noList));
         listNames.add(context.getResources().getString(R.string.allTasks));
     }
 
@@ -413,7 +413,21 @@ public class Data{
 
 
     }
-    
+
+    public ArrayList<Entry> getNoList(){
+        ArrayList<Entry> noList = new ArrayList<>();
+
+        for (Entry e : entries){
+            if (e.getList() == null || e.getList().isEmpty())
+                noList.add(e);
+        }
+
+        MergeSortByDue sort = new MergeSortByDue(noList);
+        sort.sort();
+        return noList;
+
+
+    }
     public ArrayList<Entry> getEntriesOrderedByDate(){
 
         return entriesOrderedByDue;

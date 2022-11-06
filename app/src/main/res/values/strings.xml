@@ -13,6 +13,7 @@
     <string name="repeats">Repeats every</string>
     <string name="allTasks">ALL TASKS</string>
     <string name="pick">Pick</string>
+    <string name="noList">No list</string>
 
     <!-- Strings used for spinner for choosing time interval of repeats -->
     <string-array name="time_interval">

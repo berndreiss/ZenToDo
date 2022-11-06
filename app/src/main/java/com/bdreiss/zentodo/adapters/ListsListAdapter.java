@@ -91,7 +91,16 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 AllTaskListAdapter adapter =new AllTaskListAdapter(context,data, data.getEntriesOrderedByDate());
                 recyclerView.setAdapter(adapter);//set adapter
 
-            } else{
+            } else if (holder.button.getText().equals(context.getResources().getString(R.string.noList))) {
+
+                header.setText(context.getResources().getString(R.string.noList));//set header text
+                //initialize adapter
+                AllTaskListAdapter adapter =new AllTaskListAdapter(context,data, data.getNoList());
+                recyclerView.setAdapter(adapter);//set adapter
+
+
+            } else {
+
                 String list = holder.button.getText().toString();//get list name
                 header.setText(list);//set header text
                 //initialize adapter
