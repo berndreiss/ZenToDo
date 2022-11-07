@@ -552,7 +552,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
-        if (fromPosition < toPosition) {
+      /*  if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
                 data.swap(entries.get(i).getId(),entries.get(i+1).getId());
             }
@@ -564,7 +564,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         Collections.swap(entries, fromPosition, toPosition);
 
         notifyItemMoved(fromPosition,toPosition);
-
+*/
     }
 
     @Override

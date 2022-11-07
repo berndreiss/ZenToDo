@@ -201,7 +201,6 @@ public class DbHelper  extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT " + POSITION_COL + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id1, null);
         cursor.moveToFirst();
-        cursor.close();
 
         int pos1 = cursor.getInt(0);
 
