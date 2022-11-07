@@ -25,7 +25,8 @@ public class DropTaskListAdapter extends TaskListAdapter{
 
             //change dropped in entry to false
             data.setDropped(id, false);//change to false
-            notifyDataSetChanged();
+            entries.remove(position);
+            notifyItemRemoved(position);
         });
 
     }
@@ -49,13 +50,13 @@ public class DropTaskListAdapter extends TaskListAdapter{
             } else {
                 data.editList(id, list);//write back otherwise
                 data.setDropped(id, false);//set dropped to false
-                notifyDataSetChanged();
+                entries.remove(position);
+                notifyItemRemoved(position);
             }
 
         });
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     @Override
     public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
         DatePickerDialog datePickerDialog;
@@ -63,17 +64,18 @@ public class DropTaskListAdapter extends TaskListAdapter{
             int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
             data.editDue(entry.getId(), date);//Write back data
             data.setDropped(entry.getId(), false);
-            notifyDataSetChanged();
+            entries.remove(position);
+            notifyItemRemoved(position);
 
         }, entryYear, entryMonth, entryDay);
         return datePickerDialog;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void add(String task){
         Entry entry = data.add(task);
         entries.add(entry);
-        notifyDataSetChanged();
+        notifyItemInserted(entries.size());
+
     }
 
 }

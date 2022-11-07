@@ -293,6 +293,7 @@ public class MainActivity extends AppCompatActivity {
             //re-initialize toolbar
             toolbarListenerPick();
             //initialize Focus layout
+            initializeFocus();
             showFocus();
 
         });

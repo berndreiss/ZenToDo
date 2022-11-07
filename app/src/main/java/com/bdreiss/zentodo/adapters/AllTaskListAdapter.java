@@ -13,6 +13,7 @@ public class AllTaskListAdapter extends TaskListAdapter{
     AllTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
         super(context,data,entries);
     }
+
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void setCheckBoxListener(ViewHolder holder, int position){
@@ -23,8 +24,7 @@ public class AllTaskListAdapter extends TaskListAdapter{
             data.remove(id);
 
             entries.remove(position);
-            notifyDataSetChanged();//update the adapter
-
+            notifyDataSetChanged();
 
         });
 

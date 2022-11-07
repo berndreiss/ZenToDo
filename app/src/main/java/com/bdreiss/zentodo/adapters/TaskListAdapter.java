@@ -189,6 +189,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         return entries.size();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     protected void setCheckBoxListener(TaskListAdapter.ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {
             Entry entry = entries.get(position);
@@ -206,8 +207,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             }
 
             entries.remove(position);
-            notifyItemRemoved(position);
-
+            notifyDataSetChanged();
         });
 
     }
@@ -567,6 +567,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onItemDismiss(int position) {
         entries.remove(position);

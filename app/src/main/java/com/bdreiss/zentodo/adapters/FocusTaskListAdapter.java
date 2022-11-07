@@ -21,9 +21,9 @@ public class FocusTaskListAdapter extends TaskListAdapter{
         holder.focus.setOnClickListener(view12 -> {
             Entry entry = entries.get(position);
             int id = entry.getId();//get id
-            data.setFocus(id, !entry.getFocus());//change state of focus in entry
-            if (!entry.getFocus()){
-                notifyDataSetChanged();            }
+            data.setFocus(id, false);//change state of focus in entry
+            entries.remove(position);
+            notifyDataSetChanged();
         });
 
     }
@@ -36,6 +36,7 @@ public class FocusTaskListAdapter extends TaskListAdapter{
             data.editDue(entry.getId(), date);//Write back data
 
             data.setFocus(entry.getId(),false);
+            entries.remove(position);
             notifyDataSetChanged();
 
         }, entryYear, entryMonth, entryDay);

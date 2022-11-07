@@ -77,8 +77,8 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
             data.remove(id);
 
+            entries.remove(position);
             notifyDataSetChanged();
-
         });
     }
 
