@@ -23,6 +23,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
             data.remove(id);
             entries.remove(position);
 
+            notifyItemRemoved(position);
             notifyDataSetChanged();
 
         });

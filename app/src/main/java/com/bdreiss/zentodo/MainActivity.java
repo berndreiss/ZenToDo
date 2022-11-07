@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
     public void toolbarListenerDrop(){
         toolbarDrop.setOnClickListener(view -> {
            showDrop();
+           initializeDrop();
            toolbarListenerDrop();
         });
 
@@ -135,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarPick.setOnClickListener(view -> {
             closeKeyboard();
             showPick();
+            initializePick();
             toolbarListenerPick();
         });
 
@@ -144,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarFocus.setOnClickListener(view -> {
             closeKeyboard();
             showFocus();
+            initializeFocus();
             toolbarListenerFocus();
         });
 
@@ -153,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setOnClickListener(view -> {
             closeKeyboard();
             showLists();
+            initializeLists();
             toolbarListenerLists();
         });
 
@@ -167,10 +171,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Initialize Drop layout
-    @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
 
-        dropAdapter.notifyDataSetChanged();
         //enable all components of Drop layout (setVisibility = VISIBLE)
         enableLayout(drop);
         //disable components of all other layouts (setVisibility = GONE)
@@ -232,10 +234,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //initializes Pick layout
-    @SuppressLint("NotifyDataSetChanged")
     public void showPick(){
 
-        pickAdapter.notifyDataSetChanged();
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
         //disable components of all other layouts (setVisibility = GONE)
@@ -300,9 +300,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //initializes the Focus layout
-    @SuppressLint("NotifyDataSetChanged")
     public void showFocus(){
-        focusAdapter.notifyDataSetChanged();
 
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);

@@ -104,7 +104,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 String list = holder.button.getText().toString();//get list name
                 header.setText(list);//set header text
                 //initialize adapter
-                ListTaskListAdapter adapter = new ListTaskListAdapter(context, data, data.getFromList(list));
+                ListTaskListAdapter adapter = new ListTaskListAdapter(context, data, data.getList(list));
                 recyclerView.setAdapter(adapter);//set adapter
                 ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(adapter);
 

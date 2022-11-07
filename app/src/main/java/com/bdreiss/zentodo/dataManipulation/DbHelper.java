@@ -19,10 +19,20 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 public class DbHelper  extends SQLiteOpenHelper{
+
+   // private static final String DB_NAME = "Data.db";
 
     private static final String DB_NAME = "Data.db";
 
@@ -46,16 +56,30 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     public static final String RECURRENCE_COL = "recurrence";
 
-    public DbHelper(Context context){
-        super(context,DB_NAME,null, DB_VERSION);
-    }
+    public static final String POSITION_COL = "position";
 
+    public DbHelper(Context context){super(context,DB_NAME,null, DB_VERSION);}
+
+    public void migrate(SQLiteDatabase db) {
+        String query = "DROP TABLE IF EXISTS " + TABLE_ENTRIES;
+        db.execSQL(query);
+        onCreate(db);
+
+
+    }
     //Create new table for entries onCreate
     public void onCreate(SQLiteDatabase db){
         String query = "CREATE TABLE " + TABLE_ENTRIES + " ("
-                + ID_COL + " INTEGER , " + TASK_COL + " TEXT, " + FOCUS_COL + " INTEGER, " + DROPPED_COL + " INTEGER, "
-                + LIST_COL + " TEXT, " + LIST_POSITION_COL + " INTEGER, " + DUE_COL + " INTEGER, " + RECURRENCE_COL
-                + " TEXT)";
+                + ID_COL + " INTEGER , "
+                + TASK_COL + " TEXT, "
+                + FOCUS_COL + " INTEGER, "
+                + DROPPED_COL + " INTEGER, "
+                + LIST_COL + " TEXT, "
+                + LIST_POSITION_COL + " INTEGER, "
+                + DUE_COL + " INTEGER, "
+                + RECURRENCE_COL + " TEXT,"
+                + POSITION_COL + " INTEGER "
+                + ")";
         db.execSQL(query);
     }
 
@@ -79,6 +103,7 @@ public class DbHelper  extends SQLiteOpenHelper{
         values.put(LIST_POSITION_COL,entry.getListPosition());
         values.put(DUE_COL,entry.getDue());
         values.put(RECURRENCE_COL,entry.getRecurrence());
+        values.put(POSITION_COL, entry.getPosition());
 
         db.insert(TABLE_ENTRIES,null,values);
         db.close();
@@ -112,14 +137,16 @@ public class DbHelper  extends SQLiteOpenHelper{
     }
 
     public void updateAllFields(int id, Entry entry){
-        String query = "UPDATE " + TABLE_ENTRIES + " SET " + TASK_COL + "='" + entry.getTask() + "', " +
-                FOCUS_COL + "=" + entry.getFocus() + "," +
-                RECURRENCE_COL  + "='" + entry.getRecurrence() + "'," +
-                LIST_COL  + "='" + entry.getList() + "'," +
-                LIST_POSITION_COL  + "=" + entry.getListPosition() + "," +
-                DROPPED_COL  + "=" + entry.getDropped() + "," +
-                DUE_COL + "=" + entry.getDue() +
-                " WHERE " + ID_COL + "=" + id;
+        String query = "UPDATE " + TABLE_ENTRIES + " SET "
+                + TASK_COL + "='" + entry.getTask() + "', "
+                + FOCUS_COL + "=" + entry.getFocus() + ","
+                + RECURRENCE_COL  + "='" + entry.getRecurrence() + "',"
+                + LIST_COL  + "='" + entry.getList() + "',"
+                + LIST_POSITION_COL  + "=" + entry.getListPosition() + ","
+                + DROPPED_COL  + "=" + entry.getDropped() + ","
+                + DUE_COL + "=" + entry.getDue() + ", "
+                + POSITION_COL + "=" + entry.getPosition()
+                + " WHERE " + ID_COL + "=" + id;
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(query);
@@ -147,8 +174,9 @@ public class DbHelper  extends SQLiteOpenHelper{
             int listPosition = cursor.getInt(5);
             int due = cursor.getInt(6);
             String recurrence = cursor.getString(7);
+            int position = cursor.getInt(8);
 
-            Entry entry = new Entry(id,task);
+            Entry entry = new Entry(id, position, task);
             entry.setFocus(focus);
             entry.setDropped(dropped);
             if (!(list==null) && !list.equals("null"))
@@ -169,12 +197,23 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     }
 
-    public void swapEntries(Entry entry1, Entry entry2){
-        updateAllFields(entry1.getId(), entry2);
-        updateAllFields(entry2.getId(),entry1);
-        int temp = entry1.getId();
-        entry1.setId(entry2.getId());
-        entry2.setId(temp);
+    public void swapEntries(int id1, int id2){
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT " + POSITION_COL + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id1, null);
+        cursor.moveToFirst();
+        cursor.close();
+
+        int pos1 = cursor.getInt(0);
+
+        cursor = db.rawQuery("SELECT " + POSITION_COL + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id2, null);
+        cursor.moveToFirst();
+
+        int pos2 = cursor.getInt(0);
+
+        cursor.close();
+        db.close();
+        updateEntry(POSITION_COL, id1,pos2);
+        updateEntry(POSITION_COL, id2,pos1);
 
     }
 

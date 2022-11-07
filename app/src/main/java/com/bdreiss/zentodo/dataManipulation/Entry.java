@@ -4,7 +4,8 @@ public class Entry{
 //this class represents the entry of a task
 //it consists of the following fields:
 
-    private int id;//id generated in data.java
+    private final int id;//id generated in data.java
+    private int position;
     private String task;//a description of the task that has to be done
     private Boolean focus;//true if task has been chosen today
     private Boolean dropped;//true if task has been dropped and not been used in brainstorm and pick
@@ -15,9 +16,10 @@ public class Entry{
                               //two digit number defines the offset in years (y), months(m),
                               //weeks (w) or days(d) when the task is going to reoccur
 
-    public Entry(int id, String task){
+    public Entry(int id, int position, String task){
         //creates a new instance and initializes the fields of the entry
         this.id = id;
+        this.position = position;
         this.task=task;
         this.dropped = true;
         this.focus = false;
@@ -26,6 +28,8 @@ public class Entry{
 
     //the following functions simply return the different fields of the entry
     public int getId(){return this.id;}
+
+    public int getPosition(){return this.position;}
 
     public String getTask(){
         return task;
@@ -50,7 +54,8 @@ public class Entry{
     }
     
     //The following functions are to update the different fields
-    public void setId(int id){this.id = id;}
+    public void setPosition(int position){this.position = position;}
+
     public void setTask(String task){
         this.task=task;
     }

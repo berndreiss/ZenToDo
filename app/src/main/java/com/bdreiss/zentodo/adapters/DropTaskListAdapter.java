@@ -71,7 +71,8 @@ public class DropTaskListAdapter extends TaskListAdapter{
 
     @SuppressLint("NotifyDataSetChanged")
     public void add(String task){
-        data.add(task);
+        Entry entry = data.add(task);
+        entries.add(entry);
         notifyDataSetChanged();
     }
 

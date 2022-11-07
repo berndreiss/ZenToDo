@@ -22,6 +22,7 @@ public class AllTaskListAdapter extends TaskListAdapter{
 
             data.remove(id);
 
+            entries.remove(position);
             notifyDataSetChanged();//update the adapter
 
 

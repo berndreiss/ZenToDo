@@ -43,6 +43,7 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHolder> implements ItemTouchHelperAdapter {
 
@@ -120,10 +121,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     protected Data data;
 
     public TaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
-
+        this.data = data;
         this.entries = entries;
         this.context = context;
-        this.data = data;
+
     }
 
     @NonNull
@@ -188,7 +189,6 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         return entries.size();
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     protected void setCheckBoxListener(TaskListAdapter.ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {
             Entry entry = entries.get(position);
@@ -205,8 +205,8 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
                 data.remove(id);
             }
 
-
-            notifyDataSetChanged();
+            entries.remove(position);
+            notifyItemRemoved(position);
 
         });
 
@@ -561,15 +561,16 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
                 data.swap(entries.get(i).getId(),entries.get(i-1).getId());
             }
         }
+        Collections.swap(entries, fromPosition, toPosition);
+
         notifyItemMoved(fromPosition,toPosition);
 
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onItemDismiss(int position) {
         entries.remove(position);
-        notifyDataSetChanged();
+
     }
     //Disables view and first generation children
     private void disable(LinearLayout layout){

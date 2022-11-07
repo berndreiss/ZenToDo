@@ -5,6 +5,9 @@ import android.util.Pair;
 
 import com.bdreiss.zentodo.R;
 
+import java.io.File;
+import java.io.IOException;
+import java.sql.Array;
 import java.util.Collections;
 import java.util.ArrayList;
 
@@ -21,13 +24,7 @@ public class Data{
 */
 
     protected static final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
-    protected static final ArrayList<Entry> entriesOrderedByDue = new ArrayList<>();
-    protected static final ArrayList<Entry> dropped = new ArrayList<>();
-    protected static final ArrayList<Entry> focus = new ArrayList<>();
-    protected static final ArrayList<Entry> tasksToPick = new ArrayList<>();
-    protected static final ArrayList<String> listNames = new ArrayList<>();
-    protected static final ArrayList<Pair<String,ArrayList<Entry>>> lists = new ArrayList<>();
-    protected static ArrayList<Integer> ids = new ArrayList<>();
+    protected static ArrayList<Integer> ids = new ArrayList<>();//Used to generate new ids
 
     private final Context context;
 
@@ -38,12 +35,10 @@ public class Data{
         this.context=context;
         this.db = new DbHelper(context);
         this.load();
-
     }
 
     public void load(){
         ArrayList<Entry> newEntries = db.loadEntries();
-        entries.clear();
 
         for (Entry e: newEntries)
             ids.add(e.getId());
@@ -52,21 +47,16 @@ public class Data{
 
         entries.addAll(newEntries);
 
-        initDropped();
-        initFocus();
-        initLists();
-        initTasksToPick();
-        initOrderedByDue();
+        MergeSortByPosition sort = new MergeSortByPosition(entries);
+        sort.sort();
     }
 
-    public void add(String task){
-        Entry entry = new Entry(generateId(),task); //generate ID and create entry
+    public Entry add(String task) {
+        Entry entry = new Entry(generateId(), entries.size()-1,task); //generate ID and create entry
 
         entries.add(entry); //add entry to this.entries
-        dropped.add(entry);//add entry to this.dropped
-        tasksToPick.add(entry);
         db.addEntry(entry); //write changes to save file
-        initOrderedByDue();
+        return entry;
     }
 
     public void remove(int id){
@@ -78,18 +68,15 @@ public class Data{
                 break;
             }
         }
-        initDropped();
-        initFocus();
-        initLists();
-        initTasksToPick();
-        initOrderedByDue();
+
+//        dropped.remove(getPosition(id,dropped));
+
         db.removeEntry(id);
     }
 
     public void swap(int id1, int id2){
-        int pos1 = getPosition(id1);
-        int pos2 = getPosition(id2);
 
+/*
         if (pos1 > pos2){
             for (int i = pos1; i > pos2; i--){
 
@@ -105,15 +92,16 @@ public class Data{
 
 
             }
-        }
-//        Collections.swap(entries,pos1,pos2);
-        initDropped();
-        initFocus();
-        initLists();
-        initTasksToPick();
-        initOrderedByDue();
+        }*/
+        db.swapEntries(id1,id2);
+
+        int pos1 = getPosition(id1);
+        int pos2 = getPosition(id2);
+
+        Collections.swap(entries,pos1,pos2);
 
     }
+
 
     public void editTask(int id, String newTask){
         entries.get(getPosition(id)).setTask(newTask);
@@ -134,18 +122,28 @@ public class Data{
 
     }
 
+    public int getPosition(int id, ArrayList<Entry> list){
+        for (int i=0;i<list.size();i++){
+
+            if (list.get(i).getId() == id){
+                return i;
+
+            }
+        }
+        return -1;
+
+    }
+
     /* the following functions edit different fields of entries by their id */
 
     public void setFocus(int id, Boolean focus){
         entries.get(getPosition(id)).setFocus(focus);
-        initFocus();
         db.updateEntry(DbHelper.FOCUS_COL, id, DbHelper.boolToInt(focus));
 
     }
 
     public void setDropped(int id, Boolean dropped){
         entries.get(getPosition(id)).setDropped(dropped);
-        initDropped();
         db.updateEntry(DbHelper.DROPPED_COL, id, DbHelper.boolToInt(dropped));
 
     }
@@ -186,8 +184,6 @@ public class Data{
         }
 
         entry.setDue(date);
-        initOrderedByDue();
-        initTasksToPick();
     }
 
     private int incrementRecurring(char mode, int[] dateArray,int offSet){
@@ -266,8 +262,6 @@ public class Data{
 
     public void editDue(int id, int date){
         entries.get(getPosition(id)).setDue(date);
-        initOrderedByDue();
-        initTasksToPick();
         db.updateEntry(DbHelper.DUE_COL, id, date);
     }
 
@@ -278,7 +272,6 @@ public class Data{
 
     public void editList(int id, String list){
         entries.get(getPosition(id)).setList(list);
-        initLists();
         db.updateEntry(DbHelper.LIST_COL, id, list);
     }
 
@@ -296,45 +289,24 @@ public class Data{
     }
 
     public ArrayList<String> getLists() {
-        return listNames;
-    }
+        ArrayList<String> lists = new ArrayList<>();
 
-    private void initLists(){
-
-        listNames.clear();
-        lists.clear();
-
-        for(Entry e : entries){
-            String list = e.getList();
-
-            if (list!=null) {
-
-                if (!listNames.contains(list)) {
-
-                    listNames.add(list);
-                    ArrayList<Entry> newList = new ArrayList<>();
-                    newList.add(e);
-                    Pair<String,ArrayList<Entry>> newPair = new Pair<>(list, newList);
-                    lists.add(newPair);
-                } else{
-
-                    for (Pair<String,ArrayList<Entry>> p : lists){
-                        if (p.first.equals(list)){
-                            p.second.add(e);
-                        }
-                    }
-                }
+        for (Entry e : entries){
+            if (e.getList() != null && !e.getList().isEmpty()){
+                if (!lists.contains(e.getList()))
+                    lists.add(e.getList());
             }
         }
-        Collections.sort(listNames);
-        listNames.add(context.getResources().getString(R.string.noList));
-        listNames.add(context.getResources().getString(R.string.allTasks));
+
+        Collections.sort(lists);
+        lists.add(context.getResources().getString(R.string.noList));
+        lists.add(context.getResources().getString(R.string.allTasks));
+
+        return lists;
     }
 
-    private void initTasksToPick(){
-        //return a list of all entries for which the due date is <=today
 
-        tasksToPick.clear();
+    public ArrayList<Entry> getTasksToPick(){        ArrayList<Entry> tasksToPick= new ArrayList<>();
 
         int date = getToday();//get current date as "yyyyMMdd"
 
@@ -355,30 +327,50 @@ public class Data{
             }
 
         }
-
+        return  tasksToPick;
     }
 
-    public ArrayList<Entry> getTasksToPick(){return tasksToPick;}
-
-    public ArrayList<Entry> getFromList(String list){
+    public ArrayList<Entry> getList(String list){
 
         ArrayList<Entry> listArray = new ArrayList<>();
-        for (Pair<String,ArrayList<Entry>> p: lists){
-            if (p.first.equals(list)){
-                return p.second;
+
+        for (Entry e : entries){
+
+            if (e.getList() != null && e.getList().equals(list)){
+
+                listArray.add(e);
+
             }
         }
+
+        MergeSortByListPosition sort = new MergeSortByListPosition(listArray);
+
+        sort.sort();
 
         return listArray;
     }
 
     public ArrayList<Entry> getDropped(){
 
+        ArrayList<Entry> dropped = new ArrayList<>();
+
+        for (Entry e : entries){
+            if (e.getDropped())
+                dropped.add(e);
+
+        }
         return dropped;
 
     }
     public ArrayList<Entry> getFocus(){
+        ArrayList<Entry> focus = new ArrayList<>();
 
+        for (Entry e : entries){
+
+            if (e.getFocus())
+                focus.add(e);
+
+        }
         return focus;
     }
 
@@ -429,37 +421,13 @@ public class Data{
 
     }
     public ArrayList<Entry> getEntriesOrderedByDate(){
+        ArrayList<Entry> entriesOrderedByDue = new ArrayList<>(entries);
 
-        return entriesOrderedByDue;
-
-    }
-
-    public void initDropped(){
-        dropped.clear();
-        for (Entry e : entries){
-            if(e.getDropped()){
-                dropped.add(e);
-            }
-        }
-
-    }
-
-    public void initFocus(){
-        focus.clear();
-        for (Entry e: entries){
-            if (e.getFocus()){
-                focus.add(e);
-            }
-        }
-    }
-
-    public void initOrderedByDue(){
-        entriesOrderedByDue.clear();
-        entriesOrderedByDue.addAll(entries);
         MergeSortByDue sort = new MergeSortByDue(entriesOrderedByDue);
 
         sort.sort();
 
+        return entriesOrderedByDue;
 
     }
 
