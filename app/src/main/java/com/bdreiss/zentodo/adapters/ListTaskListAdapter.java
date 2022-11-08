@@ -7,6 +7,7 @@ import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class ListTaskListAdapter extends TaskListAdapter{
 
@@ -39,6 +40,11 @@ public class ListTaskListAdapter extends TaskListAdapter{
             int id = entries.get(position).getId();//Get id of task
             String list = holder.autoCompleteList.getText().toString();//get list name
 
+            String oldList = entries.get(position).getList();
+
+            if (oldList != null && !list.equals(oldList))
+                data.decrementListHash(oldList);
+
             //set to no list if AutoComplete is empty
             if (list.trim().isEmpty()) {
                 data.editList(id, null);//reset to no list
@@ -52,5 +58,22 @@ public class ListTaskListAdapter extends TaskListAdapter{
             }
             notifyDataSetChanged();
         });
+    }
+
+    @Override
+    public void onItemMove(int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                data.swapList(entries.get(i).getId(),entries.get(i+1).getId());
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                data.swapList(entries.get(i).getId(),entries.get(i-1).getId());
+            }
+        }
+        Collections.swap(entries, fromPosition, toPosition);
+
+        notifyItemMoved(fromPosition,toPosition);
+
     }
 }

@@ -1,6 +1,7 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bdreiss.zentodo.R;
@@ -47,7 +48,7 @@ public class Data{
         for (Entry e: newEntries) {
             ids.add(e.getId());
             if (e.getList() != null && !e.getList().isEmpty()){
-
+               incrementListHash(e.getList());
             }
 
         }
@@ -84,33 +85,32 @@ public class Data{
 
     public void swap(int id1, int id2){
 
-/*
-        if (pos1 > pos2){
-            for (int i = pos1; i > pos2; i--){
-
-                Collections.swap(entries,i,i-1);
-                db.swapEntries(entries.get(i),entries.get(i-1));
-
-            }
-        } else{
-            for (int i = pos1; i < pos2; i++){
-
-                Collections.swap(entries,i,i+1);
-                db.swapEntries(entries.get(i),entries.get(i+1));
-
-
-            }
-        }*/
-        db.swapEntries(id1,id2);
+        db.swapEntries(db.getPositionCol(),id1,id2);
 
         int pos1 = getPosition(id1);
         int pos2 = getPosition(id2);
 
         Collections.swap(entries,pos1,pos2);
 
+        int posTemp = entries.get(pos1).getPosition();
+        entries.get(pos1).setPosition(entries.get(pos2).getPosition());
+        entries.get(pos2).setPosition(posTemp);
+
     }
 
 
+    public void swapList(int id1, int id2){
+
+        db.swapEntries(db.getListPositionCol(),id1,id2);
+
+        int pos1 = getPosition(id1);
+        int pos2 = getPosition(id2);
+
+        int posTemp = entries.get(pos1).getListPosition();
+        entries.get(pos1).setListPosition(entries.get(pos2).getListPosition());
+        entries.get(pos2).setListPosition(posTemp);
+
+    }
     public void editTask(int id, String newTask){
         entries.get(getPosition(id)).setTask(newTask);
         db.updateEntry(DbHelper.TASK_COL,id, newTask);
@@ -122,18 +122,6 @@ public class Data{
         for (int i=0;i<entries.size();i++){
 
             if (entries.get(i).getId() == id){
-                return i;
-
-            }
-        }
-        return -1;
-
-    }
-
-    public int getPosition(int id, ArrayList<Entry> list){
-        for (int i=0;i<list.size();i++){
-
-            if (list.get(i).getId() == id){
                 return i;
 
             }
@@ -279,8 +267,32 @@ public class Data{
     }
 
     public void editList(int id, String list){
-        entries.get(getPosition(id)).setList(list);
+        Entry entry = entries.get(getPosition(id));
+        entry.setList(list);
+        if (list != null) {
+            entry.setListPosition(listPositionCount.get(list) + 1);
+            incrementListHash(list);
+        }
         db.updateEntry(DbHelper.LIST_COL, id, list);
+    }
+
+    public void incrementListHash(String list){
+
+        if (listPositionCount.get(list)!=null)
+            listPositionCount.put(list,listPositionCount.get(list)+1);
+        else
+            listPositionCount.put(list,0);
+    }
+
+    public void decrementListHash(String list){
+
+        int position = listPositionCount.get(list);
+
+        if (position == 0)
+            listPositionCount.remove(list);
+        else
+            listPositionCount.put(list,position-1);
+
     }
 
     public String[] returnListsAsArray(){

@@ -197,23 +197,31 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     }
 
-    public void swapEntries(int id1, int id2){
+    public void swapEntries(String positionCol, int id1, int id2){
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT " + POSITION_COL + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id1, null);
+        Cursor cursor = db.rawQuery("SELECT " + positionCol + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id1, null);
         cursor.moveToFirst();
 
         int pos1 = cursor.getInt(0);
 
-        cursor = db.rawQuery("SELECT " + POSITION_COL + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id2, null);
+        cursor = db.rawQuery("SELECT " + positionCol + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id2, null);
         cursor.moveToFirst();
 
         int pos2 = cursor.getInt(0);
 
         cursor.close();
         db.close();
-        updateEntry(POSITION_COL, id1,pos2);
-        updateEntry(POSITION_COL, id2,pos1);
+        updateEntry(positionCol, id1,pos2);
+        updateEntry(positionCol, id2,pos1);
 
+    }
+
+    public String getPositionCol(){
+        return POSITION_COL;
+    }
+
+    public String getListPositionCol(){
+        return LIST_POSITION_COL;
     }
 
     //converts Integer to Boolean (false if 0, true otherwise)

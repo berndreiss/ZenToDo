@@ -39,6 +39,11 @@ public class DropTaskListAdapter extends TaskListAdapter{
             int id = entries.get(position).getId();//Get id of task
             String list = holder.autoCompleteList.getText().toString();//get list name
 
+            String oldList = entries.get(position).getList();
+
+            if (oldList != null && !list.equals(oldList))
+                data.decrementListHash(oldList);
+
             //set to no list if AutoComplete is empty
             if (list.trim().isEmpty()) {
 

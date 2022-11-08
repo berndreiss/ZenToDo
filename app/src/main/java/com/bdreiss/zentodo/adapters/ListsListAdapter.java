@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import com.bdreiss.zentodo.dataManipulation.Data;
+import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
 
@@ -35,6 +36,11 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private final ArrayList<String> lists;//Dynamically generated Array of all lists in data
     private final Data data;//Database
     private final TextView header;//header of ListView. setVisibility=GONE by default and =VISIBLE when TaskListAdapter is initialized.
+    private final ArrayList<Entry> listTasks = new ArrayList<>();
+
+    ListTaskListAdapter listsTaskListAdapter;
+    AllTaskListAdapter allTasksAdapter;
+    AllTaskListAdapter noListAdapter;
 
     private static class ViewHolder{
         private Button button;//Button to choose list
@@ -52,7 +58,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
     }
 
-    @SuppressLint("InflateParams")
+    @SuppressLint({"InflateParams", "NotifyDataSetChanged"})
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -86,31 +92,54 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             //fill ListView with all tasks or according list
             if (holder.button.getText().equals(context.getResources().getString(R.string.allTasks))){
 
+                listTasks.clear();
+                listTasks.addAll(data.getEntriesOrderedByDate());
                 header.setText(context.getResources().getString(R.string.allTasks));//set header text
                 //initialize adapter
-                AllTaskListAdapter adapter =new AllTaskListAdapter(context,data, data.getEntriesOrderedByDate());
-                recyclerView.setAdapter(adapter);//set adapter
-
+                if (allTasksAdapter == null) {
+                    allTasksAdapter = new AllTaskListAdapter(context, data, listTasks);
+                    recyclerView.setAdapter(allTasksAdapter);//set adapter
+                } else{
+                    allTasksAdapter.notifyDataSetChanged();
+                }
             } else if (holder.button.getText().equals(context.getResources().getString(R.string.noList))) {
 
+                listTasks.clear();
+                listTasks.addAll(data.getNoList());
                 header.setText(context.getResources().getString(R.string.noList));//set header text
                 //initialize adapter
-                AllTaskListAdapter adapter =new AllTaskListAdapter(context,data, data.getNoList());
-                recyclerView.setAdapter(adapter);//set adapter
-
+                if (noListAdapter == null) {
+                    noListAdapter = new AllTaskListAdapter(context, data, listTasks);
+                    recyclerView.setAdapter(noListAdapter);//set adapter
+                }else{
+                    noListAdapter.notifyDataSetChanged();
+                }
 
             } else {
 
                 String list = holder.button.getText().toString();//get list name
                 header.setText(list);//set header text
+
+                listTasks.clear();
+
+                listTasks.addAll(data.getList(list));
                 //initialize adapter
-                ListTaskListAdapter adapter = new ListTaskListAdapter(context, data, data.getList(list));
-                recyclerView.setAdapter(adapter);//set adapter
-                ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(adapter);
 
-                ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
+                if(listsTaskListAdapter==null){
+                    listsTaskListAdapter = new ListTaskListAdapter(context, data, listTasks);
+                    recyclerView.setAdapter(listsTaskListAdapter);//set adapter
+                    ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(listsTaskListAdapter);
 
-                iTouchHelper.attachToRecyclerView(recyclerView);
+
+                    ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
+
+                    iTouchHelper.attachToRecyclerView(recyclerView);
+
+                }
+                else{
+                    listsTaskListAdapter.notifyDataSetChanged();
+                }
+
 
 
             }

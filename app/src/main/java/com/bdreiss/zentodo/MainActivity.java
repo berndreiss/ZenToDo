@@ -395,6 +395,9 @@ public class MainActivity extends AppCompatActivity {
 
         //set adapter
         listView.setAdapter(listsListAdapter);
+
+
+
     }
 
     public void showSettings(){
