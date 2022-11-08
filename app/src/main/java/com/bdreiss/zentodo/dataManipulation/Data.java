@@ -13,6 +13,8 @@ import java.util.ArrayList;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.Hashtable;
+import java.util.Map;
 
 public class Data{
 /*
@@ -25,6 +27,8 @@ public class Data{
 
     protected static final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     protected static ArrayList<Integer> ids = new ArrayList<>();//Used to generate new ids
+
+    protected static final Map<String, Integer> listPositionCount = new Hashtable<>();
 
     private final Context context;
 
@@ -40,9 +44,13 @@ public class Data{
     public void load(){
         ArrayList<Entry> newEntries = db.loadEntries();
 
-        for (Entry e: newEntries)
+        for (Entry e: newEntries) {
             ids.add(e.getId());
+            if (e.getList() != null && !e.getList().isEmpty()){
 
+            }
+
+        }
         Collections.sort(ids);
 
         entries.addAll(newEntries);

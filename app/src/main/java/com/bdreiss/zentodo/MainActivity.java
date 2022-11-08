@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.View;
 
+import com.bdreiss.zentodo.dataManipulation.Entry;
 import com.bdreiss.zentodo.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -68,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
     PickTaskListAdapter pickAdapter;
     FocusTaskListAdapter focusAdapter;
     ListsListAdapter listsListAdapter;
+
+    ArrayList<Entry> droppedTasks;
+    ArrayList<Entry> tasksToPick;
+    ArrayList<Entry> focusTasks;
+    ArrayList<String> listNames;
 
     EditText dropEditText;
 
@@ -126,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
     public void toolbarListenerDrop(){
         toolbarDrop.setOnClickListener(view -> {
            showDrop();
-           initializeDrop();
            toolbarListenerDrop();
         });
 
@@ -136,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
         toolbarPick.setOnClickListener(view -> {
             closeKeyboard();
             showPick();
-            initializePick();
             toolbarListenerPick();
         });
 
@@ -146,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
         toolbarFocus.setOnClickListener(view -> {
             closeKeyboard();
             showFocus();
-            initializeFocus();
             toolbarListenerFocus();
         });
 
@@ -156,7 +159,6 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setOnClickListener(view -> {
             closeKeyboard();
             showLists();
-            initializeLists();
             toolbarListenerLists();
         });
 
@@ -171,8 +173,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Initialize Drop layout
+    @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
-
+        droppedTasks.clear();
+        droppedTasks.addAll(data.getDropped());
+        dropAdapter.notifyDataSetChanged();
         //enable all components of Drop layout (setVisibility = VISIBLE)
         enableLayout(drop);
         //disable components of all other layouts (setVisibility = GONE)
@@ -190,9 +195,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initializeDrop(){
-
+        droppedTasks = data.getDropped();
         //initialize adapter for ListView that shows tasks dropped
-        dropAdapter = new DropTaskListAdapter(this, data, data.getDropped());
+
+        dropAdapter = new DropTaskListAdapter(this, data, droppedTasks);
+
         //assign ListView
         RecyclerView listView = findViewById(R.id.list_view_drop);
         //set adapter
@@ -234,8 +241,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //initializes Pick layout
+    @SuppressLint("NotifyDataSetChanged")
     public void showPick(){
-
+        tasksToPick.clear();
+        tasksToPick.addAll(data.getTasksToPick());
+        pickAdapter.notifyDataSetChanged();
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
         //disable components of all other layouts (setVisibility = GONE)
@@ -253,8 +263,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initializePick() {
+        tasksToPick = data.getTasksToPick();
         //initialize adapter for ListView with all tasks that have been dropped or are due today
-        pickAdapter = new PickTaskListAdapter(this, data, data.getTasksToPick());
+        pickAdapter = new PickTaskListAdapter(this, data, tasksToPick);
+
         //assign ListView
         RecyclerView listView = findViewById(R.id.list_view_pick);
         //set adapter
@@ -293,7 +305,6 @@ public class MainActivity extends AppCompatActivity {
             //re-initialize toolbar
             toolbarListenerPick();
             //initialize Focus layout
-            initializeFocus();
             showFocus();
 
         });
@@ -301,8 +312,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //initializes the Focus layout
+    @SuppressLint("NotifyDataSetChanged")
     public void showFocus(){
-
+        focusTasks.clear();
+        focusTasks.addAll(data.getFocus());
+        focusAdapter.notifyDataSetChanged();
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);
         //disable all components in all other layouts (setVisibility = GONE)
@@ -321,8 +335,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initializeFocus(){
+        focusTasks = data.getFocus();
         //initialize the adapter for the ListView to show the tasks to focus on
-        focusAdapter = new FocusTaskListAdapter(this,data,data.getFocus());
+        focusAdapter = new FocusTaskListAdapter(this,data,focusTasks);
+
         //assign View
         RecyclerView listView = findViewById(R.id.list_view_focus);
         //set adapter
@@ -340,6 +356,9 @@ public class MainActivity extends AppCompatActivity {
 
     //initialize Lists layout
     public void showLists(){
+        listNames.clear();
+        listNames.addAll(data.getLists());
+        listsListAdapter.notifyDataSetChanged();
         //enable all components in the Lists layout (setVisibility = VISIBLE)
         enableLayout(lists);
         //disable all components in all other layouts (setVisibility = GONE)
@@ -362,6 +381,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initializeLists() {
+
         //initialize ListView to show lists available
         ListView listView = findViewById(R.id.list_view_lists);
         RecyclerView recyclerView = findViewById(R.id.recycle_view_lists);
@@ -369,7 +389,9 @@ public class MainActivity extends AppCompatActivity {
         TextView header = findViewById(R.id.text_view_lists_header);
         //initialize adapter: each item represents a button that when pressed initializes a TaskListAdapter
         //with all the tasks of the list (see ListsListAdapter.java)
-        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, header, data, data.getLists());
+        listNames = data.getLists();
+
+        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, header, data, listNames);
 
         //set adapter
         listView.setAdapter(listsListAdapter);
