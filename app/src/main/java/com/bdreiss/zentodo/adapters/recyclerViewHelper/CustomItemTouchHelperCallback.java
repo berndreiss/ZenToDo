@@ -1,5 +1,7 @@
 package com.bdreiss.zentodo.adapters.recyclerViewHelper;
 
+import android.annotation.SuppressLint;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -45,6 +47,7 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState){
         super.onSelectedChanged(viewHolder, actionState);
