@@ -1,14 +1,13 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
-import android.util.Pair;
 
 import com.bdreiss.zentodo.R;
+import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSort;
+import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByDue;
+import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByListPosition;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.Array;
+
 import java.util.Collections;
 import java.util.ArrayList;
 
@@ -56,7 +55,7 @@ public class Data{
 
         entries.addAll(newEntries);
 
-        MergeSortByPosition sort = new MergeSortByPosition(entries);
+        MergeSort sort = new MergeSort(entries);
         sort.sort();
     }
 

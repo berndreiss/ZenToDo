@@ -38,9 +38,9 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private final TextView header;//header of ListView. setVisibility=GONE by default and =VISIBLE when recyclerView is shown
     private final ArrayList<Entry> listTasks = new ArrayList<>();//ArrayList that serves as a container for tasks that are in the list that has been chosen
 
-    ListTaskListAdapter listsTaskListAdapter;//adapter for items in lists
-    AllTaskListAdapter allTasksAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list is changed)
-    AllTaskListAdapter noListAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list is changed) TODO implement own adapter for removing items when list is changed
+    ListTaskListAdapter listsTaskListAdapter;//adapter for items in lists (items can be moved and get removed when list of task is changed)
+    AllTaskListAdapter allTasksAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed)
+    AllTaskListAdapter noListAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed) TODO implement own adapter for removing items when list is changed
 
     private static class ViewHolder{
         private Button button;//Button to choose list

@@ -1,13 +1,15 @@
-package com.bdreiss.zentodo.dataManipulation;
+package com.bdreiss.zentodo.dataManipulation.mergeSort;
 
 //code adapted from https://www.withexample.com/merge-sort-using-arraylist-java-example/
 
+import com.bdreiss.zentodo.dataManipulation.Entry;
+
 import java.util.ArrayList;
 
-public class MergeSortByDue {
-    private final ArrayList<Entry> inputArray;
+public class MergeSort {
+    protected final ArrayList<Entry> inputArray;
 
-    public MergeSortByDue(ArrayList<Entry> inputArray){
+    public MergeSort(ArrayList<Entry> inputArray){
         this.inputArray = inputArray;
     }
 
@@ -37,7 +39,7 @@ public class MergeSortByDue {
         int rightIndex = midIndex+1;
 
         while(leftIndex<=midIndex && rightIndex<=endIndex){
-            if(inputArray.get(leftIndex).getDue()<=inputArray.get(rightIndex).getDue()){
+            if(getLeft(leftIndex)<=getRight(rightIndex)){
                 mergedSortedArray.add(inputArray.get(leftIndex));
                 leftIndex++;
             }else{
@@ -64,5 +66,13 @@ public class MergeSortByDue {
             inputArray.set(j, mergedSortedArray.get(i++));
             j++;
         }
+    }
+
+    public int getLeft(int leftIndex){
+        return inputArray.get(leftIndex).getPosition();
+    }
+
+    public int getRight(int rightIndex){
+        return inputArray.get(rightIndex).getPosition();
     }
 }
