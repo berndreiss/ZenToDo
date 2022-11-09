@@ -8,6 +8,7 @@ package com.bdreiss.zentodo.adapters;
 *
  */
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.View;
 
@@ -97,6 +98,7 @@ public class PickTaskListAdapter extends TaskListAdapter{
     }
 
     //set Focus Listener that deletes entry upon click
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     @Override
     public void setFocusListener(ViewHolder holder,int position){
         holder.delete.setOnClickListener(view -> {
@@ -114,7 +116,7 @@ public class PickTaskListAdapter extends TaskListAdapter{
             entries.remove(position);
 
             //notify adapter
-            notifyItemRemoved(position);
+            notifyDataSetChanged();
         });
     }
 

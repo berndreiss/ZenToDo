@@ -187,6 +187,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     }
 
     //set Listener for checkbox: basically if checked the item is removed
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     protected void setCheckBoxListener(TaskListAdapter.ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {
 
@@ -210,7 +211,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
             //remove from adapter and notify
             entries.remove(position);
-            notifyItemRemoved(position);
+            notifyDataSetChanged();
         });
 
     }
@@ -233,6 +234,8 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             //get current entry
             Entry entry = entries.get(position);
 
+            boolean focused = entry.getFocus();
+
             //get ID for manipulation in data
             int id = entry.getId();//get id
 
@@ -240,13 +243,14 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             data.setDropped(id, false);
 
             //change state of focus in entry
-            data.setFocus(id, !entry.getFocus());
-
-            //notify the adapter
-            notifyItemChanged(position);
+            data.setFocus(id, !focused);
+            entry.setFocus(!focused);
 
             //change color of Focus Button marking whether task is focused or not
             markSet(holder,entry);
+
+            //notify the adapter
+            notifyItemChanged(position);
 
             //return to original row layout
             setOriginal(holder);
@@ -293,9 +297,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
                 //save new task description in data
                 data.editTask(id, newTask);
+                entries.get(position).setTask(newTask);
 
-                //set new Task in list
-                holder.task.setText(newTask);
+                //notify adapter
+                notifyItemChanged(position);
 
                 //return to original layout
                 setOriginal(holder);
@@ -360,9 +365,13 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
             //set date when task is due to 0
             data.editDue(entry.getId(),0);
+            entries.get(position).setDue(0);
 
             //change color of Due Date Button marking if Date is set
             markSet(holder,entry);
+
+            //notify adapter
+            notifyItemChanged(position);
 
             //return to original layout
             setOriginal(holder);
@@ -386,9 +395,13 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
             //Write back data
             data.editDue(entry.getId(), date);
+            entries.get(position).setDue(date);
 
             //change color of Due Date Button marking if Date is set
             markSet(holder,entry);
+
+            //notify adapter
+            notifyItemChanged(position);
 
             //return to original row layout
             setOriginal(holder);
@@ -490,6 +503,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             //if editText was empty or value=0 then recurrence is set to null, otherwise number and interval are written back
             if (intervalInt == 0){
                 data.editRecurrence(id, null);
+                entries.get(position).setRecurrence(null);
             }
             else{
 
@@ -501,10 +515,15 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
                 //write back
                 data.editRecurrence(id,recurrence);
+                entries.get(position).setRecurrence(recurrence);
+
             }
 
             //change color of recurrence Button to mark if recurrence is set
             markSet(holder,entries.get(position));
+
+            //notify adapter
+            notifyItemChanged(position);
 
             //return to original row layout
             setOriginal(holder);
@@ -575,11 +594,19 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             //set to no list if AutoComplete is empty
             if (list.trim().isEmpty()) {
                 //reset to no list
-                data.editList(id, null);
+                entries.get(position).setListPosition(data.editList(id, null));
+                entries.get(position).setList(null);
             } else {
                 //write back otherwise
-                data.editList(id, list);
+                entries.get(position).setListPosition(data.editList(id, list));
+                entries.get(position).setList(list);
             }
+
+            //change Color of setList Button to mark if list is set
+            markSet(holder,entries.get(position));
+
+            //notify adapter
+            notifyItemChanged(position);
 
             //return to original row layout
             setOriginal(holder);
@@ -587,8 +614,6 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             //reset Listener
             setBackListListener(holder, position);
 
-            //change Color of setList Button to mark if list is set
-            markSet(holder,entries.get(position));
         });
     }
 
@@ -678,8 +703,6 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         //Set alternative row view to invisible and inactive
         holder.linearLayoutAlt.setAlpha(0);
         disable(holder.linearLayoutAlt);
-
-
 
     }
 

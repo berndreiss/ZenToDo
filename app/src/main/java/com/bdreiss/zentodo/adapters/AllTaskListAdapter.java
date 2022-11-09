@@ -14,7 +14,7 @@ public class AllTaskListAdapter extends TaskListAdapter{
         super(context,data,entries);
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     @Override
     public void setCheckBoxListener(ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {

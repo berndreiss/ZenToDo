@@ -1,5 +1,6 @@
 package com.bdreiss.zentodo.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
@@ -14,6 +15,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
         super(context, data, entries);
     }
 
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     @Override
     public void setCheckBoxListener(ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {
@@ -22,13 +24,13 @@ public class ListTaskListAdapter extends TaskListAdapter{
             data.remove(id);
             entries.remove(position);
 
-            notifyItemRemoved(position);
-
+            notifyDataSetChanged();
         });
 
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     @Override
     public void setBackListListener(ViewHolder holder, int position){
 
@@ -38,21 +40,28 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
             String oldList = entries.get(position).getList();
 
-            if (oldList != null && !list.equals(oldList))
+            if (!list.equals(oldList)) {
+
                 data.decrementListHash(oldList);
 
-            //set to no list if AutoComplete is empty
-            if (list.trim().isEmpty()) {
-                data.editList(id, null);//reset to no list
-                setBackListListener(holder,position);
+                //set to null if AutoComplete is empty
+                if (list.trim().isEmpty())
+                    data.editList(id, null);//reset to no list
 
-            } else {
-                if (!list.equals(entries.get(position).getList())) {
+                else
                     data.editList(id, list);//write back otherwise
-                    entries.remove(position);
-                }
+
+
+                entries.remove(position);
+                notifyDataSetChanged();
+
+
             }
-            notifyItemRemoved(position);
+
+            setOriginal(holder);
+
+            setBackListListener(holder,position);
+
         });
     }
 

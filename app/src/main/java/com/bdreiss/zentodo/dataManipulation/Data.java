@@ -2,6 +2,8 @@ package com.bdreiss.zentodo.dataManipulation;
 import android.annotation.SuppressLint;
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSort;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByDue;
@@ -16,14 +18,14 @@ import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class Data{
-/*
-*   Creates an instance of all relevant data, stored in several lists
-*   Data manipulation includes:
-*       -saving (save()) and loading (load()) data,
-*       -adding (add(String task,String list,int due)) and removing entries
-*       -returning tasks that are due (getPotentials()) and updating todays tasks (setTodays(List<Entry> todays))
-*/
+public class Data {
+    /*
+     *   Creates an instance of all relevant data, stored in several lists
+     *   Data manipulation includes:
+     *       -saving (save()) and loading (load()) data,
+     *       -adding (add(String task,String list,int due)) and removing entries
+     *       -returning tasks that are due (getPotentials()) and updating todays tasks (setTodays(List<Entry> todays))
+     */
 
     protected static final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     protected static ArrayList<Integer> ids = new ArrayList<>();//Used to generate new ids
@@ -34,20 +36,20 @@ public class Data{
 
     private final DbHelper db;
 
-    public Data(Context context){
+    public Data(Context context) {
         //initialize instance of Data, set id to 0, create save file and load data from save file
-        this.context=context;
+        this.context = context;
         this.db = new DbHelper(context);
         this.load();
     }
 
-    public void load(){
+    public void load() {
         ArrayList<Entry> newEntries = db.loadEntries();
 
-        for (Entry e: newEntries) {
+        for (Entry e : newEntries) {
             ids.add(e.getId());
-            if (e.getList() != null && !e.getList().isEmpty()){
-               incrementListHash(e.getList());
+            if (e.getList() != null && !e.getList().isEmpty()) {
+                incrementListHash(e.getList());
             }
 
         }
@@ -60,18 +62,18 @@ public class Data{
     }
 
     public Entry add(String task) {
-        Entry entry = new Entry(generateId(), entries.size()-1,task); //generate ID and create entry
+        Entry entry = new Entry(generateId(), entries.size() - 1, task); //generate ID and create entry
 
         entries.add(entry); //add entry to this.entries
         db.addEntry(entry); //write changes to save file
         return entry;
     }
 
-    public void remove(int id){
+    public void remove(int id) {
         //remove entry from database
         entries.remove(getPosition(id));
-        for (int i = 0; i < ids.size();i++){
-            if (ids.get(i) == id){
+        for (int i = 0; i < ids.size(); i++) {
+            if (ids.get(i) == id) {
                 ids.remove(i);
                 break;
             }
@@ -82,14 +84,14 @@ public class Data{
         db.removeEntry(id);
     }
 
-    public void swap(int id1, int id2){
+    public void swap(int id1, int id2) {
 
-        db.swapEntries(db.getPositionCol(),id1,id2);
+        db.swapEntries(db.getPositionCol(), id1, id2);
 
         int pos1 = getPosition(id1);
         int pos2 = getPosition(id2);
 
-        Collections.swap(entries,pos1,pos2);
+        Collections.swap(entries, pos1, pos2);
 
         int posTemp = entries.get(pos1).getPosition();
         entries.get(pos1).setPosition(entries.get(pos2).getPosition());
@@ -98,9 +100,9 @@ public class Data{
     }
 
 
-    public void swapList(int id1, int id2){
+    public void swapList(int id1, int id2) {
 
-        db.swapEntries(db.getListPositionCol(),id1,id2);
+        db.swapEntries(db.getListPositionCol(), id1, id2);
 
         int pos1 = getPosition(id1);
         int pos2 = getPosition(id2);
@@ -110,17 +112,18 @@ public class Data{
         entries.get(pos2).setListPosition(posTemp);
 
     }
-    public void editTask(int id, String newTask){
+
+    public void editTask(int id, String newTask) {
         entries.get(getPosition(id)).setTask(newTask);
-        db.updateEntry(DbHelper.TASK_COL,id, newTask);
+        db.updateEntry(DbHelper.getTaskCol(), id, newTask);
     }
 
     //Get position of entry by id, returns -1 if id not found
-    public int getPosition(int id){
+    public int getPosition(int id) {
 
-        for (int i=0;i<entries.size();i++){
+        for (int i = 0; i < entries.size(); i++) {
 
-            if (entries.get(i).getId() == id){
+            if (entries.get(i).getId() == id) {
                 return i;
 
             }
@@ -131,19 +134,19 @@ public class Data{
 
     /* the following functions edit different fields of entries by their id */
 
-    public void setFocus(int id, Boolean focus){
+    public void setFocus(int id, Boolean focus) {
         entries.get(getPosition(id)).setFocus(focus);
-        db.updateEntry(DbHelper.FOCUS_COL, id, DbHelper.boolToInt(focus));
+        db.updateEntry(DbHelper.getFocusCol(), id, DbHelper.boolToInt(focus));
 
     }
 
-    public void setDropped(int id, Boolean dropped){
+    public void setDropped(int id, Boolean dropped) {
         entries.get(getPosition(id)).setDropped(dropped);
-        db.updateEntry(DbHelper.DROPPED_COL, id, DbHelper.boolToInt(dropped));
+        db.updateEntry(DbHelper.getDroppedCol(), id, DbHelper.boolToInt(dropped));
 
     }
 
-    public void setRecurring(int id){
+    public void setRecurring(int id) {
         Entry entry = entries.get(getPosition(id));
 
         String recurrence = entry.getRecurrence();
@@ -153,7 +156,7 @@ public class Data{
 
         if (recurrence.length() > 2) {
 
-            for (int i = 2;i<recurrence.length();i++){
+            for (int i = 2; i < recurrence.length(); i++) {
                 offSetStr.append(recurrence.charAt(i));
             }
         }
@@ -164,70 +167,70 @@ public class Data{
 
         int today = getToday();
 
-        if (date == 0){
+        if (date == 0) {
             date = today;
         }
 
         int[] dateArray = new int[3];
-        dateArray[0] = date%100;
-        dateArray[1] = ((date-dateArray[0])/100)%100;
-        dateArray[2] = ((date-dateArray[1]*100-dateArray[0])/10000);
+        dateArray[0] = date % 100;
+        dateArray[1] = ((date - dateArray[0]) / 100) % 100;
+        dateArray[2] = ((date - dateArray[1] * 100 - dateArray[0]) / 10000);
 
 
-        while (date <= today){
+        while (date <= today) {
             date = incrementRecurring(mode, dateArray, offSet);
         }
 
         entry.setDue(date);
     }
 
-    private int incrementRecurring(char mode, int[] dateArray,int offSet){
+    private int incrementRecurring(char mode, int[] dateArray, int offSet) {
 
 
-        if (mode =='d' || mode =='w'){
+        if (mode == 'd' || mode == 'w') {
 
-            if (mode == 'w'){
+            if (mode == 'w') {
                 dateArray[0] += offSet * 7;
 
-            }else {
+            } else {
                 dateArray[0] += offSet;
             }
 
-            int daysOfTheMonth = returnDaysOfTheMonth(dateArray[1],dateArray[2]);
-            while (daysOfTheMonth < dateArray[0]){
+            int daysOfTheMonth = returnDaysOfTheMonth(dateArray[1], dateArray[2]);
+            while (daysOfTheMonth < dateArray[0]) {
                 dateArray[0] -= daysOfTheMonth;
                 dateArray[1]++;
 
-                if (dateArray[1] > 12){
+                if (dateArray[1] > 12) {
                     dateArray[2]++;
                     dateArray[1] -= 12;
                 }
-                daysOfTheMonth = returnDaysOfTheMonth(dateArray[1],dateArray[2]);
+                daysOfTheMonth = returnDaysOfTheMonth(dateArray[1], dateArray[2]);
             }
 
         }
 
-        if (mode == 'm'){
+        if (mode == 'm') {
             dateArray[1] += offSet;
-            if (dateArray[1] > 12){
+            if (dateArray[1] > 12) {
                 dateArray[2]++;
                 dateArray[1] -= 12;
             }
 
         }
 
-        if (mode == 'y'){
+        if (mode == 'y') {
 
-            dateArray[2]+=offSet;
+            dateArray[2] += offSet;
 
         }
 
 
-        return dateArray[0] + dateArray[1]*100 + dateArray[2]*10000;
+        return dateArray[0] + dateArray[1] * 100 + dateArray[2] * 10000;
     }
 
-    private int returnDaysOfTheMonth(int month,int year){
-        switch (month){
+    private int returnDaysOfTheMonth(int month, int year) {
+        switch (month) {
             case 1:
             case 3:
             case 5:
@@ -236,53 +239,65 @@ public class Data{
             case 10:
             case 12:
                 return 31;
-            case 2: return isLeapYear(year) ? 29 : 28;
+            case 2:
+                return isLeapYear(year) ? 29 : 28;
             case 4:
             case 6:
             case 9:
             case 11:
                 return 30;
-            default: return 0;
+            default:
+                return 0;
         }
 
 
     }
 
-    private Boolean isLeapYear(int year){
-        if (year%4 == 0){
+    private Boolean isLeapYear(int year) {
+        if (year % 4 == 0) {
             return year % 400 != 0;
         }
         return false;
     }
 
-    public void editDue(int id, int date){
+    public void editDue(int id, int date) {
         entries.get(getPosition(id)).setDue(date);
-        db.updateEntry(DbHelper.DUE_COL, id, date);
+        db.updateEntry(DbHelper.getDueCol(), id, date);
     }
 
-    public void editRecurrence(int id, String recurrence){
+    public void editRecurrence(int id, String recurrence) {
         entries.get(getPosition(id)).setRecurrence(recurrence);
-        db.updateEntry(DbHelper.RECURRENCE_COL, id, recurrence);
+        db.updateEntry(DbHelper.getRecurrenceCol(), id, recurrence);
     }
 
-    public void editList(int id, String list){
+    public int editList(int id, String list) {
         Entry entry = entries.get(getPosition(id));
         entry.setList(list);
-        if (list != null) {
-            entry.setListPosition(listPositionCount.get(list) + 1);
-            incrementListHash(list);
+
+        entry.setListPosition(incrementListHash(list));
+
+        db.updateEntry(DbHelper.getListCol(), id, list);
+        db.updateEntry(DbHelper.getListPositionCol(), id, entry.getListPosition());
+
+        return entry.getListPosition();
+    }
+
+    private int incrementListHash(String list) {
+
+        if (list == null)
+            return -1;
+
+        if (listPositionCount.get(list) != null) {
+            int pos = listPositionCount.get(list);
+            listPositionCount.put(list, pos + 1);
+            return pos + 1;
+        } else {
+            listPositionCount.put(list, 0);
+            return 0;
         }
-        db.updateEntry(DbHelper.LIST_COL, id, list);
     }
 
-    public void incrementListHash(String list){
-
-        if (listPositionCount.get(list)!=null)
-            listPositionCount.put(list,listPositionCount.get(list)+1);
-        else
-            listPositionCount.put(list,0);
-    }
-
+    @NonNull
     public void decrementListHash(String list){
 
         int position = listPositionCount.get(list);

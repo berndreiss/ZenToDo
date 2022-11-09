@@ -26,12 +26,12 @@ public class DropTaskListAdapter extends TaskListAdapter{
             //change dropped in entry to false
             data.setDropped(id, false);//change to false
             entries.remove(position);
-            notifyItemRemoved(position);
+            notifyDataSetChanged();
         });
 
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     @Override
     public void setBackListListener(ViewHolder holder, int position){
 
@@ -39,29 +39,16 @@ public class DropTaskListAdapter extends TaskListAdapter{
             int id = entries.get(position).getId();//Get id of task
             String list = holder.autoCompleteList.getText().toString();//get list name
 
-            String oldList = entries.get(position).getList();
+            data.editList(id, list);//write back otherwise
+            data.setDropped(id, false);//set dropped to false
 
-            if (oldList != null && !list.equals(oldList))
-                data.decrementListHash(oldList);
+            entries.remove(position);
 
-            //set to no list if AutoComplete is empty
-            if (list.trim().isEmpty()) {
-
-                data.editList(id, null);//reset to no list
-                //remove task from ListView is mode.equals("list")
-                setOriginal(holder);
-                setBackListListener(holder, position);
-
-            } else {
-                data.editList(id, list);//write back otherwise
-                data.setDropped(id, false);//set dropped to false
-                entries.remove(position);
-                notifyItemRemoved(position);
-            }
-
+            notifyDataSetChanged();
         });
     }
 
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     @Override
     public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
         DatePickerDialog datePickerDialog;
@@ -70,16 +57,17 @@ public class DropTaskListAdapter extends TaskListAdapter{
             data.editDue(entry.getId(), date);//Write back data
             data.setDropped(entry.getId(), false);
             entries.remove(position);
-            notifyItemRemoved(position);
+            notifyDataSetChanged();
 
         }, entryYear, entryMonth, entryDay);
         return datePickerDialog;
     }
 
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     public void add(String task){
         Entry entry = data.add(task);
         entries.add(entry);
-        notifyItemInserted(entries.size());
+        notifyDataSetChanged();
 
     }
 

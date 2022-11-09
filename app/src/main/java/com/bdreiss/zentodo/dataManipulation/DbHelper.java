@@ -38,25 +38,25 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     private static final int DB_VERSION = 1;
 
-    public static final String TABLE_ENTRIES = "entries";
+    private static final String TABLE_ENTRIES = "entries";
 
-    public static final String ID_COL = "id";
+    private static final String ID_COL = "id";
 
-    public static final String TASK_COL = "task";
+    private static final String TASK_COL = "task";
 
-    public static final String FOCUS_COL = "focus";
+    private static final String FOCUS_COL = "focus";
 
-    public static final String DROPPED_COL = "dropped";
+    private static final String DROPPED_COL = "dropped";
 
-    public static final String LIST_COL = "list";
+    private static final String LIST_COL = "list";
 
-    public static final String LIST_POSITION_COL = "listPosition";
+    private static final String LIST_POSITION_COL = "listPosition";
 
-    public static final String DUE_COL = "due";
+    private static final String DUE_COL = "due";
 
-    public static final String RECURRENCE_COL = "recurrence";
+    private static final String RECURRENCE_COL = "recurrence";
 
-    public static final String POSITION_COL = "position";
+    private static final String POSITION_COL = "position";
 
     public DbHelper(Context context){super(context,DB_NAME,null, DB_VERSION);}
 
@@ -216,13 +216,26 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     }
 
-    public String getPositionCol(){
+    public static String getTaskCol(){return TASK_COL;}
+
+    public static String getFocusCol(){return FOCUS_COL;}
+
+    public static String getDroppedCol(){return DROPPED_COL;}
+
+    public static String getPositionCol(){
         return POSITION_COL;
     }
 
-    public String getListPositionCol(){
+    public static String getDueCol() {return DUE_COL;}
+
+    public static String getRecurrenceCol(){return RECURRENCE_COL;}
+
+    public static String getListCol() {return LIST_COL;}
+
+    public static String getListPositionCol(){
         return LIST_POSITION_COL;
     }
+
 
     //converts Integer to Boolean (false if 0, true otherwise)
     static boolean intToBool(int i){

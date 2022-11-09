@@ -15,7 +15,7 @@ public class FocusTaskListAdapter extends TaskListAdapter{
         super(context, data, entries);
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     @Override
     public void setFocusListener(ViewHolder holder,int position){
         holder.focus.setOnClickListener(view12 -> {
@@ -28,7 +28,7 @@ public class FocusTaskListAdapter extends TaskListAdapter{
 
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
         DatePickerDialog datePickerDialog;
         datePickerDialog= new DatePickerDialog(super.context, (view, year, month, day) -> {
