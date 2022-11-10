@@ -1,6 +1,7 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -62,14 +63,30 @@ public class Data {
     }
 
     public Entry add(String task) {
-        Entry entry = new Entry(generateId(), entries.size() - 1, task); //generate ID and create entry
-
+        Entry entry = new Entry(generateId(), entries.size(), task); //generate ID and create entry
         entries.add(entry); //add entry to this.entries
         db.addEntry(entry); //write changes to save file
         return entry;
     }
 
     public void remove(int id) {
+
+        Entry entry = entries.get(getPosition(id));
+        int position = entry.getPosition();
+
+        for (Entry e: entries){
+
+            if (e.getPosition()>position){
+                int newPosition = e.getPosition()-1;
+                e.setPosition(newPosition);
+                db.updateEntry(DbHelper.getPositionCol(),e.getId(),newPosition);
+            }
+
+        }
+
+        if (entry.getList() != null)
+            decrementListHashPositionCount(entry.getList(),entry.getListPosition());
+
         //remove entry from database
         entries.remove(getPosition(id));
         for (int i = 0; i < ids.size(); i++) {
@@ -79,7 +96,6 @@ public class Data {
             }
         }
 
-//        dropped.remove(getPosition(id,dropped));
 
         db.removeEntry(id);
     }
@@ -87,6 +103,7 @@ public class Data {
     public void swap(int id1, int id2) {
 
         db.swapEntries(db.getPositionCol(), id1, id2);
+
 
         int pos1 = getPosition(id1);
         int pos2 = getPosition(id2);
@@ -102,15 +119,18 @@ public class Data {
 
     public void swapList(int id1, int id2) {
 
-        db.swapEntries(db.getListPositionCol(), id1, id2);
+        db.swapEntries(DbHelper.getListPositionCol(), id1, id2);
 
         int pos1 = getPosition(id1);
         int pos2 = getPosition(id2);
 
-        int posTemp = entries.get(pos1).getListPosition();
-        entries.get(pos1).setListPosition(entries.get(pos2).getListPosition());
-        entries.get(pos2).setListPosition(posTemp);
+        int listPos1 = entries.get(pos1).getListPosition();
+        int listPos2 = entries.get(pos2).getListPosition();
+        entries.get(pos1).setListPosition(listPos2);
+        entries.get(pos2).setListPosition(listPos1);
 
+        if ((pos1 < pos2 && listPos1 < listPos2) || (pos1 > pos2 && listPos1 > listPos2))
+            swap(id1,id2);
     }
 
     public void editTask(int id, String newTask) {
@@ -298,7 +318,8 @@ public class Data {
     }
 
     @NonNull
-    public void decrementListHash(String list){
+    public void decrementListHashPositionCount(String list, int currPosition){
+
 
         int position = listPositionCount.get(list);
 
@@ -306,6 +327,16 @@ public class Data {
             listPositionCount.remove(list);
         else
             listPositionCount.put(list,position-1);
+
+        for (Entry e : entries){
+
+            if (e.getList().equals(list) && e.getListPosition() > currPosition){
+                int newPosition = e.getListPosition()-1;
+                e.setListPosition(newPosition);
+                db.updateEntry(DbHelper.getListPositionCol(),e.getId(),newPosition);
+            }
+
+        }
 
     }
 

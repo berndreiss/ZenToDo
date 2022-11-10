@@ -1,5 +1,11 @@
 package com.bdreiss.zentodo.adapters;
 
+/*
+*       Adapter that shows all tasks sorted by their due date. Items are removed upon CheckBox-click
+*       even if they are recurring.
+*
+ */
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 
@@ -14,18 +20,26 @@ public class AllTaskListAdapter extends TaskListAdapter{
         super(context,data,entries);
     }
 
+    //set CheckBoxListener that ignores if task is recurring
     @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     @Override
     public void setCheckBoxListener(ViewHolder holder, int position){
         holder.checkBox.setOnClickListener(view -> {
+
+            //get entry
             Entry entry = entries.get(position);
+
+            //get id
             int id = entry.getId();//get ID
 
+            //remove from data
             data.remove(id);
 
+            //remove from adapter
             entries.remove(position);
-            notifyDataSetChanged();
 
+            //notify adapter
+            notifyDataSetChanged();
         });
 
     }

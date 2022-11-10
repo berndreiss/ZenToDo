@@ -77,6 +77,8 @@ public class PickTaskListAdapter extends TaskListAdapter{
             if (idsChecked.contains(id)){
 
                 int pos = 0;
+
+                //get position of id
                 for (int i=0;i<idsChecked.size();i++){
 
                     if (idsChecked.get(i) == id) {
