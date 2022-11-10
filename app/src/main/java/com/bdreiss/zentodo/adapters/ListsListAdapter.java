@@ -40,7 +40,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
     ListTaskListAdapter listsTaskListAdapter;//adapter for items in lists (items can be moved and get removed when list of task is changed)
     AllTaskListAdapter allTasksAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed)
-    AllTaskListAdapter noListAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed) TODO implement own adapter for removing items when list is changed
+    NoListTaskListAdapter noListAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed) TODO implement own adapter for removing items when list is changed
 
     private static class ViewHolder{
         private Button button;//Button to choose list
@@ -135,7 +135,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 if (noListAdapter == null) {
 
                     //initialize and set adapter
-                    noListAdapter = new AllTaskListAdapter(context, data, listTasks);
+                    noListAdapter = new NoListTaskListAdapter(context, data, listTasks);
                     recyclerView.setAdapter(noListAdapter);
 
                 }else{

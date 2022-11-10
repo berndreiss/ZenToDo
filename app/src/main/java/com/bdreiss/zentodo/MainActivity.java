@@ -314,6 +314,7 @@ public class MainActivity extends AppCompatActivity {
 
         //clear ArrayList for Pick, add current tasks from data and notify adapter (in case they have been altered in another layout)
         tasksToPick.clear();
+        pickAdapter.clearIdsChecked();
         tasksToPick.addAll(data.getTasksToPick());
         pickAdapter.notifyDataSetChanged();
 

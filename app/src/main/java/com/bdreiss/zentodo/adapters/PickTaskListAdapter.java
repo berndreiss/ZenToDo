@@ -61,6 +61,11 @@ public class PickTaskListAdapter extends TaskListAdapter{
         return notChecked;
     }
 
+    //clears the ArrayString
+    public void clearIdsChecked(){
+        idsChecked.clear();
+    }
+
 
     //set Listener for CheckBox. Add all picked tasks to idsChecked
     @Override
@@ -121,6 +126,7 @@ public class PickTaskListAdapter extends TaskListAdapter{
             notifyDataSetChanged();
         });
     }
+
 
 }
 

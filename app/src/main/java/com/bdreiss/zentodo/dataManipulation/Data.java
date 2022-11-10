@@ -74,6 +74,10 @@ public class Data {
         Entry entry = entries.get(getPosition(id));
         int position = entry.getPosition();
 
+        if (entry.getList() != null)
+            decrementListHashPositionCount(entry.getList(),entry.getListPosition());
+
+
         for (Entry e: entries){
 
             if (e.getPosition()>position){
@@ -84,8 +88,6 @@ public class Data {
 
         }
 
-        if (entry.getList() != null)
-            decrementListHashPositionCount(entry.getList(),entry.getListPosition());
 
         //remove entry from database
         entries.remove(getPosition(id));
@@ -330,7 +332,7 @@ public class Data {
 
         for (Entry e : entries){
 
-            if (e.getList().equals(list) && e.getListPosition() > currPosition){
+            if (e.getList() != null && e.getList().equals(list) && e.getListPosition() > currPosition){
                 int newPosition = e.getListPosition()-1;
                 e.setListPosition(newPosition);
                 db.updateEntry(DbHelper.getListPositionCol(),e.getId(),newPosition);
