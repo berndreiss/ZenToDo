@@ -202,9 +202,18 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
             //if recurring do not remove but set new due date, otherwise remove from data
             if (recurring) {
-                data.setRecurring(id);
+                //calculate new due date and write to data and entries
+                entries.get(position).setDue(data.setRecurring(id));
+
+                //reset focus in data and entries
                 data.setFocus(id,false);
+                entries.get(position).setFocus(false);
+
+                //reset dropped in data and entries
                 data.setDropped(id,false);
+                entries.get(position).setDropped(false);
+
+                notifyItemChanged(position);
             } else {
                 data.remove(id);
             }
@@ -296,7 +305,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             if (!newTask.isEmpty()) {
 
                 //save new task description in data
-                data.editTask(id, newTask);
+                data.setTask(id, newTask);
                 entries.get(position).setTask(newTask);
 
                 //notify adapter

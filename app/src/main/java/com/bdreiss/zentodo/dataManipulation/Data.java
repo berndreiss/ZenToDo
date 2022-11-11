@@ -1,7 +1,6 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -31,66 +30,96 @@ public class Data {
     protected static final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     protected static ArrayList<Integer> ids = new ArrayList<>();//Used to generate new ids
 
-    protected static final Map<String, Integer> listPositionCount = new Hashtable<>();
+    protected static final Map<String, Integer> listPositionCount = new Hashtable<>();//keeps track of lists and  of number items in list: stores list position (n-1)
 
     private final Context context;
 
-    private final DbHelper db;
+    private final DbHelper db;//database
 
+    //initialize instance of Data, load content of database into entries, populate ids and listPositionCount
     public Data(Context context) {
-        //initialize instance of Data, set id to 0, create save file and load data from save file
+
         this.context = context;
+
+        //get new Database-handler
         this.db = new DbHelper(context);
-        this.load();
-    }
 
-    public void load() {
-        ArrayList<Entry> newEntries = db.loadEntries();
+        //load Database-content to entries
+        entries.addAll(db.loadEntries());
 
-        for (Entry e : newEntries) {
+        //loop through all item and get ids, list Names and number of items in list
+        for (Entry e : entries) {
+
+            //add id
             ids.add(e.getId());
+
+            //if Entry has a list assigned, increment listPosition in listPositionCount
             if (e.getList() != null && !e.getList().isEmpty()) {
+
+                //increments counter in listPositionCount, puts item if non-existent
                 incrementListHash(e.getList());
             }
 
         }
+
+        //sort ids: when new ids are generated the app loops through the ArrayList and assigns
+        // the first available id (see generateId()). Therefore the list has to be sorted
         Collections.sort(ids);
 
-        entries.addAll(newEntries);
-
+        //sort entries by position
         MergeSort sort = new MergeSort(entries);
         sort.sort();
+
     }
 
+    //adds an Entry to Data and the Database
     public Entry add(String task) {
-        Entry entry = new Entry(generateId(), entries.size(), task); //generate ID and create entry
-        entries.add(entry); //add entry to this.entries
-        db.addEntry(entry); //write changes to save file
+
+        //generate ID and create entry
+        Entry entry = new Entry(generateId(), entries.size(), task);
+
+        //add entry to entries
+        entries.add(entry);
+
+        //write changes to database
+        db.addEntry(entry);
+
         return entry;
     }
 
+    //removes an id from Data and the Database
     public void remove(int id) {
 
+        //retrieve entry
         Entry entry = entries.get(getPosition(id));
-        int position = entry.getPosition();
 
+        //if list was assigned decrement counter in listPositionCount
         if (entry.getList() != null)
             decrementListHashPositionCount(entry.getList(),entry.getListPosition());
 
+        //get position of task
+        int position = entry.getPosition();
 
+        //for all tasks in entries: if position is higher than that of item, then decrement
         for (Entry e: entries){
 
             if (e.getPosition()>position){
+
+                //new position of item
                 int newPosition = e.getPosition()-1;
+
+                //write new position to Data and Database
                 e.setPosition(newPosition);
                 db.updateEntry(DbHelper.getPositionCol(),e.getId(),newPosition);
             }
 
         }
 
-
-        //remove entry from database
+        //remove entry from Data and Database
         entries.remove(getPosition(id));
+        db.removeEntry(id);
+
+        //remove id from ids
         for (int i = 0; i < ids.size(); i++) {
             if (ids.get(i) == id) {
                 ids.remove(i);
@@ -98,51 +127,55 @@ public class Data {
             }
         }
 
-
-        db.removeEntry(id);
     }
 
+    //swap entries if item is moved by drag and drop
     public void swap(int id1, int id2) {
 
-        db.swapEntries(db.getPositionCol(), id1, id2);
-
-
+        //get positions of items
         int pos1 = getPosition(id1);
         int pos2 = getPosition(id2);
 
+        //swap items in entries
         Collections.swap(entries, pos1, pos2);
 
+        //swap position in both Entries
         int posTemp = entries.get(pos1).getPosition();
         entries.get(pos1).setPosition(entries.get(pos2).getPosition());
         entries.get(pos2).setPosition(posTemp);
 
+        //swap position in Database
+        db.swapEntries(DbHelper.getPositionCol(), id1, id2);
+
     }
 
-
+    //swaps positions in list and synchronizes positions in entries
     public void swapList(int id1, int id2) {
 
-        db.swapEntries(DbHelper.getListPositionCol(), id1, id2);
-
+        //get position of items
         int pos1 = getPosition(id1);
         int pos2 = getPosition(id2);
 
+        //get listPositions
         int listPos1 = entries.get(pos1).getListPosition();
         int listPos2 = entries.get(pos2).getListPosition();
+
+        //swap listPosition
         entries.get(pos1).setListPosition(listPos2);
         entries.get(pos2).setListPosition(listPos1);
 
+        //swap listPositions in Database
+        db.swapEntries(DbHelper.getListPositionCol(), id1, id2);
+
+        //if relative position of items in entries is different swap them too
         if ((pos1 < pos2 && listPos1 < listPos2) || (pos1 > pos2 && listPos1 > listPos2))
             swap(id1,id2);
-    }
-
-    public void editTask(int id, String newTask) {
-        entries.get(getPosition(id)).setTask(newTask);
-        db.updateEntry(DbHelper.getTaskCol(), id, newTask);
     }
 
     //Get position of entry by id, returns -1 if id not found
     public int getPosition(int id) {
 
+        //loop through entries and return position if id matches
         for (int i = 0; i < entries.size(); i++) {
 
             if (entries.get(i).getId() == id) {
@@ -150,11 +183,20 @@ public class Data {
 
             }
         }
+
         return -1;
 
     }
 
-    /* the following functions edit different fields of entries by their id */
+    /*
+    *   The following functions edit different fields of entries by their id.
+    */
+
+    public void setTask(int id, String newTask) {
+        entries.get(getPosition(id)).setTask(newTask);
+        db.updateEntry(DbHelper.getTaskCol(), id, newTask);
+    }
+
 
     public void setFocus(int id, Boolean focus) {
         entries.get(getPosition(id)).setFocus(focus);
@@ -166,120 +208,6 @@ public class Data {
         entries.get(getPosition(id)).setDropped(dropped);
         db.updateEntry(DbHelper.getDroppedCol(), id, DbHelper.boolToInt(dropped));
 
-    }
-
-    public void setRecurring(int id) {
-        Entry entry = entries.get(getPosition(id));
-
-        String recurrence = entry.getRecurrence();
-        char mode = recurrence.charAt(0);
-        StringBuilder offSetStr = new StringBuilder();
-        offSetStr.append(recurrence.charAt(1));
-
-        if (recurrence.length() > 2) {
-
-            for (int i = 2; i < recurrence.length(); i++) {
-                offSetStr.append(recurrence.charAt(i));
-            }
-        }
-
-        int offSet = Integer.parseInt(offSetStr.toString());
-
-        int date = entry.getDue();
-
-        int today = getToday();
-
-        if (date == 0) {
-            date = today;
-        }
-
-        int[] dateArray = new int[3];
-        dateArray[0] = date % 100;
-        dateArray[1] = ((date - dateArray[0]) / 100) % 100;
-        dateArray[2] = ((date - dateArray[1] * 100 - dateArray[0]) / 10000);
-
-
-        while (date <= today) {
-            date = incrementRecurring(mode, dateArray, offSet);
-        }
-
-        entry.setDue(date);
-    }
-
-    private int incrementRecurring(char mode, int[] dateArray, int offSet) {
-
-
-        if (mode == 'd' || mode == 'w') {
-
-            if (mode == 'w') {
-                dateArray[0] += offSet * 7;
-
-            } else {
-                dateArray[0] += offSet;
-            }
-
-            int daysOfTheMonth = returnDaysOfTheMonth(dateArray[1], dateArray[2]);
-            while (daysOfTheMonth < dateArray[0]) {
-                dateArray[0] -= daysOfTheMonth;
-                dateArray[1]++;
-
-                if (dateArray[1] > 12) {
-                    dateArray[2]++;
-                    dateArray[1] -= 12;
-                }
-                daysOfTheMonth = returnDaysOfTheMonth(dateArray[1], dateArray[2]);
-            }
-
-        }
-
-        if (mode == 'm') {
-            dateArray[1] += offSet;
-            if (dateArray[1] > 12) {
-                dateArray[2]++;
-                dateArray[1] -= 12;
-            }
-
-        }
-
-        if (mode == 'y') {
-
-            dateArray[2] += offSet;
-
-        }
-
-
-        return dateArray[0] + dateArray[1] * 100 + dateArray[2] * 10000;
-    }
-
-    private int returnDaysOfTheMonth(int month, int year) {
-        switch (month) {
-            case 1:
-            case 3:
-            case 5:
-            case 7:
-            case 8:
-            case 10:
-            case 12:
-                return 31;
-            case 2:
-                return isLeapYear(year) ? 29 : 28;
-            case 4:
-            case 6:
-            case 9:
-            case 11:
-                return 30;
-            default:
-                return 0;
-        }
-
-
-    }
-
-    private Boolean isLeapYear(int year) {
-        if (year % 4 == 0) {
-            return year % 400 != 0;
-        }
-        return false;
     }
 
     public void editDue(int id, int date) {
@@ -310,7 +238,8 @@ public class Data {
             return -1;
 
         if (listPositionCount.get(list) != null) {
-            int pos = listPositionCount.get(list);
+
+            @SuppressWarnings("ConstantConditions") int pos = listPositionCount.get(list);//get(list) != null is checked for
             listPositionCount.put(list, pos + 1);
             return pos + 1;
         } else {
@@ -319,11 +248,9 @@ public class Data {
         }
     }
 
-    @NonNull
     public void decrementListHashPositionCount(String list, int currPosition){
 
-
-        int position = listPositionCount.get(list);
+        @SuppressWarnings("ConstantConditions") int position = listPositionCount.get(list); //since method call comes from an item that is in a list get(list) cannot be null
 
         if (position == 0)
             listPositionCount.remove(list);
@@ -373,7 +300,9 @@ public class Data {
     }
 
 
-    public ArrayList<Entry> getTasksToPick(){        ArrayList<Entry> tasksToPick= new ArrayList<>();
+    public ArrayList<Entry> getTasksToPick(){
+
+        ArrayList<Entry> tasksToPick= new ArrayList<>();
 
         int date = getToday();//get current date as "yyyyMMdd"
 
@@ -499,4 +428,160 @@ public class Data {
     }
 
 
+    //this routine calculates a new due date for recurring tasks
+    public int setRecurring(int id) {
+
+        //get Entry
+        Entry entry = entries.get(getPosition(id));
+
+        //get recurrence as <['d'/'w'/'m'/'y']['0'-'9']['0'-'9']['0'-'9']...> (i.e. "d15" means the task repeats every 15 days)
+        String recurrence = entry.getRecurrence();
+
+        //get first character representing the mode of repetition (days, weeks,...)
+        char mode = recurrence.charAt(0);
+
+        //StringBuilder to store offset
+        StringBuilder offSetStr = new StringBuilder();
+
+        //get all digits of offset
+        for (int i = 1; i < recurrence.length(); i++) {
+            offSetStr.append(recurrence.charAt(i));
+        }
+
+        //convert offset to Integer
+        int offSet = Integer.parseInt(offSetStr.toString());
+
+        //get due date
+        int date = entry.getDue();
+
+        //get todays date and set due to if it is not set
+        int today = getToday();
+
+        if (date == 0) {
+            date = today;
+        }
+
+        //decode due date and store in array: <[day][month][year]>
+        int[] dateArray = new int[3];
+
+        //get day
+        dateArray[0] = date % 100;
+
+        //get month
+        dateArray[1] = ((date - dateArray[0]) / 100) % 100;
+
+        //get year
+        dateArray[2] = ((date - dateArray[1] * 100 - dateArray[0]) / 10000);
+
+        //increment date by offset and repeat until it is greater than today
+        while (date <= today) {
+            date = incrementRecurring(mode, dateArray, offSet);
+        }
+
+        //write due date to entries
+        entry.setDue(date);
+
+        //write due date to Database
+        db.updateEntry(DbHelper.getDueCol(),id,date);
+
+        return date;
+    }
+
+    //return date incremented by offset
+    private int incrementRecurring(char mode, int[] dateArray, int offSet) {
+
+        //if day and week ist incremented month and year may be incremented too
+        if (mode == 'd' || mode == 'w') {
+
+            //if offset is measured in weeks increment day by offset*7, increment by offSet otherwise
+            // (because it is simply measured in days)
+            if (mode == 'w') {
+                dateArray[0] += offSet * 7;
+
+            } else {
+                dateArray[0] += offSet;
+            }
+
+            //get days of the current month
+            int daysOfTheMonth = returnDaysOfTheMonth(dateArray[1], dateArray[2]);
+
+            //in a loop check if day is bigger than day of the month increment month and even year if necessary
+            while (daysOfTheMonth < dateArray[0]) {
+
+                //increment month
+                dateArray[1]++;
+
+                //reset day
+                dateArray[0] -= daysOfTheMonth;
+
+
+                //if month is bigger than 12 increment year too
+                while (dateArray[1] > 12) {
+                    dateArray[2]++;
+                    dateArray[1] -= 12;
+                }
+
+                //recalculate days of the month for next month
+                daysOfTheMonth = returnDaysOfTheMonth(dateArray[1], dateArray[2]);
+            }
+
+        }
+
+        //if month is incremented, year may be incremented too
+        if (mode == 'm') {
+
+            //increment month by offset
+            dateArray[1] += offSet;
+
+            //if month is bigger than 12 increment year too
+            while (dateArray[1] > 12) {
+                dateArray[2]++;
+                dateArray[1] -= 12;
+            }
+
+        }
+
+        //if offset is measured in years, just increment years by offset
+        if (mode == 'y') {
+
+            dateArray[2] += offSet;
+
+        }
+
+        //return date in format yyyymmdd
+        return dateArray[0] + dateArray[1] * 100 + dateArray[2] * 10000;
+    }
+
+    //returns days of the month
+    private int returnDaysOfTheMonth(int month, int year) {
+        switch (month) {
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+            case 8:
+            case 10:
+            case 12:
+                return 31;
+            case 2:
+                return isLeapYear(year) ? 29 : 28;
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+                return 30;
+            default:
+                return 0;
+        }
+
+
+    }
+
+    //calculates if year is leap year
+    private Boolean isLeapYear(int year) {
+        if (year % 4 == 0) {
+            return year % 400 != 0;
+        }
+        return false;
+    }
 }
