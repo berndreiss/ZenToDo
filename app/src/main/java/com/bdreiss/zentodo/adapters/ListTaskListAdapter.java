@@ -66,7 +66,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
             if (!list.equals(oldList)) {
 
                 //decrement oldLists overall positionCount
-                data.decrementListHashPositionCount(oldList, entries.get(position).getListPosition());
+                data.decrementListPositionCount(oldList, entries.get(position).getListPosition());
 
                 //set to null if AutoComplete is empty, write back otherwise
                 if (list.trim().isEmpty())

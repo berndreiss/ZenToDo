@@ -2,8 +2,6 @@ package com.bdreiss.zentodo.dataManipulation;
 import android.annotation.SuppressLint;
 import android.content.Context;
 
-import androidx.annotation.NonNull;
-
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSort;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByDue;
@@ -20,11 +18,10 @@ import java.util.Map;
 
 public class Data {
     /*
-     *   Creates an instance of all relevant data, stored in several lists
-     *   Data manipulation includes:
-     *       -saving (save()) and loading (load()) data,
-     *       -adding (add(String task,String list,int due)) and removing entries
-     *       -returning tasks that are due (getPotentials()) and updating todays tasks (setTodays(List<Entry> todays))
+     *   Creates an instance of all relevant data, stored in an ArrayList as Entry (see Entry.java).
+     *
+     *   Methods serve to manipulate and retrieve data as well as communicating with the Database.
+     *
      */
 
     protected static final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
@@ -57,7 +54,7 @@ public class Data {
             if (e.getList() != null && !e.getList().isEmpty()) {
 
                 //increments counter in listPositionCount, puts item if non-existent
-                incrementListHash(e.getList());
+                incrementListPositionCount(e.getList());
             }
 
         }
@@ -95,7 +92,7 @@ public class Data {
 
         //if list was assigned decrement counter in listPositionCount
         if (entry.getList() != null)
-            decrementListHashPositionCount(entry.getList(),entry.getListPosition());
+            decrementListPositionCount(entry.getList(),entry.getListPosition());
 
         //get position of task
         int position = entry.getPosition();
@@ -224,7 +221,7 @@ public class Data {
         Entry entry = entries.get(getPosition(id));
         entry.setList(list);
 
-        entry.setListPosition(incrementListHash(list));
+        entry.setListPosition(incrementListPositionCount(list));
 
         db.updateEntry(DbHelper.getListCol(), id, list);
         db.updateEntry(DbHelper.getListPositionCol(), id, entry.getListPosition());
@@ -232,35 +229,61 @@ public class Data {
         return entry.getListPosition();
     }
 
-    private int incrementListHash(String list) {
+    //function increments position counter of list and returns a new position
+    private int incrementListPositionCount(String list) {
 
+        //if no list is passed listPosition is -1 by default
         if (list == null)
             return -1;
 
+        //if list is in listPositionCount get current position, save and return incremented position
+        //return position 0 otherwise
         if (listPositionCount.get(list) != null) {
 
+            //get current position
             @SuppressWarnings("ConstantConditions") int pos = listPositionCount.get(list);//get(list) != null is checked for
+
+            //increment position
             listPositionCount.put(list, pos + 1);
+
+            //return incremented position
             return pos + 1;
         } else {
+            //put new list
             listPositionCount.put(list, 0);
+
+            //return position 0
             return 0;
         }
     }
 
-    public void decrementListHashPositionCount(String list, int currPosition){
+    //decrement listPositionCount and synchronize listPositions in entries
+    public void decrementListPositionCount(String list, int currPosition){
 
+        //get current position
         @SuppressWarnings("ConstantConditions") int position = listPositionCount.get(list); //since method call comes from an item that is in a list get(list) cannot be null
 
+        //if position is 0 the last item has been removed and therefore the list must be removed from the map
+        //decrement position counter otherwise
         if (position == 0)
             listPositionCount.remove(list);
         else
             listPositionCount.put(list,position-1);
 
+
+        //in all entries see if listPosition was bigger than position of removed item, if so decrement
+        //this is done to preserve the sequential order of the list, which is important when new items are added to it
+        //if this wasn't done items could have the same listPosition
+        // (i.e. <0,1,2>: counter is 2  -> 0 is removed -> <1,2>: counter is 1 -> new item is added with incremented counter -> <1,2,2>)
         for (Entry e : entries){
 
+            //only get items with according list and larger listPosition
             if (e.getList() != null && e.getList().equals(list) && e.getListPosition() > currPosition){
+
+                //decrement position
                 int newPosition = e.getListPosition()-1;
+
+                //write to Entry and Database
                 e.setListPosition(newPosition);
                 db.updateEntry(DbHelper.getListPositionCol(),e.getId(),newPosition);
             }
@@ -269,11 +292,14 @@ public class Data {
 
     }
 
+    //returns lists as an Array: is used for the autocomplete when editing list
     public String[] returnListsAsArray(){
 
+        //get lists and initialize array
         ArrayList<String> lists = getLists();
         String[] listsAsArray = new String[lists.size()];
 
+        //copy to array
         for (int i=0;i<lists.size();i++){
             listsAsArray[i] = lists.get(i);
         }
@@ -282,16 +308,24 @@ public class Data {
 
     }
 
+    //return an ArrayList of all lists
     public ArrayList<String> getLists() {
+
+        //ArrayList to be returned
         ArrayList<String> lists = new ArrayList<>();
 
+        //for all entries add list to ArrayList
         for (Entry e : entries){
+
+            //if there is a list assigned check if it is in lists already, add otherwise
             if (e.getList() != null && !e.getList().isEmpty()){
                 if (!lists.contains(e.getList()))
                     lists.add(e.getList());
             }
         }
 
+        //sort lists and add noList and allTasks tokens, these are elements that are always
+        //represented in the list of lists so that users can find tasks and edit them easily
         Collections.sort(lists);
         lists.add(context.getResources().getString(R.string.noList));
         lists.add(context.getResources().getString(R.string.allTasks));
@@ -299,24 +333,49 @@ public class Data {
         return lists;
     }
 
-
+    //get entries that can be picked today. These include tasks that are due, tasks that have been dropped,
+    //or tasks that have already been in focus-
     public ArrayList<Entry> getTasksToPick(){
 
         ArrayList<Entry> tasksToPick= new ArrayList<>();
 
-        int date = getToday();//get current date as "yyyyMMdd"
+        //get current date as "yyyyMMdd" to check if task is due
+        int date = getToday();
 
-        for (Entry e : entries){//loop through this.entries
 
+        /*
+         *  for all entries:
+         *
+         *  1. check if task is in focus, if yes -> add
+         *
+         *
+         *  2. else check if task has a date
+         *
+         *      2.1 if yes and it has been dropped or no list is set -> add
+         *          (the list part is necessary because tasks might have been edited and are neither
+         *           dropped, focused or have a date. So they would never show up)
+         *
+         *  3. else check if due date <= today, if yes -> add
+        */
+
+        for (Entry e : entries){
+
+            //1. check focus
             if (e.getFocus()){
                 tasksToPick.add(e);
             } else {
+
+                //2. check date set
                 if (e.getDue() == 0) {
+
+                    //2.1 check dropped and list set
                     if (e.getDropped() || e.getList()==null) {
                         tasksToPick.add(e);
                     }
                 } else {
-                    if (e.getDue() <= date) {//add entry if it is due
+
+                    //3. check task is due
+                    if (e.getDue() <= date) {
                         tasksToPick.add(e);
                     }
                 }
@@ -326,10 +385,12 @@ public class Data {
         return  tasksToPick;
     }
 
+    //get entries assigned to a certain list
     public ArrayList<Entry> getList(String list){
 
         ArrayList<Entry> listArray = new ArrayList<>();
 
+        //add all entries that match the list passed
         for (Entry e : entries){
 
             if (e.getList() != null && e.getList().equals(list)){
@@ -339,13 +400,14 @@ public class Data {
             }
         }
 
+        //sort list by field entry.listPosition
         MergeSortByListPosition sort = new MergeSortByListPosition(listArray);
-
         sort.sort();
 
         return listArray;
     }
 
+    //get entries where dropped == true
     public ArrayList<Entry> getDropped(){
 
         ArrayList<Entry> dropped = new ArrayList<>();
@@ -358,6 +420,8 @@ public class Data {
         return dropped;
 
     }
+
+    //get entries where focus == true
     public ArrayList<Entry> getFocus(){
         ArrayList<Entry> focus = new ArrayList<>();
 
@@ -371,10 +435,16 @@ public class Data {
     }
 
 
-    //Generates a running id
+    //generates a running id: basically looks through ids and gets the next free number
+    //i.e.: <0,1,2>: next id is 3 -> 1 is removed -> <0,2>: next id is 1
     private int generateId(){
+
+        //keeping track
         int id = 0;
 
+        //if id is in ids, increment, assign id otherwise
+        //id increments in parallel as we loop through ids, since ids are sorted both numbers grow the same
+        //if a number is missing in ids the two numbers don't match anymore and the new id is found
         for (int i : ids){
             if (i == id){
                 id++;
@@ -385,13 +455,14 @@ public class Data {
                 return id;
             }
         }
+        //if new "holes" where found in ids assign new id as (last id in ids) + 1
         ids.add(id);
         Collections.sort(ids);
         return id;
     }
 
+    //return current date as "yyyyMMdd"
     public int getToday(){
-        //returns current date as "yyyyMMdd"
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 
@@ -399,28 +470,34 @@ public class Data {
 
         return Integer.parseInt(df.format(date));
 
-
     }
 
+    //return entries that have no list assigned
     public ArrayList<Entry> getNoList(){
         ArrayList<Entry> noList = new ArrayList<>();
 
+        //get all items with no list
         for (Entry e : entries){
-            if (e.getList() == null || e.getList().isEmpty())
+            if (e.getList() == null)
                 noList.add(e);
         }
 
+        //sort tasks by their field entry.getDue()
         MergeSortByDue sort = new MergeSortByDue(noList);
         sort.sort();
+
         return noList;
 
 
     }
+
+    //return ArrayList of entries ordered by when they are due
     public ArrayList<Entry> getEntriesOrderedByDate(){
+
         ArrayList<Entry> entriesOrderedByDue = new ArrayList<>(entries);
 
+        //sort entries by the field entry.getDue()
         MergeSortByDue sort = new MergeSortByDue(entriesOrderedByDue);
-
         sort.sort();
 
         return entriesOrderedByDue;
