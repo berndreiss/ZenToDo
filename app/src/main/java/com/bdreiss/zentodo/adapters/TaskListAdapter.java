@@ -739,6 +739,8 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
+
+
     //Disables view and first generation children
     private void disable(LinearLayout layout){
         for (int i = 0; i < layout.getChildCount(); i++) {

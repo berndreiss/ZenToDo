@@ -48,15 +48,15 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     //Layouts for different modes
-    private LinearLayout drop;//Layout to drop new tasks
     private LinearLayout pick;//Layout to pick tasks that have been dropped and show them in focus
+    private LinearLayout drop;//Layout to drop new tasks
     private LinearLayout focus;//Layout to show tasks to do today
     private LinearLayout lists;//Layout for all lists with tasks in it
     //private LinearLayout settings;
 
     //the following Buttons are components of the toolbar to switch between the different layouts
-    private Button toolbarDrop;
     private Button toolbarPick;
+    private Button toolbarDrop;
     private Button toolbarFocus;
     private Button toolbarLists;
     //private Button toolbarSettings;
@@ -66,14 +66,14 @@ public class MainActivity extends AppCompatActivity {
 
     //The adapters fill the RecyclerViews of layouts above and are all derived from TaskListAdapter
     //for more information on the implementation see the according java files
-    DropTaskListAdapter dropAdapter;
     PickTaskListAdapter pickAdapter;
+    DropTaskListAdapter dropAdapter;
     FocusTaskListAdapter focusAdapter;
     ListsListAdapter listsListAdapter;
 
     //ArrayLists for adapters above
-    ArrayList<Entry> droppedTasks;
     ArrayList<Entry> tasksToPick;
+    ArrayList<Entry> droppedTasks;
     ArrayList<Entry> focusTasks;
     ArrayList<String> listNames;
 
@@ -119,21 +119,21 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //set listener for Drop button in toolbar
-    public void toolbarListenerDrop(){
-        toolbarDrop.setOnClickListener(view -> {
-           showDrop();//show Drop layout
-           toolbarListenerDrop();//reset listener
-        });
-
-    }
-
     //set listener for Pick button in toolbar
     public void toolbarListenerPick(){
         toolbarPick.setOnClickListener(view -> {
             closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
             showPick();//show Pick layout
             toolbarListenerPick();//reset listener
+        });
+
+    }
+
+    //set listener for Drop button in toolbar
+    public void toolbarListenerDrop(){
+        toolbarDrop.setOnClickListener(view -> {
+           showDrop();//show Drop layout
+           toolbarListenerDrop();//reset listener
         });
 
     }
@@ -165,89 +165,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }*/
-
-    //initialize Drop layout
-    public void initializeDrop(){
-
-        //get dropped tasks from data
-        droppedTasks = data.getDropped();
-
-        //initialize adapter for ListView that shows tasks dropped
-        dropAdapter = new DropTaskListAdapter(this, data, droppedTasks);
-
-        //assign ListView
-        RecyclerView listView = findViewById(R.id.list_view_drop);
-
-        //set adapter
-        listView.setAdapter(dropAdapter);
-
-        //set layoutManager
-        listView.setLayoutManager(new LinearLayoutManager(this));
-
-        //allows items to be moved and reordered in RecyclerView
-        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(dropAdapter);
-
-        //create ItemTouchHelper and assign to RecyclerView
-        ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
-        iTouchHelper.attachToRecyclerView(listView);
-
-        //assign EditText to add new tasks
-        final EditText editText = findViewById(R.id.edit_text_drop);
-
-        //button to drop task in EditText
-        Button buttonDrop = findViewById(R.id.button_drop);
-
-        //set Button BackgroundColor to toolbar default color
-        buttonDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-
-        //set listener for drop button
-        dropListener(editText, buttonDrop);
-    }
-
-    //initialize drop button that takes text from editText and passes it to the adapter
-    public void dropListener(EditText editText, Button buttonDrop){
-
-        //OnClickListener that adds task in EditText to Data
-        buttonDrop.setOnClickListener(view -> {
-            //get task from EditText
-            String task = editText.getText().toString();
-            //reset EditText
-            editText.setText("");
-
-            //add task to Data if it is not empty
-            if (!task.trim().isEmpty()) {
-                dropAdapter.add(task);
-                dropListener(editText, buttonDrop);
-            }
-        });
-
-    }
-
-    //show Drop layout
-    @SuppressLint("NotifyDataSetChanged")
-    public void showDrop(){
-
-        //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
-        droppedTasks.clear();
-        droppedTasks.addAll(data.getDropped());
-        dropAdapter.notifyDataSetChanged();
-
-        //enable all components of Drop layout (setVisibility = VISIBLE)
-        enableLayout(drop);
-
-        //disable components of all other layouts (setVisibility = GONE)
-        disableLayout(pick);
-        disableLayout(focus);
-        disableLayout(lists);
-        //disableLayout(settings);
-
-        //set background color of Drop to chosen, all others to toolbar default
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-    }
 
     //initialize Pick layout
     public void initializePick() {
@@ -330,6 +247,89 @@ public class MainActivity extends AppCompatActivity {
         //set color of Pick-Button in toolbar to chosen, set all other Buttons to toolbar default
         toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
         toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+    }
+
+    //initialize Drop layout
+    public void initializeDrop(){
+
+        //get dropped tasks from data
+        droppedTasks = data.getDropped();
+
+        //initialize adapter for ListView that shows tasks dropped
+        dropAdapter = new DropTaskListAdapter(this, data, droppedTasks);
+
+        //assign ListView
+        RecyclerView listView = findViewById(R.id.list_view_drop);
+
+        //set adapter
+        listView.setAdapter(dropAdapter);
+
+        //set layoutManager
+        listView.setLayoutManager(new LinearLayoutManager(this));
+
+        //allows items to be moved and reordered in RecyclerView
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(dropAdapter);
+
+        //create ItemTouchHelper and assign to RecyclerView
+        ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
+        iTouchHelper.attachToRecyclerView(listView);
+
+        //assign EditText to add new tasks
+        final EditText editText = findViewById(R.id.edit_text_drop);
+
+        //button to drop task in EditText
+        Button buttonDrop = findViewById(R.id.button_drop);
+
+        //set Button BackgroundColor to toolbar default color
+        buttonDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+
+        //set listener for drop button
+        dropListener(editText, buttonDrop);
+    }
+
+    //initialize drop button that takes text from editText and passes it to the adapter
+    public void dropListener(EditText editText, Button buttonDrop){
+
+        //OnClickListener that adds task in EditText to Data
+        buttonDrop.setOnClickListener(view -> {
+            //get task from EditText
+            String task = editText.getText().toString();
+            //reset EditText
+            editText.setText("");
+
+            //add task to Data if it is not empty
+            if (!task.trim().isEmpty()) {
+                dropAdapter.add(task);
+                dropListener(editText, buttonDrop);
+            }
+        });
+
+    }
+
+    //show Drop layout
+    @SuppressLint("NotifyDataSetChanged")
+    public void showDrop(){
+
+        //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
+        droppedTasks.clear();
+        droppedTasks.addAll(data.getDropped());
+        dropAdapter.notifyDataSetChanged();
+
+        //enable all components of Drop layout (setVisibility = VISIBLE)
+        enableLayout(drop);
+
+        //disable components of all other layouts (setVisibility = GONE)
+        disableLayout(pick);
+        disableLayout(focus);
+        disableLayout(lists);
+        //disableLayout(settings);
+
+        //set background color of Drop to chosen, all others to toolbar default
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
         //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));

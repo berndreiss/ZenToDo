@@ -15,21 +15,6 @@
            android:layout_height="@dimen/toolbar_height">
 
            <android.widget.Button
-               android:id="@+id/toolbar_drop"
-               android:text="@string/dropButton"
-               android:shape="rectangle"
-               android:layout_width="0dp"
-               android:layout_height="match_parent"
-               android:layout_marginLeft="0dp"
-               android:layout_marginRight="0dp"
-               android:layout_weight="1"
-               android:layout_gravity="center"
-               style="?android:borderlessButtonStyle"
-               android:drawableTop="@drawable/ic_action_drop"
-               />
-
-
-           <android.widget.Button
                android:id="@+id/toolbar_pick"
                android:text="@string/pickButton"
                android:shape="rectangle"
@@ -44,6 +29,23 @@
                />
 
            <android.widget.Button
+               android:id="@+id/toolbar_drop"
+               android:text="@string/dropButton"
+               android:shape="rectangle"
+               android:layout_width="0dp"
+               android:layout_height="match_parent"
+               android:layout_marginLeft="0dp"
+               android:layout_marginRight="0dp"
+               android:layout_weight="1"
+               android:layout_gravity="center"
+               style="?android:borderlessButtonStyle"
+               android:drawableTop="@drawable/ic_action_drop"
+               />
+
+
+
+
+           <android.widget.Button
                android:id="@+id/toolbar_focus"
                android:text="@string/focusButton"
                android:shape="rectangle"
@@ -56,6 +58,7 @@
                style="?android:borderlessButtonStyle"
                android:drawableTop="@drawable/ic_action_focus_toolbar"
                />
+
 
 
            <android.widget.Button
@@ -78,8 +81,8 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/drop" />
     <include layout="@layout/pick"/>
+    <include layout="@layout/drop" />
     <include layout="@layout/focus"/>
     <include layout="@layout/lists"/>
 
