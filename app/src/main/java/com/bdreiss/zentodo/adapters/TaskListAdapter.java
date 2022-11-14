@@ -595,13 +595,8 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             //get old list name
             String oldList = entries.get(position).getList();
 
-            //if there was a list before and it was different to the new one, decrement the count of items in this list
-            // (this counter is used to keep track of list positions -> see Data.java)
-            if (oldList != null && !list.equals(oldList))
-                data.decrementListPositionCount(oldList, entries.get(position).getListPosition());
-
             //set to no list if AutoComplete is empty
-            if (list.trim().isEmpty()) {
+            if (list.trim().isEmpty() || list.equals("")) {
                 //reset to no list
                 entries.get(position).setListPosition(data.editList(id, null));
                 entries.get(position).setList(null);

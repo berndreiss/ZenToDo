@@ -36,16 +36,34 @@ public class DropTaskListAdapter extends TaskListAdapter{
     public void setBackListListener(ViewHolder holder, int position){
 
         holder.backList.setOnClickListener(view161 -> {
-            int id = entries.get(position).getId();//Get id of task
-            String list = holder.autoCompleteList.getText().toString();//get list name
+            //Get id of task
+            int id = entries.get(position).getId();
 
-            data.editList(id, list);//write back otherwise
-            data.setDropped(id, false);//set dropped to false
+            //get new list name
+            String list = holder.autoCompleteList.getText().toString();
 
-            entries.remove(position);
+            //get old list name
+            String oldList = entries.get(position).getList();
 
-            notifyDataSetChanged();
+            //set list if AutoComplete is not empty, write back and notify adapter
+            if (!list.trim().isEmpty()) {
+
+                //write back
+                entries.get(position).setListPosition(data.editList(id, list));
+
+                data.setDropped(id, false);//set dropped to false
+
+                entries.remove(position);
+
+                notifyDataSetChanged();
+
+            }
+
+            //return to original row layout
+            setOriginal(holder);
+
         });
+
     }
 
     @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother

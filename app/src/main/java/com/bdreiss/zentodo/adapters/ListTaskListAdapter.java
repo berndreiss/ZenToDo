@@ -65,9 +65,6 @@ public class ListTaskListAdapter extends TaskListAdapter{
             //if old and new list differ write back data and remove item from adapter
             if (!list.equals(oldList)) {
 
-                //decrement oldLists overall positionCount
-                data.decrementListPositionCount(oldList, entries.get(position).getListPosition());
-
                 //set to null if AutoComplete is empty, write back otherwise
                 if (list.trim().isEmpty())
                     data.editList(id, null);
