@@ -138,7 +138,14 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(TaskListAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
+
+        initializeViews(holder, position);
+
+    }
+
+    //added own function for everything happening in onBindViewHolder so it can be easily overwritten in sub-classes
+    public void initializeViews(ViewHolder holder, int position){
 
         //set TextView to task
         holder.task.setText(entries.get(position).getTask());
@@ -176,6 +183,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         setClearListenerList(holder);
         setBackListListener(holder,position);
         setBackListener(holder);
+
 
 
     }
@@ -591,9 +599,6 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
             //get new list name
             String list = holder.autoCompleteList.getText().toString();
-
-            //get old list name
-            String oldList = entries.get(position).getList();
 
             //set to no list if AutoComplete is empty
             if (list.trim().isEmpty() || list.equals("")) {

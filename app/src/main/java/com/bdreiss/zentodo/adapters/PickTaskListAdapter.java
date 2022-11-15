@@ -12,6 +12,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
@@ -22,7 +24,19 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
     public PickTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
         super(context, data, entries);
+
     }
+
+    @Override
+    public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
+        initializeViews(holder, position);
+
+        if (idsChecked.contains(entries.get(position).getId()))
+            holder.checkBox.setChecked(true);
+
+    }
+
+
 
     //listener that changes to alternative menu row layout on click, but setting a delete drawable for the focus Button
     @Override
@@ -63,6 +77,7 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
     //clears the ArrayString
     public void clearIdsChecked(){
+
         idsChecked.clear();
     }
 
