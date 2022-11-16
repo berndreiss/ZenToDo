@@ -210,9 +210,10 @@ public class MainActivity extends AppCompatActivity {
             //get all tasks that have not been checked
             ArrayList<Integer> notChecked = pickAdapter.getIdsNotChecked();
 
-            //set those tasks focus attribute to false so they are not shown in Focus (in case they have been there before)
+            //set focused tasks to false so they are not shown in Focus (in case they have been there before)
             for (int id : notChecked) {
-                data.setFocus(id, false);
+                if (data.getEntries().get(data.getPosition(id)).getFocus())
+                    data.setFocus(id, false);
             }
 
             //re-initialize listener for Pick button in toolbar

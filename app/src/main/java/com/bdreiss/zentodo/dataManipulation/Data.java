@@ -196,8 +196,11 @@ public class Data {
 
 
     public void setFocus(int id, Boolean focus) {
-        entries.get(getPosition(id)).setFocus(focus);
+        Entry entry = entries.get(getPosition(id));
+        entry.setFocus(focus);
         db.updateEntry(DbHelper.getFocusCol(), id, DbHelper.boolToInt(focus));
+        if (entry.getDropped())
+            setDropped(id, false);
 
     }
 
@@ -208,8 +211,13 @@ public class Data {
     }
 
     public void editDue(int id, int date) {
-        entries.get(getPosition(id)).setDue(date);
+        Entry entry = entries.get(getPosition(id));
+        entry.setDue(date);
         db.updateEntry(DbHelper.getDueCol(), id, date);
+
+        if (entry.getDropped())
+            setDropped(id, false);
+
     }
 
     public void editRecurrence(int id, String recurrence) {
@@ -231,6 +239,9 @@ public class Data {
 
         db.updateEntry(DbHelper.getListCol(), id, list);
         db.updateEntry(DbHelper.getListPositionCol(), id, entry.getListPosition());
+
+        if (entry.getDropped())
+            setDropped(id, false);
 
         return entry.getListPosition();
     }
@@ -494,6 +505,12 @@ public class Data {
 
         return noList;
 
+
+    }
+
+    public ArrayList<Entry> getEntries(){
+
+        return entries;
 
     }
 
