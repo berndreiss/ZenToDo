@@ -395,13 +395,15 @@ public class MainActivity extends AppCompatActivity {
         ListView listView = findViewById(R.id.list_view_lists);
         RecyclerView recyclerView = findViewById(R.id.recycle_view_lists);
 
-        //TextView that shows the list your currently in as a header
-        TextView header = findViewById(R.id.text_view_lists_header);
+        //Items that show the list your currently in as a header and the button for choosing a color
+        LinearLayout headerLayout = findViewById(R.id.header);
+        TextView headerTextView = findViewById(R.id.text_view_lists_header);
+        Button headerButton = findViewById(R.id.button_header);
 
         //initialize adapter: each item represents a button that when pressed initializes a TaskListAdapter
         //with all the tasks of the list (see ListsListAdapter.java)
         listNames = data.getLists();
-        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, header, data, listNames);
+        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, headerLayout, headerTextView, headerButton, data, listNames);
 
         //set adapter
         listView.setAdapter(listsListAdapter);

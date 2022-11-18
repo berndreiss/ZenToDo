@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
@@ -31,12 +32,20 @@
                 android:gravity="center"
                 android:background="@color/header_background"/>
 
-            <Button
-                android:id = "@+id/header_button"
-                android:layout_weight="1"
+            <android.widget.Button
+                android:id="@+id/button_header"
+                android:shape="rectangle"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"/>
-
+                android:layout_height="match_parent"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:paddingEnd="20dp"
+                style="?android:borderlessButtonStyle"
+                android:drawableEnd="@drawable/ic_action_color"
+                android:background="@drawable/button_color"
+                tools:ignore="RtlSymmetry" />
         </LinearLayout>
 
         <ListView

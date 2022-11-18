@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -24,6 +25,8 @@ import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.util.ArrayList;
 
@@ -35,7 +38,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private final RecyclerView recyclerView;//RecyclerView for showing tasks of list chosen (listView gets disabled)
     private final ArrayList<String> lists;//Dynamically generated Array of all lists in data
     private final Data data;//Database
-    private final TextView header;//header of ListView. setVisibility=GONE by default and =VISIBLE when recyclerView is shown
+    private final Header header;//header of ListView. setVisibility=GONE by default and =VISIBLE when recyclerView is shown
     private final ArrayList<Entry> listTasks = new ArrayList<>();//ArrayList that serves as a container for tasks that are in the list that has been chosen
 
     ListTaskListAdapter listsTaskListAdapter;//adapter for items in lists (items can be moved and get removed when list of task is changed)
@@ -46,15 +49,51 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         private Button button;//Button to choose list
     }
 
-    public ListsListAdapter(Context context, ListView listView, RecyclerView recyclerView, TextView header, Data data, ArrayList<String> lists){
+    private static class Header{
+        LinearLayout layout;
+        TextView headerText;
+        Button colorButton;
+
+        Header(Context context, LinearLayout layout, TextView headerText, Button colorButton){
+            this.layout = layout;
+            this.headerText = headerText;
+            this.colorButton = colorButton;
+            this.layout.setVisibility(View.GONE);
+            this.headerText.setVisibility(View.GONE);
+            this.colorButton.setVisibility(View.GONE);
+
+            this.colorButton.setOnClickListener(view -> ColorPickerDialogBuilder
+                    .with(context)
+                    .setTitle("Choose color")
+                    .initialColor(-65536)
+                    //.showAlphaSlider(false)
+                    .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                    .density(12)
+                    .setOnColorSelectedListener(selectedColor -> {
+
+                    })
+                    .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
+
+                    })
+                    .setNegativeButton("cancel", (dialog, which) -> {
+                    })
+                    .build()
+                    .show());
+
+        }
+
+    }
+
+    public ListsListAdapter(Context context, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton, Data data, ArrayList<String> lists){
         super(context, R.layout.lists_row,lists);
         this.context=context;
         this.data = data;
         this.lists = lists;
-        this.header = header;
         this.listView = listView;
         this.recyclerView = recyclerView;
         recyclerView.setVisibility(View.GONE);
+
+        header = new Header(context, headerLayout, headerTextView, headerButton);
 
     }
 
@@ -93,7 +132,9 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         holder.button.setOnClickListener(view -> {
 
             //set header with list name visible
-            header.setVisibility(View.VISIBLE);
+            header.layout.setVisibility(View.VISIBLE);
+            header.headerText.setVisibility(View.VISIBLE);
+            header.colorButton.setVisibility(View.VISIBLE);
 
             //set RecyclerView VISIBLE and ListView GONE
             recyclerView.setVisibility(View.VISIBLE);
@@ -107,7 +148,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 listTasks.addAll(data.getEntriesOrderedByDate());
 
                 //set header text
-                header.setText(context.getResources().getString(R.string.allTasks));
+                header.headerText.setText(context.getResources().getString(R.string.allTasks));
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if (allTasksAdapter == null) {
@@ -129,7 +170,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 listTasks.addAll(data.getNoList());
 
                 //set header text
-                header.setText(context.getResources().getString(R.string.noList));
+                header.headerText.setText(context.getResources().getString(R.string.noList));
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if (noListAdapter == null) {
@@ -150,7 +191,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 String list = holder.button.getText().toString();
 
                 //set header text
-                header.setText(list);
+                header.headerText.setText(list);
 
                 //clear ArrayList for list, add current tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
