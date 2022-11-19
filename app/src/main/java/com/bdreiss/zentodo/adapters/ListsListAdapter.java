@@ -49,7 +49,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         private Button button;//Button to choose list
     }
 
-    private static class Header{
+    private class Header{
         LinearLayout layout;
         TextView headerText;
         Button colorButton;
@@ -225,4 +225,9 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         return convertView;
     }
 
+    public void setHeaderGone(){
+        header.layout.setVisibility(View.GONE);
+        header.headerText.setVisibility(View.GONE);
+        header.colorButton.setVisibility(View.GONE);
     }
+}

@@ -413,6 +413,8 @@ public class MainActivity extends AppCompatActivity {
     //show Lists layout
     public void showLists(){
 
+        listsListAdapter.setHeaderGone();
+
         //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
         listNames.clear();
         listNames.addAll(data.getLists());
