@@ -24,10 +24,23 @@ public class Data {
      *
      */
 
+    class List{
+        int positionCount;
+        String color;
+
+        List(int positionCount, String color){
+
+            this.positionCount = positionCount;
+            this.color = color;
+
+        }
+
+    }
+
     protected static final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     protected static ArrayList<Integer> ids = new ArrayList<>();//Used to generate new ids
 
-    protected static final Map<String, Integer> listPositionCount = new Hashtable<>();//keeps track of lists and  of number items in list: stores list position (n-1)
+    protected static final Map<String, List> listPositionCount = new Hashtable<>();//keeps track of lists and  of number items in list: stores list position (n-1)
 
     private final Context context;
 
@@ -246,6 +259,14 @@ public class Data {
         return entry.getListPosition();
     }
 
+    public void editListColor(String list, String color){
+        listPositionCount.get(list).color = color;
+
+    }
+
+    public String getListColor(String list){
+        return listPositionCount.get(list).color;
+    }
     //function increments position counter of list and returns a new position
     private int incrementListPositionCount(String list) {
 
@@ -257,17 +278,14 @@ public class Data {
         //return position 0 otherwise
         if (listPositionCount.get(list) != null) {
 
-            //get current position
-            @SuppressWarnings("ConstantConditions") int pos = listPositionCount.get(list);//get(list) != null is checked for
-
             //increment position
-            listPositionCount.put(list, pos + 1);
+            listPositionCount.get(list).positionCount++;
 
             //return incremented position
-            return pos + 1;
+            return listPositionCount.get(list).positionCount;
         } else {
             //put new list
-            listPositionCount.put(list, 0);
+            listPositionCount.put(list, new List(0,null));
 
             //return position 0
             return 0;
@@ -277,16 +295,12 @@ public class Data {
     //decrement listPositionCount and synchronize listPositions in entries
     public void decrementListPositionCount(String list, int currPosition){
 
-        //get current position
-        @SuppressWarnings("ConstantConditions") int position = listPositionCount.get(list); //since method call comes from an item that is in a list get(list) cannot be null
-
         //if position is 0 the last item has been removed and therefore the list must be removed from the map
         //decrement position counter otherwise
-        if (position == 0)
+        if (listPositionCount.get(list).positionCount == 0)
             listPositionCount.remove(list);
         else
-            listPositionCount.put(list,position-1);
-
+            listPositionCount.get(list).positionCount--;
 
         //in all entries see if listPosition was bigger than position of removed item, if so decrement
         //this is done to preserve the sequential order of the list, which is important when new items are added to it

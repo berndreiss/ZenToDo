@@ -7,6 +7,9 @@ package com.bdreiss.zentodo.adapters;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.graphics.Color;
+
+import androidx.annotation.NonNull;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
@@ -17,6 +20,23 @@ public class FocusTaskListAdapter extends TaskListAdapter{
 
     public FocusTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
         super(context, data, entries);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
+
+        initializeViews(holder, position);
+
+
+        if (entries.get(position).getList() != null){
+
+            String color = data.getListColor(entries.get(position).getList());
+            //color = color.substring(2,8);
+            if (color != null)
+                holder.linearLayout.setBackgroundColor(Color.parseColor("#" + color));
+
+        }
+
     }
 
     //set Listener for the Focus Button in the menu, item is removed from adapter upon click

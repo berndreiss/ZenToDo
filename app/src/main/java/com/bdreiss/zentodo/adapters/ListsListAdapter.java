@@ -8,6 +8,8 @@ package com.bdreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +18,10 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -54,6 +59,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         TextView headerText;
         Button colorButton;
 
+        @SuppressLint("NotifyDataSetChanged")
         Header(Context context, LinearLayout layout, TextView headerText, Button colorButton){
             this.layout = layout;
             this.headerText = headerText;
@@ -65,15 +71,25 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             this.colorButton.setOnClickListener(view -> ColorPickerDialogBuilder
                     .with(context)
                     .setTitle("Choose color")
-                    .initialColor(-65536)
+                    .initialColor(905904128)
                     //.showAlphaSlider(false)
                     .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                     .density(12)
                     .setOnColorSelectedListener(selectedColor -> {
-
                     })
                     .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
 
+
+                        String color = Integer.toHexString(selectedColor);
+
+                        if (color.length() == 6)
+                            color = "00" + color;
+
+                        data.editListColor(headerText.getText().toString(), color);
+                        this.headerText.setBackgroundColor(Color.parseColor("#" + color));
+                        this.colorButton.setBackgroundColor(Color.parseColor("#" + color));
+
+                        listsTaskListAdapter.notifyDataSetChanged();
                     })
                     .setNegativeButton("cancel", (dialog, which) -> {
                     })

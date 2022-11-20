@@ -15,7 +15,6 @@ public class Entry{
     private String recurrence;//consisting of a String in the form of "y/m/w/d0-90-9" where the
                               //two digit number defines the offset in years (y), months(m),
                               //weeks (w) or days(d) when the task is going to reoccur
-    private int color; //color of list that background in Pick and Focus is set to
 
     public Entry(int id, int position, String task){
         //creates a new instance and initializes the fields of the entry
@@ -54,8 +53,6 @@ public class Entry{
         return recurrence;
     }
 
-    public int getColor(){return color;}
-
     //The following functions are to update the different fields
     public void setPosition(int position){this.position = position;}
 
@@ -80,8 +77,6 @@ public class Entry{
     public void setRecurrence(String recurrence){
         this.recurrence=recurrence;
     }
-
-    public void setColor(int color){this.color = color;}
 
 
 }

@@ -10,6 +10,7 @@ package com.bdreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -33,6 +34,16 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
         if (idsChecked.contains(entries.get(position).getId()))
             holder.checkBox.setChecked(true);
+
+
+        if (entries.get(position).getList() != null){
+
+            String color = data.getListColor(entries.get(position).getList());
+            //color = color.substring(2,8);
+            if (color != null)
+                holder.linearLayout.setBackgroundColor(Color.parseColor("#" + color));
+
+        }
 
     }
 
