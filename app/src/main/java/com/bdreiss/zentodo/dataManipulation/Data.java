@@ -15,6 +15,7 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Objects;
 
 public class Data {
     /*
@@ -79,6 +80,7 @@ public class Data {
         //sort entries by position
         MergeSort sort = new MergeSort(entries);
         sort.sort();
+
 
     }
 
@@ -260,12 +262,12 @@ public class Data {
     }
 
     public void editListColor(String list, String color){
-        listPositionCount.get(list).color = color;
+        Objects.requireNonNull(listPositionCount.get(list)).color = color;
 
     }
 
     public String getListColor(String list){
-        return listPositionCount.get(list).color;
+        return Objects.requireNonNull(listPositionCount.get(list)).color;
     }
     //function increments position counter of list and returns a new position
     private int incrementListPositionCount(String list) {
@@ -279,13 +281,13 @@ public class Data {
         if (listPositionCount.get(list) != null) {
 
             //increment position
-            listPositionCount.get(list).positionCount++;
+            Objects.requireNonNull(listPositionCount.get(list)).positionCount++;
 
             //return incremented position
-            return listPositionCount.get(list).positionCount;
+            return Objects.requireNonNull(listPositionCount.get(list)).positionCount;
         } else {
             //put new list
-            listPositionCount.put(list, new List(0,null));
+            listPositionCount.put(list, new List(0,"#00000000"));
 
             //return position 0
             return 0;
@@ -297,10 +299,10 @@ public class Data {
 
         //if position is 0 the last item has been removed and therefore the list must be removed from the map
         //decrement position counter otherwise
-        if (listPositionCount.get(list).positionCount == 0)
+        if (Objects.requireNonNull(listPositionCount.get(list)).positionCount == 0)
             listPositionCount.remove(list);
         else
-            listPositionCount.get(list).positionCount--;
+            Objects.requireNonNull(listPositionCount.get(list)).positionCount--;
 
         //in all entries see if listPosition was bigger than position of removed item, if so decrement
         //this is done to preserve the sequential order of the list, which is important when new items are added to it

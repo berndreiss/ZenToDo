@@ -85,9 +85,10 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                         if (color.length() == 6)
                             color = "00" + color;
 
+                        color = "#" + color;
                         data.editListColor(headerText.getText().toString(), color);
-                        this.headerText.setBackgroundColor(Color.parseColor("#" + color));
-                        this.colorButton.setBackgroundColor(Color.parseColor("#" + color));
+                        this.headerText.setBackgroundColor(Color.parseColor(color));
+                        this.colorButton.setBackgroundColor(Color.parseColor(color));
 
                         listsTaskListAdapter.notifyDataSetChanged();
                     })
@@ -208,6 +209,17 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //set header text
                 header.headerText.setText(list);
+
+                if (data.getListColor(list).equals("#00000000")) {
+                    header.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                    header.headerText.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                    header.colorButton.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                } else{
+                    String color = data.getListColor(list);
+                    header.layout.setBackgroundColor(Color.parseColor(color));
+                    header.headerText.setBackgroundColor(Color.parseColor(color));
+                    header.colorButton.setBackgroundColor(Color.parseColor(color));
+                }
 
                 //clear ArrayList for list, add current tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();

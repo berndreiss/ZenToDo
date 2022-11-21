@@ -40,8 +40,8 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
             String color = data.getListColor(entries.get(position).getList());
             //color = color.substring(2,8);
-            if (color != null)
-                holder.linearLayout.setBackgroundColor(Color.parseColor("#" + color));
+
+            holder.linearLayout.setBackgroundColor(Color.parseColor( color));
 
         }
 
