@@ -25,7 +25,7 @@ public class Data {
      *
      */
 
-    class List{
+    static class List{
         int positionCount;
         String color;
 
@@ -41,7 +41,7 @@ public class Data {
     protected static final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     protected static ArrayList<Integer> ids = new ArrayList<>();//Used to generate new ids
 
-    protected static final Map<String, List> listPositionCount = new Hashtable<>();//keeps track of lists and  of number items in list: stores list position (n-1)
+    protected static Map<String, List> listPositionCount;//keeps track of lists and  of number items in list: stores list position (n-1)
 
     private final Context context;
 
@@ -54,6 +54,9 @@ public class Data {
 
         //get new Database-handler
         this.db = new DbHelper(context);
+
+//        db.makeListTable();//REMOVE AFTER
+        listPositionCount = db.loadLists();
 
         //load Database-content to entries
         entries.addAll(db.loadEntries());
@@ -263,6 +266,7 @@ public class Data {
 
     public void editListColor(String list, String color){
         Objects.requireNonNull(listPositionCount.get(list)).color = color;
+        db.updateList(list,color);
 
     }
 
@@ -288,6 +292,7 @@ public class Data {
         } else {
             //put new list
             listPositionCount.put(list, new List(0,"#00000000"));
+            db.addList(list, "#00000000");
 
             //return position 0
             return 0;
@@ -299,9 +304,10 @@ public class Data {
 
         //if position is 0 the last item has been removed and therefore the list must be removed from the map
         //decrement position counter otherwise
-        if (Objects.requireNonNull(listPositionCount.get(list)).positionCount == 0)
+        if (Objects.requireNonNull(listPositionCount.get(list)).positionCount == 0) {
             listPositionCount.remove(list);
-        else
+            db.removeList(list);
+        } else
             Objects.requireNonNull(listPositionCount.get(list)).positionCount--;
 
         //in all entries see if listPosition was bigger than position of removed item, if so decrement

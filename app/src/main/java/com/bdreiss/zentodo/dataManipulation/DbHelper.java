@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Map;
 
 public class DbHelper  extends SQLiteOpenHelper{
 
@@ -58,6 +60,12 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     private static final String POSITION_COL = "position";
 
+    private static final String TABLE_LISTS = "lists";
+
+    private static final String LIST_NAME_COL = "list";
+
+    private static final String LIST_COLOR_COL = "color";
+
     public DbHelper(Context context){super(context,DB_NAME,null, DB_VERSION);}
 
     public void migrate(SQLiteDatabase db) {
@@ -81,6 +89,26 @@ public class DbHelper  extends SQLiteOpenHelper{
                 + POSITION_COL + " INTEGER "
                 + ")";
         db.execSQL(query);
+
+        query = "CREATE TABLE " + TABLE_LISTS + " ("
+                + LIST_NAME_COL + " TEXT, "
+                + LIST_COLOR_COL + " TEXT"
+                + ")";
+        db.execSQL(query);
+
+    }
+
+    public void makeListTable(){
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String query = "CREATE TABLE " + TABLE_LISTS + " ("
+                + LIST_NAME_COL + " TEXT, "
+                + LIST_COLOR_COL + " TEXT"
+                + ")";
+        db.execSQL(query);
+
+        db.close();
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
@@ -109,11 +137,33 @@ public class DbHelper  extends SQLiteOpenHelper{
         db.close();
     }
 
+    public void addList(String list, String color){
+        ContentValues values = new ContentValues();
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        values.put(LIST_NAME_COL,list);
+        values.put(LIST_COLOR_COL,color);
+
+        db.insert(TABLE_LISTS,null,values);
+        db.close();
+    }
+
     //removes entry from database by id
     public void removeEntry(int id){
         SQLiteDatabase db = this.getWritableDatabase();
 
         String query = "DELETE FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id;
+
+        db.execSQL(query);
+
+        db.close();
+    }
+
+    public void removeList(String list){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String query = "DELETE FROM " + TABLE_LISTS + " WHERE " + LIST_NAME_COL + "='" + list + "'";
 
         db.execSQL(query);
 
@@ -131,6 +181,13 @@ public class DbHelper  extends SQLiteOpenHelper{
     //update entry by id using Integer
     public void updateEntry(String field, int id, int value){
         String query = "UPDATE " + TABLE_ENTRIES + " SET " + field + "=" + value + " WHERE " + ID_COL + "=" + id + ";";
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(query);
+        db.close();
+    }
+
+    public void updateList(String list, String color){
+        String query = "UPDATE " + TABLE_LISTS + " SET " + LIST_COLOR_COL + "='" + color + "' WHERE " + LIST_NAME_COL + "='" + list + "';";
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(query);
         db.close();
@@ -196,6 +253,31 @@ public class DbHelper  extends SQLiteOpenHelper{
 
 
     }
+
+    public Map<String, Data.List> loadLists(){
+        Map<String, Data.List> lists = new Hashtable<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_LISTS, null);
+
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()) {
+
+            String listName = cursor.getString(0);
+            String color = cursor.getString(1);
+
+            Data.List list = new Data.List(-1,color);
+            lists.put(listName, list);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+        db.close();
+        return lists;
+    }
+
 
     public void swapEntries(String positionCol, int id1, int id2){
         SQLiteDatabase db = this.getWritableDatabase();
