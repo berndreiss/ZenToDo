@@ -273,6 +273,7 @@ public class DbHelper  extends SQLiteOpenHelper{
             cursor.moveToNext();
         }
 
+
         cursor.close();
         db.close();
         return lists;

@@ -1,6 +1,7 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSort;
@@ -60,6 +61,7 @@ public class Data {
 
         //load Database-content to entries
         entries.addAll(db.loadEntries());
+
 
         //loop through all item and get ids, list Names and number of items in list
         for (Entry e : entries) {
@@ -265,6 +267,7 @@ public class Data {
     }
 
     public void editListColor(String list, String color){
+        Log.d(color,"LIST");
         Objects.requireNonNull(listPositionCount.get(list)).color = color;
         db.updateList(list,color);
 

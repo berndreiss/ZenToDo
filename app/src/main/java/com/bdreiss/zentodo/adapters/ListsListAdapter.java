@@ -86,11 +86,19 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                             color = "00" + color;
 
                         color = "#" + color;
-                        data.editListColor(headerText.getText().toString(), color);
-                        this.headerText.setBackgroundColor(Color.parseColor(color));
-                        this.colorButton.setBackgroundColor(Color.parseColor(color));
 
+                        if (color.substring(3,9).equals("ffffff")) {
+                            this.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                            this.headerText.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                            this.colorButton.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                        } else {
+                            this.headerText.setBackgroundColor(Color.parseColor(color));
+                            this.colorButton.setBackgroundColor(Color.parseColor(color));
+                            this.layout.setBackgroundColor(Color.parseColor(color));
+                        }
+                        data.editListColor(headerText.getText().toString(), color);
                         listsTaskListAdapter.notifyDataSetChanged();
+
                     })
                     .setNegativeButton("cancel", (dialog, which) -> {
                     })
@@ -210,7 +218,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //set header text
                 header.headerText.setText(list);
 
-                if (data.getListColor(list).equals("#00000000")) {
+                if (data.getListColor(list).substring(3,9).equals("ffffff")) {
                     header.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
                     header.headerText.setBackgroundColor(context.getResources().getColor(R.color.header_background));
                     header.colorButton.setBackgroundColor(context.getResources().getColor(R.color.header_background));
