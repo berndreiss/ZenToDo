@@ -54,6 +54,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         private Button button;//Button to choose list
     }
 
+    //class containing all elements of header and setting color choosing dialog
     private class Header{
         LinearLayout layout;
         TextView headerText;
@@ -64,10 +65,13 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             this.layout = layout;
             this.headerText = headerText;
             this.colorButton = colorButton;
+
+            //set header invisible before list is chosen
             this.layout.setVisibility(View.GONE);
             this.headerText.setVisibility(View.GONE);
             this.colorButton.setVisibility(View.GONE);
 
+            //set color choosing dialog
             this.colorButton.setOnClickListener(view -> ColorPickerDialogBuilder
                     .with(context)
                     .setTitle("Choose color")
@@ -80,6 +84,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                     .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
 
 
+                        //get selected color and encode it as hex
                         String color = Integer.toHexString(selectedColor);
 
                         if (color.length() == 6)
@@ -87,7 +92,8 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                         color = "#" + color;
 
-                        if (color.substring(3,9).equals("ffffff")) {
+                        //set header color to chosen color or default if white is chosen
+                        if (color.startsWith("ffffff", 3)) {
                             this.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
                             this.headerText.setBackgroundColor(context.getResources().getColor(R.color.header_background));
                             this.colorButton.setBackgroundColor(context.getResources().getColor(R.color.header_background));
@@ -218,7 +224,8 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //set header text
                 header.headerText.setText(list);
 
-                if (data.getListColor(list).substring(3,9).equals("ffffff")) {
+                //set color of header to default if color is white, set it to color otherwise
+                if (data.getListColor(list).startsWith("ffffff", 3)) {
                     header.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
                     header.headerText.setBackgroundColor(context.getResources().getColor(R.color.header_background));
                     header.colorButton.setBackgroundColor(context.getResources().getColor(R.color.header_background));
