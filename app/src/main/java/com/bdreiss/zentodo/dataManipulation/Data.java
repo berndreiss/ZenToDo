@@ -294,7 +294,7 @@ public class Data {
             return Objects.requireNonNull(listPositionCount.get(list)).positionCount;
         } else {
             //put new list
-            listPositionCount.put(list, new List(0,"#00000000"));
+            listPositionCount.put(list, new List(0,"#00ffffff"));
             db.addList(list, "#00000000");
 
             //return position 0
