@@ -29,8 +29,7 @@
                 android:layout_marginRight="0dp"
                 android:textSize="20sp"
                 android:padding="10dp"
-                android:gravity="center"
-                android:background="@color/header_background"/>
+                android:gravity="center"/>
 
             <android.widget.Button
                 android:id="@+id/button_header"
@@ -44,7 +43,6 @@
                 android:paddingEnd="20dp"
                 style="?android:borderlessButtonStyle"
                 android:drawableEnd="@drawable/ic_action_color"
-                android:background="@drawable/button_color"
                 tools:ignore="RtlSymmetry" />
         </LinearLayout>
 

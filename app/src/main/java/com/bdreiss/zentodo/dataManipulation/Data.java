@@ -295,7 +295,7 @@ public class Data {
         } else {
             //put new list
             listPositionCount.put(list, new List(0,"#00ffffff"));
-            db.addList(list, "#00000000");
+            db.addList(list, "#00ffffff");
 
             //return position 0
             return 0;

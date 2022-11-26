@@ -94,19 +94,24 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                         //set header color to chosen color or default if white is chosen
                         if (color.startsWith("ffffff", 3)) {
+
                             this.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
-                            this.headerText.setBackgroundColor(context.getResources().getColor(R.color.header_background));
-                            this.colorButton.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+
                         } else {
-                            this.headerText.setBackgroundColor(Color.parseColor(color));
-                            this.colorButton.setBackgroundColor(Color.parseColor(color));
+
                             this.layout.setBackgroundColor(Color.parseColor(color));
+
                         }
                         data.editListColor(headerText.getText().toString(), color);
                         listsTaskListAdapter.notifyDataSetChanged();
 
                     })
-                    .setNegativeButton("cancel", (dialog, which) -> {
+                    .setNegativeButton("no color", (dialog, which) -> {
+                        this.headerText.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                        this.colorButton.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                        data.editListColor(headerText.getText().toString(), "#00ffffff");
+                        listsTaskListAdapter.notifyDataSetChanged();
+
                     })
                     .build()
                     .show());
@@ -226,14 +231,15 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //set color of header to default if color is white, set it to color otherwise
                 if (data.getListColor(list).startsWith("ffffff", 3)) {
+
                     header.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
-                    header.headerText.setBackgroundColor(context.getResources().getColor(R.color.header_background));
-                    header.colorButton.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+
                 } else{
+
                     String color = data.getListColor(list);
+
                     header.layout.setBackgroundColor(Color.parseColor(color));
-                    header.headerText.setBackgroundColor(Color.parseColor(color));
-                    header.colorButton.setBackgroundColor(Color.parseColor(color));
+
                 }
 
                 //clear ArrayList for list, add current tasks from data and notify adapter (in case they have been altered in another layout)
