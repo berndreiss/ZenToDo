@@ -44,6 +44,8 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private final ArrayList<String> lists;//Dynamically generated Array of all lists in data
     private final Data data;//Database
     private final Header header;//header of ListView. setVisibility=GONE by default and =VISIBLE when recyclerView is shown
+    private String headerColor;
+    private final String standardColor = "#35ff0000";
     private final ArrayList<Entry> listTasks = new ArrayList<>();//ArrayList that serves as a container for tasks that are in the list that has been chosen
 
     ListTaskListAdapter listsTaskListAdapter;//adapter for items in lists (items can be moved and get removed when list of task is changed)
@@ -75,7 +77,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             this.colorButton.setOnClickListener(view -> ColorPickerDialogBuilder
                     .with(context)
                     .setTitle("Choose color")
-                    .initialColor(905904128)
+                    .initialColor(Color.parseColor(headerColor))
                     //.showAlphaSlider(false)
                     .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                     .density(12)
@@ -91,6 +93,8 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                             color = "00" + color;
 
                         color = "#" + color;
+
+                        headerColor = color;
 
                         //set header color to chosen color or default if white is chosen
                         if (color.startsWith("ffffff", 3)) {
@@ -131,6 +135,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
         header = new Header(context, headerLayout, headerTextView, headerButton);
 
+        this.headerColor = standardColor;
     }
 
     //get View for ListView
@@ -176,6 +181,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             recyclerView.setVisibility(View.VISIBLE);
 
             listView.setVisibility(View.GONE);
+
             //fill ListView with all tasks or according list
             if (holder.button.getText().equals(context.getResources().getString(R.string.allTasks))){
 
@@ -185,6 +191,12 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //set header text
                 header.headerText.setText(context.getResources().getString(R.string.allTasks));
+
+                header.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+
+                headerColor = standardColor;
+
+                header.colorButton.setVisibility(View.GONE);
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if (allTasksAdapter == null) {
@@ -207,6 +219,12 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //set header text
                 header.headerText.setText(context.getResources().getString(R.string.noList));
+
+                header.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+
+                headerColor = standardColor;
+
+                header.colorButton.setVisibility(View.GONE);
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if (noListAdapter == null) {
@@ -234,11 +252,15 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                     header.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
 
+                    headerColor = standardColor;
+
                 } else{
 
                     String color = data.getListColor(list);
 
                     header.layout.setBackgroundColor(Color.parseColor(color));
+
+                    headerColor = color;
 
                 }
 
