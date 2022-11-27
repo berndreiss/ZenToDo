@@ -10,6 +10,6 @@ The App contains the following main layouts:
 
 -Pick: presents all tasks that are due today and lets you pick which ones to get done
 
--Focus: presents all tasks that you picked including a color mode (still to be implemented), that marks all tasks belonging to one list in the same color
+-Focus: presents all tasks that you picked including a color mode, that marks all tasks belonging to one list in the same color
 
 -Lists: shows all the lists and according tasks including a list called "All Tasks" which shows ALL tasks in increasing order of due date, in case you want to change anything
