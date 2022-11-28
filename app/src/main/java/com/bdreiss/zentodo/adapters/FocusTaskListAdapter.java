@@ -6,11 +6,20 @@ package com.bdreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 
+import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
@@ -36,6 +45,53 @@ public class FocusTaskListAdapter extends TaskListAdapter{
             holder.linearLayout.setBackgroundColor(Color.parseColor( color));
 
         }
+
+    }
+
+    //set Listener for checkbox: basically if checked the item is removed, additionally motivating picture of Panda is shown when all tasks are completed
+    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
+    @Override
+    protected void setCheckBoxListener(TaskListAdapter.ViewHolder holder, int position){
+        holder.checkBox.setOnClickListener(view -> {
+
+            //current entry
+            Entry entry = entries.get(position);
+
+            //get ID for manipulation in data
+            int id = entry.getId();
+
+            //see if item is recurring
+            boolean recurring = entry.getRecurrence()!=null;
+
+            //if recurring do not remove but set new due date, otherwise remove from data
+            if (recurring) {
+                //calculate new due date and write to data and entries
+                entries.get(position).setDue(data.setRecurring(id));
+
+                //reset focus in data and entries
+                data.setFocus(id,false);
+                entries.get(position).setFocus(false);
+
+                //reset dropped in data and entries
+                data.setDropped(id,false);
+                entries.get(position).setDropped(false);
+
+                notifyItemChanged(position);
+            } else {
+                data.remove(id);
+            }
+
+
+            //remove from adapter and notify
+            entries.remove(position);
+
+            if (entries.size()==0)
+                showImage();
+
+            notifyDataSetChanged();
+
+
+        });
 
     }
 
@@ -92,4 +148,26 @@ public class FocusTaskListAdapter extends TaskListAdapter{
         return datePickerDialog;
     }
 
+    public void showImage() {
+        Dialog builder = new Dialog(context);
+        builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        builder.getWindow().setBackgroundDrawable(
+                new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        builder.setOnDismissListener(dialogInterface -> {
+            //nothing;
+        });
+
+        ImageView imageView = new ImageView(context);
+
+        //I don't care whatever you change in this code, but THIS has to be a PANDA!
+        imageView.setImageResource(R.drawable.panda);
+
+
+        builder.addContentView(imageView, new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        builder.show();
+        imageView.setOnClickListener(v -> builder.dismiss());
+    }
 }
