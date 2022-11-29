@@ -43,7 +43,11 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
             holder.linearLayout.setBackgroundColor(Color.parseColor( color));
 
+        } else{
+            holder.linearLayout.setBackgroundColor(Color.WHITE);
+
         }
+
 
     }
 
