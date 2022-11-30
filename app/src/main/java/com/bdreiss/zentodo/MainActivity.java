@@ -100,12 +100,32 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists = findViewById(R.id.toolbar_lists);
         //toolbarSettings = findViewById(R.id.toolbar_settings);
 
-        //the following functions set OnClickListeners for buttons in toolbar which show according layout onClick
-        toolbarListenerDrop();
-        toolbarListenerPick();
-        toolbarListenerFocus();
-        toolbarListenerLists();
-        //toolbarListenerSettings();
+        //OnClickListeners for buttons in toolbar which show according layout onClick
+        toolbarPick.setOnClickListener(view -> {
+            closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
+            showPick();//show Pick layout
+        });
+
+        toolbarDrop.setOnClickListener(view -> {
+            showDrop();//show Drop layout
+        });
+
+        toolbarFocus.setOnClickListener(view -> {
+            closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
+            showFocus();//show Focus layout
+        });
+
+        toolbarLists.setOnClickListener(view -> {
+            closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
+            showLists();//show Lists layout
+        });
+
+        /*
+        toolbarSettings.setOnClickListener(view -> {
+            showSettings();
+            toolbarListenerSettings();
+        });
+        */
 
         //layouts are initialized
         initializeDrop();
@@ -118,53 +138,6 @@ public class MainActivity extends AppCompatActivity {
         showDrop();
 
     }
-
-    //set listener for Pick button in toolbar
-    public void toolbarListenerPick(){
-        toolbarPick.setOnClickListener(view -> {
-            closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
-            showPick();//show Pick layout
-            toolbarListenerPick();//reset listener
-        });
-
-    }
-
-    //set listener for Drop button in toolbar
-    public void toolbarListenerDrop(){
-        toolbarDrop.setOnClickListener(view -> {
-           showDrop();//show Drop layout
-           toolbarListenerDrop();//reset listener
-        });
-
-    }
-
-    //set listener for Focus button in toolbar
-    public void toolbarListenerFocus(){
-        toolbarFocus.setOnClickListener(view -> {
-            closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
-            showFocus();//show Focus layout
-            toolbarListenerFocus();//reset listener
-        });
-
-    }
-
-    //set listener for Lists button in toolbar
-    public void toolbarListenerLists(){
-        toolbarLists.setOnClickListener(view -> {
-            closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
-            showLists();//show Lists layout
-            toolbarListenerLists();//reset listener
-        });
-
-    }
-
-    /*public void toolbarListenerSettings() {
-        toolbarSettings.setOnClickListener(view -> {
-            showSettings();
-            toolbarListenerSettings();
-        });
-
-    }*/
 
     //initialize Pick layout
     public void initializePick() {
@@ -215,9 +188,6 @@ public class MainActivity extends AppCompatActivity {
                 if (data.getEntries().get(data.getPosition(id)).getFocus())
                     data.setFocus(id, false);
             }
-
-            //re-initialize listener for Pick button in toolbar
-            toolbarListenerPick();
 
             //show Focus layout
             showFocus();

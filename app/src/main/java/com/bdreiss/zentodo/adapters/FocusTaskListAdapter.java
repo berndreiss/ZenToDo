@@ -34,7 +34,7 @@ public class FocusTaskListAdapter extends TaskListAdapter{
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
 
-        initializeViews(holder, position);
+        super.onBindViewHolder(holder, position);
 
 
         if (entries.get(position).getList() != null){

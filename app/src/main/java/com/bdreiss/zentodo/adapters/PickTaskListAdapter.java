@@ -30,7 +30,7 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
-        initializeViews(holder, position);
+        super.onBindViewHolder(holder, position);
 
         if (idsChecked.contains(entries.get(position).getId()))
             holder.checkBox.setChecked(true);
@@ -67,8 +67,6 @@ public class PickTaskListAdapter extends TaskListAdapter{
             //setting focus drawable GONE
             holder.focus.setVisibility(View.GONE);
 
-            //reset Listener
-            setMenuListener(holder);
         });
 
     }
@@ -127,8 +125,6 @@ public class PickTaskListAdapter extends TaskListAdapter{
                 idsChecked.add(id);
             }
 
-            //reset Listener
-            setCheckBoxListener(holder, position);
 
         });
 
