@@ -9,6 +9,8 @@ package com.bdreiss.zentodo.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
@@ -20,10 +22,12 @@ public class AllTaskListAdapter extends TaskListAdapter{
         super(context,data,entries);
     }
 
-    //set CheckBoxListener that ignores if task is recurring
-    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
+    @SuppressLint("NotifyDataSetChanged")
     @Override
-    public void setCheckBoxListener(ViewHolder holder, int position){
+    public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
+        super.onBindViewHolder(holder, position);
+
+        //set CheckBoxListener that ignores if task is recurring
         holder.checkBox.setOnClickListener(view -> {
 
             //get entry
@@ -42,6 +46,6 @@ public class AllTaskListAdapter extends TaskListAdapter{
             notifyDataSetChanged();
         });
 
-    }
 
+    }
 }

@@ -8,6 +8,8 @@ package com.bdreiss.zentodo.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
@@ -19,12 +21,13 @@ public class NoListTaskListAdapter extends AllTaskListAdapter{
         super(context,data,entries);
     }
 
-    //set Listener to change list of task, if the new list is not empty also remove task from adadpter
-    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
+    @SuppressLint("NotifyDataSetChanged")
     @Override
-    public void setBackListListener(ViewHolder holder, int position){
+    public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
+        super.onBindViewHolder(holder,position);
 
-        holder.backList.setOnClickListener(view161 -> {
+        //set Listener to change list of task, if the new list is not empty also remove task from adadpter
+        holder.backList.setOnClickListener(v -> {
 
             //get id of task
             int id = entries.get(position).getId();
@@ -49,11 +52,8 @@ public class NoListTaskListAdapter extends AllTaskListAdapter{
             //return to original row layout
             setOriginal(holder);
 
-            //reset Listener
-            setBackListListener(holder,position);
-
         });
-    }
 
+    }
 
 }

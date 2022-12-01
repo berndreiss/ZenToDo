@@ -28,36 +28,12 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
 
-        if (idsChecked.contains(entries.get(position).getId()))
-            holder.checkBox.setChecked(true);
-
-
-        if (entries.get(position).getList() != null){
-
-            String color = data.getListColor(entries.get(position).getList());
-            //color = color.substring(2,8);
-
-            holder.linearLayout.setBackgroundColor(Color.parseColor( color));
-
-        } else{
-            holder.linearLayout.setBackgroundColor(Color.WHITE);
-
-        }
-
-
-    }
-
-
-
-    //listener that changes to alternative menu row layout on click, but setting a delete drawable for the focus Button
-    @Override
-    protected void setMenuListener(TaskListAdapter.ViewHolder holder){
-        holder.menu.setOnClickListener(view -> {
-
+        holder.menu.setOnClickListener(v -> {
             //setting alternative row layout visible and active, everything else disabled
             setAlt(holder);
 
@@ -66,39 +42,9 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
             //setting focus drawable GONE
             holder.focus.setVisibility(View.GONE);
-
         });
 
-    }
-
-    //returns ids of checked tasks in mode pick
-    public ArrayList<Integer> getIdsChecked(){
-        return idsChecked;
-    }
-
-    //returns ids of tasks that have not been checked in mode pick
-    public ArrayList<Integer> getIdsNotChecked(){
-        ArrayList<Integer> notChecked = new ArrayList<>();
-
-        for (Entry e: entries){
-            if (!idsChecked.contains(e.getId())){
-                notChecked.add(e.getId());
-            }
-        }
-        return notChecked;
-    }
-
-    //clears the ArrayString
-    public void clearIdsChecked(){
-
-        idsChecked.clear();
-    }
-
-
-    //set Listener for CheckBox. Add all picked tasks to idsChecked
-    @Override
-    public void setCheckBoxListener(ViewHolder holder, int position){
-        holder.checkBox.setOnClickListener(view -> {
+        holder.checkBox.setOnClickListener(v ->{
 
             //get current entry
             Entry entry = entries.get(position);
@@ -124,17 +70,9 @@ public class PickTaskListAdapter extends TaskListAdapter{
             } else{
                 idsChecked.add(id);
             }
-
-
         });
 
-    }
-
-    //set Focus Listener that deletes entry upon click
-    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
-    @Override
-    public void setFocusListener(ViewHolder holder,int position){
-        holder.delete.setOnClickListener(view -> {
+        holder.focus.setOnClickListener(v ->{
 
             //get current entry
             Entry entry = entries.get(position);
@@ -151,7 +89,51 @@ public class PickTaskListAdapter extends TaskListAdapter{
             //notify adapter
             notifyDataSetChanged();
         });
+
+        if (idsChecked.contains(entries.get(position).getId()))
+            holder.checkBox.setChecked(true);
+
+
+        if (entries.get(position).getList() != null){
+
+            String color = data.getListColor(entries.get(position).getList());
+            //color = color.substring(2,8);
+
+            holder.linearLayout.setBackgroundColor(Color.parseColor( color));
+
+        } else{
+            holder.linearLayout.setBackgroundColor(Color.WHITE);
+
+        }
+
+
     }
+
+
+
+    //returns ids of checked tasks in mode pick
+    public ArrayList<Integer> getIdsChecked(){
+        return idsChecked;
+    }
+
+    //returns ids of tasks that have not been checked in mode pick
+    public ArrayList<Integer> getIdsNotChecked(){
+        ArrayList<Integer> notChecked = new ArrayList<>();
+
+        for (Entry e: entries){
+            if (!idsChecked.contains(e.getId())){
+                notChecked.add(e.getId());
+            }
+        }
+        return notChecked;
+    }
+
+    //clears the ArrayString
+    public void clearIdsChecked(){
+
+        idsChecked.clear();
+    }
+
 
 
 }

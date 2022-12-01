@@ -21,7 +21,6 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,12 +37,18 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bdreiss.zentodo.R;
+import com.bdreiss.zentodo.adapters.listeners.BackEditListener;
+import com.bdreiss.zentodo.adapters.listeners.BackListListener;
+import com.bdreiss.zentodo.adapters.listeners.BackRecurrenceListener;
+import com.bdreiss.zentodo.adapters.listeners.CheckBoxListener;
+import com.bdreiss.zentodo.adapters.listeners.FocusListener;
+import com.bdreiss.zentodo.adapters.listeners.RecurrenceListener;
+import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.adapters.recyclerViewHelper.ItemTouchHelperAdapter;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 
@@ -116,11 +121,11 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         }
     }
 
-    protected ArrayList<Entry> entries;//ArrayList that holds task shown in RecyclerView
+    public ArrayList<Entry> entries;//ArrayList that holds task shown in RecyclerView
 
-    protected Context context;
+    public Context context;
 
-    protected Data data;
+    public Data data;
 
     public TaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
         this.data = data;
@@ -142,13 +147,6 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
 
-        initializeViews(holder, position);
-
-    }
-
-    //added own function for everything happening in onBindViewHolder so it can be easily overwritten in sub-classes
-    public void initializeViews(ViewHolder holder, int position){
-
         //set TextView to task
         holder.task.setText(entries.get(position).getTask());
 
@@ -157,7 +155,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         holder.checkBox.setTag(position);
 
         //establish routine to remove task when checkbox is clicked
-        setCheckBoxListener(holder, position);
+        holder.checkBox.setOnClickListener(new CheckBoxListener(this,holder, position));
 
         //Creating adapter for spinner with entries days/weeks/months/years
         /* Adapter has to be declared here so that the dropdown element of the spinner is not shown in the background */
@@ -171,120 +169,18 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
         //sets buttons that have edited data that has been set to a different color
         markSet(holder,this.entries.get(position));
-        setMenuListener(holder);
 
-        //setting Entry.focus to true/false, which means the task is/is not listed in focus mode
-        setFocusListener(holder, position);
-        setEditListener(holder);
-        setBackEditListener(holder, position);
-        setSetDateListener(holder, position);
-        setRecurrenceListener(holder, position);
-        setClearRecurrenceListener(holder);
-        setBackRecurrenceListener(holder, position);
-        setSetListListener(holder,position);
-        setClearListenerList(holder);
-        setBackListListener(holder,position);
-        setBackListener(holder);
-
-
-
-    }
-
-    // Returns the total count of items in the list
-    @Override
-    public int getItemCount() {
-        return entries.size();
-    }
-
-    //set Listener for checkbox: basically if checked the item is removed
-    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
-    protected void setCheckBoxListener(TaskListAdapter.ViewHolder holder, int position){
-        holder.checkBox.setOnClickListener(view -> {
-
-            //current entry
-            Entry entry = entries.get(position);
-
-            //get ID for manipulation in data
-            int id = entry.getId();
-
-            //see if item is recurring
-            boolean recurring = entry.getRecurrence()!=null;
-
-            //if recurring do not remove but set new due date, otherwise remove from data
-            if (recurring) {
-                //calculate new due date and write to data and entries
-                entries.get(position).setDue(data.setRecurring(id));
-
-                //reset focus in data and entries
-                data.setFocus(id,false);
-                entries.get(position).setFocus(false);
-
-                //reset dropped in data and entries
-                data.setDropped(id,false);
-                entries.get(position).setDropped(false);
-
-                notifyItemChanged(position);
-            } else {
-                data.remove(id);
-            }
-
-            //remove from adapter and notify
-            entries.remove(position);
-            notifyDataSetChanged();
-        });
-
-    }
-
-    //set Listener for showing menu of task
-    protected void setMenuListener(TaskListAdapter.ViewHolder holder){
-        //listener that changes to alternative row layout on click
+        //set Listener for showing menu of task
         holder.menu.setOnClickListener(view -> {
             //setting alternative row layout visible and active, everything else disabled
             setAlt(holder);
-            setMenuListener(holder); //reset Listener
         });
 
-    }
+        //setting Entry.focus to true/false, which means the task is/is not listed in focus mode
+        holder.focus.setOnClickListener(new FocusListener(this,holder,position));
 
-    //set Listener for the Focus Button in the menu, item is being marked/unmarked as focused
-    protected void setFocusListener(TaskListAdapter.ViewHolder holder, int position){
-        holder.focus.setOnClickListener(view12 -> {
-
-            //get current entry
-            Entry entry = entries.get(position);
-
-            boolean focused = entry.getFocus();
-
-            //get ID for manipulation in data
-            int id = entry.getId();//get id
-
-            //set dropped to false: as soon as item is in focus it is not dropped anymore
-            data.setDropped(id, false);
-
-            //change state of focus in entry
-            data.setFocus(id, !focused);
-            entry.setFocus(!focused);
-
-            //change color of Focus Button marking whether task is focused or not
-            markSet(holder,entry);
-
-            //notify the adapter
-            notifyItemChanged(position);
-
-            //return to original row layout
-            setOriginal(holder);
-
-            //reset the Listener
-            setFocusListener(holder, position);
-
-        });
-
-    }
-
-    //set Listener for Edit Task Button
-    protected void setEditListener(TaskListAdapter.ViewHolder holder){
         //onClickListener for Button to change the task name
-        holder.edit.setOnClickListener(view13 -> {
+        holder.edit.setOnClickListener(v -> {
 
             //setting edit row visible and active, everything else disabled
             setEdit(holder);
@@ -292,194 +188,18 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             //setting editText to task
             holder.editText.setText(holder.task.getText());
 
-            //reset Listener
-            setEditListener(holder);
-
         });
-
-    }
-
-    //set Listener for returning from Edit Task
-    protected void setBackEditListener(TaskListAdapter.ViewHolder holder, int position){
 
         //Listener to write back changes
-        holder.backEdit.setOnClickListener(view131 -> {
-
-            //getting the id of task
-            int id = entries.get(position).getId();
-
-            //get new Task from EditText
-            String newTask = holder.editText.getText().toString();
-
-            //if EditText is not empty write changes to data and return to original layout
-            if (!newTask.isEmpty()) {
-
-                //save new task description in data
-                data.setTask(id, newTask);
-                entries.get(position).setTask(newTask);
-
-                //notify adapter
-                notifyItemChanged(position);
-
-                //return to original layout
-                setOriginal(holder);
-            }
-
-            //reset Listener
-            setBackEditListener(holder, position);
-
-        });
-    }
-
-    //set Listener for Due Date Button: sets a new Date when task is due
-    protected void setSetDateListener(TaskListAdapter.ViewHolder holder, int position){
+        holder.backEdit.setOnClickListener(new BackEditListener(this, holder, position));
 
         //Listener to add date when task is due
-        holder.setDate.setOnClickListener(view14 -> {
+        holder.setDate.setOnClickListener(new SetDateListener(this,holder,position));
 
-            //opens date pickerDialog
-            openDatePickerDialog(context,holder,position);
+        //Listener to edit how often task repeats
+        holder.recurrence.setOnClickListener(new RecurrenceListener(this,holder,position));
 
-            //reset Listener
-            setSetDateListener(holder, position);
-        });
-    }
-
-    //choose date for which task is due and write back data, if "no date" is pressed, date is set to 0
-    protected void openDatePickerDialog(Context context, TaskListAdapter.ViewHolder holder, int position) {
-
-        //Get entry
-        Entry entry = entries.get(position);
-
-        //get current date when task is due
-        int entryDate = entry.getDue();
-
-        //variables for setting picker
-        int entryDay;
-        int entryMonth;
-        int entryYear;
-
-        //if current date greater then 0 set value, otherwise set today
-        if(entryDate>0) {
-
-            //resolve format "yyyymmdd"
-            entryDay = entryDate%100;
-            entryMonth = ((entryDate%10000)-entryDay)/100-1;
-            entryYear = (entryDate-entryMonth*100-entryDay)/10000;
-        }
-        else {
-
-            //get todays date
-            Calendar c = Calendar.getInstance();
-            entryYear = c.get(Calendar.YEAR);
-            entryMonth = c.get(Calendar.MONTH);
-            entryDay = c.get(Calendar.DAY_OF_MONTH);
-        }
-
-        //create DatePickerDialog and set listener
-        DatePickerDialog datePickerDialog = getDatePickerDialog(entry, entryDay,entryMonth,entryYear,holder,position);
-
-        //set listener for cancel button
-        datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,context.getResources().getString(R.string.cancel), (dialog, which) -> {
-
-            //set date when task is due to 0
-            data.editDue(entry.getId(),0);
-            entries.get(position).setDue(0);
-
-            //change color of Due Date Button marking if Date is set
-            markSet(holder,entry);
-
-            //notify adapter
-            notifyItemChanged(position);
-
-            //return to original layout
-            setOriginal(holder);
-        });
-
-        //show the dialog
-        datePickerDialog.show();
-    }
-
-    //return DatePickerDialog
-    protected DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, TaskListAdapter.ViewHolder holder, int position){
-
-        //DatePickerDialog to be returned
-        DatePickerDialog datePickerDialog;
-
-        //initialize DatePickerDialog
-        datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
-
-            //Encode format "YYYYMMDD"
-            int date = year*10000+(month+1)*100+day;
-
-            //Write back data
-            data.editDue(entry.getId(), date);
-            entries.get(position).setDue(date);
-
-            //change color of Due Date Button marking if Date is set
-            markSet(holder,entry);
-
-            //notify adapter
-            notifyItemChanged(position);
-
-            //return to original row layout
-            setOriginal(holder);
-
-        }, entryYear, entryMonth, entryDay);
-
-        return datePickerDialog;
-    }
-
-    //Listener to edit how often task repeats
-    protected void setRecurrenceListener(TaskListAdapter.ViewHolder holder, int position){
-        holder.recurrence.setOnClickListener(view15 -> {
-
-            //setting recurrence row visible and active, everything else disabled
-            setRecurrence(holder);
-
-            //get entry to set spinner on current recurrence
-            Entry entry = entries.get(position);
-            String rec = entry.getRecurrence();
-
-            //initialize spinner if recurrence is set
-            if (rec!=null) {
-                //set spinner according to first letter y/w/m/y
-                switch (rec.charAt(0)) {
-                    case 'd':
-                        holder.spinnerRecurrence.setSelection(0);
-                        break;
-                    case 'w':
-                        holder.spinnerRecurrence.setSelection(1);
-                        break;
-                    case 'm':
-                        holder.spinnerRecurrence.setSelection(2);
-                        break;
-                    case 'y':
-                        holder.spinnerRecurrence.setSelection(3);
-                        break;
-                    default://sets spinner to days but this should actually never happen
-
-                }
-
-                //String for editText
-                StringBuilder recEdit = new StringBuilder();
-
-                //add all digits after the first char
-                for (int i = 1; i < rec.length(); i++) {
-                    recEdit.append(rec.charAt(i));
-                }
-
-                //set editText
-                holder.editTextRecurrence.setText(recEdit.toString());
-            }
-
-            //reset Listener
-            setRecurrenceListener(holder, position);
-        });
-    }
-
-    //reset all fields in recurrence row view to default
-    protected void setClearRecurrenceListener(TaskListAdapter.ViewHolder holder){
+        //reset all fields in recurrence row view to default
         holder.clearRecurrence.setOnClickListener(view -> {
 
             //reset spinner to days
@@ -488,73 +208,11 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             //reset edit Text to empty
             holder.editTextRecurrence.setText("");
 
-            //reset Listener
-            setClearRecurrenceListener(holder);
         });
 
-    }
 
-    //set Listener for returning from Recurrence Editing layout and writing back changes
-    protected  void setBackRecurrenceListener(TaskListAdapter.ViewHolder holder, int position){
-
-        //Listener for writing back data
-        holder.backRecurrence.setOnClickListener(view151 -> {
-
-            //get id for manipulation in data
-            int id = entries.get(position).getId(); //get id
-
-            //number of repeats
-            String interval = holder.editTextRecurrence.getText().toString();
-
-            //the same number but as Integer
-            int intervalInt;
-
-            //if editText is empty number is set to 0, assign content otherwise
-            if (interval.equals("")){
-                intervalInt = 0;
-            } else {
-                intervalInt = Integer.parseInt(interval);
-            }
-
-            //String that will be written back
-            String recurrence = "";
-
-            //if editText was empty or value=0 then recurrence is set to null, otherwise number and interval are written back
-            if (intervalInt == 0){
-                data.editRecurrence(id, null);
-                entries.get(position).setRecurrence(null);
-            }
-            else{
-
-                //add spinner values first character as lower case (d/w/m/y)
-                recurrence += Character.toLowerCase(holder.spinnerRecurrence.getSelectedItem().toString().charAt(0));
-
-                //add number of editText
-                recurrence += interval;
-
-                //write back
-                data.editRecurrence(id,recurrence);
-                entries.get(position).setRecurrence(recurrence);
-
-            }
-
-            //change color of recurrence Button to mark if recurrence is set
-            markSet(holder,entries.get(position));
-
-            //notify adapter
-            notifyItemChanged(position);
-
-            //return to original row layout
-            setOriginal(holder);
-
-            //reset Listener
-            setBackRecurrenceListener(holder, position);
-
-        });
-    }
-
-    //set Listener for setting list of Task
-    protected void setSetListListener(TaskListAdapter.ViewHolder holder, int position){
+        //set Listener for returning from Recurrence Editing layout and writing back changes
+        holder.backRecurrence.setOnClickListener(new BackRecurrenceListener(this, holder, position));
 
         //Listener for Button to change list task is assigned to
         holder.setList.setOnClickListener(view16 -> {
@@ -573,76 +231,38 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             //set edit Text to current list
             holder.autoCompleteList.setText(entries.get(position).getList());
 
-            //reset Listener
-            setSetListListener(holder,position);
         });
 
-    }
-
-    //clear edit Text when editing list
-    protected void setClearListenerList(TaskListAdapter.ViewHolder holder){
+        //clear edit Text when editing list
         holder.clearList.setOnClickListener(view -> {
-
             //set edit Text to empty
             holder.autoCompleteList.setText("");
-
-            //reset Listener
-            setClearListenerList(holder);
         });
-    }
 
-    //set Listener for returning from editing list and write back data
-    protected void setBackListListener(TaskListAdapter.ViewHolder holder, int position){
+        //set Listener for returning from editing list and write back data
+        holder.backList.setOnClickListener(new BackListListener(this,holder,position));
 
-        holder.backList.setOnClickListener(view161 -> {
-
-            //Get id of task
-            int id = entries.get(position).getId();
-
-            //get new list name
-            String list = holder.autoCompleteList.getText().toString();
-
-            //set to no list if AutoComplete is empty
-            if (list.trim().isEmpty() || list.equals("")) {
-                //reset to no list
-                entries.get(position).setListPosition(data.editList(id, null));
-                entries.get(position).setList(null);
-            } else {
-                //write back otherwise
-                entries.get(position).setListPosition(data.editList(id, list));
-                entries.get(position).setList(list);
-            }
-
-            //change Color of setList Button to mark if list is set
-            markSet(holder,entries.get(position));
-
-            //notify adapter
-            notifyItemChanged(position);
-
-            //return to original row layout
-            setOriginal(holder);
-
-            //reset Listener
-            setBackListListener(holder, position);
-
-        });
-    }
-
-    //set Listener for returning from main menu
-    protected void setBackListener(TaskListAdapter.ViewHolder holder){
         //Listener to return to default layout
-        holder.back.setOnClickListener(view17 -> {
+        holder.back.setOnClickListener(v -> {
             //setting original row visible and active, everything else disabled
             setOriginal(holder);
 
-            //reset Listener
-            setBackListener(holder);
         });
+
+
 
     }
 
+
+    // Returns the total count of items in the list
+    @Override
+    public int getItemCount() {
+        return entries.size();
+    }
+
+
     //Setting original row view
-    protected void setOriginal(TaskListAdapter.ViewHolder holder){
+    public void setOriginal(TaskListAdapter.ViewHolder holder){
         //Set original row view to visible and active
         holder.linearLayout.setAlpha(1);
         enable(holder.linearLayout);
@@ -666,7 +286,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     }
 
     //Setting alternative row view coming from original
-    protected void setAlt(TaskListAdapter.ViewHolder holder){
+    public void setAlt(TaskListAdapter.ViewHolder holder){
         //Set alternative row view to visible and active
         holder.linearLayoutAlt.bringToFront();
         holder.linearLayoutAlt.setAlpha(1);
@@ -679,7 +299,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     }
 
     //Setting edit row view coming from alternative view
-    private void setEdit(TaskListAdapter.ViewHolder holder){
+    public void setEdit(TaskListAdapter.ViewHolder holder){
 
         //Set edit row view to visible and active
         holder.linearLayoutEdit.bringToFront();
@@ -693,7 +313,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     }
 
     //Setting recurrence row view coming from alternative view
-    private void setRecurrence(TaskListAdapter.ViewHolder holder){
+    public void setRecurrence(TaskListAdapter.ViewHolder holder){
         //Set recurrence row view to visible and active
         holder.linearLayoutRecurrence.bringToFront();
         holder.linearLayoutRecurrence.setAlpha(1);
@@ -705,7 +325,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     }
 
     //Setting list row view coming from alternative view
-    private void setList(TaskListAdapter.ViewHolder holder){
+    public void setList(TaskListAdapter.ViewHolder holder){
         //Set list row view to visible and active
         holder.linearLayoutList.bringToFront();
         holder.linearLayoutList.setAlpha(1);
@@ -744,7 +364,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
 
     //Disables view and first generation children
-    private void disable(LinearLayout layout){
+    public void disable(LinearLayout layout){
         for (int i = 0; i < layout.getChildCount(); i++) {
             View child = layout.getChildAt(i);
             child.setEnabled(false);
@@ -754,7 +374,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     }
 
     //Enables view and first generation children
-    private void enable(LinearLayout layout){
+    public void enable(LinearLayout layout){
         for (int i = 0; i < layout.getChildCount(); i++) {
             View child = layout.getChildAt(i);
             child.setEnabled(true);
@@ -764,7 +384,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     //marks Buttons that have been set in a different color
     @SuppressLint("UseCompatLoadingForDrawables")
-    protected void markSet(TaskListAdapter.ViewHolder holder, Entry entry){
+    public void markSet(TaskListAdapter.ViewHolder holder, Entry entry){
 
         //Set date button to alternative color if !=0, original color otherwise
         if (entry.getDue()!=0){

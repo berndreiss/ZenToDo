@@ -14,12 +14,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 
 import com.bdreiss.zentodo.R;
+import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
@@ -31,16 +33,15 @@ public class FocusTaskListAdapter extends TaskListAdapter{
         super(context, data, entries);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
 
         super.onBindViewHolder(holder, position);
 
-
         if (entries.get(position).getList() != null){
 
             String color = data.getListColor(entries.get(position).getList());
-            //color = color.substring(2,8);
 
             holder.linearLayout.setBackgroundColor(Color.parseColor( color));
 
@@ -49,12 +50,7 @@ public class FocusTaskListAdapter extends TaskListAdapter{
 
         }
 
-    }
-
-    //set Listener for checkbox: basically if checked the item is removed, additionally motivating picture of Panda is shown when all tasks are completed
-    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
-    @Override
-    protected void setCheckBoxListener(TaskListAdapter.ViewHolder holder, int position){
+        //set Listener for checkbox: basically if checked the item is removed, additionally motivating picture of Panda is shown when all tasks are completed
         holder.checkBox.setOnClickListener(view -> {
 
             //current entry
@@ -96,12 +92,9 @@ public class FocusTaskListAdapter extends TaskListAdapter{
 
         });
 
-    }
 
-    //set Listener for the Focus Button in the menu, item is removed from adapter upon click
-    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
-    @Override
-    public void setFocusListener(ViewHolder holder,int position){
+
+        //set Listener for the Focus Button in the menu, item is removed from adapter upon click
         holder.focus.setOnClickListener(view12 -> {
 
             //get entry
@@ -120,38 +113,40 @@ public class FocusTaskListAdapter extends TaskListAdapter{
             notifyDataSetChanged();
         });
 
+        //return DatePickerDialog that writes back to data and removes item from adapter
+        holder.setDate.setOnClickListener(new SetDateListener(this,holder,position){
+            @Override
+            public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
+                DatePickerDialog datePickerDialog;
+
+                datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
+
+                    //encode format "YYYYMMDD"
+                    int date = year*10000+(month+1)*100+day;
+
+                    //write back to data
+                    data.editDue(entry.getId(), date);
+
+                    //also set focus to false in data
+                    data.setFocus(entry.getId(),false);
+
+                    //remove from adapter
+                    entries.remove(position);
+
+                    //notify adapter
+                    notifyDataSetChanged();
+
+                }, entryYear, entryMonth, entryDay);
+
+                //return Dialog
+                return datePickerDialog;
+
+            }
+        });
+
     }
 
-    //return DatePickerDialog that writes back to data and removes item from adapter
-    @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
-    public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
-
-        DatePickerDialog datePickerDialog;
-
-        datePickerDialog= new DatePickerDialog(super.context, (view, year, month, day) -> {
-
-            //encode format "YYYYMMDD"
-            int date = year*10000+(month+1)*100+day;
-
-            //write back to data
-            data.editDue(entry.getId(), date);
-
-            //also set focus to false in data
-            data.setFocus(entry.getId(),false);
-
-            //remove from adapter
-            entries.remove(position);
-
-            //notify adapter
-            notifyDataSetChanged();
-
-        }, entryYear, entryMonth, entryDay);
-
-        //return Dialog
-        return datePickerDialog;
-    }
-
-    public void showImage() {
+    private void showImage() {
         Dialog builder = new Dialog(context);
         builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
         builder.getWindow().setBackgroundDrawable(
