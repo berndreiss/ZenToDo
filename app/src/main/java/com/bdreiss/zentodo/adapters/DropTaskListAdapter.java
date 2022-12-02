@@ -1,5 +1,10 @@
 package com.bdreiss.zentodo.adapters;
 
+/*
+*       TaskListAdapter that removes tasks from RecyclerView if task is being sent to Focus or
+*       list or date is set
+ */
+
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -22,6 +27,8 @@ public class DropTaskListAdapter extends TaskListAdapter{
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
+
+        //Remove task from View if task is being sent to Focus
         holder.focus.setOnClickListener(v -> {
             Entry entry = entries.get(position);
             int id = entry.getId();//get id
@@ -33,15 +40,13 @@ public class DropTaskListAdapter extends TaskListAdapter{
             notifyDataSetChanged();
         });
 
+        //Remove task from View if list is set
         holder.backList.setOnClickListener(view161 -> {
             //Get id of task
             int id = entries.get(position).getId();
 
             //get new list name
             String list = holder.autoCompleteList.getText().toString();
-
-            //get old list name
-            String oldList = entries.get(position).getList();
 
             //set list if AutoComplete is not empty, write back and notify adapter
             if (!list.trim().isEmpty()) {
@@ -62,6 +67,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
 
         });
 
+        //Remove task from View if date is set
         holder.setDate.setOnClickListener(new SetDateListener(this, holder,position){
             @Override
             public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
@@ -79,7 +85,6 @@ public class DropTaskListAdapter extends TaskListAdapter{
             }
         });
     }
-
 
 
     @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
