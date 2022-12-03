@@ -111,8 +111,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                     })
                     .setNegativeButton("no color", (dialog, which) -> {
-                        this.headerText.setBackgroundColor(context.getResources().getColor(R.color.header_background));
-                        this.colorButton.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                        this.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
                         data.editListColor(headerText.getText().toString(), "#00ffffff");
                         listsTaskListAdapter.notifyDataSetChanged();
 
