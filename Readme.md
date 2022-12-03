@@ -13,3 +13,5 @@ The App contains the following main layouts:
 -Focus: presents all tasks that you picked including a color mode, that marks all tasks belonging to one list in the same color
 
 -Lists: shows all the lists and according tasks including a list called "All Tasks" which shows ALL tasks in increasing order of due date, in case you want to change anything
+
+Early test versions can be found here: https://www.dropbox.com/sh/4a0sttdf6od3y6e/AAAU3uAM_yp2ko7raln-k97Wa?dl=0
