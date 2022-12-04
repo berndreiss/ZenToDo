@@ -18,6 +18,7 @@
     <string name="pickButton">pick</string>
     <string name="focusButton">focus</string>
     <string name="listsButton">lists</string>
+    <string name="help">help</string>
 
     <!-- Strings used for spinner for choosing time interval of repeats -->
     <string-array name="time_interval">
