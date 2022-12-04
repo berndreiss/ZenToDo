@@ -4,9 +4,12 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../../layout/custom_preview.xml" value="0.25769927536231885" />
+        <entry key="app/src/main/res/drawable-anydpi/focus.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_back.xml" value="0.2655" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_brainstorm.xml" value="0.19" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_color.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_floating.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_focus_toolbar.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_lists.xml" value="0.19" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_pick.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_settings.xml" value="0.1" />
@@ -23,7 +26,7 @@
         <entry key="app/src/main/res/drawable/remove.xml" value="0.189" />
         <entry key="app/src/main/res/layout-v23/row.xml" value="0.259375" />
         <entry key="app/src/main/res/layout/ListView.xml" value="0.18072916666666666" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.16304347826086957" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.2" />
         <entry key="app/src/main/res/layout/bottom_navigation_menu.xml" value="0.2110705596107056" />
         <entry key="app/src/main/res/layout/brainstorm_and_pick.xml" value="0.3333333333333333" />
         <entry key="app/src/main/res/layout/button_alt.xml" value="0.18072916666666666" />
