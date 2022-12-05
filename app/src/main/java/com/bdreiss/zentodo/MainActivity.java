@@ -17,6 +17,7 @@ package com.bdreiss.zentodo;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
@@ -26,15 +27,20 @@ import com.bdreiss.zentodo.adapters.ListsListAdapter;
 import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.motion.widget.OnSwipe;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.view.DragEvent;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.bdreiss.zentodo.dataManipulation.Entry;
 import com.bdreiss.zentodo.databinding.ActivityMainBinding;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -46,6 +52,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
+    private Context context = this;
 
     //Layouts for different modes
     private LinearLayout pick;//Layout to pick tasks that have been dropped and show them in focus
@@ -60,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
     private Button toolbarFocus;
     private Button toolbarLists;
     //private Button toolbarSettings;
+
+    private FloatingActionButton fab;
 
     //Data-object that stores all tasks, reminders, lists etc. (See Data.java and Entry.java)
     private Data data;
@@ -77,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Entry> focusTasks;
     ArrayList<String> listNames;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +111,8 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists = findViewById(R.id.toolbar_lists);
         //toolbarSettings = findViewById(R.id.toolbar_settings);
 
+        fab = findViewById(R.id.fab);
+        fab.setVisibility(View.GONE);
         //OnClickListeners for buttons in toolbar which show according layout onClick
         toolbarPick.setOnClickListener(view -> {
             closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
@@ -140,6 +153,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //initialize Pick layout
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializePick() {
 
         //get tasks to pick from data
@@ -150,6 +165,9 @@ public class MainActivity extends AppCompatActivity {
 
         //assign RecyclerView
         RecyclerView listView = findViewById(R.id.list_view_pick);
+
+        listView.setOnTouchListener(new fabListener());
+
 
         //set adapter
         listView.setAdapter(pickAdapter);
@@ -224,6 +242,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //initialize Drop layout
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializeDrop(){
 
         //get dropped tasks from data
@@ -234,6 +254,9 @@ public class MainActivity extends AppCompatActivity {
 
         //assign ListView
         RecyclerView listView = findViewById(R.id.list_view_drop);
+
+
+        listView.setOnTouchListener(new fabListener());
 
         //set adapter
         listView.setAdapter(dropAdapter);
@@ -307,6 +330,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //initialize Focus layout
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializeFocus(){
 
         //get tasks for focus from data
@@ -317,6 +342,8 @@ public class MainActivity extends AppCompatActivity {
 
         //assign RecyclerView
         RecyclerView listView = findViewById(R.id.list_view_focus);
+
+        listView.setOnTouchListener(new fabListener());
 
         //set adapter for Recyclerview
         listView.setAdapter(focusAdapter);
@@ -359,11 +386,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //initialize Lists layout
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializeLists() {
 
         //initialize ListView to show lists available
         ListView listView = findViewById(R.id.list_view_lists);
         RecyclerView recyclerView = findViewById(R.id.recycle_view_lists);
+
+
+        listView.setOnTouchListener(new fabListener());
+        recyclerView.setOnTouchListener(new fabListener());
+
 
         //Items that show the list your currently in as a header and the button for choosing a color
         LinearLayout headerLayout = findViewById(R.id.header);
@@ -483,4 +517,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public class fabListener implements View.OnTouchListener {
+
+
+
+        @SuppressLint("ClickableViewAccessibility")
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            fab.setVisibility(View.VISIBLE);
+            fab.postDelayed(() -> fab.setVisibility(View.GONE), 3000);
+            return false;
+        }
+    }
 }
