@@ -10,6 +10,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,7 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import java.util.ArrayList;
 
 
-public class ListsListAdapter extends ArrayAdapter<String> {
+public class ListsListAdapter extends ArrayAdapter<String> implements View.OnClickListener {
 
     private final Context context;
     private final ListView listView;//ListView to show lists (recyclerView is disabled before choosing)
@@ -299,5 +300,12 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         header.layout.setVisibility(View.GONE);
         header.headerText.setVisibility(View.GONE);
         header.colorButton.setVisibility(View.GONE);
+    }
+
+
+    @Override
+    public void onClick(View v){
+
+        Log.d("TEST","LISTS");
     }
 }

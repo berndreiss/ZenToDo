@@ -227,6 +227,8 @@ public class MainActivity extends AppCompatActivity {
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
 
+        fab.setOnClickListener(pickAdapter);
+
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(focus);
@@ -257,6 +259,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         listView.setOnTouchListener(new fabListener());
+
+        drop.setOnTouchListener(new fabListener());
 
         //set adapter
         listView.setAdapter(dropAdapter);
@@ -301,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
     }
 
     //show Drop layout
@@ -314,6 +319,8 @@ public class MainActivity extends AppCompatActivity {
 
         //enable all components of Drop layout (setVisibility = VISIBLE)
         enableLayout(drop);
+
+        fab.setOnClickListener(dropAdapter);
 
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(pick);
@@ -369,6 +376,8 @@ public class MainActivity extends AppCompatActivity {
 
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);
+
+        fab.setOnClickListener(focusAdapter);
 
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
@@ -426,6 +435,8 @@ public class MainActivity extends AppCompatActivity {
 
         //enable all components in the Lists layout (setVisibility = VISIBLE)
         enableLayout(lists);
+
+        fab.setOnClickListener(listsListAdapter);
 
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);

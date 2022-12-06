@@ -11,12 +11,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -27,7 +29,7 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
 
-public class FocusTaskListAdapter extends TaskListAdapter{
+public class FocusTaskListAdapter extends TaskListAdapter implements View.OnClickListener {
 
     public FocusTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
         super(context, data, entries);
@@ -168,4 +170,10 @@ public class FocusTaskListAdapter extends TaskListAdapter{
         builder.show();
         imageView.setOnClickListener(v -> builder.dismiss());
     }
+
+    @Override
+    public void onClick(View v){
+        Log.d("TEST","FOCUS");
+    }
+
 }

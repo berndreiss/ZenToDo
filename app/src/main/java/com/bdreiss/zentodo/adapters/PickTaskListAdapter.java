@@ -11,6 +11,7 @@ package com.bdreiss.zentodo.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -20,7 +21,7 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
 
-public class PickTaskListAdapter extends TaskListAdapter{
+public class PickTaskListAdapter extends TaskListAdapter implements View.OnClickListener {
     private final ArrayList<Integer> idsChecked = new ArrayList<>();//stores ids of all checked tasks
 
     public PickTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
@@ -136,5 +137,10 @@ public class PickTaskListAdapter extends TaskListAdapter{
 
 
 
+    @Override
+    public void onClick(View v){
+
+        Log.d("TEST","PICK");
+    }
 }
 
