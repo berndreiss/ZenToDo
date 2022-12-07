@@ -74,7 +74,8 @@ public class PickTaskListAdapter extends TaskListAdapter implements View.OnClick
         });
 
         holder.focus.setOnClickListener(v ->{
-
+            Log.d("TEST", "HERE!");
+            /*
             //get current entry
             Entry entry = entries.get(position);
 
@@ -88,7 +89,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements View.OnClick
             entries.remove(position);
 
             //notify adapter
-            notifyDataSetChanged();
+            notifyDataSetChanged();*/
         });
 
         if (idsChecked.contains(entries.get(position).getId()))
