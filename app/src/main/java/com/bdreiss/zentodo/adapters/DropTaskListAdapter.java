@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.bdreiss.zentodo.adapters.help.HelpDialog;
 import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
@@ -101,6 +102,6 @@ public class DropTaskListAdapter extends TaskListAdapter implements View.OnClick
     @Override
     public void onClick(View v){
 
-        Log.d("TEST","DROP");
+        HelpDialog helper = new HelpDialog(context, "DROP");
     }
 }

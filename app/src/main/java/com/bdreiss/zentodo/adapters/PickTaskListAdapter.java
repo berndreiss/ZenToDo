@@ -16,9 +16,17 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.bdreiss.zentodo.adapters.help.HelpDialog;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class PickTaskListAdapter extends TaskListAdapter implements View.OnClickListener {
@@ -141,7 +149,8 @@ public class PickTaskListAdapter extends TaskListAdapter implements View.OnClick
     @Override
     public void onClick(View v){
 
-        Log.d("TEST","PICK");
+        HelpDialog helper = new HelpDialog(context, "PICK");
+
     }
 }
 

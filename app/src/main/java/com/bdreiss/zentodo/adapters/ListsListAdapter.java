@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bdreiss.zentodo.R;
+import com.bdreiss.zentodo.adapters.help.HelpDialog;
 import com.bdreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
@@ -306,6 +307,6 @@ public class ListsListAdapter extends ArrayAdapter<String> implements View.OnCli
     @Override
     public void onClick(View v){
 
-        Log.d("TEST","LISTS");
+        HelpDialog helper = new HelpDialog(context, "LISTS");
     }
 }

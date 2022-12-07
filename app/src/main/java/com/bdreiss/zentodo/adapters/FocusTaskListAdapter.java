@@ -23,6 +23,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.bdreiss.zentodo.R;
+import com.bdreiss.zentodo.adapters.help.HelpDialog;
 import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
@@ -173,7 +174,8 @@ public class FocusTaskListAdapter extends TaskListAdapter implements View.OnClic
 
     @Override
     public void onClick(View v){
-        Log.d("TEST","FOCUS");
+
+        HelpDialog helper = new HelpDialog(context, "FOCUS");
     }
 
 }
