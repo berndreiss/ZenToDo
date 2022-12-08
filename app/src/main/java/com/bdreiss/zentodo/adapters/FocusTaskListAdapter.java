@@ -23,14 +23,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.bdreiss.zentodo.R;
-import com.bdreiss.zentodo.adapters.help.HelpDialog;
 import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
 
-public class FocusTaskListAdapter extends TaskListAdapter implements View.OnClickListener {
+public class FocusTaskListAdapter extends TaskListAdapter {
 
     public FocusTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
         super(context, data, entries);
@@ -172,10 +171,5 @@ public class FocusTaskListAdapter extends TaskListAdapter implements View.OnClic
         imageView.setOnClickListener(v -> builder.dismiss());
     }
 
-    @Override
-    public void onClick(View v){
-
-        HelpDialog helper = new HelpDialog(context, "FOCUS");
-    }
 
 }

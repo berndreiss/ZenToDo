@@ -16,7 +16,6 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import com.bdreiss.zentodo.adapters.help.HelpDialog;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
@@ -29,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class PickTaskListAdapter extends TaskListAdapter implements View.OnClickListener {
+public class PickTaskListAdapter extends TaskListAdapter {
     private final ArrayList<Integer> idsChecked = new ArrayList<>();//stores ids of all checked tasks
 
     public PickTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
@@ -145,12 +144,5 @@ public class PickTaskListAdapter extends TaskListAdapter implements View.OnClick
     }
 
 
-
-    @Override
-    public void onClick(View v){
-
-        HelpDialog helper = new HelpDialog(context, "PICK");
-
-    }
 }
 

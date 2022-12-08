@@ -28,17 +28,22 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bdreiss.zentodo.R;
-import com.bdreiss.zentodo.adapters.help.HelpDialog;
 import com.bdreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 
-public class ListsListAdapter extends ArrayAdapter<String> implements View.OnClickListener {
+public class ListsListAdapter extends ArrayAdapter<String> {
 
     private final Context context;
     private final ListView listView;//ListView to show lists (recyclerView is disabled before choosing)
@@ -304,9 +309,4 @@ public class ListsListAdapter extends ArrayAdapter<String> implements View.OnCli
     }
 
 
-    @Override
-    public void onClick(View v){
-
-        HelpDialog helper = new HelpDialog(context, "LISTS");
-    }
 }

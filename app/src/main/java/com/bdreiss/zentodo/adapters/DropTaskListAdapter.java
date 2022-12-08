@@ -14,14 +14,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.bdreiss.zentodo.adapters.help.HelpDialog;
 import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
 
-public class DropTaskListAdapter extends TaskListAdapter implements View.OnClickListener {
+public class DropTaskListAdapter extends TaskListAdapter{
 
     public DropTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
         super(context, data, entries);
@@ -99,9 +98,4 @@ public class DropTaskListAdapter extends TaskListAdapter implements View.OnClick
 
     }
 
-    @Override
-    public void onClick(View v){
-
-        HelpDialog helper = new HelpDialog(context, "DROP");
-    }
 }

@@ -29,12 +29,10 @@ import com.bdreiss.zentodo.dataManipulation.Data;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.motion.widget.OnSwipe;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -227,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
 
-        fab.setOnClickListener(pickAdapter);
+        fab.setOnClickListener(Helper.getPickListener(this));
 
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(drop);
@@ -320,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
         //enable all components of Drop layout (setVisibility = VISIBLE)
         enableLayout(drop);
 
-        fab.setOnClickListener(dropAdapter);
+        fab.setOnClickListener(Helper.getDropListener(this));
 
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(pick);
@@ -377,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);
 
-        fab.setOnClickListener(focusAdapter);
+        fab.setOnClickListener(Helper.getFocusListener(this));
 
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
@@ -436,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
         //enable all components in the Lists layout (setVisibility = VISIBLE)
         enableLayout(lists);
 
-        fab.setOnClickListener(listsListAdapter);
+        fab.setOnClickListener(Helper.getListListener(this));
 
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
