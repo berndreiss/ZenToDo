@@ -2,36 +2,22 @@ package com.bdreiss.zentodo;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
+import androidx.core.text.HtmlCompat;
 
-import com.bdreiss.zentodo.R;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 public class Helper{
 
-    private static final String PICK_FILE = "PickHelp";
-    private static final String FOCUS_FILE = "FocusHelp";
-    private static final String DROP_FILE = "DropHelp";
-    private static final String LIST_FILE = "ListHelp";
-
     private static class HelpListener implements View.OnClickListener {
-        private Context context;
-        private String text;
+        private final Context context;
+        private final String text;
 
         HelpListener (Context context, String text){
             this.context = context;
@@ -53,7 +39,11 @@ public class Helper{
             TextView textView = new TextView(context);
 
 
-            textView.setText(text);
+            textView.setText(HtmlCompat.fromHtml(text,HtmlCompat.FROM_HTML_MODE_LEGACY));
+
+            textView.setPadding(50,50,50,50);
+
+            textView.setTextSize(20);
 
             dialog.addContentView(textView, new RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -65,6 +55,7 @@ public class Helper{
     }
 
     public static HelpListener getPickListener(Context context){
+
         return new HelpListener(context, "PICK");
     }
 
@@ -73,7 +64,19 @@ public class Helper{
     }
 
     public static HelpListener getDropListener(Context context){
-        return new HelpListener(context, "DROP");
+        String help = "<p><b>This is Drop mode.</b></p>" +
+                "<p>You can drop todos here and pick them later.</p>" +
+                "<p>Tasks are <b>edited</b> via their menu.</p>" +
+                "<p><b>Reminder date</b><br>" +
+                "It is possible to set a reminder date." +
+                "The task will then disappear and you will be reminded on the date set.</p>" +
+                "<p><b>Repeating</b><br>" +
+                "You can make tasks repeating. The reminder date will be reset when the task is ticked off.</p>" +
+                "<p><b>Lists</b><br>" +
+                "You can assign tasks to a list. The task is then moved to the list. <b>Tasks in lists without a reminder date will NOT be shown in Pick.</b>" +
+                "This way you can have collections of items, that are not strictly todos (i.e. list of movies to watch, list of books to read etc.).</p>";
+
+        return new HelpListener(context, help);
     }
 
     public static HelpListener getListListener(Context context){
