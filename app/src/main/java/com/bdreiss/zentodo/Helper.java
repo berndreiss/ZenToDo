@@ -73,12 +73,34 @@ public class Helper{
     }
 
     public static HelpListener getPickListener(Context context){
+        String help = "<p><b>PICK MODE</b></p>" +
+                "<p>All tasks you dropped and that are due today are shown here." +
 
-        return new HelpListener(context, "PICK");
+                "When you press \"PICK\" all ticked tasks get sent to Focus.</p>" +
+
+                "<p>Tasks can still be <b>edited</b> via their menu:</p>" +
+
+                "<p><img src = \"ic_action_delete\"> <b>&ensp;Delete Button</b><br><br>" +
+                "The task is deleted.</p>" +
+
+                "<p><img src = \"ic_action_edit\"><b>&ensp;Edit Button</b><br><br>" +
+                "Edit the text of the task.</p>" +
+
+                "<p><img src = \"ic_action_calendar\"><b>&ensp;Reminder date Button</b><br><br>" +
+                "A reminder date is set and the task will be shown again on the date given.</p>" +
+
+                "<p><img src = \"ic_action_recurrence\"><b>&ensp;Repeat Button</b><br><br>" +
+                "You can make tasks repeating. A new reminder date will be set when the task is ticked off.</p>" +
+
+                "<p><img src = \"ic_action_list\"><b>&ensp;Lists button</b><br><br>" +
+                "You can assign tasks to a list. The task is then moved to the list. <b>Tasks in lists without a reminder date will NOT be shown in Pick.</b>" +
+                "This way you can have collections of items, that are not strictly todos (i.e. list of movies to watch, list of books to read etc.).</p>";
+
+        return new HelpListener(context, help);
     }
 
     public static HelpListener getFocusListener(Context context){
-        String help = "<p><b>This is Focus mode.</b></p>" +
+        String help = "<p><b>FOCUS MODE</b></p>" +
                 "<p>All tasks you picked are shown here.</p>" +
 
                 "<p>Tasks can still be <b>edited</b> via their menu:</p>" +
@@ -90,9 +112,9 @@ public class Helper{
                 "Edit the text of the task.</p>" +
 
                 "<p><img src = \"ic_action_calendar\"><b>&ensp;Reminder date Button</b><br><br>" +
-                "A reminder date is set, the task will disappear and you will be reminded on the date given.</p>" +
+                "A reminder date is set, the task will disappear and be show again on the date given.</p>" +
 
-                "<p><img src = \"ic_action_recurrence\"><b>&ensp;Repeating Button</b><br><br>" +
+                "<p><img src = \"ic_action_recurrence\"><b>&ensp;Repeat Button</b><br><br>" +
                 "You can make tasks repeating. A new reminder date will be set when the task is ticked off.</p>" +
 
                 "<p><img src = \"ic_action_list\"><b>&ensp;Lists button</b><br><br>" +
@@ -103,7 +125,7 @@ public class Helper{
     }
 
     public static HelpListener getDropListener(Context context){
-        String help = "<p><b>This is Drop mode.</b></p>" +
+        String help = "<p><b>DROP MODE</b></p>" +
                 "<p>You can drop todos here and pick them later.</p>" +
 
                 "<p>Tasks are <b>edited</b> via their menu:</p>" +
@@ -116,9 +138,9 @@ public class Helper{
 
                 "<p><img src = \"ic_action_calendar\"><b>&ensp;Reminder date Button</b><br><br>" +
                 "It is possible to set a reminder date." +
-                "The task will then disappear and you will be reminded on the date set.</p>" +
+                "The task will then disappear and be shown again on the date set.</p>" +
 
-                "<p><img src = \"ic_action_recurrence\"><b>&ensp;Repeating Button</b><br><br>" +
+                "<p><img src = \"ic_action_recurrence\"><b>&ensp;Repeat Button</b><br><br>" +
                 "You can make tasks repeating. A new reminder date will be set when the task is ticked off.</p>" +
 
                 "<p><img src = \"ic_action_list\"><b>&ensp;Lists button</b><br><br>" +
@@ -129,7 +151,15 @@ public class Helper{
     }
 
     public static HelpListener getListListener(Context context) {
-        return new HelpListener(context, "LIST");
+        String help = "<p><b>LISTS MODE</b></p>" +
+                "<p>If you would like to <b>create a list</b> go to the menu of a task and assign a list. It will then be created and shown here.</p>" +
+                "<p>When you remove the last task in a list the <b>list will be deleted</b> too.</p>" +
+                "<p><img src = \"ic_action_color\"> When you enter a list you can assign a <b>color</b> to it via the Button shown on the top right next to the name of the list." +
+                "Tasks in <b>Pick and Focus</b> will then be shown in the same color.</p>" +
+                "<p>If a <b>task has no list</b> you can still find them here under \"No list\" where all tasks without a list are shown sorted by their reminder date.</p>" +
+                "<p>Alternatively you can find every task in \"ALL TASKS\" where every task is shown sorted by their reminder date.</p>";
+
+        return new HelpListener(context, help);
     }
 
 
