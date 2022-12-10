@@ -140,6 +140,10 @@ public class DbHelper  extends SQLiteOpenHelper{
     public void addList(String list, String color){
         ContentValues values = new ContentValues();
 
+        list = checkStringForApostrophe(list);
+
+
+        Log.d("CHECK", list);
         SQLiteDatabase db = this.getWritableDatabase();
 
         values.put(LIST_NAME_COL,list);
@@ -163,6 +167,8 @@ public class DbHelper  extends SQLiteOpenHelper{
     public void removeList(String list){
         SQLiteDatabase db = this.getWritableDatabase();
 
+        list = checkStringForApostrophe(list);
+
         String query = "DELETE FROM " + TABLE_LISTS + " WHERE " + LIST_NAME_COL + "='" + list + "'";
 
         db.execSQL(query);
@@ -172,6 +178,7 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     //update entry by id using String
     public void updateEntry(String field, int id, String value){
+        value = checkStringForApostrophe(value);
         String query = "UPDATE " + TABLE_ENTRIES + " SET " + field + "='" + value + "' WHERE " + ID_COL + "=" + id + ";";
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(query);
@@ -187,6 +194,7 @@ public class DbHelper  extends SQLiteOpenHelper{
     }
 
     public void updateList(String list, String color){
+        list = checkStringForApostrophe(list);
         String query = "UPDATE " + TABLE_LISTS + " SET " + LIST_COLOR_COL + "='" + color + "' WHERE " + LIST_NAME_COL + "='" + list + "';";
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(query);
@@ -195,10 +203,10 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     public void updateAllFields(int id, Entry entry){
         String query = "UPDATE " + TABLE_ENTRIES + " SET "
-                + TASK_COL + "='" + entry.getTask() + "', "
+                + TASK_COL + "='" + checkStringForApostrophe(entry.getTask()) + "', "
                 + FOCUS_COL + "=" + entry.getFocus() + ","
                 + RECURRENCE_COL  + "='" + entry.getRecurrence() + "',"
-                + LIST_COL  + "='" + entry.getList() + "',"
+                + LIST_COL  + "='" + checkStringForApostrophe(entry.getList()) + "',"
                 + LIST_POSITION_COL  + "=" + entry.getListPosition() + ","
                 + DROPPED_COL  + "=" + entry.getDropped() + ","
                 + DUE_COL + "=" + entry.getDue() + ", "
@@ -328,6 +336,28 @@ public class DbHelper  extends SQLiteOpenHelper{
     //converts Boolean to Integer (0 if false, 1 if true)
     static int boolToInt(boolean b){
         return b ? 1 : 0;
+    }
+
+    private String checkStringForApostrophe(String string){
+        String[] sArray = string.split("'");
+
+        StringBuilder sb = new StringBuilder();
+
+        Log.d("CHECK", String.valueOf(sArray.length));
+        if (sArray.length == 0)
+            return "''";
+
+        if (!(string.charAt(0) == '\''))
+            sb.append(sArray[0]);
+
+        for (int i = 1; i < sArray.length; i++)
+            sb.append("''").append(sArray[i]);
+
+        if (string.charAt(string.length()-1) == '\'')
+            sb.append("''");
+
+
+        return sb.toString();
     }
 
 }
