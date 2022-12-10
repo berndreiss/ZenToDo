@@ -80,9 +80,9 @@ public class PickTaskListAdapter extends TaskListAdapter {
             }
         });
 
-        holder.focus.setOnClickListener(v ->{
-            Log.d("TEST", "HERE!");
-            /*
+        holder.focus.setOnClickListener(c -> {});
+
+        holder.delete.setOnClickListener(v ->{
             //get current entry
             Entry entry = entries.get(position);
 
@@ -96,7 +96,7 @@ public class PickTaskListAdapter extends TaskListAdapter {
             entries.remove(position);
 
             //notify adapter
-            notifyDataSetChanged();*/
+            notifyDataSetChanged();
         });
 
         if (idsChecked.contains(entries.get(position).getId()))
