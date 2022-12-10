@@ -105,6 +105,9 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             //get id
             int id = entry.getId();
 
+            if (entry.getDue() == 0)
+                data.editDue(id, data.getToday());
+
             //write back change to data
             data.setFocus(id, false);
 
