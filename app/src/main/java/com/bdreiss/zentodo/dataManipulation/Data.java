@@ -267,9 +267,10 @@ public class Data {
     }
 
     public void editListColor(String list, String color){
-        Log.d(color,"LIST");
-        Objects.requireNonNull(listPositionCount.get(list)).color = color;
-        db.updateList(list,color);
+        if (listPositionCount.get(list) != null) {
+            Objects.requireNonNull(listPositionCount.get(list)).color = color;
+            db.updateList(list, color);
+        }
 
     }
 
