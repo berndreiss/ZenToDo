@@ -51,8 +51,6 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Context context = this;
-
     //Layouts for different modes
     private LinearLayout pick;//Layout to pick tasks that have been dropped and show them in focus
     private LinearLayout drop;//Layout to drop new tasks

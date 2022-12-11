@@ -14,20 +14,14 @@
 
 package com.bdreiss.zentodo.dataManipulation;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
@@ -290,7 +284,7 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     public void swapEntries(String positionCol, int id1, int id2){
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT " + positionCol + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id1, null);
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery("SELECT " + positionCol + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id1, null);
         cursor.moveToFirst();
 
         int pos1 = cursor.getInt(0);

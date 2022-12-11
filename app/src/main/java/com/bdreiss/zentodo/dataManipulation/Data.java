@@ -1,7 +1,6 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSort;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 

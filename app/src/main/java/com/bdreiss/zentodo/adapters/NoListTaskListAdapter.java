@@ -26,7 +26,7 @@ public class NoListTaskListAdapter extends AllTaskListAdapter{
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
         super.onBindViewHolder(holder,position);
 
-        //set Listener to change list of task, if the new list is not empty also remove task from adadpter
+        //set Listener to change list of task, if the new list is not empty also remove task from adapter
         holder.backList.setOnClickListener(v -> {
 
             //get id of task

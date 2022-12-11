@@ -49,7 +49,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
             notifyDataSetChanged();
         });
 
-        //set Listener to change list of task, if the new list differs from the old also remove task from adadpter
+        //set Listener to change list of task, if the new list differs from the old also remove task from adapter
         holder.backList.setOnClickListener(view161 -> {
 
             //get id of task

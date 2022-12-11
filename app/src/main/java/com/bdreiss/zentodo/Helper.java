@@ -1,26 +1,18 @@
 package com.bdreiss.zentodo;
 
-import static android.text.Html.FROM_HTML_MODE_LEGACY;
-
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.text.Editable;
-import android.text.Html;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.core.content.res.ResourcesCompat;
 import androidx.core.text.HtmlCompat;
-
-import org.xml.sax.XMLReader;
 
 
 public class Helper{
