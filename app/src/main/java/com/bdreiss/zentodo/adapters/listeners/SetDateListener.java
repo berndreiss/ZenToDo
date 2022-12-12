@@ -10,6 +10,15 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.Calendar;
 
+/*
+ *
+ *  Implements listener for the setting the reminder date of a task.
+ *
+ *  Gets current reminder date from task and shows datePickerDialog.
+ *
+ */
+
+
 public class SetDateListener extends BasicListener implements View.OnClickListener {
 
 
@@ -24,7 +33,7 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
         Entry entry = adapter.entries.get(position);
 
         //get current date when task is due
-        int entryDate = entry.getDue();
+        int entryDate = entry.getReminderDate();
 
         //variables for setting picker
         int entryDay;
@@ -55,10 +64,10 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
         datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
             //set date when task is due to 0
-            adapter.data.editDue(entry.getId(),0);
-            adapter.entries.get(position).setDue(0);
+            adapter.data.editReminderDate(entry.getId(),0);
+            adapter.entries.get(position).setReminderDate(0);
 
-            //change color of Due Date Button marking if Date is set
+            //change color of reminder date Button marking if Date is set
             adapter.markSet(holder,entry);
 
             //notify adapter
@@ -86,10 +95,10 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
             int date = year*10000+(month+1)*100+day;
 
             //Write back data
-            adapter.data.editDue(entry.getId(), date);
-            adapter.entries.get(position).setDue(date);
+            adapter.data.editReminderDate(entry.getId(), date);
+            adapter.entries.get(position).setReminderDate(date);
 
-            //change color of Due Date Button marking if Date is set
+            //change color of reminder date Button marking if Date is set
             adapter.markSet(holder,entry);
 
             //notify adapter

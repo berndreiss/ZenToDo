@@ -11,7 +11,7 @@ public class Entry{
     private Boolean dropped;//true if task has been dropped and not been used in brainstorm and pick
     private String list;//a list to which the task belongs to
     private int listPosition;//position in according list
-    private int due;//a date, when the task is due -> "yyyyMMdd"
+    private int reminderDate;//a date, when the task is due -> "yyyyMMdd"
     private String recurrence;//consisting of a String in the form of "y/m/w/d0-90-9" where the
                               //two digit number defines the offset in years (y), months(m),
                               //weeks (w) or days(d) when the task is going to reoccur
@@ -45,8 +45,8 @@ public class Entry{
 
     public int getListPosition(){return listPosition;}
 
-    public int getDue(){
-        return due;
+    public int getReminderDate(){
+        return reminderDate;
     }
     
     public String getRecurrence(){
@@ -70,8 +70,8 @@ public class Entry{
 
     public void setListPosition(int listPosition){this.listPosition=listPosition;}
 
-    public void setDue(int due){
-        this.due=due;
+    public void setReminderDate(int reminderDate){
+        this.reminderDate=reminderDate;
     }
 
     public void setRecurrence(String recurrence){

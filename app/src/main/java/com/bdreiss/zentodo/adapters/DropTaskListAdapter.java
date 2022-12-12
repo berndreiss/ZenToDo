@@ -74,7 +74,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
                 DatePickerDialog datePickerDialog;
                 datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
                     int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
-                    data.editDue(entry.getId(), date);//Write back data
+                    data.editReminderDate(entry.getId(), date);//Write back data
                     data.setDropped(entry.getId(), false);
                     entries.remove(position);
                     notifyDataSetChanged();

@@ -4,6 +4,13 @@ import android.view.View;
 
 import com.bdreiss.zentodo.adapters.TaskListAdapter;
 
+/*
+ *
+ *  Implements listener for the Button to return from editing recurrence of a task.
+ *
+ */
+
+
 public class BackRecurrenceListener extends BasicListener implements View.OnClickListener{
 
     public BackRecurrenceListener(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position){

@@ -5,6 +5,15 @@ import android.view.View;
 import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
+/*
+ *
+ *  Implements listener for the focus Button os a task.
+ *
+ *  Sets dropped to false and inverts focus attribute. Also changes color of focus Button.
+ *
+ */
+
+
 public class FocusListener extends BasicListener implements View.OnClickListener{
 
     public FocusListener(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position){

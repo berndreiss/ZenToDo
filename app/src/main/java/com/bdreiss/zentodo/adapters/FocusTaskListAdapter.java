@@ -59,10 +59,10 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             //see if item is recurring
             boolean recurring = entry.getRecurrence()!=null;
 
-            //if recurring do not remove but set new due date, otherwise remove from data
+            //if recurring do not remove but set new reminder date, otherwise remove from data
             if (recurring) {
-                //calculate new due date and write to data and entries
-                entries.get(position).setDue(data.setRecurring(id));
+                //calculate new reminder date and write to data and entries
+                entries.get(position).setReminderDate(data.setRecurring(id));
 
                 //reset focus in data and entries
                 data.setFocus(id,false);
@@ -100,8 +100,8 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             //get id
             int id = entry.getId();
 
-            if (entry.getDue() == 0)
-                data.editDue(id, data.getToday());
+            if (entry.getReminderDate() == 0)
+                data.editReminderDate(id, data.getToday());
 
             //write back change to data
             data.setFocus(id, false);
@@ -125,7 +125,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                     int date = year*10000+(month+1)*100+day;
 
                     //write back to data
-                    data.editDue(entry.getId(), date);
+                    data.editReminderDate(entry.getId(), date);
 
                     //also set focus to false in data
                     data.setFocus(entry.getId(),false);

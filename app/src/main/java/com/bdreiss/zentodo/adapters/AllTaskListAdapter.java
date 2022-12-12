@@ -1,7 +1,7 @@
 package com.bdreiss.zentodo.adapters;
 
 /*
-*       Adapter that shows all tasks sorted by their due date. Items are removed upon CheckBox-click
+*       Adapter that shows all tasks sorted by their reminder date. Items are removed upon CheckBox-click
 *       even if they are recurring.
 *
  */

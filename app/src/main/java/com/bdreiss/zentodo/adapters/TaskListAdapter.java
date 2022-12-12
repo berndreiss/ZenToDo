@@ -384,7 +384,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     public void markSet(TaskListAdapter.ViewHolder holder, Entry entry){
 
         //Set date button to alternative color if !=0, original color otherwise
-        if (entry.getDue()!=0){
+        if (entry.getReminderDate()!=0){
             holder.setDate.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
         }else{
             holder.setDate.setBackground(context.getResources().getDrawable(R.drawable.button_alt));

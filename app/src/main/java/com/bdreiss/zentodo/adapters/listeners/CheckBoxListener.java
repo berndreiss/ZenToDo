@@ -6,6 +6,15 @@ import android.view.View;
 import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
+/*
+ *
+ *  Implements listener for checkBox of a task.
+ *
+ *  Removes task if it is not recurring. Otherwise resets the reminder date adding the given interval.
+ *
+ */
+
+
 public class CheckBoxListener extends BasicListener implements View.OnClickListener{
 
     public CheckBoxListener(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position){
@@ -24,10 +33,10 @@ public class CheckBoxListener extends BasicListener implements View.OnClickListe
         //see if item is recurring
         boolean recurring = entry.getRecurrence()!=null;
 
-        //if recurring do not remove but set new due date, otherwise remove from data
+        //if recurring do not remove but set new reminder date, otherwise remove from data
         if (recurring) {
-            //calculate new due date and write to data and entries
-            adapter.entries.get(position).setDue(adapter.data.setRecurring(id));
+            //calculate new reminder date and write to data and entries
+            adapter.entries.get(position).setReminderDate(adapter.data.setRecurring(id));
 
             //reset focus in data and entries
             adapter.data.setFocus(id,false);

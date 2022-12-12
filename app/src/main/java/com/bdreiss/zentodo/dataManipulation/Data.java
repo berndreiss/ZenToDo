@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSort;
-import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByDue;
+import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByReminderDate;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByListPosition;
 
 
@@ -228,10 +228,10 @@ public class Data {
 
     }
 
-    public void editDue(int id, int date) {
+    public void editReminderDate(int id, int date) {
         Entry entry = entries.get(getPosition(id));
-        entry.setDue(date);
-        db.updateEntry(DbHelper.getDueCol(), id, date);
+        entry.setReminderDate(date);
+        db.updateEntry(DbHelper.getReminderDateCol(), id, date);
 
         if (entry.getDropped())
             setDropped(id, false);
@@ -396,7 +396,7 @@ public class Data {
          *          (the list part is necessary because tasks might have been edited and are neither
          *           dropped, focused or have a date. So they would never show up)
          *
-         *  3. else check if due date <= today, if yes -> add
+         *  3. else check if reminder date <= today, if yes -> add
         */
 
         for (Entry e : entries){
@@ -407,7 +407,7 @@ public class Data {
             } else {
 
                 //2. check date set
-                if (e.getDue() == 0) {
+                if (e.getReminderDate() == 0) {
 
                     //2.1 check dropped and list set
                     if (e.getDropped() || e.getList()==null) {
@@ -416,7 +416,7 @@ public class Data {
                 } else {
 
                     //3. check task is due
-                    if (e.getDue() <= date) {
+                    if (e.getReminderDate() <= date) {
                         tasksToPick.add(e);
                     }
                 }
@@ -523,8 +523,8 @@ public class Data {
                 noList.add(e);
         }
 
-        //sort tasks by their field entry.getDue()
-        MergeSortByDue sort = new MergeSortByDue(noList);
+        //sort tasks by their field entry.getReminderDate()
+        MergeSortByReminderDate sort = new MergeSortByReminderDate(noList);
         sort.sort();
 
         return noList;
@@ -541,18 +541,18 @@ public class Data {
     //return ArrayList of entries ordered by when they are due
     public ArrayList<Entry> getEntriesOrderedByDate(){
 
-        ArrayList<Entry> entriesOrderedByDue = new ArrayList<>(entries);
+        ArrayList<Entry> entriesOrderedByReminderDate = new ArrayList<>(entries);
 
-        //sort entries by the field entry.getDue()
-        MergeSortByDue sort = new MergeSortByDue(entriesOrderedByDue);
+        //sort entries by the field entry.getReminderDate()
+        MergeSortByReminderDate sort = new MergeSortByReminderDate(entriesOrderedByReminderDate);
         sort.sort();
 
-        return entriesOrderedByDue;
+        return entriesOrderedByReminderDate;
 
     }
 
 
-    //this routine calculates a new due date for recurring tasks
+    //this routine calculates a new reminder date for recurring tasks
     public int setRecurring(int id) {
 
         //get Entry
@@ -575,17 +575,17 @@ public class Data {
         //convert offset to Integer
         int offSet = Integer.parseInt(offSetStr.toString());
 
-        //get due date
-        int date = entry.getDue();
+        //get reminder date
+        int date = entry.getReminderDate();
 
-        //get todays date and set due to if it is not set
+        //get todays date and set reminder date to if it is not set
         int today = getToday();
 
         if (date == 0) {
             date = today;
         }
 
-        //decode due date and store in array: <[day][month][year]>
+        //decode reminder date and store in array: <[day][month][year]>
         int[] dateArray = new int[3];
 
         //get day
@@ -602,11 +602,11 @@ public class Data {
             date = incrementRecurring(mode, dateArray, offSet);
         }
 
-        //write due date to entries
-        entry.setDue(date);
+        //write reminder date to entries
+        entry.setReminderDate(date);
 
-        //write due date to Database
-        db.updateEntry(DbHelper.getDueCol(),id,date);
+        //write reminder date to Database
+        db.updateEntry(DbHelper.getReminderDateCol(),id,date);
 
         return date;
     }

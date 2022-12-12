@@ -48,7 +48,7 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     private static final String LIST_POSITION_COL = "listPosition";
 
-    private static final String DUE_COL = "due";
+    private static final String REMINDER_DATE_COL = "due";
 
     private static final String RECURRENCE_COL = "recurrence";
 
@@ -78,7 +78,7 @@ public class DbHelper  extends SQLiteOpenHelper{
                 + DROPPED_COL + " INTEGER, "
                 + LIST_COL + " TEXT, "
                 + LIST_POSITION_COL + " INTEGER, "
-                + DUE_COL + " INTEGER, "
+                + REMINDER_DATE_COL + " INTEGER, "
                 + RECURRENCE_COL + " TEXT,"
                 + POSITION_COL + " INTEGER "
                 + ")";
@@ -123,7 +123,7 @@ public class DbHelper  extends SQLiteOpenHelper{
         values.put(DROPPED_COL,entry.getDropped());
         values.put(LIST_COL,entry.getList());
         values.put(LIST_POSITION_COL,entry.getListPosition());
-        values.put(DUE_COL,entry.getDue());
+        values.put(REMINDER_DATE_COL,entry.getReminderDate());
         values.put(RECURRENCE_COL,entry.getRecurrence());
         values.put(POSITION_COL, entry.getPosition());
 
@@ -203,7 +203,7 @@ public class DbHelper  extends SQLiteOpenHelper{
                 + LIST_COL  + "='" + checkStringForApostrophe(entry.getList()) + "',"
                 + LIST_POSITION_COL  + "=" + entry.getListPosition() + ","
                 + DROPPED_COL  + "=" + entry.getDropped() + ","
-                + DUE_COL + "=" + entry.getDue() + ", "
+                + REMINDER_DATE_COL + "=" + entry.getReminderDate() + ", "
                 + POSITION_COL + "=" + entry.getPosition()
                 + " WHERE " + ID_COL + "=" + id;
 
@@ -231,7 +231,7 @@ public class DbHelper  extends SQLiteOpenHelper{
             boolean dropped = intToBool(cursor.getInt(3));
             String list = cursor.getString(4);
             int listPosition = cursor.getInt(5);
-            int due = cursor.getInt(6);
+            int reminderDate = cursor.getInt(6);
             String recurrence = cursor.getString(7);
             int position = cursor.getInt(8);
 
@@ -241,7 +241,7 @@ public class DbHelper  extends SQLiteOpenHelper{
             if (!(list==null) && !list.equals("null"))
                 entry.setList(list);
             entry.setListPosition(listPosition);
-            entry.setDue(due);
+            entry.setReminderDate(reminderDate);
             if (!(recurrence==null) && !recurrence.equals("null"))
                 entry.setRecurrence(recurrence);
 
@@ -311,7 +311,7 @@ public class DbHelper  extends SQLiteOpenHelper{
         return POSITION_COL;
     }
 
-    public static String getDueCol() {return DUE_COL;}
+    public static String getReminderDateCol() {return REMINDER_DATE_COL;}
 
     public static String getRecurrenceCol(){return RECURRENCE_COL;}
 

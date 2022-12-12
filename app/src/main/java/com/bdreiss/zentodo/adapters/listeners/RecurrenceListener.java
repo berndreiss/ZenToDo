@@ -5,6 +5,15 @@ import android.view.View;
 import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
+/*
+ *
+ *  Implements listener for the Button to edit recurrence of a task.
+ *
+ *  Loads current recurrence settings from task and sets Views accordingly.
+ *
+ */
+
+
 public class RecurrenceListener extends BasicListener implements View.OnClickListener{
 
     public RecurrenceListener(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position){
