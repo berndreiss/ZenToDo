@@ -2,12 +2,12 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <LinearLayout
         android:id="@+id/layout_pick"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
 
         <TextView
             android:layout_width="match_parent"
@@ -15,21 +15,35 @@
 
 
 
+        <LinearLayout
+        android:id="@+id/layout_pick_lists"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_weight="40">
+
+
+
+
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_view_pick"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="40"
+            android:layout_height="match_parent"
             />
+
+
+        </LinearLayout>
         <Button
             android:id="@+id/button_pick"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_height="0dp"
+            android:layout_weight="4"
             android:text="@string/pick"
             android:backgroundTint="@color/button_toolbar"
 
             />
 
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
