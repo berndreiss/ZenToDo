@@ -13,27 +13,89 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_height"/>
 
-
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="40">
 
         <LinearLayout
         android:id="@+id/layout_pick_lists"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_weight="40">
+        >
 
 
 
 
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list_view_pick"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list_view_pick"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
 
+            <TextView
+                android:id="@+id/pick_header_doNow"
+                android:text="@string/do_now"
+                android:shape="rectangle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:textSize="20sp"
+                android:padding="10dp"
+                android:gravity="center"
+                android:background="@color/header_background"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list_view_pick_doNow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:id="@+id/pick_header_doLater"
+                android:text="@string/do_later"
+                android:shape="rectangle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:textSize="20sp"
+                android:padding="10dp"
+                android:gravity="center"
+                android:background="@color/header_background"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list_view_pick_doLater"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:id="@+id/pick_header_list"
+                android:text="@string/move_to_list"
+                android:shape="rectangle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:textSize="20sp"
+                android:padding="10dp"
+                android:gravity="center"
+                android:background="@color/header_background"/>
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list_view_pick_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
 
         </LinearLayout>
+        </ScrollView>
+
         <Button
             android:id="@+id/button_pick"
             android:layout_width="match_parent"
