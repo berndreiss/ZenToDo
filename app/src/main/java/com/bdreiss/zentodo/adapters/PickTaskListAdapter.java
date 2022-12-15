@@ -23,15 +23,27 @@ import java.util.ArrayList;
 public class PickTaskListAdapter extends TaskListAdapter {
     private final ArrayList<Integer> idsChecked = new ArrayList<>();//stores ids of all checked tasks
 
-    public PickTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
+    private PickTaskListAdapter otherAdapter;
+
+    private boolean checkOrNot;
+
+    public PickTaskListAdapter(Context context, Data data,  ArrayList<Entry> entries, boolean checkOrNot){
         super(context, data, entries);
 
+        this.checkOrNot = checkOrNot;
+
+    }
+
+    public void setOtherAdapter(PickTaskListAdapter otherAdapter){
+        this.otherAdapter = otherAdapter;
     }
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
+
+        holder.checkBox.setChecked(checkOrNot);
 
         holder.menu.setOnClickListener(v -> {
             //setting alternative row layout visible and active, everything else disabled
@@ -52,6 +64,12 @@ public class PickTaskListAdapter extends TaskListAdapter {
             //get ID
             int id = entry.getId();
 
+            entries.remove(position);
+            notifyDataSetChanged();
+
+            otherAdapter.entries.add(entry);
+            otherAdapter.notifyDataSetChanged();
+
             //if id has been checked before remove from idsChecked, else add
             if (idsChecked.contains(id)){
 
@@ -67,6 +85,7 @@ public class PickTaskListAdapter extends TaskListAdapter {
 
                 }
                 idsChecked.remove(pos);
+
             } else{
                 idsChecked.add(id);
             }
@@ -91,8 +110,8 @@ public class PickTaskListAdapter extends TaskListAdapter {
             notifyDataSetChanged();
         });
 
-        if (idsChecked.contains(entries.get(position).getId()))
-            holder.checkBox.setChecked(true);
+//        if (idsChecked.contains(entries.get(position).getId()))
+            //holder.checkBox.setChecked(true);
 
 
         if (entries.get(position).getList() != null){

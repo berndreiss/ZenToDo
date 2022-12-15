@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
+import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import com.bdreiss.zentodo.adapters.FocusTaskListAdapter;
 import com.bdreiss.zentodo.adapters.ListsListAdapter;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout drop;//Layout to drop new tasks
     private LinearLayout focus;//Layout to show tasks to do today
     private LinearLayout lists;//Layout for all lists with tasks in it
-    //private LinearLayout settings;
+    //private LinearLayout settings;1
 
     //the following Buttons are components of the toolbar to switch between the different layouts
     private Button toolbarPick;
@@ -73,12 +74,14 @@ public class MainActivity extends AppCompatActivity {
     //The adapters fill the RecyclerViews of layouts above and are all derived from TaskListAdapter
     //for more information on the implementation see the according java files
     PickTaskListAdapter pickAdapter;
+    PickTaskListAdapter doNowAdapter;
     DropTaskListAdapter dropAdapter;
     FocusTaskListAdapter focusAdapter;
     ListsListAdapter listsListAdapter;
 
     //ArrayLists for adapters above
     ArrayList<Entry> tasksToPick;
+    ArrayList<Entry> tasksToDoNow;
     ArrayList<Entry> droppedTasks;
     ArrayList<Entry> focusTasks;
     ArrayList<String> listNames;
@@ -156,34 +159,26 @@ public class MainActivity extends AppCompatActivity {
         //get tasks to pick from data
         tasksToPick = data.getTasksToPick();
 
+        tasksToDoNow = new ArrayList<>();
+
+        doNowAdapter = new PickTaskListAdapter(this, data, tasksToDoNow, true);
+
         //initialize adapter for RecyclerView with all tasks that have been dropped, have been in Focus or are due today
-        pickAdapter = new PickTaskListAdapter(this, data, tasksToPick);
+        pickAdapter = new PickTaskListAdapter(this, data, tasksToPick, false);
 
-        //assign RecyclerView
-        RecyclerView listView = findViewById(R.id.list_view_pick);
-
-        listView.setOnTouchListener(new fabListener());
+        doNowAdapter.setOtherAdapter(pickAdapter);
+        pickAdapter.setOtherAdapter(doNowAdapter);
 
 
-        //set adapter
-        listView.setAdapter(pickAdapter);
+        initializeRecyclerView(findViewById(R.id.list_view_pick), pickAdapter);
 
-        //set layoutManager
-        listView.setLayoutManager(new LinearLayoutManager(this));
-
-        //allows items to be moved and reordered in RecyclerView
-        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(pickAdapter);
-
-        //create ItemTouchHelper and assign to RecyclerView
-        ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
-        iTouchHelper.attachToRecyclerView(listView);
-
+        initializeRecyclerView(findViewById(R.id.list_view_pick_doNow), doNowAdapter);
 
         //button to pick tasks that have been checked
-        Button pick = findViewById(R.id.button_pick);
+        Button pickButton = findViewById(R.id.button_pick);
 
         //if pressed remove tasks from Drop and add to Focus
-        pick.setOnClickListener(view -> {
+        pickButton.setOnClickListener(view -> {
 
             //list of items that have been checked in RecyclerView (see TaskListAdapter.java)
             ArrayList<Integer> checked = pickAdapter.getIdsChecked();
@@ -220,6 +215,9 @@ public class MainActivity extends AppCompatActivity {
         tasksToPick.addAll(data.getTasksToPick());
         pickAdapter.notifyDataSetChanged();
 
+        tasksToDoNow.clear();
+        doNowAdapter.notifyDataSetChanged();
+
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
 
@@ -254,9 +252,9 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView listView = findViewById(R.id.list_view_drop);
 
 
-        listView.setOnTouchListener(new fabListener());
+        listView.setOnTouchListener(new ShowHelp());
 
-        drop.setOnTouchListener(new fabListener());
+        drop.setOnTouchListener(new ShowHelp());
 
         //set adapter
         listView.setAdapter(dropAdapter);
@@ -346,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
         //assign RecyclerView
         RecyclerView listView = findViewById(R.id.list_view_focus);
 
-        listView.setOnTouchListener(new fabListener());
+        listView.setOnTouchListener(new ShowHelp());
 
         //set adapter for Recyclerview
         listView.setAdapter(focusAdapter);
@@ -400,8 +398,8 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recycle_view_lists);
 
 
-        listView.setOnTouchListener(new fabListener());
-        recyclerView.setOnTouchListener(new fabListener());
+        listView.setOnTouchListener(new ShowHelp());
+        recyclerView.setOnTouchListener(new ShowHelp());
 
 
         //Items that show the list your currently in as a header and the button for choosing a color
@@ -525,7 +523,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public class fabListener implements View.OnTouchListener {
+    public class ShowHelp implements View.OnTouchListener {
 
 
 
@@ -536,5 +534,30 @@ public class MainActivity extends AppCompatActivity {
             fab.postDelayed(() -> fab.setVisibility(View.GONE), 3000);
             return false;
         }
+
     }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void initializeRecyclerView(RecyclerView view, TaskListAdapter adapter){
+
+        //shows Floating Action Button on
+        view.setOnTouchListener(new ShowHelp());
+
+        //set adapter
+        view.setAdapter(adapter);
+
+        //set layoutManager
+        view.setLayoutManager(new LinearLayoutManager(this));
+
+        //allows items to be moved and reordered in RecyclerView
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(adapter);
+
+        //create ItemTouchHelper and assign to RecyclerView
+        ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
+        iTouchHelper.attachToRecyclerView(view);
+
+
+    }
+
 }
