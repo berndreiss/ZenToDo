@@ -25,12 +25,12 @@ public class PickTaskListAdapter extends TaskListAdapter {
 
     private PickTaskListAdapter otherAdapter;
 
-    private boolean checkOrNot;
+    private boolean checkboxTicked;//Tasks that are in DO NOW are ticked
 
     public PickTaskListAdapter(Context context, Data data,  ArrayList<Entry> entries, boolean checkOrNot){
         super(context, data, entries);
 
-        this.checkOrNot = checkOrNot;
+        this.checkboxTicked = checkOrNot;
 
     }
 
@@ -43,7 +43,7 @@ public class PickTaskListAdapter extends TaskListAdapter {
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
 
-        holder.checkBox.setChecked(checkOrNot);
+        holder.checkBox.setChecked(checkboxTicked);
 
         holder.menu.setOnClickListener(v -> {
             //setting alternative row layout visible and active, everything else disabled
