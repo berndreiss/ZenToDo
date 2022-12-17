@@ -25,11 +25,11 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 import java.util.ArrayList;
 
 public class PickTaskListAdapter extends TaskListAdapter {
-    private final ArrayList<Integer> idsChecked = new ArrayList<>();//stores ids of all checked tasks
 
-    private PickTaskListAdapter otherAdapter;
-    private PickTaskListAdapter doLaterAdapter;
-    private PickTaskListAdapter movetoListAdapter;
+    private static PickTaskListAdapter pickAdapter;
+    private static PickTaskListAdapter doNowAdapter;
+    private static PickTaskListAdapter doLaterAdapter;
+    private static PickTaskListAdapter moveToListAdapter;
     private boolean checkboxTicked;//Tasks that are in DO NOW are ticked
 
     public PickTaskListAdapter(Context context, Data data,  ArrayList<Entry> entries, boolean checkboxTicked){
@@ -39,18 +39,35 @@ public class PickTaskListAdapter extends TaskListAdapter {
 
     }
 
-    public void setOtherAdapter(PickTaskListAdapter otherAdapter){
-        this.otherAdapter = otherAdapter;
+    public void setPickAdapter (PickTaskListAdapter pickAdapter){
+        this.pickAdapter = pickAdapter;
+    }
+    public void setDoNowAdapter(PickTaskListAdapter doNowAdapter){
+        this.doNowAdapter = doNowAdapter;
     }
 
     public void setDoLaterAdapter(PickTaskListAdapter doLaterAdapter){
         this.doLaterAdapter = doLaterAdapter;
     }
 
-    public void setMovetoListAdapter (PickTaskListAdapter movetoListAdapter){
-        this.movetoListAdapter = movetoListAdapter;
+    public void setMoveToListAdapter (PickTaskListAdapter moveToListAdapter){
+        this.moveToListAdapter = moveToListAdapter;
     }
 
+    public static PickTaskListAdapter getPickAdapter (){
+        return pickAdapter;
+    }
+    public static PickTaskListAdapter getDoNowAdapter(){
+        return doNowAdapter;
+    }
+
+    public static PickTaskListAdapter getDoLaterAdapter(){
+        return doLaterAdapter;
+    }
+
+    public static PickTaskListAdapter getMoveToListAdapter(){
+        return moveToListAdapter;
+    }
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
@@ -77,31 +94,30 @@ public class PickTaskListAdapter extends TaskListAdapter {
             //get ID
             int id = entry.getId();
 
-            entries.remove(position);
-            notifyDataSetChanged();
+            if (doNowAdapter.entries.contains(entry)){
+                doNowAdapter.entries.remove(entry);
+                doNowAdapter.notifyDataSetChanged();
 
-            otherAdapter.entries.add(entry);
-            otherAdapter.notifyDataSetChanged();
-
-            //if id has been checked before remove from idsChecked, else add
-            if (idsChecked.contains(id)){
-
-                int pos = 0;
-
-                //get position of id
-                for (int i=0;i<idsChecked.size();i++){
-
-                    if (idsChecked.get(i) == id) {
-                        pos = i;
-                        break;
-                    }
-
+                if (entry.getReminderDate()> data.getToday()){
+                    doLaterAdapter.entries.add(entry);
+                    doLaterAdapter.notifyDataSetChanged();
+                } else if (entry.getReminderDate() == 0 && entry.getList() != null){
+                    moveToListAdapter.entries.add(entry);
+                    moveToListAdapter.notifyDataSetChanged();
+                } else{
+                    pickAdapter.entries.add(entry);
+                    pickAdapter.notifyDataSetChanged();
                 }
-                idsChecked.remove(pos);
+
+
 
             } else{
-                idsChecked.add(id);
+                doNowAdapter.entries.add(entry);
+                doNowAdapter.notifyDataSetChanged();
+                entries.remove(entry);
+                notifyDataSetChanged();
             }
+
         });
 
         holder.focus.setOnClickListener(c -> {});
@@ -126,8 +142,8 @@ public class PickTaskListAdapter extends TaskListAdapter {
 //        if (idsChecked.contains(entries.get(position).getId()))
             //holder.checkBox.setChecked(true);
 
-        holder.setDate.setOnClickListener(new SetDateListenerPick(this, holder, position,otherAdapter,doLaterAdapter, movetoListAdapter));
-        holder.backList.setOnClickListener(new BackListListenerPick(this,holder,position,otherAdapter,doLaterAdapter,movetoListAdapter));
+        holder.setDate.setOnClickListener(new SetDateListenerPick(this, holder, position));
+        holder.backList.setOnClickListener(new BackListListenerPick(this,holder,position));
 
         if (entries.get(position).getList() != null){
 
@@ -143,32 +159,6 @@ public class PickTaskListAdapter extends TaskListAdapter {
 
 
     }
-
-
-
-    //returns ids of checked tasks in mode pick
-    public ArrayList<Integer> getIdsChecked(){
-        return idsChecked;
-    }
-
-    //returns ids of tasks that have not been checked in mode pick
-    public ArrayList<Integer> getIdsNotChecked(){
-        ArrayList<Integer> notChecked = new ArrayList<>();
-
-        for (Entry e: entries){
-            if (!idsChecked.contains(e.getId())){
-                notChecked.add(e.getId());
-            }
-        }
-        return notChecked;
-    }
-
-    //clears the ArrayString
-    public void clearIdsChecked(){
-
-        idsChecked.clear();
-    }
-
 
 }
 

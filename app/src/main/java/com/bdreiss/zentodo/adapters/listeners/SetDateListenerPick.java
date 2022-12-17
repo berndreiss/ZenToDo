@@ -11,14 +11,13 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 
 public class SetDateListenerPick extends SetDateListener{
 
-    private PickTaskListAdapter otherAdapter;
-    private PickTaskListAdapter doLaterAdapter;
-    private PickTaskListAdapter moveToListAdapter;
-    public SetDateListenerPick(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position, PickTaskListAdapter otherAdapter, PickTaskListAdapter doLaterAdapter, PickTaskListAdapter moveToListAdapter){
+    private PickTaskListAdapter pickAdapter = PickTaskListAdapter.getPickAdapter();
+    private PickTaskListAdapter doNowAdapter = PickTaskListAdapter.getDoNowAdapter();
+    private PickTaskListAdapter doLaterAdapter = PickTaskListAdapter.getDoLaterAdapter();
+    private PickTaskListAdapter moveToListAdapter = PickTaskListAdapter.getMoveToListAdapter();
+
+    public SetDateListenerPick(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position){
         super(adapter, holder, position);
-        this.otherAdapter = otherAdapter;
-        this.doLaterAdapter = doLaterAdapter;
-        this.moveToListAdapter = moveToListAdapter;
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -39,25 +38,9 @@ public class SetDateListenerPick extends SetDateListener{
             adapter.data.editReminderDate(entry.getId(), date);
             e.setReminderDate(date);
 
-            if (date>adapter.data.getToday()){
-                if (!doLaterAdapter.entries.contains(e)){
-
-                    doLaterAdapter.entries.add(e);
-                    doLaterAdapter.notifyDataSetChanged();
-                    adapter.entries.remove(position);
-
-                }
-
-            } else{
-                if (doLaterAdapter.entries.contains(e)){
-                    doLaterAdapter.entries.remove(e);
-                    doLaterAdapter.notifyDataSetChanged();
-                    otherAdapter.entries.add(e);
-                    otherAdapter.notifyDataSetChanged();
-                }
-            }
-
-
+            doLaterAdapter.entries.add(e);
+            doLaterAdapter.notifyDataSetChanged();
+            adapter.entries.remove(e);
             adapter.notifyDataSetChanged();
 
         }, entryYear, entryMonth, entryDay);
@@ -90,8 +73,8 @@ public class SetDateListenerPick extends SetDateListener{
                 if (doLaterAdapter.entries.contains(e)) {
                     doLaterAdapter.entries.remove(e);
                     doLaterAdapter.notifyDataSetChanged();
-                    otherAdapter.entries.add(e);
-                    otherAdapter.notifyDataSetChanged();
+                    pickAdapter.entries.add(e);
+                    pickAdapter.notifyDataSetChanged();
                 }
             }
         });

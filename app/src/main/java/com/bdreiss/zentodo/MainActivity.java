@@ -47,6 +47,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -174,21 +175,10 @@ public class MainActivity extends AppCompatActivity {
         doLaterAdapter = new PickTaskListAdapter(this, data, tasksToDoLater, false);
         moveToListAdapter = new PickTaskListAdapter(this, data,tasksToMoveToList, false);
 
-        pickAdapter.setOtherAdapter(doNowAdapter);
+        pickAdapter.setPickAdapter(pickAdapter);
+        pickAdapter.setDoNowAdapter(doNowAdapter);
         pickAdapter.setDoLaterAdapter(doLaterAdapter);
-        pickAdapter.setMovetoListAdapter(moveToListAdapter);
-
-        doNowAdapter.setOtherAdapter(pickAdapter);
-        doNowAdapter.setDoLaterAdapter(doLaterAdapter);
-        doNowAdapter.setMovetoListAdapter(moveToListAdapter);
-
-        doLaterAdapter.setOtherAdapter(pickAdapter);
-        doLaterAdapter.setDoLaterAdapter(doLaterAdapter);
-        doLaterAdapter.setMovetoListAdapter(moveToListAdapter);
-
-        moveToListAdapter.setOtherAdapter(pickAdapter);
-        moveToListAdapter.setDoLaterAdapter(doLaterAdapter);
-        moveToListAdapter.setMovetoListAdapter(moveToListAdapter);
+        pickAdapter.setMoveToListAdapter(moveToListAdapter);
 
         initializeRecyclerView(findViewById(R.id.list_view_pick), pickAdapter);
         initializeRecyclerView(findViewById(R.id.list_view_pick_doNow), doNowAdapter);
@@ -201,27 +191,31 @@ public class MainActivity extends AppCompatActivity {
         //if pressed remove tasks from Drop and add to Focus
         pickButton.setOnClickListener(view -> {
 
-            //list of items that have been checked in RecyclerView (see TaskListAdapter.java)
-            ArrayList<Integer> checked = pickAdapter.getIdsChecked();
-
-            //if checked reset dropped and focus attributes of all task in list above
-            for (int id : checked) {
-                data.setFocus(id, true);
-                data.setDropped(id, false);
+            if (tasksToPick.size() != 0){
+                Helper.showPickHelper(this);
             }
+            else {
 
-            //get all tasks that have not been checked
-            ArrayList<Integer> notChecked = pickAdapter.getIdsNotChecked();
 
-            //set focused tasks to false so they are not shown in Focus (in case they have been there before)
-            for (int id : notChecked) {
-                if (data.getEntries().get(data.getPosition(id)).getFocus())
-                    data.setFocus(id, false);
+                //if checked reset dropped and focus attributes of all task in list above
+                for (Entry e : tasksToDoNow) {
+                    data.setFocus(e.getId(), true);
+                    data.setDropped(e.getId(), false);
+                }
+
+                for (Entry e : tasksToDoLater) {
+                    if (data.getEntries().get(data.getPosition(e.getId())).getFocus())
+                        data.setFocus(e.getId(), false);
+                }
+
+                for (Entry e : tasksToMoveToList) {
+                    if (data.getEntries().get(data.getPosition(e.getId())).getFocus())
+                        data.setFocus(e.getId(), false);
+                }
+
+                //show Focus layout
+                showFocus();
             }
-
-            //show Focus layout
-            showFocus();
-
         });
 
     }
@@ -232,11 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
         //clear ArrayList for Pick, add current tasks from data and notify adapter (in case they have been altered in another layout)
         tasksToPick.clear();
-        pickAdapter.clearIdsChecked();
         tasksToPick.addAll(data.getTasksToPick());
-
-        for (Entry e: tasksToPick)
-            e.setReminderDate(0);
 
         pickAdapter.notifyDataSetChanged();
 
