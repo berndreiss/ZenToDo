@@ -9,13 +9,16 @@ package com.bdreiss.zentodo.adapters;
  */
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.bdreiss.zentodo.adapters.listeners.BackListListenerPick;
 import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
+import com.bdreiss.zentodo.adapters.listeners.SetDateListenerPick;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
@@ -123,14 +126,8 @@ public class PickTaskListAdapter extends TaskListAdapter {
 //        if (idsChecked.contains(entries.get(position).getId()))
             //holder.checkBox.setChecked(true);
 
-        holder.setDate.setOnClickListener(new SetDateListener(this, holder, position){
-
-            @Override
-            public void onClick(View v){}
-
-
-        });
-
+        holder.setDate.setOnClickListener(new SetDateListenerPick(this, holder, position,otherAdapter,doLaterAdapter, movetoListAdapter));
+        holder.backList.setOnClickListener(new BackListListenerPick(this,holder,position,otherAdapter,doLaterAdapter,movetoListAdapter));
 
         if (entries.get(position).getList() != null){
 

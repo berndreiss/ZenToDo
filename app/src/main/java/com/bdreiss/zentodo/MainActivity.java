@@ -243,6 +243,12 @@ public class MainActivity extends AppCompatActivity {
         tasksToDoNow.clear();
         doNowAdapter.notifyDataSetChanged();
 
+        tasksToDoLater.clear();
+        doLaterAdapter.notifyDataSetChanged();
+
+        tasksToMoveToList.clear();
+        moveToListAdapter.notifyDataSetChanged();
+
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
 

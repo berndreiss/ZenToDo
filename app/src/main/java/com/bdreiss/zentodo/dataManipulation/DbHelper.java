@@ -333,6 +333,11 @@ public class DbHelper  extends SQLiteOpenHelper{
     }
 
     private String checkStringForApostrophe(String string){
+
+        if (string == null){
+            return string;
+        }
+
         String[] sArray = string.split("'");
 
         StringBuilder sb = new StringBuilder();

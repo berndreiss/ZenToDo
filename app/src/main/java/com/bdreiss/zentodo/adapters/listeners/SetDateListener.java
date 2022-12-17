@@ -21,7 +21,6 @@ import java.util.Calendar;
 
 public class SetDateListener extends BasicListener implements View.OnClickListener {
 
-
     public SetDateListener(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position){
         super(adapter, holder, position);
     }
@@ -60,23 +59,6 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
         //create DatePickerDialog and set listener
         DatePickerDialog datePickerDialog = getDatePickerDialog(entry, entryDay,entryMonth,entryYear,holder,position);
 
-        //set listener for cancel button
-        datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.context.getResources().getString(R.string.cancel), (dialog, which) -> {
-
-            //set date when task is due to 0
-            adapter.data.editReminderDate(entry.getId(),0);
-            adapter.entries.get(position).setReminderDate(0);
-
-            //change color of reminder date Button marking if Date is set
-            adapter.markSet(holder,entry);
-
-            //notify adapter
-            adapter.notifyItemChanged(position);
-
-            //return to original layout
-            adapter.setOriginal(holder);
-        });
-
         //show the dialog
         datePickerDialog.show();
 
@@ -108,6 +90,23 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
             adapter.setOriginal(holder);
 
         }, entryYear, entryMonth, entryDay);
+
+        datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.context.getResources().getString(R.string.cancel), (dialog, which) -> {
+
+            //set date when task is due to 0
+            adapter.data.editReminderDate(entry.getId(),0);
+            adapter.entries.get(position).setReminderDate(0);
+
+            //change color of reminder date Button marking if Date is set
+            adapter.markSet(holder,entry);
+
+            //notify adapter
+            adapter.notifyItemChanged(position);
+
+            //return to original layout
+            adapter.setOriginal(holder);
+        });
+
 
         return datePickerDialog;
     }
