@@ -75,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
     //for more information on the implementation see the according java files
     PickTaskListAdapter pickAdapter;
     PickTaskListAdapter doNowAdapter;
+    PickTaskListAdapter doLaterAdapter;
+    PickTaskListAdapter moveToListAdapter;
     DropTaskListAdapter dropAdapter;
     FocusTaskListAdapter focusAdapter;
     ListsListAdapter listsListAdapter;
@@ -82,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
     //ArrayLists for adapters above
     ArrayList<Entry> tasksToPick;
     ArrayList<Entry> tasksToDoNow;
+    ArrayList<Entry> tasksToDoLater;
+    ArrayList<Entry> tasksToMoveToList;
     ArrayList<Entry> droppedTasks;
     ArrayList<Entry> focusTasks;
     ArrayList<String> listNames;
@@ -157,22 +161,39 @@ public class MainActivity extends AppCompatActivity {
     public void initializePick() {
 
         //get tasks to pick from data
-        tasksToPick = data.getTasksToPick();
+        tasksToPick = new ArrayList<>();
 
         tasksToDoNow = new ArrayList<>();
-
-        doNowAdapter = new PickTaskListAdapter(this, data, tasksToDoNow, true);
+        tasksToDoLater = new ArrayList<>();
+        tasksToMoveToList = new ArrayList<>();
 
         //initialize adapter for RecyclerView with all tasks that have been dropped, have been in Focus or are due today
         pickAdapter = new PickTaskListAdapter(this, data, tasksToPick, false);
 
-        doNowAdapter.setOtherAdapter(pickAdapter);
-        pickAdapter.setOtherAdapter(doNowAdapter);
+        doNowAdapter = new PickTaskListAdapter(this, data, tasksToDoNow, true);
+        doLaterAdapter = new PickTaskListAdapter(this, data, tasksToDoLater, false);
+        moveToListAdapter = new PickTaskListAdapter(this, data,tasksToMoveToList, false);
 
+        pickAdapter.setOtherAdapter(doNowAdapter);
+        pickAdapter.setDoLaterAdapter(doLaterAdapter);
+        pickAdapter.setMovetoListAdapter(moveToListAdapter);
+
+        doNowAdapter.setOtherAdapter(pickAdapter);
+        doNowAdapter.setDoLaterAdapter(doLaterAdapter);
+        doNowAdapter.setMovetoListAdapter(moveToListAdapter);
+
+        doLaterAdapter.setOtherAdapter(pickAdapter);
+        doLaterAdapter.setDoLaterAdapter(doLaterAdapter);
+        doLaterAdapter.setMovetoListAdapter(moveToListAdapter);
+
+        moveToListAdapter.setOtherAdapter(pickAdapter);
+        moveToListAdapter.setDoLaterAdapter(doLaterAdapter);
+        moveToListAdapter.setMovetoListAdapter(moveToListAdapter);
 
         initializeRecyclerView(findViewById(R.id.list_view_pick), pickAdapter);
-
         initializeRecyclerView(findViewById(R.id.list_view_pick_doNow), doNowAdapter);
+        initializeRecyclerView(findViewById(R.id.list_view_pick_doLater), doLaterAdapter);
+        initializeRecyclerView(findViewById(R.id.list_view_pick_list), moveToListAdapter);
 
         //button to pick tasks that have been checked
         Button pickButton = findViewById(R.id.button_pick);
@@ -213,6 +234,10 @@ public class MainActivity extends AppCompatActivity {
         tasksToPick.clear();
         pickAdapter.clearIdsChecked();
         tasksToPick.addAll(data.getTasksToPick());
+
+        for (Entry e: tasksToPick)
+            e.setReminderDate(0);
+
         pickAdapter.notifyDataSetChanged();
 
         tasksToDoNow.clear();

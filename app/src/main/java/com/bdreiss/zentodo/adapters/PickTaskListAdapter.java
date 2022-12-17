@@ -15,6 +15,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
@@ -24,18 +25,27 @@ public class PickTaskListAdapter extends TaskListAdapter {
     private final ArrayList<Integer> idsChecked = new ArrayList<>();//stores ids of all checked tasks
 
     private PickTaskListAdapter otherAdapter;
-
+    private PickTaskListAdapter doLaterAdapter;
+    private PickTaskListAdapter movetoListAdapter;
     private boolean checkboxTicked;//Tasks that are in DO NOW are ticked
 
-    public PickTaskListAdapter(Context context, Data data,  ArrayList<Entry> entries, boolean checkOrNot){
+    public PickTaskListAdapter(Context context, Data data,  ArrayList<Entry> entries, boolean checkboxTicked){
         super(context, data, entries);
 
-        this.checkboxTicked = checkOrNot;
+        this.checkboxTicked = checkboxTicked;
 
     }
 
     public void setOtherAdapter(PickTaskListAdapter otherAdapter){
         this.otherAdapter = otherAdapter;
+    }
+
+    public void setDoLaterAdapter(PickTaskListAdapter doLaterAdapter){
+        this.doLaterAdapter = doLaterAdapter;
+    }
+
+    public void setMovetoListAdapter (PickTaskListAdapter movetoListAdapter){
+        this.movetoListAdapter = movetoListAdapter;
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -112,6 +122,14 @@ public class PickTaskListAdapter extends TaskListAdapter {
 
 //        if (idsChecked.contains(entries.get(position).getId()))
             //holder.checkBox.setChecked(true);
+
+        holder.setDate.setOnClickListener(new SetDateListener(this, holder, position){
+
+            @Override
+            public void onClick(View v){}
+
+
+        });
 
 
         if (entries.get(position).getList() != null){
