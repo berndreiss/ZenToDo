@@ -10,7 +10,7 @@
     <color name="button_alt">#d4aca3</color>
     <color name="button_alt_edited">#c8cafa</color>
     <color name="button_toolbar">#95b6cf</color>
-    <color name="button_toolbar_chosen">#B3B3B3</color>
+    <color name="button_toolbar_chosen">#E6E6E6</color>
     <color name="button_lists_row">#FFFFFF</color>
     <color name="header_background"> #E6E6E6</color>
     <color name="settings">#777777</color>
