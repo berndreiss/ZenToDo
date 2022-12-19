@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
         doLaterAdapter = new PickTaskListAdapter(this, data, tasksToDoLater, false);
         moveToListAdapter = new PickTaskListAdapter(this, data,tasksToMoveToList, false);
 
+
         pickAdapter.setPickAdapter(pickAdapter);
         pickAdapter.setDoNowAdapter(doNowAdapter);
         pickAdapter.setDoLaterAdapter(doLaterAdapter);

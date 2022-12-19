@@ -11,13 +11,15 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 
 public class SetDateListenerPick extends SetDateListener{
 
-    private PickTaskListAdapter pickAdapter = PickTaskListAdapter.getPickAdapter();
-    private PickTaskListAdapter doNowAdapter = PickTaskListAdapter.getDoNowAdapter();
-    private PickTaskListAdapter doLaterAdapter = PickTaskListAdapter.getDoLaterAdapter();
-    private PickTaskListAdapter moveToListAdapter = PickTaskListAdapter.getMoveToListAdapter();
+    private final PickTaskListAdapter pickAdapter;
+    private final PickTaskListAdapter doLaterAdapter;
+    private final  PickTaskListAdapter moveToListAdapter;
 
-    public SetDateListenerPick(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position){
+    public SetDateListenerPick(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position, PickTaskListAdapter pickAdapter, PickTaskListAdapter doLaterAdapter, PickTaskListAdapter moveToListAdapter){
         super(adapter, holder, position);
+        this.pickAdapter = pickAdapter;
+        this.doLaterAdapter = doLaterAdapter;
+        this.moveToListAdapter = moveToListAdapter;
     }
 
     @SuppressLint("NotifyDataSetChanged")

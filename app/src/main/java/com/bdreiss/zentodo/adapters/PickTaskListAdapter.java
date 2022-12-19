@@ -1,15 +1,21 @@
 package com.bdreiss.zentodo.adapters;
 
 /*
-*       Extends TaskListAdapter but does not remove tasks when CheckBox is clicked. Instead it stores
-*       all chosen tasks and upon clicking the PickButton in MainActivity sends all chosen tasks to Focus.
-*       Because of that the Focus Button does not have much use in this adapter. Therefore its new
+*       Extends TaskListAdapter but does not remove tasks when CheckBox is clicked.
+*       The PickTaskListAdapter actually consists of four distinct adapters:
+*
+*       pickAdapter: contains all tasks that are due today.
+*       doNowAdapter: contains all tasks ticked in any of the three other adapters (and therefore tasks that haven been chosen for todays FOCUS)
+*       doLaterAdapter: contains all tasks for which a reminder date has been set in any of the other adapters
+*       moveToListAdapter: contains all tasks for which a list has been set, but that don't have a reminder date
+*
+*       If the pickAdapter is empty clicking the PickButton in MainActivity sends all ticked tasks to Focus.
+*       Because of that the Focus Button does not have much use in this adapter. Its new
 *       function is to delete tasks (being marked by a delete drawable).
 *
  */
 
 import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
@@ -17,7 +23,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.bdreiss.zentodo.adapters.listeners.BackListListenerPick;
-import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.adapters.listeners.SetDateListenerPick;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
@@ -26,11 +31,11 @@ import java.util.ArrayList;
 
 public class PickTaskListAdapter extends TaskListAdapter {
 
-    private static PickTaskListAdapter pickAdapter;
-    private static PickTaskListAdapter doNowAdapter;
-    private static PickTaskListAdapter doLaterAdapter;
-    private static PickTaskListAdapter moveToListAdapter;
-    private boolean checkboxTicked;//Tasks that are in DO NOW are ticked
+    private PickTaskListAdapter pickAdapter;
+    private PickTaskListAdapter doNowAdapter;
+    private PickTaskListAdapter doLaterAdapter;
+    private PickTaskListAdapter moveToListAdapter;
+    private final boolean checkboxTicked;//Tasks that are in the doNowAdapter are ticked
 
     public PickTaskListAdapter(Context context, Data data,  ArrayList<Entry> entries, boolean checkboxTicked){
         super(context, data, entries);
@@ -38,6 +43,7 @@ public class PickTaskListAdapter extends TaskListAdapter {
         this.checkboxTicked = checkboxTicked;
 
     }
+
 
     public void setPickAdapter (PickTaskListAdapter pickAdapter){
         this.pickAdapter = pickAdapter;
@@ -54,20 +60,8 @@ public class PickTaskListAdapter extends TaskListAdapter {
         this.moveToListAdapter = moveToListAdapter;
     }
 
-    public static PickTaskListAdapter getPickAdapter (){
-        return pickAdapter;
-    }
-    public static PickTaskListAdapter getDoNowAdapter(){
-        return doNowAdapter;
-    }
 
-    public static PickTaskListAdapter getDoLaterAdapter(){
-        return doLaterAdapter;
-    }
 
-    public static PickTaskListAdapter getMoveToListAdapter(){
-        return moveToListAdapter;
-    }
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
@@ -86,13 +80,11 @@ public class PickTaskListAdapter extends TaskListAdapter {
             holder.focus.setVisibility(View.GONE);
         });
 
+        //on checkBox tick if task is
         holder.checkBox.setOnClickListener(v ->{
 
             //get current entry
             Entry entry = entries.get(position);
-
-            //get ID
-            int id = entry.getId();
 
             if (doNowAdapter.entries.contains(entry)){
                 doNowAdapter.entries.remove(entry);
@@ -139,11 +131,8 @@ public class PickTaskListAdapter extends TaskListAdapter {
             notifyDataSetChanged();
         });
 
-//        if (idsChecked.contains(entries.get(position).getId()))
-            //holder.checkBox.setChecked(true);
-
-        holder.setDate.setOnClickListener(new SetDateListenerPick(this, holder, position));
-        holder.backList.setOnClickListener(new BackListListenerPick(this,holder,position));
+        holder.setDate.setOnClickListener(new SetDateListenerPick(this, holder, position, pickAdapter, doLaterAdapter, moveToListAdapter));
+        holder.backList.setOnClickListener(new BackListListenerPick(this,holder,position, pickAdapter, moveToListAdapter));
 
         if (entries.get(position).getList() != null){
 
