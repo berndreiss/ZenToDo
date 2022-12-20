@@ -262,10 +262,10 @@ public class MainActivity extends AppCompatActivity {
         //disableLayout(settings);
 
         //set color of Pick-Button in toolbar to chosen, set all other Buttons to toolbar default
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
         //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
 
@@ -319,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
         Button buttonDrop = findViewById(R.id.button_drop);
 
         //set Button BackgroundColor to toolbar default color
-        buttonDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        buttonDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
 
         //set listener for drop button
         dropListener(editText, buttonDrop);
@@ -366,10 +366,10 @@ public class MainActivity extends AppCompatActivity {
         //disableLayout(settings);
 
         //set background color of Drop to chosen, all others to toolbar default
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
         //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
         toolbarDrop.setTextColor(Color.parseColor(TEXT_COLOR));
@@ -432,10 +432,10 @@ public class MainActivity extends AppCompatActivity {
         //disableLayout(settings);
 
         //set background color of Focus to chosen, all others to toolbar default
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
         //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
         toolbarFocus.setTextColor(Color.parseColor(TEXT_COLOR));
@@ -500,10 +500,10 @@ public class MainActivity extends AppCompatActivity {
         //disableLayout(settings);
 
         //set color of Lists-Button in toolbar to chosen, set all other Buttons to toolbar default
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
+        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
         //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
         toolbarLists.setTextColor(Color.parseColor(TEXT_COLOR));

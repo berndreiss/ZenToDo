@@ -89,11 +89,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-        android:backgroundTint="@color/button_toolbar"
+        android:backgroundTint="@color/color_primary"
         android:src="@drawable/ic_action_help"
         app:tint="@color/white"
         app:borderWidth="0dp"
-        app:rippleColor="@color/button_toolbar"
+        app:rippleColor="@color/color_primary"
         android:contentDescription="@string/help" />
 
 

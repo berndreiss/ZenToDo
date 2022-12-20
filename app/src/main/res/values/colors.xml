@@ -9,8 +9,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="button_alt">#d4aca3</color>
     <color name="button_alt_edited">#c8cafa</color>
-    <color name="button_toolbar">#95b6cf</color>
-    <color name="button_toolbar_chosen">#E6E6E6</color>
+    <color name="color_primary">#95b6cf</color>
+    <color name="color_primary_variant">#000000</color>
+    <color name="color_primary_variant_alt">#6f8fa7</color>
+    <color name="color_primary_accent">#E6E6E6</color>
     <color name="button_lists_row">#FFFFFF</color>
     <color name="header_background"> #E6E6E6</color>
     <color name="settings">#777777</color>
