@@ -186,10 +186,6 @@ public class MainActivity extends AppCompatActivity {
         moveToListAdapter = new PickTaskListAdapter(this, data,tasksToMoveToList, false);
 
 
-        pickAdapter.setPickAdapter(pickAdapter);
-        pickAdapter.setDoNowAdapter(doNowAdapter);
-        pickAdapter.setDoLaterAdapter(doLaterAdapter);
-        pickAdapter.setMoveToListAdapter(moveToListAdapter);
 
         initializeRecyclerView(findViewById(R.id.list_view_pick), pickAdapter);
         initializeRecyclerView(findViewById(R.id.list_view_pick_doNow), doNowAdapter);
@@ -609,7 +605,7 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(api = Build.VERSION_CODES.M)
-    private void initializeRecyclerView(RecyclerView view, TaskListAdapter adapter){
+    private void initializeRecyclerView(RecyclerView view, PickTaskListAdapter adapter){
 
         //shows Floating Action Button on
         view.setOnTouchListener(new ShowHelp());
@@ -627,6 +623,10 @@ public class MainActivity extends AppCompatActivity {
         ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
         iTouchHelper.attachToRecyclerView(view);
 
+        adapter.setPickAdapter(pickAdapter);
+        adapter.setDoNowAdapter(doNowAdapter);
+        adapter.setDoLaterAdapter(doLaterAdapter);
+        adapter.setMoveToListAdapter(moveToListAdapter);
 
     }
 
