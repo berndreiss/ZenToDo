@@ -22,6 +22,8 @@
     <string name="do_now">DO NOW</string>
     <string name="do_later">DO LATER</string>
     <string name="move_to_list">MOVE TO LIST</string>
+    <string name="new_task">new Task</string>
+    <string name="drop">Drop</string>
 
     <!-- Strings used for spinner for choosing time interval of repeats -->
     <string-array name="time_interval">

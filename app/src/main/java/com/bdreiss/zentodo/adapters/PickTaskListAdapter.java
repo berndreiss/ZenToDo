@@ -21,7 +21,9 @@ import android.graphics.Color;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
+import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.adapters.listeners.BackListListenerPick;
 import com.bdreiss.zentodo.adapters.listeners.PickListener;
 import com.bdreiss.zentodo.adapters.listeners.SetDateListenerPick;
@@ -154,7 +156,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
             holder.linearLayout.setBackgroundColor(Color.parseColor( color));
 
         } else{
-            holder.linearLayout.setBackgroundColor(Color.WHITE);
+            holder.linearLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.color_primary));
 
         }
 

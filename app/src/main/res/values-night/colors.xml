@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FFFFFFFF</color>
+    <color name="white">#FF000000</color>
+    <color name="button_alt">#202020</color>
+    <color name="button_alt_edited">#000000</color>
+    <color name="color_primary">#000000</color>
+    <color name="color_primary_variant">#FFFFFF</color>
+    <color name="color_primary_accent">#FFFFFF</color>
+    <color name="button_lists_row">#000000</color>
+    <color name="header_background"> #202020</color>
+    <color name="settings">#777777</color>
+    <color name="header_text">#FFFFFF</color>
+
+</resources>

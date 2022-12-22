@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
@@ -40,10 +41,10 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
             String color = data.getListColor(entries.get(position).getList());
 
-            holder.linearLayout.setBackgroundColor(Color.parseColor( color));
+            holder.linearLayout.setBackgroundColor(Color.parseColor(color));
 
         } else{
-            holder.linearLayout.setBackgroundColor(Color.WHITE);
+            holder.linearLayout.setBackgroundColor(ContextCompat.getColor(context,R.color.color_primary));
 
         }
 
