@@ -54,7 +54,12 @@ public class Data {
         //get new Database-handler
         this.db = new DbHelper(context);
 
-//        db.makeListTable();//REMOVE AFTER
+        if (listPositionCount != null)
+            listPositionCount.clear();
+
+       entries.clear();
+
+        //        db.makeListTable();//REMOVE AFTER
         listPositionCount = db.loadLists();
 
         //load Database-content to entries
