@@ -15,7 +15,7 @@ public class SetDateListenerPick extends SetDateListener{
     private final PickTaskListAdapter doLaterAdapter;
     private final  PickTaskListAdapter moveToListAdapter;
 
-    public SetDateListenerPick(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position, PickTaskListAdapter pickAdapter, PickTaskListAdapter doLaterAdapter, PickTaskListAdapter moveToListAdapter){
+    public SetDateListenerPick(PickTaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position, PickTaskListAdapter pickAdapter, PickTaskListAdapter doLaterAdapter, PickTaskListAdapter moveToListAdapter){
         super(adapter, holder, position);
         this.pickAdapter = pickAdapter;
         this.doLaterAdapter = doLaterAdapter;
@@ -42,10 +42,12 @@ public class SetDateListenerPick extends SetDateListener{
 
             doLaterAdapter.entries.add(e);
             doLaterAdapter.notifyDataSetChanged();
+            doLaterAdapter.itemCountChanged();
             adapter.entries.remove(e);
             adapter.notifyDataSetChanged();
-
-        }, entryYear, entryMonth, entryDay);
+            PickTaskListAdapter adapterTemp = (PickTaskListAdapter) adapter;
+            adapterTemp.itemCountChanged();
+            }, entryYear, entryMonth, entryDay);
 
         datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
@@ -70,13 +72,18 @@ public class SetDateListenerPick extends SetDateListener{
 
                 adapter.entries.remove(e);
                 adapter.notifyDataSetChanged();
+                PickTaskListAdapter adapterTemp = (PickTaskListAdapter) adapter;
+                adapterTemp.itemCountChanged();
+
             }
             else {
                 if (doLaterAdapter.entries.contains(e)) {
                     doLaterAdapter.entries.remove(e);
                     doLaterAdapter.notifyDataSetChanged();
+                    doLaterAdapter.itemCountChanged();
                     pickAdapter.entries.add(e);
                     pickAdapter.notifyDataSetChanged();
+                    pickAdapter.itemCountChanged();
                 }
             }
         });

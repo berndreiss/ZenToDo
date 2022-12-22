@@ -23,13 +23,14 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.bdreiss.zentodo.adapters.listeners.BackListListenerPick;
+import com.bdreiss.zentodo.adapters.listeners.PickListener;
 import com.bdreiss.zentodo.adapters.listeners.SetDateListenerPick;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.util.ArrayList;
 
-public class PickTaskListAdapter extends TaskListAdapter {
+public class PickTaskListAdapter extends TaskListAdapter implements PickListener {
 
     private PickTaskListAdapter pickAdapter;
     private PickTaskListAdapter doNowAdapter;
@@ -89,16 +90,20 @@ public class PickTaskListAdapter extends TaskListAdapter {
             if (doNowAdapter.entries.contains(entry)){
                 doNowAdapter.entries.remove(entry);
                 doNowAdapter.notifyDataSetChanged();
+                doNowAdapter.itemCountChanged();
 
                 if (entry.getReminderDate()> data.getToday()){
                     doLaterAdapter.entries.add(entry);
                     doLaterAdapter.notifyDataSetChanged();
+                    doLaterAdapter.itemCountChanged();
                 } else if (entry.getReminderDate() == 0 && entry.getList() != null){
                     moveToListAdapter.entries.add(entry);
                     moveToListAdapter.notifyDataSetChanged();
+                    moveToListAdapter.itemCountChanged();
                 } else{
                     pickAdapter.entries.add(entry);
                     pickAdapter.notifyDataSetChanged();
+                    pickAdapter.itemCountChanged();
                 }
 
 
@@ -106,8 +111,11 @@ public class PickTaskListAdapter extends TaskListAdapter {
             } else{
                 doNowAdapter.entries.add(entry);
                 doNowAdapter.notifyDataSetChanged();
+                doNowAdapter.itemCountChanged();
+
                 entries.remove(entry);
                 notifyDataSetChanged();
+                itemCountChanged();
             }
 
         });
@@ -127,8 +135,12 @@ public class PickTaskListAdapter extends TaskListAdapter {
             //remove entry from adapter
             entries.remove(position);
 
+            itemCountChanged();
+
             //notify adapter
             notifyDataSetChanged();
+            itemCountChanged();
+
         });
 
         holder.setDate.setOnClickListener(new SetDateListenerPick(this, holder, position, pickAdapter, doLaterAdapter, moveToListAdapter));
@@ -148,6 +160,9 @@ public class PickTaskListAdapter extends TaskListAdapter {
 
 
     }
+
+    @Override
+    public void itemCountChanged(){}
 
 }
 

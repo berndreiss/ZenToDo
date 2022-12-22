@@ -47,6 +47,7 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 import com.bdreiss.zentodo.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -179,11 +180,39 @@ public class MainActivity extends AppCompatActivity {
         tasksToMoveToList = new ArrayList<>();
 
         //initialize adapter for RecyclerView with all tasks that have been dropped, have been in Focus or are due today
-        pickAdapter = new PickTaskListAdapter(this, data, tasksToPick, false);
+        pickAdapter = new PickTaskListAdapter(this, data, tasksToPick, false){
+            @Override
+            public void itemCountChanged(){
+                ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick).getLayoutParams();
+                params.height = (int) (getResources().getDimension(R.dimen.row_height) * pickAdapter.entries.size());
+                findViewById(R.id.list_view_pick).setLayoutParams(params);
+            }
+        };
 
-        doNowAdapter = new PickTaskListAdapter(this, data, tasksToDoNow, true);
-        doLaterAdapter = new PickTaskListAdapter(this, data, tasksToDoLater, false);
-        moveToListAdapter = new PickTaskListAdapter(this, data,tasksToMoveToList, false);
+        doNowAdapter = new PickTaskListAdapter(this, data, tasksToDoNow, true){
+            @Override
+            public void itemCountChanged(){
+                ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doNow).getLayoutParams();
+                params.height = (int) (getResources().getDimension(R.dimen.row_height) * doNowAdapter.entries.size());
+                findViewById(R.id.list_view_pick_doNow).setLayoutParams(params);
+            }
+        };
+        doLaterAdapter = new PickTaskListAdapter(this, data, tasksToDoLater, false){
+            @Override
+            public void itemCountChanged(){
+                ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doLater).getLayoutParams();
+                params.height = (int) (getResources().getDimension(R.dimen.row_height) * doLaterAdapter.entries.size());
+                findViewById(R.id.list_view_pick_doLater).setLayoutParams(params);
+            }
+        };
+        moveToListAdapter = new PickTaskListAdapter(this, data,tasksToMoveToList, false){
+            @Override
+            public void itemCountChanged(){
+                ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_list).getLayoutParams();
+                params.height = (int) (getResources().getDimension(R.dimen.row_height) * moveToListAdapter.entries.size());
+                findViewById(R.id.list_view_pick_list).setLayoutParams(params);
+            }
+        };
 
 
 
@@ -236,15 +265,19 @@ public class MainActivity extends AppCompatActivity {
         tasksToPick.addAll(data.getTasksToPick());
 
         pickAdapter.notifyDataSetChanged();
+        pickAdapter.itemCountChanged();
 
         tasksToDoNow.clear();
         doNowAdapter.notifyDataSetChanged();
+        doNowAdapter.itemCountChanged();
 
         tasksToDoLater.clear();
         doLaterAdapter.notifyDataSetChanged();
+        doLaterAdapter.itemCountChanged();
 
         tasksToMoveToList.clear();
         moveToListAdapter.notifyDataSetChanged();
+        moveToListAdapter.itemCountChanged();
 
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
@@ -616,6 +649,8 @@ public class MainActivity extends AppCompatActivity {
         //set layoutManager
         view.setLayoutManager(new LinearLayoutManager(this));
 
+        view.setNestedScrollingEnabled(false);
+
         //allows items to be moved and reordered in RecyclerView
         ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(adapter);
 
@@ -627,6 +662,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.setDoNowAdapter(doNowAdapter);
         adapter.setDoLaterAdapter(doLaterAdapter);
         adapter.setMoveToListAdapter(moveToListAdapter);
+
 
     }
 
