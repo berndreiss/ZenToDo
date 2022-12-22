@@ -62,7 +62,9 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final static String TEXT_COLOR = "#90000000";
+ //   private final static String TEXT_COLOR = "#90000000";
+    private final static String TEXT_COLOR = "#FFFFFF";
+    private final static String TEXT_COLOR_ACCENT = "#90000000";
 
     //Layouts for different modes
     private LinearLayout pick;//Layout to pick tasks that have been dropped and show them in focus
@@ -224,6 +226,8 @@ public class MainActivity extends AppCompatActivity {
         //button to pick tasks that have been checked
         Button pickButton = findViewById(R.id.button_pick);
 
+        pickButton.setTextColor(Color.parseColor(TEXT_COLOR));
+
         //if pressed remove tasks from Drop and add to Focus
         pickButton.setOnClickListener(view -> {
 
@@ -298,14 +302,14 @@ public class MainActivity extends AppCompatActivity {
         //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
 
-        toolbarPick.setTextColor(Color.parseColor(TEXT_COLOR));
-        toolbarPick.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
-        toolbarDrop.setTextColor(Color.WHITE);
-        toolbarDrop.getCompoundDrawables()[1].setTint(Color.WHITE);
-        toolbarFocus.setTextColor(Color.WHITE);
-        toolbarFocus.getCompoundDrawables()[1].setTint(Color.WHITE);
-        toolbarLists.setTextColor(Color.WHITE);
-        toolbarLists.getCompoundDrawables()[1].setTint(Color.WHITE);
+        toolbarPick.setTextColor(Color.parseColor(TEXT_COLOR_ACCENT));
+        toolbarPick.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR_ACCENT));
+        toolbarDrop.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarDrop.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
+        toolbarFocus.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarFocus.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
+        toolbarLists.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarLists.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
 
     }
 
@@ -347,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
         //button to drop task in EditText
         Button buttonDrop = findViewById(R.id.button_drop);
 
+        buttonDrop.setTextColor(Color.parseColor(TEXT_COLOR));
         //set Button BackgroundColor to toolbar default color
         buttonDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
 
@@ -401,14 +406,14 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
         //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
-        toolbarDrop.setTextColor(Color.parseColor(TEXT_COLOR));
-        toolbarDrop.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
-        toolbarPick.setTextColor(Color.WHITE);
-        toolbarPick.getCompoundDrawables()[1].setTint(Color.WHITE);
-        toolbarFocus.setTextColor(Color.WHITE);
-        toolbarFocus.getCompoundDrawables()[1].setTint(Color.WHITE);
-        toolbarLists.setTextColor(Color.WHITE);
-        toolbarLists.getCompoundDrawables()[1].setTint(Color.WHITE);
+        toolbarDrop.setTextColor(Color.parseColor(TEXT_COLOR_ACCENT));
+        toolbarDrop.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR_ACCENT));
+        toolbarPick.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarPick.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
+        toolbarFocus.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarFocus.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
+        toolbarLists.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarLists.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
     }
 
     //initialize Focus layout
@@ -467,14 +472,14 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
         //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
-        toolbarFocus.setTextColor(Color.parseColor(TEXT_COLOR));
-        toolbarFocus.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
-        toolbarDrop.setTextColor(Color.WHITE);
-        toolbarDrop.getCompoundDrawables()[1].setTint(Color.WHITE);
-        toolbarPick.setTextColor(Color.WHITE);
-        toolbarPick.getCompoundDrawables()[1].setTint(Color.WHITE);
-        toolbarLists.setTextColor(Color.WHITE);
-        toolbarLists.getCompoundDrawables()[1].setTint(Color.WHITE);
+        toolbarFocus.setTextColor(Color.parseColor(TEXT_COLOR_ACCENT));
+        toolbarFocus.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR_ACCENT));
+        toolbarDrop.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarDrop.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
+        toolbarPick.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarPick.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
+        toolbarLists.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarLists.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
 
     }
 
@@ -535,14 +540,14 @@ public class MainActivity extends AppCompatActivity {
         toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
         //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
 
-        toolbarLists.setTextColor(Color.parseColor(TEXT_COLOR));
-        toolbarLists.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
-        toolbarDrop.setTextColor(Color.WHITE);
-        toolbarDrop.getCompoundDrawables()[1].setTint(Color.WHITE);
-        toolbarPick.setTextColor(Color.WHITE);
-        toolbarPick.getCompoundDrawables()[1].setTint(Color.WHITE);
-        toolbarFocus.setTextColor(Color.WHITE);
-        toolbarFocus.getCompoundDrawables()[1].setTint(Color.WHITE);
+        toolbarLists.setTextColor(Color.parseColor(TEXT_COLOR_ACCENT));
+        toolbarLists.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR_ACCENT));
+        toolbarDrop.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarDrop.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
+        toolbarPick.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarPick.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
+        toolbarFocus.setTextColor(Color.parseColor(TEXT_COLOR));
+        toolbarFocus.getCompoundDrawables()[1].setTint(Color.parseColor(TEXT_COLOR));
 
         //header for showing name of chosen list
         TextView header = findViewById(R.id.text_view_lists_header);

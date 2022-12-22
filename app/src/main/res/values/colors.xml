@@ -7,9 +7,9 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="button_alt">#d4aca3</color>
-    <color name="button_alt_edited">#c8cafa</color>
-    <color name="color_primary">#95b6cf</color>
+    <color name="button_alt">#E6E6E6</color>
+    <color name="button_alt_edited">#6883BC</color>
+    <color name="color_primary">#6883BC</color>
     <color name="color_primary_variant">#000000</color>
     <color name="color_primary_variant_alt">#6f8fa7</color>
     <color name="color_primary_accent">#E6E6E6</color>
