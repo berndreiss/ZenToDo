@@ -19,6 +19,7 @@ package com.bdreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -386,6 +387,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         //Set date button to alternative color if !=0, original color otherwise
         if (entry.getReminderDate()!=0){
             holder.setDate.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+
         }else{
             holder.setDate.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
         }
@@ -406,6 +408,8 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
         if (entry.getFocus()){
             holder.focus.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+
+
         } else{
             holder.focus.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
         }

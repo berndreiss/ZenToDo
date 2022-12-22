@@ -36,6 +36,7 @@
                 android:id="@+id/pick_header_doNow"
                 android:text="@string/do_now"
                 android:shape="rectangle"
+                android:textColor="@color/header_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="0dp"
@@ -54,6 +55,7 @@
             <TextView
                 android:id="@+id/pick_header_doLater"
                 android:text="@string/do_later"
+                android:textColor="@color/header_text"
                 android:shape="rectangle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -73,6 +75,7 @@
             <TextView
                 android:id="@+id/pick_header_list"
                 android:text="@string/move_to_list"
+                android:textColor="@color/header_text"
                 android:shape="rectangle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -99,7 +102,7 @@
             android:layout_height="0dp"
             android:layout_weight="4"
             android:text="@string/pick"
-            android:backgroundTint="@color/color_primary"
+            android:backgroundTint="@color/color_primary_accent"
 
             />
 

@@ -8,12 +8,13 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="button_alt">#E6E6E6</color>
-    <color name="button_alt_edited">#6883BC</color>
-    <color name="color_primary">#6883BC</color>
+    <color name="button_alt_edited">#FFFFFF</color>
+    <color name="color_primary">#FFFFFF</color>
     <color name="color_primary_variant">#000000</color>
     <color name="color_primary_variant_alt">#6f8fa7</color>
-    <color name="color_primary_accent">#E6E6E6</color>
+    <color name="color_primary_accent">#000000</color>
     <color name="button_lists_row">#FFFFFF</color>
     <color name="header_background"> #E6E6E6</color>
     <color name="settings">#777777</color>
+    <color name="header_text">#000000</color>
 </resources>

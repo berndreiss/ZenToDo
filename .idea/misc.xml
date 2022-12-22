@@ -7,12 +7,21 @@
         <entry key="app/src/main/res/drawable-anydpi/focus.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_back.xml" value="0.2655" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_brainstorm.xml" value="0.19" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_calendar.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_checkbox.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_clear.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_color.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_delete.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_drop.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_edit.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_floating.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_focus_toolbar.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_help.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_list.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_lists.xml" value="0.19" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_menu.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_pick.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-anydpi/ic_action_recurrence.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_settings.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_thoughts.xml" value="0.19" />
         <entry key="app/src/main/res/drawable-anydpi/ic_action_todays.xml" value="0.19" />

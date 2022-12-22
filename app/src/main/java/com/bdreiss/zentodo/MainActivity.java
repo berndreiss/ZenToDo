@@ -62,9 +62,10 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
- //   private final static String TEXT_COLOR = "#90000000";
-    private final static String TEXT_COLOR = "#FFFFFF";
-    private final static String TEXT_COLOR_ACCENT = "#90000000";
+//    private final static String TEXT_COLOR = "#90000000";
+    private final static String TEXT_COLOR = "#000000";
+    private final static String TEXT_COLOR_ACCENT = "#FFFFFF";
+
 
     //Layouts for different modes
     private LinearLayout pick;//Layout to pick tasks that have been dropped and show them in focus
@@ -167,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
         //Drop is shown when app starts
         showDrop();
 
+
     }
 
     //initialize Pick layout
@@ -226,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
         //button to pick tasks that have been checked
         Button pickButton = findViewById(R.id.button_pick);
 
-        pickButton.setTextColor(Color.parseColor(TEXT_COLOR));
+        pickButton.setTextColor(Color.parseColor(TEXT_COLOR_ACCENT));
 
         //if pressed remove tasks from Drop and add to Focus
         pickButton.setOnClickListener(view -> {
@@ -351,9 +353,8 @@ public class MainActivity extends AppCompatActivity {
         //button to drop task in EditText
         Button buttonDrop = findViewById(R.id.button_drop);
 
-        buttonDrop.setTextColor(Color.parseColor(TEXT_COLOR));
+        buttonDrop.setTextColor(Color.parseColor(TEXT_COLOR_ACCENT));
         //set Button BackgroundColor to toolbar default color
-        buttonDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
 
         //set listener for drop button
         dropListener(editText, buttonDrop);

@@ -2,7 +2,9 @@ package com.bdreiss.zentodo.adapters.listeners;
 
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.view.View;
+import android.widget.DatePicker;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.adapters.TaskListAdapter;
@@ -106,7 +108,6 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
             //return to original layout
             adapter.setOriginal(holder);
         });
-
 
         return datePickerDialog;
     }

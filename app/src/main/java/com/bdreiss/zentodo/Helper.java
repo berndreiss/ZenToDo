@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.core.text.HtmlCompat;
@@ -38,15 +39,17 @@ public class Helper{
             Dialog dialog = new Dialog(context);
 
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.getWindow().setBackgroundDrawable(
-                    new ColorDrawable(Color.WHITE));
 
             dialog.setOnDismissListener(dialogInterface -> {
                 //nothing;
             });
 
+            ScrollView scrollView = new ScrollView(context);
             TextView textView = new TextView(context);
 
+            scrollView.addView(textView);
+
+            textView.setTextColor(Color.parseColor("#000000"));
 
             textView.setText(HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY, s -> {
 
@@ -62,7 +65,7 @@ public class Helper{
 
             textView.setTextSize(15);
 
-            dialog.addContentView(textView, new RelativeLayout.LayoutParams(
+            dialog.addContentView(scrollView, new RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT));
             dialog.show();

@@ -15,12 +15,14 @@
 
         <CheckBox
             android:id="@+id/checkbox"
+            android:buttonTint="@color/header_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
 
         <TextView
             android:id="@+id/task"
+            android:textColor="@color/header_text"
             android:layout_width="0dp"
             android:layout_weight="6"
             android:layout_height="wrap_content"
@@ -196,6 +198,7 @@
 
         <TextView
             android:id="@+id/text_view_recurrence"
+            android:textColor="@color/header_text"
             android:layout_width="0dp"
             android:layout_weight="2"
             android:layout_height="wrap_content"
@@ -204,6 +207,7 @@
 
         <EditText
             android:id="@+id/edit_text_recurrence"
+            android:textColor="@color/header_text"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
@@ -213,6 +217,8 @@
 
         <Spinner
             android:id="@+id/spinner_time_interval"
+            android:backgroundTint="@color/header_text"
+            android:textColor="@color/header_text"
             android:layout_width="0dp"
             android:layout_weight="3"
             android:layout_height="wrap_content"

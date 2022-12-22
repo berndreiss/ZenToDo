@@ -89,7 +89,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-        android:backgroundTint="@color/color_primary"
+        android:backgroundTint="@color/header_text"
         android:src="@drawable/ic_action_help"
         app:tint="@color/white"
         app:borderWidth="0dp"
