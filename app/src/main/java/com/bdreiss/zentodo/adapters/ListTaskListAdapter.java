@@ -20,8 +20,11 @@ import java.util.Collections;
 
 public class ListTaskListAdapter extends TaskListAdapter{
 
-    public ListTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
+    private ArrayList<Integer> recurringButRemovedFromFocus;
+    public ListTaskListAdapter(Context context, Data data, ArrayList<Entry> entries, ArrayList<Integer> recurringButRemovedFromFocus){
         super(context, data, entries);
+
+        this.recurringButRemovedFromFocus = recurringButRemovedFromFocus;
     }
 
 

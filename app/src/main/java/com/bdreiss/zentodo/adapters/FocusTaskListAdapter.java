@@ -27,8 +27,10 @@ import java.util.ArrayList;
 
 public class FocusTaskListAdapter extends TaskListAdapter {
 
-    public FocusTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
+    private ArrayList<Integer> recurringButRemovedFromFocus;
+    public FocusTaskListAdapter(Context context, Data data, ArrayList<Entry> entries, ArrayList<Integer> recurringButRemovedFromFocus){
         super(context, data, entries);
+        this.recurringButRemovedFromFocus = recurringButRemovedFromFocus;
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -100,6 +102,9 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
             //get id
             int id = entry.getId();
+
+            if (entry.getRecurrence() != null)
+                recurringButRemovedFromFocus.add(id);
 
             if (entry.getReminderDate() == 0)
                 data.editReminderDate(id, data.getToday());

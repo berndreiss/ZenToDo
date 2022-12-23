@@ -406,6 +406,8 @@ public class Data {
 
         for (Entry e : entries){
 
+            if (e.getRecurrence() != null)
+                continue;
             //1. check focus
             if (e.getFocus()){
                 tasksToPick.add(e);
@@ -468,12 +470,17 @@ public class Data {
     }
 
     //get entries where focus == true
-    public ArrayList<Entry> getFocus(){
+    public ArrayList<Entry> getFocus(ArrayList<Integer> recurringButRemovedFromToday){
         ArrayList<Entry> focus = new ArrayList<>();
 
         for (Entry e : entries){
 
-            if (e.getFocus())
+            if (e.getFocus() ||
+                    (
+                            ( (e.getRecurrence() != null) && (e.getReminderDate() <= getToday())) &&
+                                    !recurringButRemovedFromToday.contains(e.getId())
+                    )
+            )
                 focus.add(e);
 
         }
