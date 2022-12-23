@@ -475,12 +475,11 @@ public class Data {
 
         for (Entry e : entries){
 
-            if (e.getFocus() ||
-                    (
-                            ( (e.getRecurrence() != null) && (e.getReminderDate() <= getToday())) &&
-                                    !recurringButRemovedFromToday.contains(e.getId())
-                    )
-            )
+            if (( (e.getRecurrence() != null) && (e.getReminderDate() <= getToday())) &&
+                            !recurringButRemovedFromToday.contains(e.getId()))
+                e.setFocus(true);
+
+            if (e.getFocus())
                 focus.add(e);
 
         }
