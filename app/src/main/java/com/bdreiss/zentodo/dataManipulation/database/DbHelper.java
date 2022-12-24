@@ -12,7 +12,7 @@
 *
 */
 
-package com.bdreiss.zentodo.dataManipulation;
+package com.bdreiss.zentodo.dataManipulation.database;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
@@ -22,48 +22,28 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.bdreiss.zentodo.dataManipulation.Entry;
+import com.bdreiss.zentodo.dataManipulation.TaskList;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 
 public class DbHelper  extends SQLiteOpenHelper{
 
-   // private static final String DB_NAME = "Data.db";
-
-    private static final String DB_NAME = "Data.db";
-
     private static final int DB_VERSION = 1;
 
-    private static final String TABLE_ENTRIES = "entries";
 
-    private static final String ID_COL = "id";
 
-    private static final String TASK_COL = "task";
 
-    private static final String FOCUS_COL = "focus";
 
-    private static final String DROPPED_COL = "dropped";
 
-    private static final String LIST_COL = "list";
-
-    private static final String LIST_POSITION_COL = "listPosition";
-
-    private static final String REMINDER_DATE_COL = "due";
-
-    private static final String RECURRENCE_COL = "recurrence";
-
-    private static final String POSITION_COL = "position";
-
-    private static final String TABLE_LISTS = "lists";
-
-    private static final String LIST_NAME_COL = "list";
-
-    private static final String LIST_COLOR_COL = "color";
-
-    public DbHelper(Context context){super(context,DB_NAME,null, DB_VERSION);}
+    public DbHelper(Context context, String DB_NAME){
+        super(context,DB_NAME,null, DB_VERSION);
+    }
 
     public void migrate(SQLiteDatabase db) {
-        String query = "DROP TABLE IF EXISTS " + TABLE_ENTRIES;
+        String query = "DROP TABLE IF EXISTS " + TABLES.TABLE_ENTRIES;
         db.execSQL(query);
         onCreate(db);
 
@@ -71,22 +51,22 @@ public class DbHelper  extends SQLiteOpenHelper{
     }
     //Create new table for entries onCreate
     public void onCreate(SQLiteDatabase db){
-        String query = "CREATE TABLE " + TABLE_ENTRIES + " ("
-                + ID_COL + " INTEGER , "
-                + TASK_COL + " TEXT, "
-                + FOCUS_COL + " INTEGER, "
-                + DROPPED_COL + " INTEGER, "
-                + LIST_COL + " TEXT, "
-                + LIST_POSITION_COL + " INTEGER, "
-                + REMINDER_DATE_COL + " INTEGER, "
-                + RECURRENCE_COL + " TEXT,"
-                + POSITION_COL + " INTEGER "
+        String query = "CREATE TABLE " + TABLES.TABLE_ENTRIES + " ("
+                + COLUMNS_ENTRIES.ID_COL + " INTEGER , "
+                + COLUMNS_ENTRIES.TASK_COL + " TEXT, "
+                + COLUMNS_ENTRIES.FOCUS_COL + " INTEGER, "
+                + COLUMNS_ENTRIES.DROPPED_COL + " INTEGER, "
+                + COLUMNS_ENTRIES.LIST_COL + " TEXT, "
+                + COLUMNS_ENTRIES.LIST_POSITION_COL + " INTEGER, "
+                + COLUMNS_ENTRIES.REMINDER_DATE_COL + " INTEGER, "
+                + COLUMNS_ENTRIES.RECURRENCE_COL + " TEXT,"
+                + COLUMNS_ENTRIES.POSITION_COL + " INTEGER "
                 + ")";
         db.execSQL(query);
 
-        query = "CREATE TABLE " + TABLE_LISTS + " ("
-                + LIST_NAME_COL + " TEXT, "
-                + LIST_COLOR_COL + " TEXT"
+        query = "CREATE TABLE " + TABLES.TABLE_LISTS + " ("
+                + COLUMNS_LISTS.LIST_NAME_COL + " TEXT, "
+                + COLUMNS_LISTS.LIST_COLOR_COL + " TEXT"
                 + ")";
         db.execSQL(query);
 
@@ -96,9 +76,9 @@ public class DbHelper  extends SQLiteOpenHelper{
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = "CREATE TABLE " + TABLE_LISTS + " ("
-                + LIST_NAME_COL + " TEXT, "
-                + LIST_COLOR_COL + " TEXT"
+        String query = "CREATE TABLE " + TABLES.TABLE_LISTS + " ("
+                + COLUMNS_LISTS.LIST_NAME_COL + " TEXT, "
+                + COLUMNS_LISTS.LIST_COLOR_COL + " TEXT"
                 + ")";
         db.execSQL(query);
 
@@ -106,7 +86,7 @@ public class DbHelper  extends SQLiteOpenHelper{
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
-        String query = "DROP TABLE IF EXISTS " + TABLE_ENTRIES;
+        String query = "DROP TABLE IF EXISTS " + TABLES.TABLE_ENTRIES;
         db.execSQL(query);
         onCreate(db);
     }
@@ -117,17 +97,17 @@ public class DbHelper  extends SQLiteOpenHelper{
         ContentValues values = new ContentValues();
         SQLiteDatabase db = this.getWritableDatabase();
 
-        values.put(ID_COL,entry.getId());
-        values.put(TASK_COL,entry.getTask());
-        values.put(FOCUS_COL,entry.getFocus());
-        values.put(DROPPED_COL,entry.getDropped());
-        values.put(LIST_COL,entry.getList());
-        values.put(LIST_POSITION_COL,entry.getListPosition());
-        values.put(REMINDER_DATE_COL,entry.getReminderDate());
-        values.put(RECURRENCE_COL,entry.getRecurrence());
-        values.put(POSITION_COL, entry.getPosition());
+        values.put(COLUMNS_ENTRIES.ID_COL.toString(),entry.getId());
+        values.put(COLUMNS_ENTRIES.TASK_COL.toString(),entry.getTask());
+        values.put(COLUMNS_ENTRIES.FOCUS_COL.toString(),entry.getFocus());
+        values.put(COLUMNS_ENTRIES.DROPPED_COL.toString(),entry.getDropped());
+        values.put(COLUMNS_ENTRIES.LIST_COL.toString(),entry.getList());
+        values.put(COLUMNS_ENTRIES.LIST_POSITION_COL.toString(),entry.getListPosition());
+        values.put(COLUMNS_ENTRIES.REMINDER_DATE_COL.toString(),entry.getReminderDate());
+        values.put(COLUMNS_ENTRIES.RECURRENCE_COL.toString(),entry.getRecurrence());
+        values.put(COLUMNS_ENTRIES.POSITION_COL.toString(), entry.getPosition());
 
-        db.insert(TABLE_ENTRIES,null,values);
+        db.insert(TABLES.TABLE_ENTRIES.toString(),null,values);
         db.close();
     }
 
@@ -140,10 +120,10 @@ public class DbHelper  extends SQLiteOpenHelper{
         Log.d("CHECK", list);
         SQLiteDatabase db = this.getWritableDatabase();
 
-        values.put(LIST_NAME_COL,list);
-        values.put(LIST_COLOR_COL,color);
+        values.put(COLUMNS_LISTS.LIST_NAME_COL.toString(),list);
+        values.put(COLUMNS_LISTS.LIST_COLOR_COL.toString(),color);
 
-        db.insert(TABLE_LISTS,null,values);
+        db.insert(TABLES.TABLE_LISTS.toString(), null,values);
         db.close();
     }
 
@@ -151,7 +131,7 @@ public class DbHelper  extends SQLiteOpenHelper{
     public void removeEntry(int id){
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = "DELETE FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id;
+        String query = "DELETE FROM " + TABLES.TABLE_ENTRIES + " WHERE " + COLUMNS_ENTRIES.ID_COL + "=" + id;
 
         db.execSQL(query);
 
@@ -163,7 +143,7 @@ public class DbHelper  extends SQLiteOpenHelper{
 
         list = checkStringForApostrophe(list);
 
-        String query = "DELETE FROM " + TABLE_LISTS + " WHERE " + LIST_NAME_COL + "='" + list + "'";
+        String query = "DELETE FROM " + TABLES.TABLE_LISTS + " WHERE " + COLUMNS_LISTS.LIST_NAME_COL + "='" + list + "'";
 
         db.execSQL(query);
 
@@ -171,17 +151,17 @@ public class DbHelper  extends SQLiteOpenHelper{
     }
 
     //update entry by id using String
-    public void updateEntry(String field, int id, String value){
+    public void updateEntry(COLUMNS_ENTRIES field, int id, String value){
         value = checkStringForApostrophe(value);
-        String query = "UPDATE " + TABLE_ENTRIES + " SET " + field + "='" + value + "' WHERE " + ID_COL + "=" + id + ";";
+        String query = "UPDATE " + TABLES.TABLE_ENTRIES + " SET " + field + "='" + value + "' WHERE " + COLUMNS_ENTRIES.ID_COL + "=" + id + ";";
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(query);
         db.close();
     }
 
     //update entry by id using Integer
-    public void updateEntry(String field, int id, int value){
-        String query = "UPDATE " + TABLE_ENTRIES + " SET " + field + "=" + value + " WHERE " + ID_COL + "=" + id + ";";
+    public void updateEntry(COLUMNS_ENTRIES field, int id, int value){
+        String query = "UPDATE " + TABLES.TABLE_ENTRIES + " SET " + field + "=" + value + " WHERE " + COLUMNS_ENTRIES.ID_COL + "=" + id + ";";
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(query);
         db.close();
@@ -189,23 +169,23 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     public void updateList(String list, String color){
         list = checkStringForApostrophe(list);
-        String query = "UPDATE " + TABLE_LISTS + " SET " + LIST_COLOR_COL + "='" + color + "' WHERE " + LIST_NAME_COL + "='" + list + "';";
+        String query = "UPDATE " + TABLES.TABLE_LISTS + " SET " + COLUMNS_LISTS.LIST_COLOR_COL + "='" + color + "' WHERE " + COLUMNS_LISTS.LIST_NAME_COL + "='" + list + "';";
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(query);
         db.close();
     }
 
     public void updateAllFields(int id, Entry entry){
-        String query = "UPDATE " + TABLE_ENTRIES + " SET "
-                + TASK_COL + "='" + checkStringForApostrophe(entry.getTask()) + "', "
-                + FOCUS_COL + "=" + entry.getFocus() + ","
-                + RECURRENCE_COL  + "='" + entry.getRecurrence() + "',"
-                + LIST_COL  + "='" + checkStringForApostrophe(entry.getList()) + "',"
-                + LIST_POSITION_COL  + "=" + entry.getListPosition() + ","
-                + DROPPED_COL  + "=" + entry.getDropped() + ","
-                + REMINDER_DATE_COL + "=" + entry.getReminderDate() + ", "
-                + POSITION_COL + "=" + entry.getPosition()
-                + " WHERE " + ID_COL + "=" + id;
+        String query = "UPDATE " + TABLES.TABLE_ENTRIES + " SET "
+                + COLUMNS_ENTRIES.TASK_COL + "='" + checkStringForApostrophe(entry.getTask()) + "', "
+                + COLUMNS_ENTRIES.FOCUS_COL + "=" + entry.getFocus() + ","
+                + COLUMNS_ENTRIES.RECURRENCE_COL  + "='" + entry.getRecurrence() + "',"
+                + COLUMNS_ENTRIES.LIST_COL  + "='" + checkStringForApostrophe(entry.getList()) + "',"
+                + COLUMNS_ENTRIES.LIST_POSITION_COL  + "=" + entry.getListPosition() + ","
+                + COLUMNS_ENTRIES.DROPPED_COL  + "=" + entry.getDropped() + ","
+                + COLUMNS_ENTRIES.REMINDER_DATE_COL + "=" + entry.getReminderDate() + ", "
+                + COLUMNS_ENTRIES.POSITION_COL + "=" + entry.getPosition()
+                + " WHERE " + COLUMNS_ENTRIES.ID_COL + "=" + id;
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(query);
@@ -219,7 +199,7 @@ public class DbHelper  extends SQLiteOpenHelper{
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_ENTRIES, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLES.TABLE_ENTRIES, null);
 
         cursor.moveToFirst();
 
@@ -256,12 +236,12 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     }
 
-    public Map<String, Data.List> loadLists(){
-        Map<String, Data.List> lists = new Hashtable<>();
+    public Map<String, TaskList> loadLists(){
+        Map<String, TaskList> lists = new Hashtable<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_LISTS, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLES.TABLE_LISTS, null);
 
         cursor.moveToFirst();
 
@@ -270,7 +250,7 @@ public class DbHelper  extends SQLiteOpenHelper{
             String listName = cursor.getString(0);
             String color = cursor.getString(1);
 
-            Data.List list = new Data.List(-1,color);
+            TaskList list = new TaskList(-1,color);
             lists.put(listName, list);
             cursor.moveToNext();
         }
@@ -282,14 +262,14 @@ public class DbHelper  extends SQLiteOpenHelper{
     }
 
 
-    public void swapEntries(String positionCol, int id1, int id2){
+    public void swapEntries(COLUMNS_ENTRIES positionCol, int id1, int id2){
         SQLiteDatabase db = this.getWritableDatabase();
-        @SuppressLint("Recycle") Cursor cursor = db.rawQuery("SELECT " + positionCol + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id1, null);
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery("SELECT " + positionCol + " FROM " + TABLES.TABLE_ENTRIES + " WHERE " + COLUMNS_ENTRIES.ID_COL + "=" + id1, null);
         cursor.moveToFirst();
 
         int pos1 = cursor.getInt(0);
 
-        cursor = db.rawQuery("SELECT " + positionCol + " FROM " + TABLE_ENTRIES + " WHERE " + ID_COL + "=" + id2, null);
+        cursor = db.rawQuery("SELECT " + positionCol + " FROM " + TABLES.TABLE_ENTRIES + " WHERE " + COLUMNS_ENTRIES.ID_COL + "=" + id2, null);
         cursor.moveToFirst();
 
         int pos2 = cursor.getInt(0);
@@ -301,41 +281,21 @@ public class DbHelper  extends SQLiteOpenHelper{
 
     }
 
-    public static String getTaskCol(){return TASK_COL;}
-
-    public static String getFocusCol(){return FOCUS_COL;}
-
-    public static String getDroppedCol(){return DROPPED_COL;}
-
-    public static String getPositionCol(){
-        return POSITION_COL;
-    }
-
-    public static String getReminderDateCol() {return REMINDER_DATE_COL;}
-
-    public static String getRecurrenceCol(){return RECURRENCE_COL;}
-
-    public static String getListCol() {return LIST_COL;}
-
-    public static String getListPositionCol(){
-        return LIST_POSITION_COL;
-    }
-
 
     //converts Integer to Boolean (false if 0, true otherwise)
-    static boolean intToBool(int i){
+    public static boolean intToBool(int i){
         return i!=0;
     }
 
     //converts Boolean to Integer (0 if false, 1 if true)
-    static int boolToInt(boolean b){
+    public static int boolToInt(boolean b){
         return b ? 1 : 0;
     }
 
     private String checkStringForApostrophe(String string){
 
         if (string == null){
-            return string;
+            return null;
         }
 
         String[] sArray = string.split("'");

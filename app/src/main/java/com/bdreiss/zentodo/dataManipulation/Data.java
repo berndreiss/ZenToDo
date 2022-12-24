@@ -3,6 +3,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.bdreiss.zentodo.R;
+import com.bdreiss.zentodo.dataManipulation.database.COLUMNS_ENTRIES;
+import com.bdreiss.zentodo.dataManipulation.database.DbHelper;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSort;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByReminderDate;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByListPosition;
@@ -24,23 +26,11 @@ public class Data {
      *
      */
 
-    static class List{
-        int positionCount;
-        String color;
-
-        List(int positionCount, String color){
-
-            this.positionCount = positionCount;
-            this.color = color;
-
-        }
-
-    }
 
     protected static final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
     protected static ArrayList<Integer> ids = new ArrayList<>();//Used to generate new ids
 
-    protected static Map<String, List> listPositionCount;//keeps track of lists and  of number items in list: stores list position (n-1)
+    protected static Map<String, TaskList> listPositionCount;//keeps track of lists and  of number items in list: stores list position (n-1)
 
     private final Context context;
 
@@ -52,7 +42,7 @@ public class Data {
         this.context = context;
 
         //get new Database-handler
-        this.db = new DbHelper(context);
+        this.db = new DbHelper(context, "Data.db");
 
         if (listPositionCount != null)
             listPositionCount.clear();
@@ -130,7 +120,7 @@ public class Data {
 
                 //write new position to Data and Database
                 e.setPosition(newPosition);
-                db.updateEntry(DbHelper.getPositionCol(),e.getId(),newPosition);
+                db.updateEntry(COLUMNS_ENTRIES.POSITION_COL,e.getId(),newPosition);
             }
 
         }
@@ -165,7 +155,7 @@ public class Data {
         entries.get(pos2).setPosition(posTemp);
 
         //swap position in Database
-        db.swapEntries(DbHelper.getPositionCol(), id1, id2);
+        db.swapEntries(COLUMNS_ENTRIES.POSITION_COL, id1, id2);
 
     }
 
@@ -185,7 +175,7 @@ public class Data {
         entries.get(pos2).setListPosition(listPos1);
 
         //swap listPositions in Database
-        db.swapEntries(DbHelper.getListPositionCol(), id1, id2);
+        db.swapEntries(COLUMNS_ENTRIES.POSITION_COL, id1, id2);
 
         //if relative position of items in entries is different swap them too
         if ((pos1 < pos2 && listPos1 < listPos2) || (pos1 > pos2 && listPos1 > listPos2))
@@ -214,14 +204,14 @@ public class Data {
 
     public void setTask(int id, String newTask) {
         entries.get(getPosition(id)).setTask(newTask);
-        db.updateEntry(DbHelper.getTaskCol(), id, newTask);
+        db.updateEntry(COLUMNS_ENTRIES.TASK_COL, id, newTask);
     }
 
 
     public void setFocus(int id, Boolean focus) {
         Entry entry = entries.get(getPosition(id));
         entry.setFocus(focus);
-        db.updateEntry(DbHelper.getFocusCol(), id, DbHelper.boolToInt(focus));
+        db.updateEntry(COLUMNS_ENTRIES.FOCUS_COL, id, DbHelper.boolToInt(focus));
         if (entry.getDropped())
             setDropped(id, false);
 
@@ -229,14 +219,14 @@ public class Data {
 
     public void setDropped(int id, Boolean dropped) {
         entries.get(getPosition(id)).setDropped(dropped);
-        db.updateEntry(DbHelper.getDroppedCol(), id, DbHelper.boolToInt(dropped));
+        db.updateEntry(COLUMNS_ENTRIES.DROPPED_COL, id, DbHelper.boolToInt(dropped));
 
     }
 
     public void editReminderDate(int id, int date) {
         Entry entry = entries.get(getPosition(id));
         entry.setReminderDate(date);
-        db.updateEntry(DbHelper.getReminderDateCol(), id, date);
+        db.updateEntry(COLUMNS_ENTRIES.REMINDER_DATE_COL, id, date);
 
         if (entry.getDropped())
             setDropped(id, false);
@@ -245,7 +235,7 @@ public class Data {
 
     public void editRecurrence(int id, String recurrence) {
         entries.get(getPosition(id)).setRecurrence(recurrence);
-        db.updateEntry(DbHelper.getRecurrenceCol(), id, recurrence);
+        db.updateEntry(COLUMNS_ENTRIES.RECURRENCE_COL, id, recurrence);
     }
 
     public int editList(int id, String list) {
@@ -260,8 +250,8 @@ public class Data {
 
         entry.setListPosition(incrementListPositionCount(list));
 
-        db.updateEntry(DbHelper.getListCol(), id, list);
-        db.updateEntry(DbHelper.getListPositionCol(), id, entry.getListPosition());
+        db.updateEntry(COLUMNS_ENTRIES.LIST_COL, id, list);
+        db.updateEntry(COLUMNS_ENTRIES.LIST_POSITION_COL, id, entry.getListPosition());
 
         if (entry.getDropped())
             setDropped(id, false);
@@ -298,7 +288,7 @@ public class Data {
             return Objects.requireNonNull(listPositionCount.get(list)).positionCount;
         } else {
             //put new list
-            listPositionCount.put(list, new List(0,"#00ffffff"));
+            listPositionCount.put(list, new TaskList(0,"#00ffffff"));
             db.addList(list, "#00ffffff");
 
             //return position 0
@@ -331,7 +321,7 @@ public class Data {
 
                 //write to Entry and Database
                 e.setListPosition(newPosition);
-                db.updateEntry(DbHelper.getListPositionCol(),e.getId(),newPosition);
+                db.updateEntry(COLUMNS_ENTRIES.LIST_POSITION_COL,e.getId(),newPosition);
             }
 
         }
@@ -617,7 +607,7 @@ public class Data {
         entry.setReminderDate(date);
 
         //write reminder date to Database
-        db.updateEntry(DbHelper.getReminderDateCol(),id,date);
+        db.updateEntry(COLUMNS_ENTRIES.REMINDER_DATE_COL,id,date);
 
         return date;
     }
