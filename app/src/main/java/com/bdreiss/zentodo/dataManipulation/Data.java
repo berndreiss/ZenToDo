@@ -3,7 +3,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.bdreiss.zentodo.R;
-import com.bdreiss.zentodo.dataManipulation.database.COLUMNS_ENTRIES;
+import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_ENTRIES_V1;
 import com.bdreiss.zentodo.dataManipulation.database.DbHelper;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSort;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByReminderDate;
@@ -120,7 +120,7 @@ public class Data {
 
                 //write new position to Data and Database
                 e.setPosition(newPosition);
-                db.updateEntry(COLUMNS_ENTRIES.POSITION_COL,e.getId(),newPosition);
+                db.updateEntry(COLUMNS_ENTRIES_V1.POSITION_COL,e.getId(),newPosition);
             }
 
         }
@@ -155,7 +155,7 @@ public class Data {
         entries.get(pos2).setPosition(posTemp);
 
         //swap position in Database
-        db.swapEntries(COLUMNS_ENTRIES.POSITION_COL, id1, id2);
+        db.swapEntries(COLUMNS_ENTRIES_V1.POSITION_COL, id1, id2);
 
     }
 
@@ -175,7 +175,7 @@ public class Data {
         entries.get(pos2).setListPosition(listPos1);
 
         //swap listPositions in Database
-        db.swapEntries(COLUMNS_ENTRIES.POSITION_COL, id1, id2);
+        db.swapEntries(COLUMNS_ENTRIES_V1.POSITION_COL, id1, id2);
 
         //if relative position of items in entries is different swap them too
         if ((pos1 < pos2 && listPos1 < listPos2) || (pos1 > pos2 && listPos1 > listPos2))
@@ -204,14 +204,14 @@ public class Data {
 
     public void setTask(int id, String newTask) {
         entries.get(getPosition(id)).setTask(newTask);
-        db.updateEntry(COLUMNS_ENTRIES.TASK_COL, id, newTask);
+        db.updateEntry(COLUMNS_ENTRIES_V1.TASK_COL, id, newTask);
     }
 
 
     public void setFocus(int id, Boolean focus) {
         Entry entry = entries.get(getPosition(id));
         entry.setFocus(focus);
-        db.updateEntry(COLUMNS_ENTRIES.FOCUS_COL, id, DbHelper.boolToInt(focus));
+        db.updateEntry(COLUMNS_ENTRIES_V1.FOCUS_COL, id, focus);
         if (entry.getDropped())
             setDropped(id, false);
 
@@ -219,14 +219,14 @@ public class Data {
 
     public void setDropped(int id, Boolean dropped) {
         entries.get(getPosition(id)).setDropped(dropped);
-        db.updateEntry(COLUMNS_ENTRIES.DROPPED_COL, id, DbHelper.boolToInt(dropped));
+        db.updateEntry(COLUMNS_ENTRIES_V1.DROPPED_COL, id, dropped);
 
     }
 
     public void editReminderDate(int id, int date) {
         Entry entry = entries.get(getPosition(id));
         entry.setReminderDate(date);
-        db.updateEntry(COLUMNS_ENTRIES.REMINDER_DATE_COL, id, date);
+        db.updateEntry(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL, id, date);
 
         if (entry.getDropped())
             setDropped(id, false);
@@ -235,7 +235,7 @@ public class Data {
 
     public void editRecurrence(int id, String recurrence) {
         entries.get(getPosition(id)).setRecurrence(recurrence);
-        db.updateEntry(COLUMNS_ENTRIES.RECURRENCE_COL, id, recurrence);
+        db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, id, recurrence);
     }
 
     public int editList(int id, String list) {
@@ -250,8 +250,8 @@ public class Data {
 
         entry.setListPosition(incrementListPositionCount(list));
 
-        db.updateEntry(COLUMNS_ENTRIES.LIST_COL, id, list);
-        db.updateEntry(COLUMNS_ENTRIES.LIST_POSITION_COL, id, entry.getListPosition());
+        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_COL, id, list);
+        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, id, entry.getListPosition());
 
         if (entry.getDropped())
             setDropped(id, false);
@@ -261,14 +261,14 @@ public class Data {
 
     public void editListColor(String list, String color){
         if (listPositionCount.get(list) != null) {
-            Objects.requireNonNull(listPositionCount.get(list)).color = color;
+            Objects.requireNonNull(listPositionCount.get(list)).setColor(color);
             db.updateList(list, color);
         }
 
     }
 
     public String getListColor(String list){
-        return Objects.requireNonNull(listPositionCount.get(list)).color;
+        return Objects.requireNonNull(listPositionCount.get(list)).getColor();
     }
     //function increments position counter of list and returns a new position
     private int incrementListPositionCount(String list) {
@@ -277,15 +277,17 @@ public class Data {
         if (list == null)
             return -1;
 
+        TaskList taskList = listPositionCount.get(list);
         //if list is in listPositionCount get current position, save and return incremented position
         //return position 0 otherwise
-        if (listPositionCount.get(list) != null) {
+        if (taskList != null) {
+
 
             //increment position
-            Objects.requireNonNull(listPositionCount.get(list)).positionCount++;
+            taskList.setPositionCount(taskList.getPositionCount()+1);
 
             //return incremented position
-            return Objects.requireNonNull(listPositionCount.get(list)).positionCount;
+            return taskList.getPositionCount();
         } else {
             //put new list
             listPositionCount.put(list, new TaskList(0,"#00ffffff"));
@@ -299,13 +301,18 @@ public class Data {
     //decrement listPositionCount and synchronize listPositions in entries
     public void decrementListPositionCount(String list, int currPosition){
 
+        TaskList taskList = listPositionCount.get(list);
         //if position is 0 the last item has been removed and therefore the list must be removed from the map
         //decrement position counter otherwise
-        if (Objects.requireNonNull(listPositionCount.get(list)).positionCount == 0) {
+
+        if (taskList == null)
+            return;
+
+        if (taskList.getPositionCount() == 0) {
             listPositionCount.remove(list);
             db.removeList(list);
         } else
-            Objects.requireNonNull(listPositionCount.get(list)).positionCount--;
+            taskList.setPositionCount(taskList.getPositionCount()-1);
 
         //in all entries see if listPosition was bigger than position of removed item, if so decrement
         //this is done to preserve the sequential order of the list, which is important when new items are added to it
@@ -321,7 +328,7 @@ public class Data {
 
                 //write to Entry and Database
                 e.setListPosition(newPosition);
-                db.updateEntry(COLUMNS_ENTRIES.LIST_POSITION_COL,e.getId(),newPosition);
+                db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL,e.getId(),newPosition);
             }
 
         }
@@ -607,7 +614,7 @@ public class Data {
         entry.setReminderDate(date);
 
         //write reminder date to Database
-        db.updateEntry(COLUMNS_ENTRIES.REMINDER_DATE_COL,id,date);
+        db.updateEntry(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL,id,date);
 
         return date;
     }
