@@ -1,6 +1,7 @@
 package com.bdreiss.zentodo;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -11,7 +12,7 @@ import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_ENTRIES_V1
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_LISTS_V1;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.TABLES_V1;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,19 +30,23 @@ public class DbHelper_V1 {
 
     private static Context appContext;
 
+    private static final String[] stringTestData = {"Test", ",", ".", ";", ":", "-", "_", "#",
+            "'", " '", "' ", "'A", "A'", "A'A", "'A'A'",
+            "*", "~", "+", "`", "´", "?", "\\", "=",
+            "}", ")", "]", "(", "[", "{", "/", "&,",
+            "%", "$", "§", "\"", "!", "^", "°", "<", ">", "|"
+    };
+
     public void addTestDataNull(DbHelper db){
         insertQuery("0, \"NEW TASK\", 0, 1, NULL, -1, 0, NULL, 0", db);
-//        insertQuery("1, \"NEW TASK\", 0, 1, \"null\", -1, 0, \"null\", 1");
-//        insertQuery("2, \"NEW TASK\", 0, 1, \"null\", -1, 0, NULL, 2");
-//        insertQuery("3, \"NEW TASK\", 0, 1, NULL, -1, 0, \"null\", 3");
     }
 
-    public void addTestDataList(DbHelper db){
+    public void addTestDataList(DbHelper db, String string){
         db.getWritableDatabase().execSQL("INSERT INTO " + TABLES_V1.TABLE_LISTS + "(" +
                         COLUMNS_LISTS_V1.LIST_NAME_COL + ", " +
-                        COLUMNS_LISTS_V1.LIST_COLOR_COL + ") VALUES (" +
-                        "\"TEST\"" + ", " +
-                        "\"WHITE\")"
+                        COLUMNS_LISTS_V1.LIST_COLOR_COL + ") VALUES ('" +
+                        string + "', " +
+                        "'WHITE')"
                 );
     }
 
@@ -100,81 +105,45 @@ public class DbHelper_V1 {
         assert(entry.getPosition() == 0);
 
         appContext.deleteDatabase("TEST.db");
-        /*
-        entry = entries.get(1);
+    }
 
-        assert(entry.getId() == 1);
-        assert(entry.getTask().equals("NEW TASK"));
-        assert(!entry.getFocus());
-        assert(entry.getDropped());
-        assert(entry.getList() == null);
-        assert(entry.getListPosition() == -1);
-        assert(entry.getReminderDate() == 0);
-        assert(entry.getRecurrence() == null);
-        assert(entry.getPosition() == 1);
+    @Test
+    public void addEntry(){
+        DbHelper db = new DbHelper(appContext, "TEST.db");
 
-        entry = entries.get(2);
+        String[] tasks = stringTestData;
 
-        assert(entry.getId() == 2);
-        assert(entry.getTask().equals("NEW TASK"));
-        assert(!entry.getFocus());
-        assert(entry.getDropped());
-        assert(entry.getList() == null);
-        assert(entry.getListPosition() == -1);
-        assert(entry.getReminderDate() == 0);
-        assert(entry.getRecurrence() == null);
-        assert(entry.getPosition() == 2);
+        for (int i = 0; i < tasks.length; i++)
+            db.addEntry(new Entry(i,i,tasks[i]));
 
-        entry = entries.get(3);
+        for (int i = 0; i < tasks.length; i++)
+            assert(db.loadEntries().get(i).getTask().equals(tasks[i]));
 
-        assert(entry.getId() == 3);
-        assert(entry.getTask().equals("NEW TASK"));
-        assert(!entry.getFocus());
-        assert(entry.getDropped());
-        assert(entry.getList() == null);
-        assert(entry.getListPosition() == -1);
-        assert(entry.getReminderDate() == 0);
-        assert(entry.getRecurrence() == null);
-        assert(entry.getPosition() == 3);*/
-
+        appContext.deleteDatabase("TEST.db");
     }
 
     @Test
     public void loadEntries(){
         DbHelper db = new DbHelper(appContext, "TEST.db");
 
-        db.addEntry(new Entry(0,0,"NEW TASK"));
+        for (int i = 0; i < 3; i++) {
 
-        assert(db.loadEntries().size() == 1);
+            db.addEntry(new Entry(i, i, "NEW TASK"));
 
-        Entry entry = db.loadEntries().get(0);
+            Log.d("SIZE ENTRIES: ", String.valueOf(db.loadEntries().size()));
+//            assert (db.loadEntries().size() == i+1);
+            Entry entry = db.loadEntries().get(i);
 
-        assert(entry.getId() == 0);
-        assert(entry.getTask().equals("NEW TASK"));
-        assert(!entry.getFocus());
-        assert(entry.getDropped());
-        assert(entry.getList() == null);
-        assert(entry.getListPosition() == -1);
-        assert(entry.getReminderDate() == 0);
-        assert(entry.getRecurrence() == null);
-        assert(entry.getPosition() == 0);
-
-        db.addEntry(new Entry(1,1,"NEW TASK"));
-
-        assert(db.loadEntries().size() == 2);
-
-        entry = db.loadEntries().get(1);
-
-        assert(entry.getId() == 1);
-        assert(entry.getTask().equals("NEW TASK"));
-        assert(!entry.getFocus());
-        assert(entry.getDropped());
-        assert(entry.getList() == null);
-        assert(entry.getListPosition() == -1);
-        assert(entry.getReminderDate() == 0);
-        assert(entry.getRecurrence() == null);
-        assert(entry.getPosition() == 1);
-
+            assert(entry.getId() == i);
+            assert(entry.getTask().equals("NEW TASK"));
+            assert(!entry.getFocus());
+            assert(entry.getDropped());
+            assert(entry.getList() == null);
+            assert(entry.getListPosition() == -1);
+            assert(entry.getReminderDate() == 0);
+            assert(entry.getRecurrence() == null);
+            assert(entry.getPosition() == i);
+        }
         appContext.deleteDatabase("TEST.db");
 
     }
@@ -235,13 +204,45 @@ public class DbHelper_V1 {
 
         assert(db.loadLists().isEmpty());
 
-        addTestDataList(db);
+        addTestDataList(db, "TEST");
 
-        assert(db.loadLists().containsKey("TEST"));
+        assert (db.loadLists().containsKey("TEST"));
+        assert (Objects.equals(Objects.requireNonNull(db.loadLists().get("TEST")).getColor(), "WHITE"));
 
-        assert(Objects.equals(Objects.requireNonNull(db.loadLists().get("TEST")).getColor(), "WHITE"));
         appContext.deleteDatabase("TEST.db");
 
+    }
+
+    @Test
+    public void addList(){
+        DbHelper db = new DbHelper(appContext, "TEST.db");
+
+        db.addList("|", "WHITE");
+
+        assert(db.loadLists().containsKey("|"));
+
+
+        for (String stringTestDatum : stringTestData) db.addList(stringTestDatum, "WHITE");
+
+        for (String stringTestDatum : stringTestData) {
+            assert (db.loadLists().containsKey(stringTestDatum));
+            assert (Objects.equals(Objects.requireNonNull(db.loadLists().get(stringTestDatum)).getColor(), "WHITE"));
+        }
+        appContext.deleteDatabase("TEST.db");
+
+    }
+
+    @Test
+    public void removeList(){
+        DbHelper db = new DbHelper(appContext, "TEST.db");
+
+        addTestDataList(db, "TEST");
+
+        db.removeList("TEST");
+
+        assert(db.loadLists().isEmpty());
+
+        appContext.deleteDatabase("TEST.db");
     }
 
     @Test
@@ -250,9 +251,33 @@ public class DbHelper_V1 {
 
         db.addEntry(new Entry(0,0,"NEW TASK"));
 
-        db.updateEntry(COLUMNS_ENTRIES_V1.TASK_COL,0,"TEST");
 
-        assert(db.loadEntries().get(0).getTask().equals("TEST"));
+        for (String stringTestDatum : stringTestData) {
+
+
+            db.updateEntry(COLUMNS_ENTRIES_V1.TASK_COL, 0, stringTestDatum);
+
+            assert (db.loadEntries().get(0).getTask().equals(stringTestDatum));
+
+
+            db.updateEntry(COLUMNS_ENTRIES_V1.LIST_COL, 0, stringTestDatum);
+
+            assert (db.loadEntries().get(0).getList().equals(stringTestDatum));
+
+
+            db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, 0, stringTestDatum);
+
+            assert (db.loadEntries().get(0).getRecurrence().equals(stringTestDatum));
+
+        }
+
+        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_COL, 0, null);
+
+        assert (db.loadEntries().get(0).getList() == null);
+
+        db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, 0, null);
+
+        assert (db.loadEntries().get(0).getRecurrence() == null);
 
         db.updateEntry(COLUMNS_ENTRIES_V1.FOCUS_COL, 0, false);
 
@@ -270,14 +295,6 @@ public class DbHelper_V1 {
 
         assert(db.loadEntries().get(0).getDropped());
 
-        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_COL, 0, null);
-
-        assert(db.loadEntries().get(0).getList() == null);
-
-        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_COL, 0, "TEST");
-
-        assert(db.loadEntries().get(0).getList().equals("TEST"));
-
         db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, 0, 0);
 
         assert(db.loadEntries().get(0).getListPosition() == 0);
@@ -285,14 +302,6 @@ public class DbHelper_V1 {
         db.updateEntry(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL, 0, 2000);
 
         assert(db.loadEntries().get(0).getReminderDate() == 2000);
-
-        db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, 0, null);
-
-        assert(db.loadEntries().get(0).getRecurrence() == null);
-
-        db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, 0, "TEST");
-
-        assert(db.loadEntries().get(0).getRecurrence().equals("TEST"));
 
         db.updateEntry(COLUMNS_ENTRIES_V1.POSITION_COL, 0, 99);
 
@@ -302,8 +311,69 @@ public class DbHelper_V1 {
         appContext.deleteDatabase("TEST.db");
     }
 
-    @AfterClass
-    public static void tearDown(){
+    @Test
+    public void updateList(){
+        DbHelper db = new DbHelper(appContext, "TEST.db");
+
+        for (String stringTestDatum : stringTestData) {
+            db.addList(stringTestDatum, "WHITE");
+
+            db.updateList(stringTestDatum, "RED");
+
+            assert (Objects.requireNonNull(db.loadLists().get(stringTestDatum)).getColor().equals("RED"));
+
+        }
+        appContext.deleteDatabase("TEST.db");
+    }
+
+    @Test
+    public void swapEntries(){
+
+        class Test{
+            final COLUMNS_ENTRIES_V1[] fields = {COLUMNS_ENTRIES_V1.POSITION_COL, COLUMNS_ENTRIES_V1.LIST_POSITION_COL};
+            final int[][][] testData = {{{0,1},{0,2}, {1,2}},{{0,1},{0,2}, {1,2}}};
+            final int[][][] results = {{{1,0,2},{2,0,1},{2,1,0}},{{1,0,2},{2,0,1},{2,1,0}}};
+        }
+
+        Test test = new Test();
+
+        DbHelper db = new DbHelper(appContext, "TEST.db");
+
+        for (int i = 0; i < test.results[0][0].length; i++){
+            db.addEntry(new Entry(i,i,"NEW TASK"));
+            db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, i,i);
+
+        }
+
+
+        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, 1,1);
+        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, 2,2);
+
+        for (int i = 0; i < test.fields.length; i++)
+            for (int j = 0; j < test.testData[i].length; j++) {
+                db.swapEntries(test.fields[i], test.testData[i][j][0], test.testData[i][j][1]);
+
+                switch (test.fields[i]){
+                    case POSITION_COL:
+                        for (int k = 0; k < test.results[0][0].length; k++ )
+                            assert(db.loadEntries().get(k).getPosition() == test.results[i][j][k]);
+                        break;
+                    case LIST_POSITION_COL:
+                        for (int k = 0; k < test.results[0][0].length; k++ )
+                            assert(db.loadEntries().get(k).getListPosition() == test.results[i][j][k]);
+                        break;
+
+                }
+
+            }
+
+        appContext.deleteDatabase("TEST.db");
+    }
+
+    @After
+    public void cleanUp(){
+
+        appContext.deleteDatabase("TEST.db");
 
     }
 
