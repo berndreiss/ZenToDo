@@ -36,22 +36,10 @@ public class DbHelper extends SQLiteOpenHelper{
 
     private static final int DB_VERSION = 1;
 
-
-
-
-
-
     public DbHelper(Context context, String DB_NAME){
         super(context,DB_NAME,null, DB_VERSION);
     }
 
-    public void migrate(SQLiteDatabase db) {
-        String query = "DROP TABLE IF EXISTS " + TABLES_V1.TABLE_ENTRIES;
-        db.execSQL(query);
-        onCreate(db);
-
-
-    }
     //Create new table for entries onCreate
     public void onCreate(SQLiteDatabase db){
         String query = "CREATE TABLE " + TABLES_V1.TABLE_ENTRIES + " ("
@@ -103,9 +91,6 @@ public class DbHelper extends SQLiteOpenHelper{
 
     public void addList(String list, String color){
         ContentValues values = new ContentValues();
-
-        list = checkStringForApostrophe(list);
-
 
         Log.d("CHECK", list);
         SQLiteDatabase db = this.getWritableDatabase();
@@ -180,24 +165,6 @@ public class DbHelper extends SQLiteOpenHelper{
         db.close();
     }
 
-    public void updateAllFields(int id, Entry entry){
-        String query = "UPDATE " + TABLES_V1.TABLE_ENTRIES + " SET "
-                + COLUMNS_ENTRIES_V1.TASK_COL + "='" + checkStringForApostrophe(entry.getTask()) + "', "
-                + COLUMNS_ENTRIES_V1.FOCUS_COL + "=" + entry.getFocus() + ","
-                + COLUMNS_ENTRIES_V1.RECURRENCE_COL  + "='" + entry.getRecurrence() + "',"
-                + COLUMNS_ENTRIES_V1.LIST_COL  + "='" + checkStringForApostrophe(entry.getList()) + "',"
-                + COLUMNS_ENTRIES_V1.LIST_POSITION_COL  + "=" + entry.getListPosition() + ","
-                + COLUMNS_ENTRIES_V1.DROPPED_COL  + "=" + entry.getDropped() + ","
-                + COLUMNS_ENTRIES_V1.REMINDER_DATE_COL + "=" + entry.getReminderDate() + ", "
-                + COLUMNS_ENTRIES_V1.POSITION_COL + "=" + entry.getPosition()
-                + " WHERE " + COLUMNS_ENTRIES_V1.ID_COL + "=" + id;
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL(query);
-        db.close();
-
-    }
-
     //load all entries from database and return as ArrayList
     public ArrayList<Entry> loadEntries(){
         ArrayList<Entry> entries = new ArrayList<>();
@@ -266,7 +233,6 @@ public class DbHelper extends SQLiteOpenHelper{
         return lists;
     }
 
-
     public void swapEntries(COLUMNS_ENTRIES_V1 positionCol, int id1, int id2){
         SQLiteDatabase db = this.getWritableDatabase();
         @SuppressLint("Recycle") Cursor cursor = db.rawQuery("SELECT " + positionCol + " FROM " + TABLES_V1.TABLE_ENTRIES + " WHERE " + COLUMNS_ENTRIES_V1.ID_COL + "=" + id1, null);
@@ -285,7 +251,6 @@ public class DbHelper extends SQLiteOpenHelper{
         updateEntry(positionCol, id2,pos1);
 
     }
-
 
     //converts Integer to Boolean (false if 0, true otherwise)
     public static boolean intToBool(int i){
