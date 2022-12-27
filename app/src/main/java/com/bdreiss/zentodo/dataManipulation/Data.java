@@ -37,12 +37,12 @@ public class Data {
     private final DbHelper db;//database
 
     //initialize instance of Data, load content of database into entries, populate ids and listPositionCount
-    public Data(Context context) {
+    public Data(Context context, String databaseName) {
 
         this.context = context;
 
         //get new Database-handler
-        this.db = new DbHelper(context, "Data.db");
+        this.db = new DbHelper(context, databaseName);
 
         if (listPositionCount != null)
             listPositionCount.clear();

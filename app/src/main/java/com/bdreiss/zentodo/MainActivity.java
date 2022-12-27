@@ -65,7 +65,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
 //    private final static String TEXT_COLOR = "#90000000";
-
+    private final static String DATABASE_NAME = "Data.db";
 
 
     //Layouts for different modes
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         //Initialize Data-object and load data
-        data = new Data(this);
+        data = new Data(this, DATABASE_NAME);
 
         //Assign views to variables
         drop = findViewById(R.id.layout_drop);
