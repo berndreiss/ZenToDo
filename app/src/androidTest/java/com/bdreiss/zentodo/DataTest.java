@@ -93,10 +93,36 @@ public class DataTest {
 
         }
 
+
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    @Test
+    public void idGeneration(){
+        String[] strings = {"0","1","2","3"};
 
+        TestClass test = new TestClass(strings);
+
+        test.set();
+
+        Data data = test.getData();
+
+        data.remove(1);
+
+        data.add("4");
+
+        for (Entry e : data.getEntries())
+            assert !e.getTask().equals("4") || (e.getId() == 1);
+
+        data.remove(2);
+
+        data.add("5");
+
+        for (Entry e : data.getEntries())
+            assert !e.getTask().equals("5") || (e.getId() == 2);
+
+        appContext.deleteDatabase(DATABASE_NAME);
+    }
 
     @Test
     public void remove(){
@@ -106,6 +132,8 @@ public class DataTest {
 
         int[][] results = {{0,1,2},{1,2},{0,2},{0,1},{2},{0},{1},{},};
 
+        int[][] resultsPosition = {{0,1,2}, {0,1}, {0,1}, {0,1}, {0},{0},{0},{}};
+
         String[] entryStrings = {"0","1","2"};
         TestClass test = new TestClass(entryStrings);
 
@@ -118,9 +146,10 @@ public class DataTest {
             for (int j = 0; j < tests[i].length; j++)
                 data.remove(tests[i][j]);
 
-            for (int j = 0; j < data.getEntries().size(); j++)
-                assert(data.getEntries().get(j).getId() == results[i][j]);
-
+            for (int j = 0; j < data.getEntries().size(); j++) {
+                assert (data.getEntries().get(j).getId() == results[i][j]);
+                assert (data.getEntries().get(j).getPosition() == resultsPosition[i][j]);
+            }
         }
 
         appContext.deleteDatabase(DATABASE_NAME);
@@ -129,10 +158,14 @@ public class DataTest {
     @Test
     public void swap(){
 
-/*
-        int[][][] tests = {{},{{0,1}}, {{1,2}}, {2},{0,1},{1,2},{0,2},{0,1,2}};
 
-        int[][] results = {{0,1,2},{1,2},{0,2},{0,1},{2},{0},{1},{},};
+        int[][][] tests = {{{0,1}}, {{1,2}}, {{0,2}}, {{1,0}}, {{2,1}}, {{2,0}},
+                            {{0,1},{1,0}}, {{0,2},{1,2}},{{0,1},{1,2}}
+                            };
+
+        int[][] results = {{1,0,2}, {0,2,1}, {2,1,0}, {1,0,2}, {0,2,1}, {2,1,0},
+                            {0,1,2}, {1,2,0}, {2,0,1}
+                            };
 
         String[] entryStrings = {"0","1","2"};
 
@@ -145,7 +178,7 @@ public class DataTest {
             Data data = test.getData();
 
             for (int j = 0; j < tests[i].length; j++)
-                data.remove(tests[i][j]);
+                data.swap(tests[i][j][0],tests[i][j][1]);
 
             for (int j = 0; j < data.getEntries().size(); j++)
                 assert(data.getEntries().get(j).getId() == results[i][j]);
@@ -154,7 +187,7 @@ public class DataTest {
 
         appContext.deleteDatabase(DATABASE_NAME);
 
-*/
+
     }
 
     @Test
@@ -170,16 +203,90 @@ public class DataTest {
     @Test
     public void setTask(){
 
+        String[] stringData = {"0","1","2"};
+
+        TestClass test = new TestClass(stringData);
+
+        test.set();
+
+        Data data = test.getData();
+
+        for (int i = 0; i < stringData.length; i++){
+            data.setTask(i, "TEST");
+        }
+
+        for (Entry e : data.getEntries())
+            assert(e.getTask().equals("TEST"));
+
+        for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
+            assert(e.getTask().equals("TEST"));
+
     }
 
     @Test
     public void setFocus(){
 
+        String[] stringData = {"0","1","2"};
+
+        TestClass test = new TestClass(stringData);
+
+        test.set();
+
+        Data data = test.getData();
+
+        for (int i = 0; i < stringData.length; i++){
+            data.setFocus(i, true);
+        }
+
+        for (Entry e : data.getEntries())
+            assert(e.getFocus());
+
+        for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
+            assert(e.getFocus());
+
+
+        for (int i = 0; i < stringData.length; i++){
+            data.setFocus(i, false);
+        }
+
+        for (Entry e : data.getEntries())
+            assert(!e.getFocus());
+
+        for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
+            assert(!e.getFocus());
     }
 
     @Test
     public void setDropped(){
 
+        String[] stringData = {"0","1","2"};
+
+        TestClass test = new TestClass(stringData);
+
+        test.set();
+
+        Data data = test.getData();
+
+        for (int i = 0; i < stringData.length; i++){
+            data.setDropped(i, true);
+        }
+
+        for (Entry e : data.getEntries())
+            assert(e.getDropped());
+
+        for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
+            assert(e.getDropped());
+
+
+        for (int i = 0; i < stringData.length; i++){
+            data.setDropped(i, false);
+        }
+
+        for (Entry e : data.getEntries())
+            assert(!e.getDropped());
+
+        for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
+            assert(!e.getDropped());
     }
 
     @Test
@@ -195,6 +302,49 @@ public class DataTest {
     @Test
     public void editList(){
 
+        String[] stringData = {"0","1","2","3","4","5"};
+
+        TestClass test = new TestClass(stringData);
+
+        String[] tests = {"0", "1"};
+
+        String[] resultsList = {"0", "1", "0", "1", "0", "1"};
+
+        int[] resultsPosition = {0,0,1,1,2,2};
+
+        test.set();
+
+        Data data = test.getData();
+
+        for (int i = 0; i < data.getEntries().size(); i++) {
+            data.editList(i, tests[i % 2]);
+        }
+
+        ArrayList<Entry> entries = new DbHelper(appContext,DATABASE_NAME).loadEntries();
+        for (int i = 0; i < entries.size(); i++) {
+            assert(entries.get(i).getList().equals(resultsList[i]));
+            assert(entries.get(i).getListPosition() == resultsPosition[i]);
+        }
+
+        for (String s : tests) {
+            assert (data.getLists().contains(s));
+            assert(new DbHelper(appContext,DATABASE_NAME).loadLists().containsKey(s));
+        }
+
+        data.editList(0,null);
+
+        assert(data.getEntries().get(2).getListPosition() == 0);
+        assert(data.getEntries().get(4).getListPosition() == 1);
+
+        data.editList(2,null);
+
+        assert(data.getEntries().get(4).getListPosition() == 0);
+
+        data.editList(4,null);
+
+        assert(data.getLists().size() == 3);
+
+        appContext.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
