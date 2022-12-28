@@ -243,7 +243,7 @@ public class Data {
 
         //if there was a list before and it was different to the new one, decrement the count of items in this list
         // (this counter is used to keep track of list positions -> see Data.java)
-        if (list != null && entry.getList() != null && !list.equals(entry.getList()))
+        if (entry.getList() != null)
             decrementListPositionCount(entry.getList(), entries.get(getPosition(id)).getListPosition());
 
         entry.setList(list);
