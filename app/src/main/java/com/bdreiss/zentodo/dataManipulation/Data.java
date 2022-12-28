@@ -27,10 +27,10 @@ public class Data {
      */
 
 
-    protected static final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
-    protected static ArrayList<Integer> ids = new ArrayList<>();//Used to generate new ids
+    protected final ArrayList<Entry> entries = new ArrayList<>(); //list of all current tasks, which are also always present in the save file
+    protected ArrayList<Integer> ids = new ArrayList<>();//Used to generate new ids
 
-    protected static Map<String, TaskList> listPositionCount;//keeps track of lists and  of number items in list: stores list position (n-1)
+    protected Map<String, TaskList> listPositionCount;//keeps track of lists and  of number items in list: stores list position (n-1)
 
     private final Context context;
 
