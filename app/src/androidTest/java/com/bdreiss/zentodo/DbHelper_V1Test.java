@@ -26,11 +26,11 @@ import java.util.Objects;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 @RunWith(AndroidJUnit4.class)
-public class DbHelper_V1 {
+public class DbHelper_V1Test {
 
     private static Context appContext;
 
-    private static final String[] stringTestData = {"Test", ",", ".", ";", ":", "-", "_", "#",
+    public static final String[] stringTestData = {"Test", ",", ".", ";", ":", "-", "_", "#",
             "'", " '", "' ", "'A", "A'", "A'A", "'A'A'",
             "*", "~", "+", "`", "´", "?", "\\", "=",
             "}", ")", "]", "(", "[", "{", "/", "&,",
