@@ -24,10 +24,18 @@ public class DataTest {
 
         private String[] entryStrings;
 
+        private String[] listStrings;
+
         private Data data;
 
         TestClass(String[] entryStrings) {
             this.entryStrings = entryStrings;
+        }
+        TestClass(String[] entryStrings, String[] listStrings) {
+
+            this.entryStrings = entryStrings;
+
+            this.listStrings = listStrings;
         }
 
         public void set(){
@@ -38,6 +46,12 @@ public class DataTest {
 
             for (String s : entryStrings)
                 data.add(s);
+
+            if (listStrings != null)
+                for (int i = 0; i < data.getEntries().size(); i++)
+                    data.editList(i, listStrings[i]);
+
+
 
 
         }
@@ -193,6 +207,57 @@ public class DataTest {
     @Test
     public void swapList(){
 
+        String[] stringData = {"0","1","2","3","4","5"};
+
+        String[] tests = {"0", "1", "0", "1", "0", "1"};
+
+        int[][][] swaps = {{{0,2}},{{0,4}}, {{2,4}},{{2,0}},{{4,0}}, {{4,2}},
+                {{0,2},{2,4}},{{0,2},{2,4},{0,4}},{{0,2},{2,4},{0,4},{2,4}}
+        };
+
+        int[][] resultsListPosition = {
+                {1,0,0,1,2,2},
+                {2,0,1,1,0,2},
+                {0,0,2,1,1,2},
+                {1,0,0,1,2,2},
+                {2,0,1,1,0,2},
+                {0,0,2,1,1,2},
+                {1,0,2,1,0,2},
+                {0,0,2,1,1,2},
+                {0,0,1,1,2,2}
+        };
+
+        int[][] resultsPosition = {
+                {2,1,0,3,4,5},
+                {4,1,2,3,0,5},
+                {0,1,4,3,2,5},
+                {2,1,0,3,4,5},
+                {4,1,2,3,0,5},
+                {0,1,4,3,2,5},
+                {2,1,4,3,0,5},
+                {0,1,4,3,2,5},
+                {0,1,2,3,4,5}
+
+        };
+
+        TestClass test = new TestClass(stringData, tests);
+
+
+        for (int i = 0; i < swaps.length; i++){
+            test.set();
+
+            Data data = test.getData();
+
+            for (int j = 0; j < swaps[i].length; j++)
+                data.swapList(swaps[i][j][0],swaps[i][j][1]);
+
+            for (Entry e : data.getEntries()) {
+                assert (e.getListPosition() == resultsListPosition[i][e.getId()]);
+                assert (e.getPosition() == resultsPosition[i][e.getId()]);
+            }
+        }
+
+
     }
 
     @Test
@@ -304,21 +369,17 @@ public class DataTest {
 
         String[] stringData = {"0","1","2","3","4","5"};
 
-        TestClass test = new TestClass(stringData);
-
-        String[] tests = {"0", "1"};
+        String[] tests = {"0", "1", "0", "1", "0", "1"};
 
         String[] resultsList = {"0", "1", "0", "1", "0", "1"};
 
         int[] resultsPosition = {0,0,1,1,2,2};
 
+        TestClass test = new TestClass(stringData, tests);
+
         test.set();
 
         Data data = test.getData();
-
-        for (int i = 0; i < data.getEntries().size(); i++) {
-            data.editList(i, tests[i % 2]);
-        }
 
         ArrayList<Entry> entries = new DbHelper(appContext,DATABASE_NAME).loadEntries();
         for (int i = 0; i < entries.size(); i++) {
