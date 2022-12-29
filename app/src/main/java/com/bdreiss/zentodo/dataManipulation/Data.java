@@ -175,7 +175,7 @@ public class Data {
         entries.get(pos2).setListPosition(listPos1);
 
         //swap listPositions in Database
-        db.swapEntries(COLUMNS_ENTRIES_V1.POSITION_COL, id1, id2);
+        db.swapEntries(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, id1, id2);
 
         //if relative position of items in entries is different swap them too
         if ((pos1 < pos2 && listPos1 < listPos2) || (pos1 > pos2 && listPos1 > listPos2))
