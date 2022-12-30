@@ -1,7 +1,6 @@
 package com.bdreiss.zentodo;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -20,9 +19,9 @@ import java.util.ArrayList;
 @RunWith(AndroidJUnit4.class)
 public class DataTest {
 
-    class TestClass{
+    static class TestClass{
 
-        private String[] entryStrings;
+        private final String[] entryStrings;
 
         private String[] listStrings;
 
@@ -263,6 +262,15 @@ public class DataTest {
     @Test
     public void getPosition(){
 
+        String[] taskStrings = {"0","1","2","3"};
+
+        TestClass test = new TestClass(taskStrings);
+
+        test.set();
+
+        for (int i = 0; i < taskStrings.length; i++)
+            assert(test.getData().getPosition(i)==i);
+
     }
 
     @Test
@@ -355,12 +363,59 @@ public class DataTest {
     }
 
     @Test
-    public void setReminderDate(){
+    public void editReminderDate(){
 
+        String[] taskStrings = {"0","1","2","3"};
+
+        int[] tests = {0, 20110311, 0, 2000};
+
+        TestClass test = new TestClass(taskStrings);
+
+        test.set();
+
+        Data data = test.getData();
+
+        for (int i = 0; i < taskStrings.length; i++)
+            data.editReminderDate(i,tests[i]);
+
+        ArrayList<Entry> entries = new DbHelper(appContext, DATABASE_NAME).loadEntries();
+
+        for (int i = 0; i < taskStrings.length; i++)
+            assert(entries.get(0).getReminderDate()== tests[entries.get(0).getId()]);
+
+        appContext.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
     public void editRecurrence(){
+
+        String[] taskStrings = {"0","1","2","3"};
+
+        String[] tests = {"w2", "d999", "y88", "m3"};
+
+        TestClass test = new TestClass(taskStrings);
+
+        test.set();
+
+        Data data = test.getData();
+
+        for (int i = 0; i < taskStrings.length; i++)
+            data.editRecurrence(i,tests[i]);
+
+        ArrayList<Entry> entries = new DbHelper(appContext, DATABASE_NAME).loadEntries();
+
+        for (int i = 0; i < taskStrings.length; i++)
+            assert(entries.get(0).getRecurrence().equals(tests[entries.get(0).getId()]));
+
+        for (int i = 0; i < tests.length; i++)
+            data.editRecurrence(i,null);
+
+        entries = new DbHelper(appContext, DATABASE_NAME).loadEntries();
+
+        for (Entry e : entries)
+            assert(e.getRecurrence()==null);
+
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 
