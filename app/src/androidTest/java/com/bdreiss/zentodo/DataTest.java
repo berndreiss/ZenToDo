@@ -466,10 +466,27 @@ public class DataTest {
     @Test
     public void editListColor(){
 
+
+
     }
 
     @Test
     public void getListColor(){
+
+        DbHelper db = new DbHelper(appContext,DATABASE_NAME);
+
+        String[] lists = {"0", "1", "2"};
+        String[] colors = {"WHITE", "RED", "BLUE"};
+
+        for (int i = 0; i < lists.length; i++)
+            db.addList(lists[i],colors[i]);
+
+        Data data = new Data(appContext,DATABASE_NAME);
+
+        for (int i = 0; i < lists.length; i++)
+            assert(data.getListColor(lists[i]).equals(colors[i]));
+
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 
