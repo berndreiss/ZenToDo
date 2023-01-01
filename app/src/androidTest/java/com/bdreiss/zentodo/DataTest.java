@@ -466,6 +466,23 @@ public class DataTest {
     @Test
     public void editListColor(){
 
+        DbHelper db = new DbHelper(appContext,DATABASE_NAME);
+
+        String[] lists = {"0", "1", "2"};
+        String[] initialColors = {"WHITE", "RED", "BLUE"};
+        String[] results = {"BLUE", "WHITE", "RED"};
+        for (int i = 0; i < lists.length; i++)
+            db.addList(lists[i],initialColors[i]);
+
+        Data data = new Data(appContext,DATABASE_NAME);
+
+        for (int i = 0; i < lists.length;i++)
+            data.editListColor(lists[i],results[i]);
+
+        for (int i = 0; i < lists.length; i++)
+            assert(data.getListColor(lists[i]).equals(results[i]));
+
+        appContext.deleteDatabase(DATABASE_NAME);
 
 
     }
@@ -494,7 +511,8 @@ public class DataTest {
 
     @Test
     public void decrementListPositionCount(){
-
+//        String[] lists = {"0","0", "0", "1", "1", "1"};
+//        String[] tasks = {"0","1","2", "3", "4", "5"};
     }
 
     @Test
