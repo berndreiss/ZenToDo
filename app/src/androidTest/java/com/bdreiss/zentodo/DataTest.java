@@ -1,6 +1,7 @@
 package com.bdreiss.zentodo;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -511,8 +512,41 @@ public class DataTest {
 
     @Test
     public void decrementListPositionCount(){
-//        String[] lists = {"0","0", "0", "1", "1", "1"};
-//        String[] tasks = {"0","1","2", "3", "4", "5"};
+        String[] tasks = {"0","1","2", "3", "4", "5"};
+        String[] lists = {"0","0", "0", "1", "1", "1"};
+
+
+        String[][][] tests = {{{"2",null}},{{"1",null}},{{"0", null}},
+                {{"2", null},{"1",null}},{{"1", null},{"0",null}},{{"2", null},{"0",null}},
+                {{"1", null},{"2",null}},{{"0", null},{"1",null}},{{"0", null},{"2",null}},
+                {{"2", null},{"1",null},{"0",null}}, {{"1", null},{"2",null},{"0",null}}, {{"0", null},{"1",null},{"2",null}}
+        };
+
+        int[][] results = {{0, 1, -1, 0, 1, 2},{0, -1, 1, 0, 1, 2},{-1, 0, 1, 0, 1, 2},
+                {0, -1, -1, 0, 1, 2},{-1, -1, 0, 0, 1, 2},{-1, 0, -1, 0, 1, 2},
+                {0, -1, -1, 0, 1, 2},{-1, -1, 0, 0, 1, 2},{-1, 0, -1, 0, 1, 2},
+                {-1, -1, -1, 0, 1, 2},{-1, -1, -1, 0, 1, 2},{-1, -1, -1, 0, 1, 2}
+
+        };
+
+        TestClass test = new TestClass(tasks,lists);
+
+        for (int i = 0; i < tests.length; i++){
+
+            test.set();
+
+            Data data = test.getData();
+
+            for (int j = 0; j < tests[i].length; j++)
+                data.editList(Integer.parseInt(tests[i][j][0]),tests[i][j][1]);
+
+            for (Entry e : data.getEntries())
+                assert (e.getListPosition() == results[i][e.getId()]);
+
+
+        }
+
+        appContext.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
