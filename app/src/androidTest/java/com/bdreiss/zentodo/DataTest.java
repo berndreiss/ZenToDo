@@ -582,6 +582,32 @@ public class DataTest {
     @Test
     public void getLists(){
 
+        String[] tasks = {"0","1","2","3"};
+
+        String[] lists = {"0","1","2","3"};
+
+        TestClass test = new TestClass(tasks,lists);
+
+        test.set();
+
+        Data data = test.getData();
+
+        ArrayList<String> returnedLists = data.getLists();
+
+        assert(returnedLists.size() == lists.length+2);
+
+        for (String s : lists) {
+            boolean contains = false;
+            for (String rs :returnedLists)
+                if (rs.equals(s)) {
+                    contains = true;
+                    break;
+                }
+            assert (contains);
+        }
+
+        appContext.deleteDatabase(DATABASE_NAME);
+
     }
 
     @Test
