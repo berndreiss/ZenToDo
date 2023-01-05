@@ -511,7 +511,7 @@ public class Data {
     }
 
     //return current date as "yyyyMMdd"
-    public int getToday(){
+    public static int getToday(){
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 
