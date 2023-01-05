@@ -613,10 +613,64 @@ public class DataTest {
     @Test
     public void getTasksToPick(){
 
+        String[] tasks = {"0","1","2","3"};
+
+        int[] dates = {Data.getToday()-1,Data.getToday()+1,Data.getToday(),Data.getToday()+1};
+
+        String[] results = {"0","2"};
+
+        TestClass test = new TestClass(tasks);
+
+        test.set();
+
+        Data data = test.getData();
+
+        ArrayList<Entry> tasksToPick = data.getTasksToPick();
+
+        for (int i=0; i< tasksToPick.size();i++)
+            assert(tasksToPick.get(i).getTask().equals(tasks[i]));
+
+        for (int i = 0; i < tasks.length; i++)
+            data.editReminderDate(Integer.parseInt(tasks[i]), dates[i]);
+
+        tasksToPick = data.getTasksToPick();
+
+        assert(tasksToPick.size() == results.length);
+
+        for (int i = 0; i < tasksToPick.size(); i++)
+            assert(tasksToPick.get(i).getTask().equals(results[i]));
+
+
+        appContext.deleteDatabase(DATABASE_NAME);
+
     }
 
     @Test
     public void getList(){
+        String[] tasks = {"0","1","2","3","4","5"};
+
+        String[] lists = {"0","0","0","1","1","1"};
+
+        TestClass test = new TestClass(tasks,lists);
+
+        test.set();
+
+        Data data = test.getData();
+
+        ArrayList<Entry> returnedList = data.getList("0");
+
+        for (int i = 0; i < returnedList.size(); i++){
+            assert(returnedList.get(i).getTask().equals(String.valueOf(i)));
+        }
+
+
+        returnedList = data.getList("1");
+
+        for (int i = 0; i < returnedList.size(); i++){
+            assert(returnedList.get(i).getTask().equals(String.valueOf(i+3)));
+        }
+
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 
