@@ -677,6 +677,31 @@ public class DataTest {
     @Test
     public void getDropped(){
 
+        String[] tasks = {"0","1","2"};
+
+        TestClass test = new TestClass(tasks);
+
+        test.set();
+
+        Data data = test.getData();
+
+        ArrayList<Entry> dropped = data.getDropped();
+
+        for (int i = 0; i < tasks.length; i++)
+            assert(dropped.get(i).getTask().equals(tasks[i]));
+
+        tasks = new String[0];
+
+        test = new TestClass(tasks);
+
+        test.set();
+
+        data = test.getData();
+
+        dropped = data.getDropped();
+
+        assert(dropped.size()==0);
+
     }
 
     @Test
