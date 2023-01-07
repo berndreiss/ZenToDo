@@ -702,14 +702,55 @@ public class DataTest {
 
         assert(dropped.size()==0);
 
+        appContext.deleteDatabase(DATABASE_NAME);
     }
+
+/*    public void addToRecurringButRemoved(int id){
+        recurringButRemovedFromToday.add(id);
+    }
+
+    public void removeFromRecurringButRemoved(int id){
+        for (int i = 0; i < recurringButRemovedFromToday.size(); i++)
+            if (recurringButRemovedFromToday.get(i)==id)
+                recurringButRemovedFromToday.remove(i);
+    }*/
 
     @Test
     public void getFocus(){
 
-    }
 
-    //Test for generate id
+        String[] tasks = {"0","1","2","3"};
+
+        boolean[] focus = {true,false,false,false};
+
+        String[] results = {"0","2"};
+
+        TestClass test = new TestClass(tasks);
+
+        test.set();
+
+        Data data = test.getData();
+
+        data.editRecurrence(2, "w2");
+        data.editRecurrence(3, "w2");
+
+        for (String s : tasks)
+            data.setFocus(Integer.parseInt(s),focus[Integer.parseInt(s)]);
+
+        data.addToRecurringButRemoved(3);
+
+
+        ArrayList<Entry> focused = data.getFocus();
+
+        for (Entry e : focused)
+            Log.d("TESTXXX", e.getTask());
+
+        for (int i = 0; i < focused.size(); i++)
+            assert(focused.get(i).getTask().equals(results[i]));
+
+        appContext.deleteDatabase(DATABASE_NAME);
+
+    }
 
     @Test
     public void getToday(){
