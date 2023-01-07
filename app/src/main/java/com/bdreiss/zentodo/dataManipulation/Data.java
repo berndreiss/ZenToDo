@@ -32,6 +32,8 @@ public class Data {
 
     protected Map<String, TaskList> listPositionCount;//keeps track of lists and  of number items in list: stores list position (n-1)
 
+    private ArrayList<Integer> recurringButRemovedFromToday = new ArrayList<>();
+
     private final Context context;
 
     private final DbHelper db;//database
@@ -467,7 +469,7 @@ public class Data {
     }
 
     //get entries where focus == true
-    public ArrayList<Entry> getFocus(ArrayList<Integer> recurringButRemovedFromToday){
+    public ArrayList<Entry> getFocus(){
         ArrayList<Entry> focus = new ArrayList<>();
 
         for (Entry e : entries){
@@ -715,5 +717,15 @@ public class Data {
             return year % 400 != 0;
         }
         return false;
+    }
+
+    public void addToRecurringButRemoved(int id){
+        recurringButRemovedFromToday.add(id);
+    }
+
+    public void removeFromRecurringButRemoved(int id){
+        for (int i = 0; i < recurringButRemovedFromToday.size(); i++)
+            if (recurringButRemovedFromToday.get(i)==id)
+                recurringButRemovedFromToday.remove(i);
     }
 }

@@ -46,8 +46,6 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private final String standardColor = "#35ff0000";
     private final ArrayList<Entry> listTasks = new ArrayList<>();//ArrayList that serves as a container for tasks that are in the list that has been chosen
 
-    private ArrayList<Integer> recurringButRemovedFromFocus;
-
     ListTaskListAdapter listsTaskListAdapter;//adapter for items in lists (items can be moved and get removed when list of task is changed)
     AllTaskListAdapter allTasksAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed)
     NoListTaskListAdapter noListAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed) TODO implement own adapter for removing items when list is changed
@@ -123,7 +121,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
     }
 
-    public ListsListAdapter(Context context, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton, Data data, ArrayList<String> lists,ArrayList<Integer> recurringButRemovedFromFocus){
+    public ListsListAdapter(Context context, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton, Data data, ArrayList<String> lists){
         super(context, R.layout.lists_row,lists);
         this.context=context;
         this.data = data;
@@ -132,7 +130,6 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         this.recyclerView = recyclerView;
         recyclerView.setVisibility(View.GONE);
 
-        this.recurringButRemovedFromFocus = recurringButRemovedFromFocus;
 
         header = new Header(context, headerLayout, headerTextView, headerButton);
 
@@ -274,7 +271,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if(listsTaskListAdapter==null){
                     //initialize and set adapter
-                    listsTaskListAdapter = new ListTaskListAdapter(context, data, listTasks, recurringButRemovedFromFocus);
+                    listsTaskListAdapter = new ListTaskListAdapter(context, data, listTasks);
                     recyclerView.setAdapter(listsTaskListAdapter);
 
                     //allows items to be moved and reordered in RecyclerView

@@ -105,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Entry> droppedTasks;
     ArrayList<Entry> focusTasks;
     ArrayList<String> listNames;
-    ArrayList<Integer> recurringButRemovedFromFocus;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -184,8 +183,6 @@ public class MainActivity extends AppCompatActivity {
         tasksToDoNow = new ArrayList<>();
         tasksToDoLater = new ArrayList<>();
         tasksToMoveToList = new ArrayList<>();
-
-        recurringButRemovedFromFocus = new ArrayList<>();
 
         //initialize adapter for RecyclerView with all tasks that have been dropped, have been in Focus or are due today
         pickAdapter = new PickTaskListAdapter(this, data, tasksToPick, false){
@@ -427,10 +424,10 @@ public class MainActivity extends AppCompatActivity {
     public void initializeFocus(){
 
         //get tasks for focus from data
-        focusTasks = data.getFocus(recurringButRemovedFromFocus);
+        focusTasks = data.getFocus();
 
         //initialize the adapter for the ListView to show the tasks to focus on
-        focusAdapter = new FocusTaskListAdapter(this,data,focusTasks, recurringButRemovedFromFocus);
+        focusAdapter = new FocusTaskListAdapter(this,data,focusTasks);
 
         //assign RecyclerView
         RecyclerView listView = findViewById(R.id.list_view_focus);
@@ -456,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
 
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
         focusTasks.clear();
-        focusTasks.addAll(data.getFocus(recurringButRemovedFromFocus));
+        focusTasks.addAll(data.getFocus());
         focusAdapter.notifyDataSetChanged();
 
         //enable all components in the Focus layout (setVisibility = VISIBLE)
@@ -510,7 +507,7 @@ public class MainActivity extends AppCompatActivity {
         //initialize adapter: each item represents a button that when pressed initializes a TaskListAdapter
         //with all the tasks of the list (see ListsListAdapter.java)
         listNames = data.getLists();
-        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, headerLayout, headerTextView, headerButton, data, listNames, recurringButRemovedFromFocus);
+        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, headerLayout, headerTextView, headerButton, data, listNames);
 
         //set adapter
         listView.setAdapter(listsListAdapter);
