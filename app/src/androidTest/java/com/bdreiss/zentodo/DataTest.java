@@ -1,7 +1,6 @@
 package com.bdreiss.zentodo;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -50,9 +49,6 @@ public class DataTest {
             if (listStrings != null)
                 for (int i = 0; i < data.getEntries().size(); i++)
                     data.editList(i, listStrings[i]);
-
-
-
 
         }
 
@@ -508,7 +504,7 @@ public class DataTest {
 
     }
 
-    //test for incrementListPositionCount
+    //TODO test for incrementListPositionCount
 
     @Test
     public void decrementListPositionCount(){
@@ -705,15 +701,7 @@ public class DataTest {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
-/*    public void addToRecurringButRemoved(int id){
-        recurringButRemovedFromToday.add(id);
-    }
 
-    public void removeFromRecurringButRemoved(int id){
-        for (int i = 0; i < recurringButRemovedFromToday.size(); i++)
-            if (recurringButRemovedFromToday.get(i)==id)
-                recurringButRemovedFromToday.remove(i);
-    }*/
 
     @Test
     public void getFocus(){
@@ -742,11 +730,22 @@ public class DataTest {
 
         ArrayList<Entry> focused = data.getFocus();
 
-        for (Entry e : focused)
-            Log.d("TESTXXX", e.getTask());
-
         for (int i = 0; i < focused.size(); i++)
             assert(focused.get(i).getTask().equals(results[i]));
+
+        data.removeFromRecurringButRemoved(3);
+
+        focused = data.getFocus();
+
+        String[] resultsNew = new String[results.length+1];
+
+        System.arraycopy(results, 0, resultsNew, 0, results.length);
+
+        resultsNew[results.length] = "3";
+
+        for (int i = 0; i < focused.size(); i++)
+            assert(focused.get(i).getTask().equals(resultsNew[i]));
+
 
         appContext.deleteDatabase(DATABASE_NAME);
 
