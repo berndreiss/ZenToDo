@@ -752,12 +752,26 @@ public class DataTest {
     }
 
     @Test
-    public void getToday(){
-
-    }
-
-    @Test
     public void getNoList(){
+
+        String[] tasks = {"0","1","2","3"};
+
+        String[] lists = {"0","1",null,null};
+
+        String[] results = {"2","3"};
+
+        TestClass test = new TestClass(tasks, lists);
+
+        test.set();
+
+        Data data = test.getData();
+
+        ArrayList<Entry> noList = data.getNoList();
+
+        for (int i=0;i<noList.size();i++)
+            assert(noList.get(i).getTask().equals(results[i]));
+
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 
