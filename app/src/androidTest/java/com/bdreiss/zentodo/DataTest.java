@@ -776,12 +776,38 @@ public class DataTest {
     }
 
     @Test
-    public void getEntries(){
-
-    }
-
-    @Test
     public void getEntriesOrderedByDate(){
+
+        String[] tasks = {"0","1","2"};
+
+        int[][] tests = {{0,20221231,20230110},{20221231,20230110,0},{20230110,20221231,0},
+                            {0,20230110,20221231},{20221231,0,20230110},{20230110,0,20221231}
+                            };
+
+        String[][] results = {{"0","1","2"},{"2","0","1"},{"2","1","0"},
+                                {"0","2","1"},{"1","0","2"},{"1","2","0"}
+                                };
+
+        TestClass test = new TestClass(tasks);
+
+
+        for (int i = 0; i < tests.length; i++) {
+
+            test.set();
+
+            Data data = test.getData();
+
+            for (int j = 0; j < tests[i].length; j++)
+                data.editReminderDate(j, tests[i][j]);
+
+            ArrayList<Entry> entries = data.getEntriesOrderedByDate();
+
+            for (int j = 0; j < entries.size(); j++)
+                assert(entries.get(j).getTask().equals(results[i][j]));
+
+        }
+
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 
