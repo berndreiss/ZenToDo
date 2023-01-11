@@ -32,7 +32,7 @@ public class Data {
 
     protected Map<String, TaskList> listPositionCount;//keeps track of lists and  of number items in list: stores list position (n-1)
 
-    private ArrayList<Integer> recurringButRemovedFromToday = new ArrayList<>();
+    private final ArrayList<Integer> recurringButRemovedFromToday = new ArrayList<>();
 
     private final Context context;
 
@@ -725,7 +725,9 @@ public class Data {
 
     public void removeFromRecurringButRemoved(int id){
         for (int i = 0; i < recurringButRemovedFromToday.size(); i++)
-            if (recurringButRemovedFromToday.get(i)==id)
+            if (recurringButRemovedFromToday.get(i)==id) {
                 recurringButRemovedFromToday.remove(i);
+                break;
+            }
     }
 }

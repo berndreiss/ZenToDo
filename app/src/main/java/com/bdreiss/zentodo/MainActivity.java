@@ -17,15 +17,10 @@ package com.bdreiss.zentodo;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
-import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import com.bdreiss.zentodo.adapters.FocusTaskListAdapter;
 import com.bdreiss.zentodo.adapters.ListsListAdapter;
@@ -34,10 +29,7 @@ import com.bdreiss.zentodo.dataManipulation.Data;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -56,15 +48,11 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-//    private final static String TEXT_COLOR = "#90000000";
     private final static String DATABASE_NAME = "Data.db";
 
 
@@ -73,14 +61,12 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout drop;//Layout to drop new tasks
     private LinearLayout focus;//Layout to show tasks to do today
     private LinearLayout lists;//Layout for all lists with tasks in it
-    //private LinearLayout settings;1
 
     //the following Buttons are components of the toolbar to switch between the different layouts
     private Button toolbarPick;
     private Button toolbarDrop;
     private Button toolbarFocus;
     private Button toolbarLists;
-    //private Button toolbarSettings;
 
     private FloatingActionButton fab;
 
@@ -151,13 +137,6 @@ public class MainActivity extends AppCompatActivity {
             closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
             showLists();//show Lists layout
         });
-
-        /*
-        toolbarSettings.setOnClickListener(view -> {
-            showSettings();
-            toolbarListenerSettings();
-        });
-        */
 
         //layouts are initialized
         initializeDrop();
@@ -563,25 +542,6 @@ public class MainActivity extends AppCompatActivity {
         //is only visible after list has been chosen in adapter TODO move to adapter
         recyclerView.setVisibility(View.GONE);
     }
-
-    /*
-    public void showSettings(){
-        //enable all components in the Lists layout (setVisibility = VISIBLE)
-        enableLayout(settings);
-        //disable all components in all other layouts (setVisibility = GONE)
-        disableLayout(drop);
-        disableLayout(pick);
-        disableLayout(focus);
-        disableLayout(lists);
-
-        //set color of Lists-Button in toolbar to chosen, set all other Buttons to toolbar default
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-        toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar_chosen));
-
-    }*/
 
     //set Visibility of all first generation children of layout to VISIBLE and bring layout to front
     public void enableLayout(LinearLayout layout){
