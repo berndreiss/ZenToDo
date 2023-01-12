@@ -1,6 +1,7 @@
 package com.bdreiss.zentodo;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -813,6 +814,55 @@ public class DataTest {
 
     @Test
     public void setRecurring(){
+
+        int[] today = {20231015,20231015,20231015,20231015,20231015,20231015,20231015,
+                        20230131,20230228,20240228,20231231,
+                        20231015,20231015,20231015,20231030,20231231,
+                        20230101,20230101,20231201,
+                        20230101,20230101
+        };
+
+        String[] mode = {"d1","d2","d3","d4","d5","d6","d7",
+                        "d1","d1","d1","d1",
+                        "w1","w2","w1","w1","w1",
+                        "m1","m2","m1",
+                        "y1","y2"
+        };
+
+        int[] tests ={20231015,20231015,20231015,20231015,20231015,20231015,20231015,
+                        20230131,20230228,20240228,20231231,
+                        20231015,20231015,20231008,20231025,20231204,
+                        20230101,20230101,20230101,
+                        20230101,20221501
+        };
+
+        int[] results = {20231016,20231017,20231018,20231019,20231020,20231021,20231022,
+                        20230201,20230301,20240229,20240101,
+                        20231022,20231029,20231022,20231101,20240101,
+                        20230201,20230301,20240101,
+                        20240101,20241501
+        };
+
+        Data data = new Data(appContext, DATABASE_NAME);
+
+        data.add("Test");
+
+        for (int i = 0; i < tests.length; i++){
+
+
+            data.editReminderDate(0,tests[i]);
+
+            data.getEntries().get(0).setRecurrence(mode[i]);
+
+            data.setRecurring(0,today[i]);
+
+            Log.d("TESTXXX", String.valueOf(data.getEntries().get(0).getReminderDate()));
+
+            assert(data.getEntries().get(0).getReminderDate()==results[i]);
+
+        }
+
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 

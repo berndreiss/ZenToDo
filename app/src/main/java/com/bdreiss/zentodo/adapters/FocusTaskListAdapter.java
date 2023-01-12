@@ -63,7 +63,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             //if recurring do not remove but set new reminder date, otherwise remove from data
             if (recurring) {
                 //calculate new reminder date and write to data and entries
-                entries.get(position).setReminderDate(data.setRecurring(id));
+                entries.get(position).setReminderDate(data.setRecurring(id,Data.getToday()));
 
                 //reset focus in data and entries
                 data.setFocus(id,false);

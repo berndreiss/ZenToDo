@@ -563,7 +563,7 @@ public class Data {
 
 
     //this routine calculates a new reminder date for recurring tasks
-    public int setRecurring(int id) {
+    public int setRecurring(int id, int today) {
 
         //get Entry
         Entry entry = entries.get(getPosition(id));
@@ -587,9 +587,6 @@ public class Data {
 
         //get reminder date
         int date = entry.getReminderDate();
-
-        //get todays date and set reminder date to if it is not set
-        int today = getToday();
 
         if (date == 0) {
             date = today;

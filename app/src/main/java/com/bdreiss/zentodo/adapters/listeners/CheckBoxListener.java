@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.view.View;
 
 import com.bdreiss.zentodo.adapters.TaskListAdapter;
+import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
 /*
@@ -36,7 +37,7 @@ public class CheckBoxListener extends BasicListener implements View.OnClickListe
         //if recurring do not remove but set new reminder date, otherwise remove from data
         if (recurring) {
             //calculate new reminder date and write to data and entries
-            adapter.entries.get(position).setReminderDate(adapter.data.setRecurring(id));
+            adapter.entries.get(position).setReminderDate(adapter.data.setRecurring(id, Data.getToday()));
 
             //reset focus in data and entries
             adapter.data.setFocus(id,false);
