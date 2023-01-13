@@ -1,7 +1,6 @@
 package com.bdreiss.zentodo;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -856,8 +855,6 @@ public class DataTest {
 
             data.setRecurring(0,today[i]);
 
-            Log.d("TESTXXX", String.valueOf(data.getEntries().get(0).getReminderDate()));
-
             assert(data.getEntries().get(0).getReminderDate()==results[i]);
 
         }
@@ -865,13 +862,6 @@ public class DataTest {
         appContext.deleteDatabase(DATABASE_NAME);
 
     }
-
-    //test for incrementRecurring
-
-    //test for return days of the month
-
-    //test for isLeapYear
-
 
 
     @After

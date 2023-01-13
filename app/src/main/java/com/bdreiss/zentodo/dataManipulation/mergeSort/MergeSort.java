@@ -17,7 +17,7 @@ public class MergeSort {
         divide(0, this.inputArray.size()-1);
     }
 
-    public void divide(int startIndex,int endIndex){
+    private void divide(int startIndex,int endIndex){
 
         //Divide till you breakdown your list to single element
         if(startIndex<endIndex && (endIndex-startIndex)>=1){
@@ -30,7 +30,7 @@ public class MergeSort {
         }
     }
 
-    public void merger(int startIndex,int midIndex,int endIndex){
+    private void merger(int startIndex,int midIndex,int endIndex){
 
         //Below is the merged Array that will be sorted array Array[i-midIndex] , Array[(midIndex+1)-endIndex]
         ArrayList<Entry> mergedSortedArray = new ArrayList<>();
