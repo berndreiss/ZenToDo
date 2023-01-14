@@ -10,6 +10,13 @@ import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByReminderDate;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByListPosition;
 
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.ArrayList;
 
@@ -32,7 +39,7 @@ public class Data {
 
     protected Map<String, TaskList> listPositionCount;//keeps track of lists and  of number items in list: stores list position (n-1)
 
-    private final ArrayList<Integer> recurringButRemovedFromToday = new ArrayList<>();
+    private ArrayList<Integer> recurringButRemovedFromToday = new ArrayList<>();
 
     private final Context context;
 
@@ -80,6 +87,23 @@ public class Data {
         //sort entries by position
         MergeSort sort = new MergeSort(entries);
         sort.sort();
+
+        File saveFile = new File(context.getFilesDir() + "/" + String.valueOf(getToday()));
+
+        if (saveFile.exists()){
+            try {
+                FileInputStream fis = new FileInputStream(saveFile);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+
+                recurringButRemovedFromToday = (ArrayList<Integer>) ois.readObject();
+
+                fis.close();
+                ois.close();
+
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
 
 
     }
@@ -718,6 +742,21 @@ public class Data {
 
     public void addToRecurringButRemoved(int id){
         recurringButRemovedFromToday.add(id);
+
+        try {
+            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" +  String.valueOf(getToday()));
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+            oos.writeObject(recurringButRemovedFromToday);
+
+            fos.close();
+            oos.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     public void removeFromRecurringButRemoved(int id){
@@ -726,5 +765,19 @@ public class Data {
                 recurringButRemovedFromToday.remove(i);
                 break;
             }
+
+        try {
+            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" + String.valueOf(getToday()));
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+            oos.writeObject(recurringButRemovedFromToday);
+
+            fos.close();
+            oos.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
