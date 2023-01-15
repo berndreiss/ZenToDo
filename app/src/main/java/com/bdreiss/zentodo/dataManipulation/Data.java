@@ -12,7 +12,6 @@ import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByListPosition;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -88,14 +87,25 @@ public class Data {
         MergeSort sort = new MergeSort(entries);
         sort.sort();
 
-        File saveFile = new File(context.getFilesDir() + "/" + String.valueOf(getToday()));
+        File saveFile = new File(context.getFilesDir() + "/" + getToday());
 
+        String[] fileNames = context.getFilesDir().list();
+        File[] files = context.getFilesDir().listFiles();
+
+        for (int i = 0; i < Objects.requireNonNull(fileNames).length; i++){
+
+            if (Integer.parseInt(fileNames[i]) < getToday()) {
+                assert files != null;
+                if (files[i] != null) files[i].delete();
+            }
+        }
         if (saveFile.exists()){
+
             try {
                 FileInputStream fis = new FileInputStream(saveFile);
                 ObjectInputStream ois = new ObjectInputStream(fis);
 
-                recurringButRemovedFromToday = (ArrayList<Integer>) ois.readObject();
+                 recurringButRemovedFromToday = (ArrayList<Integer>) ois.readObject();
 
                 fis.close();
                 ois.close();
@@ -744,7 +754,7 @@ public class Data {
         recurringButRemovedFromToday.add(id);
 
         try {
-            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" +  String.valueOf(getToday()));
+            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" +  getToday());
             ObjectOutputStream oos = new ObjectOutputStream(fos);
 
             oos.writeObject(recurringButRemovedFromToday);
@@ -767,7 +777,7 @@ public class Data {
             }
 
         try {
-            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" + String.valueOf(getToday()));
+            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" + getToday());
             ObjectOutputStream oos = new ObjectOutputStream(fos);
 
             oos.writeObject(recurringButRemovedFromToday);
