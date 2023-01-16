@@ -22,22 +22,33 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 import com.bdreiss.zentodo.dataManipulation.TaskList;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_ENTRIES_V1;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_LISTS_V1;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.TABLES_V1;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Objects;
 
 public class DbHelper extends SQLiteOpenHelper{
 
     private static final int DB_VERSION = 1;
 
+    private final Context context;
+
     public DbHelper(Context context, String DB_NAME){
         super(context,DB_NAME,null, DB_VERSION);
+        this.context = context;
     }
 
     //Create new table for entries onCreate
@@ -287,6 +298,61 @@ public class DbHelper extends SQLiteOpenHelper{
 
 
         return sb.toString();
+    }
+
+    public void saveRecurring(ArrayList<Integer> arrayList){
+
+        try {
+            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" +  Data.getToday());
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+            oos.writeObject(arrayList);
+
+            fos.close();
+            oos.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public ArrayList<Integer> loadRecurring(){
+
+        ArrayList<Integer> toReturn = new ArrayList<>();
+
+        File saveFile = new File(context.getFilesDir() + "/" + Data.getToday());
+
+        String[] fileNames = context.getFilesDir().list();
+        File[] files = context.getFilesDir().listFiles();
+
+        for (int i = 0; i < Objects.requireNonNull(fileNames).length; i++){
+
+            if (Integer.parseInt(fileNames[i]) < Data.getToday()) {
+                assert files != null;
+                if (files[i] != null) files[i].delete();
+            }
+        }
+        if (saveFile.exists()){
+
+
+            try {
+                FileInputStream fis = new FileInputStream(saveFile);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+
+                toReturn = (ArrayList<Integer>) ois.readObject();
+
+                fis.close();
+                ois.close();
+
+
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return toReturn;
     }
 
 }

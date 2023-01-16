@@ -10,12 +10,6 @@ import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByReminderDate;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByListPosition;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.ArrayList;
 
@@ -38,7 +32,7 @@ public class Data {
 
     protected Map<String, TaskList> listPositionCount;//keeps track of lists and  of number items in list: stores list position (n-1)
 
-    private ArrayList<Integer> recurringButRemovedFromToday = new ArrayList<>();
+    private final ArrayList<Integer> recurringButRemovedFromToday;
 
     private final Context context;
 
@@ -87,34 +81,7 @@ public class Data {
         MergeSort sort = new MergeSort(entries);
         sort.sort();
 
-        File saveFile = new File(context.getFilesDir() + "/" + getToday());
-
-        String[] fileNames = context.getFilesDir().list();
-        File[] files = context.getFilesDir().listFiles();
-
-        for (int i = 0; i < Objects.requireNonNull(fileNames).length; i++){
-
-            if (Integer.parseInt(fileNames[i]) < getToday()) {
-                assert files != null;
-                if (files[i] != null) files[i].delete();
-            }
-        }
-        if (saveFile.exists()){
-
-            try {
-                FileInputStream fis = new FileInputStream(saveFile);
-                ObjectInputStream ois = new ObjectInputStream(fis);
-
-                 recurringButRemovedFromToday = (ArrayList<Integer>) ois.readObject();
-
-                fis.close();
-                ois.close();
-
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
+        recurringButRemovedFromToday = db.loadRecurring();
 
     }
 
@@ -753,19 +720,7 @@ public class Data {
     public void addToRecurringButRemoved(int id){
         recurringButRemovedFromToday.add(id);
 
-        try {
-            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" +  getToday());
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-
-            oos.writeObject(recurringButRemovedFromToday);
-
-            fos.close();
-            oos.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        db.saveRecurring(recurringButRemovedFromToday);
 
     }
 
@@ -776,18 +731,7 @@ public class Data {
                 break;
             }
 
-        try {
-            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" + getToday());
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-
-            oos.writeObject(recurringButRemovedFromToday);
-
-            fos.close();
-            oos.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        db.saveRecurring(recurringButRemovedFromToday);
 
     }
 }
