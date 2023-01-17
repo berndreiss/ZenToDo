@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 import com.bdreiss.zentodo.dataManipulation.database.DbHelper;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_ENTRIES_V1;
@@ -17,6 +18,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -368,6 +370,48 @@ public class DbHelper_V1Test {
             }
 
         appContext.deleteDatabase("TEST.db");
+    }
+
+    @Test
+    public void saveLoadRecurring(){
+
+        DbHelper db = new DbHelper(appContext, "TEST.db");
+
+        int filename = Data.getToday();
+
+        ArrayList<Integer> ids = new ArrayList<>();
+
+        db.saveRecurring(ids);
+
+        assert(db.loadRecurring().size()==0);
+
+        ids.add(0);
+
+        db.saveRecurring(ids);
+
+        assert(db.loadRecurring().get(0)==0);
+
+        ids.add(1);
+
+        ids.add(2);
+
+        db.saveRecurring(ids);
+
+        for (int i=0; i<ids.size();i++)
+            assert(db.loadRecurring().get(i)==i);
+
+        ids.remove(1);
+
+        db.saveRecurring(ids);
+
+        assert(db.loadRecurring().get(0)==0);
+        assert(db.loadRecurring().get(1)==2);
+
+        appContext.deleteDatabase("TEST.db");
+
+        new File(appContext.getFilesDir() + "/" + filename).delete();
+
+
     }
 
     @After
