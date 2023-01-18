@@ -32,6 +32,8 @@ public class DbHelper_V1Test {
 
     private static Context appContext;
 
+    private static final String DATABASE_NAME = "TEST.db";
+
     public static final String[] stringTestData = {"Test", ",", ".", ";", ":", "-", "_", "#",
             "'", " '", "' ", "'A", "A'", "A'A", "'A'A'",
             "*", "~", "+", "`", "´", "?", "\\", "=",
@@ -76,18 +78,18 @@ public class DbHelper_V1Test {
 
     @Test
     public void createDatabase(){
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         assert(appContext.getDatabasePath("TEST") != null);
         assert(db.loadEntries().size() == 0);
 
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 
     @Test
     public void loadNewTask() {
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         // Context of the app under test.
         addTestDataNull(db);
@@ -106,12 +108,12 @@ public class DbHelper_V1Test {
         assert(entry.getRecurrence() == null);
         assert(entry.getPosition() == 0);
 
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
     public void addEntry(){
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         String[] tasks = stringTestData;
 
@@ -121,12 +123,12 @@ public class DbHelper_V1Test {
         for (int i = 0; i < tasks.length; i++)
             assert(db.loadEntries().get(i).getTask().equals(tasks[i]));
 
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
     public void loadEntries(){
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         for (int i = 0; i < 3; i++) {
 
@@ -146,13 +148,13 @@ public class DbHelper_V1Test {
             assert(entry.getRecurrence() == null);
             assert(entry.getPosition() == i);
         }
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 
     @Test
     public void removeEntry(){
-        DbHelper db = new DbHelper(appContext,"TEST.db");
+        DbHelper db = new DbHelper(appContext,DATABASE_NAME);
 
         db.addEntry(new Entry(0,0,"NEW TASK"));
 
@@ -193,12 +195,12 @@ public class DbHelper_V1Test {
 
         assert(db.loadEntries().size() == 0);
 
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
     public void loadLists(){
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         assert(db.loadLists().isEmpty());
 
@@ -211,13 +213,13 @@ public class DbHelper_V1Test {
         assert (db.loadLists().containsKey("TEST"));
         assert (Objects.equals(Objects.requireNonNull(db.loadLists().get("TEST")).getColor(), "WHITE"));
 
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 
     @Test
     public void addList(){
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         db.addList("|", "WHITE");
 
@@ -230,13 +232,13 @@ public class DbHelper_V1Test {
             assert (db.loadLists().containsKey(stringTestDatum));
             assert (Objects.equals(Objects.requireNonNull(db.loadLists().get(stringTestDatum)).getColor(), "WHITE"));
         }
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 
     @Test
     public void removeList(){
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         addTestDataList(db, "TEST");
 
@@ -244,12 +246,12 @@ public class DbHelper_V1Test {
 
         assert(db.loadLists().isEmpty());
 
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
     public void updateEntry(){
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         db.addEntry(new Entry(0,0,"NEW TASK"));
 
@@ -310,12 +312,12 @@ public class DbHelper_V1Test {
         assert(db.loadEntries().get(0).getPosition() == 99);
 
 
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
     public void updateList(){
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         for (String stringTestDatum : stringTestData) {
             db.addList(stringTestDatum, "WHITE");
@@ -325,7 +327,7 @@ public class DbHelper_V1Test {
             assert (Objects.requireNonNull(db.loadLists().get(stringTestDatum)).getColor().equals("RED"));
 
         }
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
@@ -339,7 +341,7 @@ public class DbHelper_V1Test {
 
         Test test = new Test();
 
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         for (int i = 0; i < test.results[0][0].length; i++){
             db.addEntry(new Entry(i,i,"NEW TASK"));
@@ -369,13 +371,13 @@ public class DbHelper_V1Test {
 
             }
 
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
     public void saveLoadRecurring(){
 
-        DbHelper db = new DbHelper(appContext, "TEST.db");
+        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
         int filename = Data.getToday();
 
@@ -407,7 +409,7 @@ public class DbHelper_V1Test {
         assert(db.loadRecurring().get(0)==0);
         assert(db.loadRecurring().get(1)==2);
 
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
 
         new File(appContext.getFilesDir() + "/" + filename).delete();
 
@@ -417,7 +419,7 @@ public class DbHelper_V1Test {
     @After
     public void cleanUp(){
 
-        appContext.deleteDatabase("TEST.db");
+        appContext.deleteDatabase(DATABASE_NAME);
 
     }
 

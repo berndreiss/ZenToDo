@@ -38,6 +38,7 @@ public class Data {
 
     private final DbHelper db;//database
 
+
     //initialize instance of Data, load content of database into entries, populate ids and listPositionCount
     public Data(Context context, String databaseName) {
 
@@ -85,6 +86,7 @@ public class Data {
 
     }
 
+
     //adds an Entry to Data and the Database
     public Entry add(String task) {
 
@@ -99,6 +101,7 @@ public class Data {
 
         return entry;
     }
+
 
     //removes an id from Data and the Database
     public void remove(int id) {
@@ -142,6 +145,7 @@ public class Data {
 
     }
 
+
     //swap entries if item is moved by drag and drop
     public void swap(int id1, int id2) {
 
@@ -161,6 +165,7 @@ public class Data {
         db.swapEntries(COLUMNS_ENTRIES_V1.POSITION_COL, id1, id2);
 
     }
+
 
     //swaps positions in list and synchronizes positions in entries
     public void swapList(int id1, int id2) {
@@ -185,6 +190,7 @@ public class Data {
             swap(id1,id2);
     }
 
+
     //Get position of entry by id, returns -1 if id not found
     public int getPosition(int id) {
 
@@ -198,8 +204,8 @@ public class Data {
         }
 
         return -1;
-
     }
+
 
     /*
     *   The following functions edit different fields of entries by their id.
@@ -220,11 +226,13 @@ public class Data {
 
     }
 
+
     public void setDropped(int id, Boolean dropped) {
         entries.get(getPosition(id)).setDropped(dropped);
         db.updateEntry(COLUMNS_ENTRIES_V1.DROPPED_COL, id, dropped);
 
     }
+
 
     public void editReminderDate(int id, int date) {
         Entry entry = entries.get(getPosition(id));
@@ -236,10 +244,12 @@ public class Data {
 
     }
 
+
     public void editRecurrence(int id, String recurrence) {
         entries.get(getPosition(id)).setRecurrence(recurrence);
         db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, id, recurrence);
     }
+
 
     public int editList(int id, String list) {
         Entry entry = entries.get(getPosition(id));
@@ -262,6 +272,7 @@ public class Data {
         return entry.getListPosition();
     }
 
+
     public void editListColor(String list, String color){
         if (listPositionCount.get(list) != null) {
             Objects.requireNonNull(listPositionCount.get(list)).setColor(color);
@@ -270,9 +281,12 @@ public class Data {
 
     }
 
+
     public String getListColor(String list){
         return Objects.requireNonNull(listPositionCount.get(list)).getColor();
     }
+
+
     //function increments position counter of list and returns a new position
     private int incrementListPositionCount(String list) {
 
@@ -300,6 +314,7 @@ public class Data {
             return 0;
         }
     }
+
 
     //decrement listPositionCount and synchronize listPositions in entries
     public void decrementListPositionCount(String list, int currPosition){
@@ -338,6 +353,7 @@ public class Data {
 
     }
 
+
     //returns lists as an Array: is used for the autocomplete when editing list
     public String[] returnListsAsArray(){
 
@@ -353,6 +369,7 @@ public class Data {
         return listsAsArray;
 
     }
+
 
     //return an ArrayList of all lists
     public ArrayList<String> getLists() {
@@ -378,6 +395,7 @@ public class Data {
 
         return lists;
     }
+
 
     //get entries that can be picked today. These include tasks that are due, tasks that have been dropped,
     //or tasks that have already been in focus-
@@ -433,6 +451,7 @@ public class Data {
         return  tasksToPick;
     }
 
+
     //get entries assigned to a certain list
     public ArrayList<Entry> getList(String list){
 
@@ -455,6 +474,7 @@ public class Data {
         return listArray;
     }
 
+
     //get entries where dropped == true
     public ArrayList<Entry> getDropped(){
 
@@ -468,6 +488,7 @@ public class Data {
         return dropped;
 
     }
+
 
     //get entries where focus == true
     public ArrayList<Entry> getFocus(){
@@ -513,6 +534,7 @@ public class Data {
         return id;
     }
 
+
     //return current date as "yyyyMMdd"
     public static int getToday(){
 
@@ -523,6 +545,7 @@ public class Data {
         return Integer.parseInt(df.format(date));
 
     }
+
 
     //return entries that have no list assigned
     public ArrayList<Entry> getNoList(){
@@ -543,11 +566,13 @@ public class Data {
 
     }
 
+
     public ArrayList<Entry> getEntries(){
 
         return entries;
 
     }
+
 
     //return ArrayList of entries ordered by when they are due
     public ArrayList<Entry> getEntriesOrderedByDate(){
@@ -619,6 +644,7 @@ public class Data {
         return date;
     }
 
+
     //return date incremented by offset
     private int incrementRecurring(char mode, int[] dateArray, int offSet) {
 
@@ -684,6 +710,7 @@ public class Data {
         return dateArray[0] + dateArray[1] * 100 + dateArray[2] * 10000;
     }
 
+
     //returns days of the month
     private int returnDaysOfTheMonth(int month, int year) {
         switch (month) {
@@ -709,6 +736,7 @@ public class Data {
 
     }
 
+
     //calculates if year is leap year
     private Boolean isLeapYear(int year) {
         if (year % 4 == 0) {
@@ -717,12 +745,14 @@ public class Data {
         return false;
     }
 
+
     public void addToRecurringButRemoved(int id){
         recurringButRemovedFromToday.add(id);
 
         db.saveRecurring(recurringButRemovedFromToday);
 
     }
+
 
     public void removeFromRecurringButRemoved(int id){
         for (int i = 0; i < recurringButRemovedFromToday.size(); i++)

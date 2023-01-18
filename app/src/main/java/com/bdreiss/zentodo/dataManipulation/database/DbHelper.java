@@ -51,6 +51,7 @@ public class DbHelper extends SQLiteOpenHelper{
         this.context = context;
     }
 
+
     //Create new table for entries onCreate
     public void onCreate(SQLiteDatabase db){
         String query = "CREATE TABLE " + TABLES_V1.TABLE_ENTRIES + " ("
@@ -74,11 +75,13 @@ public class DbHelper extends SQLiteOpenHelper{
 
     }
 
+
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
         String query = "DROP TABLE IF EXISTS " + TABLES_V1.TABLE_ENTRIES;
         db.execSQL(query);
         onCreate(db);
     }
+
 
     //adds new entry to database
     public void addEntry(Entry entry) {
@@ -100,6 +103,7 @@ public class DbHelper extends SQLiteOpenHelper{
         db.close();
     }
 
+
     public void addList(String list, String color){
         ContentValues values = new ContentValues();
 
@@ -113,6 +117,7 @@ public class DbHelper extends SQLiteOpenHelper{
         db.close();
     }
 
+
     //removes entry from database by id
     public void removeEntry(int id){
         SQLiteDatabase db = this.getWritableDatabase();
@@ -123,6 +128,7 @@ public class DbHelper extends SQLiteOpenHelper{
 
         db.close();
     }
+
 
     public void removeList(String list){
         SQLiteDatabase db = this.getWritableDatabase();
@@ -135,6 +141,7 @@ public class DbHelper extends SQLiteOpenHelper{
 
         db.close();
     }
+
 
     //update entry by id using String
     public void updateEntry(COLUMNS_ENTRIES_V1 field, int id, String value){
@@ -152,6 +159,7 @@ public class DbHelper extends SQLiteOpenHelper{
         db.close();
     }
 
+
     //update entry by id using Integer
     public void updateEntry(COLUMNS_ENTRIES_V1 field, int id, int value){
         String query = "UPDATE " + TABLES_V1.TABLE_ENTRIES + " SET " + field + "=" + value + " WHERE " + COLUMNS_ENTRIES_V1.ID_COL + "=" + id + ";";
@@ -159,6 +167,7 @@ public class DbHelper extends SQLiteOpenHelper{
         db.execSQL(query);
         db.close();
     }
+
 
     public void updateEntry(COLUMNS_ENTRIES_V1 field, int id, boolean valueBool){
         int value = boolToInt(valueBool);
@@ -168,6 +177,7 @@ public class DbHelper extends SQLiteOpenHelper{
         db.close();
     }
 
+
     public void updateList(String list, String color){
         list = checkStringForApostrophe(list);
         String query = "UPDATE " + TABLES_V1.TABLE_LISTS + " SET " + COLUMNS_LISTS_V1.LIST_COLOR_COL + "='" + color + "' WHERE " + COLUMNS_LISTS_V1.LIST_NAME_COL + "='" + list + "';";
@@ -175,6 +185,7 @@ public class DbHelper extends SQLiteOpenHelper{
         db.execSQL(query);
         db.close();
     }
+
 
     //load all entries from database and return as ArrayList
     public ArrayList<Entry> loadEntries(){
@@ -216,8 +227,8 @@ public class DbHelper extends SQLiteOpenHelper{
         db.close();
         return entries;
 
-
     }
+
 
     public Map<String, TaskList> loadLists(){
         Map<String, TaskList> lists = new Hashtable<>();
@@ -244,6 +255,7 @@ public class DbHelper extends SQLiteOpenHelper{
         return lists;
     }
 
+
     public void swapEntries(COLUMNS_ENTRIES_V1 positionCol, int id1, int id2){
         SQLiteDatabase db = this.getWritableDatabase();
         @SuppressLint("Recycle") Cursor cursor = db.rawQuery("SELECT " + positionCol + " FROM " + TABLES_V1.TABLE_ENTRIES + " WHERE " + COLUMNS_ENTRIES_V1.ID_COL + "=" + id1, null);
@@ -263,15 +275,18 @@ public class DbHelper extends SQLiteOpenHelper{
 
     }
 
+
     //converts Integer to Boolean (false if 0, true otherwise)
     public static boolean intToBool(int i){
         return i!=0;
     }
 
+
     //converts Boolean to Integer (0 if false, 1 if true)
     public static int boolToInt(boolean b){
         return b ? 1 : 0;
     }
+
 
     private String checkStringForApostrophe(String string){
 
@@ -298,7 +313,9 @@ public class DbHelper extends SQLiteOpenHelper{
 
 
         return sb.toString();
+
     }
+
 
     public void saveRecurring(ArrayList<Integer> arrayList){
 
@@ -315,8 +332,8 @@ public class DbHelper extends SQLiteOpenHelper{
             e.printStackTrace();
         }
 
-
     }
+
 
     public ArrayList<Integer> loadRecurring(){
 
@@ -334,8 +351,8 @@ public class DbHelper extends SQLiteOpenHelper{
                 if (files[i] != null) files[i].delete();
             }
         }
-        if (saveFile.exists()){
 
+        if (saveFile.exists()){
 
             try {
                 FileInputStream fis = new FileInputStream(saveFile);
@@ -345,7 +362,6 @@ public class DbHelper extends SQLiteOpenHelper{
 
                 fis.close();
                 ois.close();
-
 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
