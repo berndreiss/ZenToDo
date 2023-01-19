@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.InputFilter;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -329,6 +330,8 @@ public class MainActivity extends AppCompatActivity {
 
         //assign EditText to add new tasks
         final EditText editText = findViewById(R.id.edit_text_drop);
+
+        editText.setFilters(new InputFilter[] {new InputFilter.LengthFilter(getResources().getInteger(R.integer.task_max_char))});
 
         //button to drop task in EditText
         Button buttonDrop = findViewById(R.id.button_drop);

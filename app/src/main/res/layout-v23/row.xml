@@ -11,13 +11,15 @@
         android:paddingTop="10dp"
         android:orientation="horizontal"
         android:background="@color/color_primary"
-        android:foreground="?attr/selectableItemBackground">
+        android:foreground="?attr/selectableItemBackground"
+        >
 
         <CheckBox
             android:id="@+id/checkbox"
             android:buttonTint="@color/header_text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"
+            android:layout_gravity="center"/>
 
 
         <TextView
@@ -26,20 +28,22 @@
             android:layout_width="0dp"
             android:layout_weight="6"
             android:layout_height="wrap_content"
-            />
+            android:layout_gravity="center"/>
+
 
         <Button
             android:id="@+id/button_menu"
             android:shape="rectangle"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginLeft="0dp"
             android:layout_marginRight="0dp"
             style="?android:attr/borderlessButtonStyle"
             android:drawableEnd="@drawable/ic_action_menu"
             android:backgroundTint="@color/white"
-            />
+            android:layout_gravity="center"/>
+
 
     </LinearLayout>
 
@@ -50,7 +54,8 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:orientation="horizontal"
-        android:background="@color/button_alt_background_color">
+        android:background="@color/button_alt_background_color"
+        >
 
         <android.widget.Button
             android:id="@+id/button_focus"
@@ -170,7 +175,6 @@
             android:layout_width="0dp"
             android:layout_weight="5"
             android:layout_height="wrap_content"
-
             />
 
         <android.widget.Button
