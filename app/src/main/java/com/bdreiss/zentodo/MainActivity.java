@@ -5,13 +5,14 @@ package com.bdreiss.zentodo;
 *
 *   The idea is, that you drop tasks you need to do, so you don't have to think about them anymore.
 *   When you want to make your list for the day, you pick out of all the task that have been
-*   dropped. In this step you decide, which tasks you want to focus on. For all the tasks you don't
+*   dropped. In this step you decide, which tasks you want to do now. For all the tasks you don't
 *   want to get done right away, you can set a reminder date or add them to a list.
 *
 *   Basically the app has the following structure implemented in different layouts:
-*   Drop -> Pick -> Focus
 *
-*   Lists: shows all the lists and upon choosing one shows all tasks assigned to the list
+*   -Drop -> Pick -> Focus
+*
+*   -Lists: shows all the lists and upon choosing one shows all tasks assigned to the list
 *
  */
 
@@ -21,6 +22,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
+import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import com.bdreiss.zentodo.adapters.FocusTaskListAdapter;
 import com.bdreiss.zentodo.adapters.ListsListAdapter;
@@ -80,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     PickTaskListAdapter doLaterAdapter;
     PickTaskListAdapter moveToListAdapter;
     DropTaskListAdapter dropAdapter;
-    FocusTaskListAdapter focusAdapter;
+    TaskListAdapter focusAdapter;
     ListsListAdapter listsListAdapter;
 
     //ArrayLists for adapters above
@@ -108,16 +110,16 @@ public class MainActivity extends AppCompatActivity {
         pick = findViewById(R.id.layout_pick);
         focus = findViewById(R.id.layout_focus);
         lists = findViewById(R.id.layout_lists);
-        //settings = findViewById(R.id.layout_settings);
 
         toolbarDrop = findViewById(R.id.toolbar_drop);
         toolbarPick = findViewById(R.id.toolbar_pick);
         toolbarFocus = findViewById(R.id.toolbar_focus);
         toolbarLists = findViewById(R.id.toolbar_lists);
-        //toolbarSettings = findViewById(R.id.toolbar_settings);
 
+        //Floating action button that shows help on press
         fab = findViewById(R.id.fab);
         fab.setVisibility(View.GONE);
+
         //OnClickListeners for buttons in toolbar which show according layout onClick
         toolbarPick.setOnClickListener(view -> {
             closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
@@ -158,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         //get tasks to pick from data
         tasksToPick = new ArrayList<>();
 
+        //ArrayLists for different RecyclerViews in Layout
         tasksToDoNow = new ArrayList<>();
         tasksToDoLater = new ArrayList<>();
         tasksToMoveToList = new ArrayList<>();
@@ -172,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        //initialize empty adapters for the other RecyclerViews
         doNowAdapter = new PickTaskListAdapter(this, data, tasksToDoNow, true){
             @Override
             public void itemCountChanged(){
@@ -180,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.list_view_pick_doNow).setLayoutParams(params);
             }
         };
+
         doLaterAdapter = new PickTaskListAdapter(this, data, tasksToDoLater, false){
             @Override
             public void itemCountChanged(){
@@ -188,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.list_view_pick_doLater).setLayoutParams(params);
             }
         };
+
         moveToListAdapter = new PickTaskListAdapter(this, data,tasksToMoveToList, false){
             @Override
             public void itemCountChanged(){
@@ -198,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
 
-
+        //Set up ItemTouchHelper to move tasks around and connect View to each other
         initializeRecyclerView(findViewById(R.id.list_view_pick), pickAdapter);
         initializeRecyclerView(findViewById(R.id.list_view_pick_doNow), doNowAdapter);
         initializeRecyclerView(findViewById(R.id.list_view_pick_doLater), doLaterAdapter);
@@ -212,27 +218,25 @@ public class MainActivity extends AppCompatActivity {
         //if pressed remove tasks from Drop and add to Focus
         pickButton.setOnClickListener(view -> {
 
+            //Continue if all tasks have been categorized, show hint otherwise
             if (tasksToPick.size() != 0){
                 Helper.showPickHelper(this);
             }
             else {
 
-
-                //if checked reset dropped and focus attributes of all task in list above
+                //if checked reset dropped and focus attributes of all task in tasksToDoNow
                 for (Entry e : tasksToDoNow) {
                     data.setFocus(e.getId(), true);
                     data.setDropped(e.getId(), false);
                 }
 
-                for (Entry e : tasksToDoLater) {
-                    if (data.getEntries().get(data.getPosition(e.getId())).getFocus())
+                //set focus to false for all tasks in tasksToDoLater
+                for (Entry e : tasksToDoLater)
                         data.setFocus(e.getId(), false);
-                }
 
-                for (Entry e : tasksToMoveToList) {
-                    if (data.getEntries().get(data.getPosition(e.getId())).getFocus())
+                //set focus to false for all tasks in tasksToMoveToList
+                for (Entry e : tasksToMoveToList)
                         data.setFocus(e.getId(), false);
-                }
 
                 //show Focus layout
                 showFocus();
@@ -248,6 +252,9 @@ public class MainActivity extends AppCompatActivity {
         //clear ArrayList for Pick, add current tasks from data and notify adapter (in case they have been altered in another layout)
         tasksToPick.clear();
         tasksToPick.addAll(data.getTasksToPick());
+
+        //Reset and Update Adapters to reflect changes
+        //Also update itemCountChanged, so that RecyclerViews get resized properly
 
         pickAdapter.notifyDataSetChanged();
         pickAdapter.itemCountChanged();
