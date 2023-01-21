@@ -29,7 +29,6 @@ import com.bdreiss.zentodo.dataManipulation.Data;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.collection.CircularArray;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -56,10 +55,6 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private final static String DATABASE_NAME = "Data.db";
-
-    public CircularArray<ShowLayout> layouts = new CircularArray<>();
-
-    public int currentLayout;
 
     //Layouts for different modes
     private LinearLayout pick;//Layout to pick tasks that have been dropped and show them in focus
@@ -104,13 +99,6 @@ public class MainActivity extends AppCompatActivity {
 
         com.bdreiss.zentodo.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        layouts.addLast(this::showPick);
-        layouts.addLast(this::showFocus);
-        layouts.addLast(this::showDrop);
-        layouts.addLast(this::showLists);
-
-        currentLayout = 2;
 
         //Initialize Data-object and load data
         data = new Data(this, DATABASE_NAME);
@@ -158,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Drop is shown when app starts
-        layouts.get(currentLayout).show();
+        showDrop();
 
     }
 
@@ -256,8 +244,6 @@ public class MainActivity extends AppCompatActivity {
     //show Pick layout
     @SuppressLint("NotifyDataSetChanged")
     public void showPick(){
-
-        currentLayout = 0;
 
         //clear ArrayList for Pick, add current tasks from data and notify adapter (in case they have been altered in another layout)
         tasksToPick.clear();
@@ -379,8 +365,6 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
 
-        currentLayout = 2;
-
         //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
         droppedTasks.clear();
         droppedTasks.addAll(data.getDropped());
@@ -447,8 +431,6 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     public void showFocus(){
 
-        currentLayout = 1;
-
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
         focusTasks.clear();
         focusTasks.addAll(data.getFocus());
@@ -514,8 +496,6 @@ public class MainActivity extends AppCompatActivity {
 
     //show Lists layout
     public void showLists(){
-
-        currentLayout = 3;
 
         listsListAdapter.setHeaderGone();
 
