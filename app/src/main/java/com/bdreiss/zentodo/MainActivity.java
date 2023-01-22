@@ -315,10 +315,11 @@ public class MainActivity extends AppCompatActivity {
         //assign ListView
         RecyclerView listView = findViewById(R.id.list_view_drop);
 
+        //show fab when anything is being touched in listViews
+        listView.setOnTouchListener(new ShowFab());
 
-        listView.setOnTouchListener(new ShowHelp());
-
-        drop.setOnTouchListener(new ShowHelp());
+        //show fab when anything is being touched in layout
+        drop.setOnTouchListener(new ShowFab());
 
         //set adapter
         listView.setAdapter(dropAdapter);
@@ -419,7 +420,11 @@ public class MainActivity extends AppCompatActivity {
         //assign RecyclerView
         RecyclerView listView = findViewById(R.id.list_view_focus);
 
-        listView.setOnTouchListener(new ShowHelp());
+        //show fab when anything is being touched in listView
+        listView.setOnTouchListener(new ShowFab());
+
+        //show fab when anything is being touched in layout
+        focus.setOnTouchListener(new ShowFab());
 
         //set adapter for Recyclerview
         listView.setAdapter(focusAdapter);
@@ -481,10 +486,11 @@ public class MainActivity extends AppCompatActivity {
         ListView listView = findViewById(R.id.list_view_lists);
         RecyclerView recyclerView = findViewById(R.id.recycle_view_lists);
 
+        //show fab when anything is being touched in listView
+        listView.setOnTouchListener(new ShowFab());
 
-        listView.setOnTouchListener(new ShowHelp());
-        recyclerView.setOnTouchListener(new ShowHelp());
-
+        //show fab when anything is being touched in layout
+        recyclerView.setOnTouchListener(new ShowFab());
 
         //Items that show the list your currently in as a header and the button for choosing a color
         LinearLayout headerLayout = findViewById(R.id.header);
@@ -597,7 +603,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public class ShowHelp implements View.OnTouchListener {
+    public class ShowFab implements View.OnTouchListener {
 
 
 
@@ -615,8 +621,8 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void initializeRecyclerView(RecyclerView view, PickTaskListAdapter adapter){
 
-        //shows Floating Action Button on
-        view.setOnTouchListener(new ShowHelp());
+        //show fab when view is being touched
+        view.setOnTouchListener(new ShowFab());
 
         //set adapter
         view.setAdapter(adapter);
