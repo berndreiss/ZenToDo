@@ -86,13 +86,15 @@ public class MainActivity extends AppCompatActivity {
     ListsListAdapter listsListAdapter;
 
     //ArrayLists for adapters above
-    ArrayList<Entry> tasksToPick;
-    ArrayList<Entry> tasksToDoNow;
-    ArrayList<Entry> tasksToDoLater;
-    ArrayList<Entry> tasksToMoveToList;
-    ArrayList<Entry> droppedTasks;
-    ArrayList<Entry> focusTasks;
-    ArrayList<String> listNames;
+    //the ArrayLists in Pick are represented by 4 RecyclerViews, that are separated by according
+    //headers in the app
+    ArrayList<Entry> tasksToPick;//PICK: new tasks
+    ArrayList<Entry> tasksToDoNow;//PICK: tasks from tasksToPick chosen to be done now
+    ArrayList<Entry> tasksToDoLater;//PICK: tasks from tasksToPick chosen to be done later
+    ArrayList<Entry> tasksToMoveToList;//PICK: tasks from tasksToPick to be moved to list
+    ArrayList<Entry> droppedTasks;//DROP
+    ArrayList<Entry> focusTasks;//FOCUS
+    ArrayList<String> listNames;//LISTS
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -274,28 +276,28 @@ public class MainActivity extends AppCompatActivity {
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
 
+        //set fab to show help according to layout
         fab.setOnClickListener(Helper.getPickListener(this));
 
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(focus);
         disableLayout(lists);
-        //disableLayout(settings);
 
         //set color of Pick-Button in toolbar to chosen, set all other Buttons to toolbar default
         toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-
-
         toolbarPick.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarPick.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary));
+
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarDrop.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
+
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarFocus.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarFocus.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
+
+        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
@@ -381,27 +383,28 @@ public class MainActivity extends AppCompatActivity {
         //enable all components of Drop layout (setVisibility = VISIBLE)
         enableLayout(drop);
 
+        //set fab to show help according to layout
         fab.setOnClickListener(Helper.getDropListener(this));
 
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(pick);
         disableLayout(focus);
         disableLayout(lists);
-        //disableLayout(settings);
 
         //set background color of Drop to chosen, all others to toolbar default
         toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-
         toolbarDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarDrop.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary));
+
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarPick.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarPick.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
+
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarFocus.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarFocus.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
+
+        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
     }
@@ -451,27 +454,28 @@ public class MainActivity extends AppCompatActivity {
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);
 
+        //set fab to show help according to layout
         fab.setOnClickListener(Helper.getFocusListener(this));
 
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(lists);
         disableLayout(pick);
-        //disableLayout(settings);
 
         //set background color of Focus to chosen, all others to toolbar default
         toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-
         toolbarFocus.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarFocus.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary));
+
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarDrop.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
+
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarPick.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarPick.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
+
+        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
@@ -510,6 +514,7 @@ public class MainActivity extends AppCompatActivity {
     //show Lists layout
     public void showLists(){
 
+        //hide header (will be shown when list is chosen)
         listsListAdapter.setHeaderGone();
 
         //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
@@ -520,27 +525,28 @@ public class MainActivity extends AppCompatActivity {
         //enable all components in the Lists layout (setVisibility = VISIBLE)
         enableLayout(lists);
 
+        //set fab to show help according to layout
         fab.setOnClickListener(Helper.getListListener(this));
 
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(pick);
         disableLayout(focus);
-        //disableLayout(settings);
 
         //set color of Lists-Button in toolbar to chosen, set all other Buttons to toolbar default
         toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
-        //toolbarSettings.setBackgroundColor(getResources().getColor(R.color.button_toolbar));
-
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary));
+
+        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarDrop.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
+
+        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarPick.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarPick.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
+
+        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
         toolbarFocus.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarFocus.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
@@ -605,8 +611,6 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public class ShowFab implements View.OnTouchListener {
 
-
-
         @SuppressLint("ClickableViewAccessibility")
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -639,6 +643,7 @@ public class MainActivity extends AppCompatActivity {
         ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
         iTouchHelper.attachToRecyclerView(view);
 
+        //sets references to other adapters in adapter
         adapter.setPickAdapter(pickAdapter);
         adapter.setDoNowAdapter(doNowAdapter);
         adapter.setDoLaterAdapter(doLaterAdapter);
