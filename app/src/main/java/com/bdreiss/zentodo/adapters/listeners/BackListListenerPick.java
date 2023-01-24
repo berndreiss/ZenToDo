@@ -9,12 +9,14 @@ import com.bdreiss.zentodo.dataManipulation.Entry;
 
 public class BackListListenerPick extends BackListListener{
 
+    PickTaskListAdapter currentAdapter;
     private final PickTaskListAdapter pickAdapter;
     private final PickTaskListAdapter moveToListAdapter;
 
 
-    public BackListListenerPick(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position, PickTaskListAdapter pickAdapter, PickTaskListAdapter moveToListAdapter){
+    public BackListListenerPick(PickTaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position, PickTaskListAdapter pickAdapter, PickTaskListAdapter moveToListAdapter){
         super(adapter, holder, position);
+        this.currentAdapter = adapter;
         this.pickAdapter = pickAdapter;
         this.moveToListAdapter = moveToListAdapter;
     }
@@ -45,15 +47,19 @@ public class BackListListenerPick extends BackListListener{
 
             moveToListAdapter.entries.add(e);
             moveToListAdapter.notifyDataSetChanged();
+            moveToListAdapter.itemCountChanged();
             adapter.entries.remove(e);
-
+            adapter.notifyDataSetChanged();
+            currentAdapter.itemCountChanged();
         }
 
         if (e.getList() == null && moveToListAdapter.entries.contains(e)){
             moveToListAdapter.entries.remove(e);
             moveToListAdapter.notifyDataSetChanged();
+            moveToListAdapter.itemCountChanged();
             pickAdapter.entries.add(e);
             pickAdapter.notifyDataSetChanged();
+            pickAdapter.itemCountChanged();
         }
 
         adapter.notifyDataSetChanged();
