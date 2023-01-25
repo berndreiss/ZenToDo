@@ -346,6 +346,9 @@ public class DbHelper extends SQLiteOpenHelper{
 
         for (int i = 0; i < Objects.requireNonNull(fileNames).length; i++){
 
+            if (fileNames[i].equals("mode"))
+                continue;
+
             if (Integer.parseInt(fileNames[i]) < Data.getToday()) {
                 assert files != null;
                 if (files[i] != null) files[i].delete();

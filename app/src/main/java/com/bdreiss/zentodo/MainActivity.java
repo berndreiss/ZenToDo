@@ -52,11 +52,16 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.Buffer;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final static String DATABASE_NAME = "Data.db";
+    private static String DATABASE_NAME = "Data.db";
 
     //Layouts for different modes
     private LinearLayout pick;//Layout to pick tasks that have been dropped and show them in focus
@@ -103,6 +108,17 @@ public class MainActivity extends AppCompatActivity {
 
         com.bdreiss.zentodo.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(getFilesDir() + "/" + getResources().getString(R.string.mode_file)));
+            if (br.readLine().equals("1"))
+                DATABASE_NAME = getResources().getString(R.string.db_test);
+            br.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         //Initialize Data-object and load data
         data = new Data(this, DATABASE_NAME);

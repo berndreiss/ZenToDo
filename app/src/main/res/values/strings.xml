@@ -24,6 +24,8 @@
     <string name="move_to_list">MOVE TO LIST</string>
     <string name="new_task">new Task</string>
     <string name="drop">Drop</string>
+    <string name="mode_file">mode</string>
+    <string name="db_test">"TEST.db"</string>
 
     <!-- Strings used for spinner for choosing time interval of repeats -->
     <string-array name="time_interval">
