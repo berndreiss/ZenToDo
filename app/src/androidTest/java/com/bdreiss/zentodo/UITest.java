@@ -45,21 +45,38 @@ public class UITest {
 
     private static String TEST_MODE_FILE;
 
+    //This class only serves the purpose of creating a file telling the program that it is in test mode
+    //The reason for putting this code in it's own class is strictly so that it can be accessed by
+    //creating an instance BEFORE any constructor of the actual test class is run.
+    //Otherwise the mode will be written to the file AFTER the program has started and will run the
+    //tests on the Database with real data, not the test database. This can be changed, if in the
+    //future user accounts are introduced
+    private static class SaveMode{
+
+        SaveMode() {
+            appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+
+            TEST_MODE_FILE = appContext.getResources().getString(R.string.mode_file);
+
+            DATABASE_NAME = appContext.getResources().getString(R.string.db_test);
+
+            try {
+                Writer w = new FileWriter(appContext.getFilesDir() + "/" + TEST_MODE_FILE);
+                w.write("1");
+                w.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    SaveMode sm = new SaveMode();
+
+
+
     @Before
     public void setup(){
-        appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        TEST_MODE_FILE = appContext.getResources().getString(R.string.mode_file);
-
-        DATABASE_NAME = appContext.getResources().getString(R.string.db_test);
-
-        try {
-            Writer w = new FileWriter(appContext.getFilesDir() + "/" + TEST_MODE_FILE);
-            w.write("1");
-            w.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
     }
 
@@ -90,7 +107,7 @@ public class UITest {
 
     @After
     public void cleanup(){
-        //appContext.deleteDatabase(DATABASE_NAME);
+        appContext.deleteDatabase(DATABASE_NAME);
         try {
             Writer w = new FileWriter(appContext.getFilesDir() + "/" + TEST_MODE_FILE);
             w.write("0");
