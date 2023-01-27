@@ -52,6 +52,7 @@ import java.util.Collections;
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHolder> implements ItemTouchHelperAdapter {
 
 
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public LinearLayout linearLayout;//"normal" row layout that shows checkbox and task
         protected CheckBox checkBox;//Checkbox to remove entry
@@ -414,5 +415,9 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         }
 
     }
+
+    public void reset() {
+    }
+
 
 }

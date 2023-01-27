@@ -120,11 +120,11 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
     }
 
-    public ListsListAdapter(Context context, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton, Data data, ArrayList<String> lists){
-        super(context, R.layout.lists_row,lists);
+    public ListsListAdapter(Context context, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton, Data data){
+        super(context, R.layout.lists_row,data.getLists());
         this.context=context;
         this.data = data;
-        this.lists = lists;
+        this.lists = data.getLists();
         this.listView = listView;
         this.recyclerView = recyclerView;
         recyclerView.setVisibility(View.GONE);
@@ -301,5 +301,15 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         header.colorButton.setVisibility(View.GONE);
     }
 
+    public void reset(){
+        //hide header (will be shown when list is chosen)
+        setHeaderGone();
+
+        //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
+        lists.clear();
+        lists.addAll(data.getLists());
+        notifyDataSetChanged();
+
+    }
 
 }

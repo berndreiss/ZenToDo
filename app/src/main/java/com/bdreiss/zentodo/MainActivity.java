@@ -90,16 +90,6 @@ public class MainActivity extends AppCompatActivity {
     TaskListAdapter focusAdapter;
     ListsListAdapter listsListAdapter;
 
-    //ArrayLists for adapters above
-    //the ArrayLists in Pick are represented by 4 RecyclerViews, that are separated by according
-    //headers in the app
-    ArrayList<Entry> tasksToPick;//PICK: new tasks
-    ArrayList<Entry> tasksToDoNow;//PICK: tasks from tasksToPick chosen to be done now
-    ArrayList<Entry> tasksToDoLater;//PICK: tasks from tasksToPick chosen to be done later
-    ArrayList<Entry> tasksToMoveToList;//PICK: tasks from tasksToPick to be moved to list
-    ArrayList<Entry> droppedTasks;//DROP
-    ArrayList<Entry> focusTasks;//FOCUS
-    ArrayList<String> listNames;//LISTS
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -175,16 +165,8 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializePick() {
 
-        //get tasks to pick from data
-        tasksToPick = new ArrayList<>();
-
-        //ArrayLists for different RecyclerViews in Layout
-        tasksToDoNow = new ArrayList<>();
-        tasksToDoLater = new ArrayList<>();
-        tasksToMoveToList = new ArrayList<>();
-
         //initialize adapter for RecyclerView with all tasks that have been dropped, have been in Focus or are due today
-        pickAdapter = new PickTaskListAdapter(this, data, tasksToPick, false){
+        pickAdapter = new PickTaskListAdapter(this, data, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick).getLayoutParams();
@@ -194,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         //initialize empty adapters for the other RecyclerViews
-        doNowAdapter = new PickTaskListAdapter(this, data, tasksToDoNow, true){
+        doNowAdapter = new PickTaskListAdapter(this, data, true){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doNow).getLayoutParams();
@@ -203,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        doLaterAdapter = new PickTaskListAdapter(this, data, tasksToDoLater, false){
+        doLaterAdapter = new PickTaskListAdapter(this, data, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doLater).getLayoutParams();
@@ -212,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        moveToListAdapter = new PickTaskListAdapter(this, data,tasksToMoveToList, false){
+        moveToListAdapter = new PickTaskListAdapter(this, data, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_list).getLayoutParams();
@@ -237,23 +219,23 @@ public class MainActivity extends AppCompatActivity {
         pickButton.setOnClickListener(view -> {
 
             //Continue if all tasks have been categorized, show hint otherwise
-            if (tasksToPick.size() != 0){
+            if (pickAdapter.entries.size() != 0){
                 Helper.showPickHelper(this);
             }
             else {
 
                 //if checked reset dropped and focus attributes of all task in tasksToDoNow
-                for (Entry e : tasksToDoNow) {
+                for (Entry e : doNowAdapter.entries) {
                     data.setFocus(e.getId(), true);
                     data.setDropped(e.getId(), false);
                 }
 
                 //set focus to false for all tasks in tasksToDoLater
-                for (Entry e : tasksToDoLater)
+                for (Entry e : doLaterAdapter.entries)
                         data.setFocus(e.getId(), false);
 
                 //set focus to false for all tasks in tasksToMoveToList
-                for (Entry e : tasksToMoveToList)
+                for (Entry e : moveToListAdapter.entries)
                         data.setFocus(e.getId(), false);
 
                 //show Focus layout
@@ -267,27 +249,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     public void showPick(){
 
-        //clear ArrayList for Pick, add current tasks from data and notify adapter (in case they have been altered in another layout)
-        tasksToPick.clear();
-        tasksToPick.addAll(data.getTasksToPick());
-
-        //Reset and Update Adapters to reflect changes
-        //Also update itemCountChanged, so that RecyclerViews get resized properly
-
-        pickAdapter.notifyDataSetChanged();
-        pickAdapter.itemCountChanged();
-
-        tasksToDoNow.clear();
-        doNowAdapter.notifyDataSetChanged();
-        doNowAdapter.itemCountChanged();
-
-        tasksToDoLater.clear();
-        doLaterAdapter.notifyDataSetChanged();
-        doLaterAdapter.itemCountChanged();
-
-        tasksToMoveToList.clear();
-        moveToListAdapter.notifyDataSetChanged();
-        moveToListAdapter.itemCountChanged();
+        pickAdapter.reset();
 
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
@@ -324,11 +286,8 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializeDrop(){
 
-        //get dropped tasks from data
-        droppedTasks = data.getDropped();
-
         //initialize adapter for ListView that shows tasks dropped
-        dropAdapter = new DropTaskListAdapter(this, data, droppedTasks);
+        dropAdapter = new DropTaskListAdapter(this, data);
 
         //assign ListView
         RecyclerView listView = findViewById(R.id.list_view_drop);
@@ -391,10 +350,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
 
-        //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
-        droppedTasks.clear();
-        droppedTasks.addAll(data.getDropped());
-        dropAdapter.notifyDataSetChanged();
+        dropAdapter.reset();
 
         //enable all components of Drop layout (setVisibility = VISIBLE)
         enableLayout(drop);
@@ -430,11 +386,8 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializeFocus(){
 
-        //get tasks for focus from data
-        focusTasks = data.getFocus();
-
         //initialize the adapter for the ListView to show the tasks to focus on
-        focusAdapter = new FocusTaskListAdapter(this,data,focusTasks);
+        focusAdapter = new FocusTaskListAdapter(this,data);
 
         //assign RecyclerView
         RecyclerView listView = findViewById(R.id.list_view_focus);
@@ -462,10 +415,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     public void showFocus(){
 
-        //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
-        focusTasks.clear();
-        focusTasks.addAll(data.getFocus());
-        focusAdapter.notifyDataSetChanged();
+        focusAdapter.reset();
 
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);
@@ -517,10 +467,7 @@ public class MainActivity extends AppCompatActivity {
         TextView headerTextView = findViewById(R.id.text_view_lists_header);
         Button headerButton = findViewById(R.id.button_header);
 
-        //initialize adapter: each item represents a button that when pressed initializes a TaskListAdapter
-        //with all the tasks of the list (see ListsListAdapter.java)
-        listNames = data.getLists();
-        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, headerLayout, headerTextView, headerButton, data, listNames);
+        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, headerLayout, headerTextView, headerButton, data);
 
         //set adapter
         listView.setAdapter(listsListAdapter);
@@ -530,13 +477,7 @@ public class MainActivity extends AppCompatActivity {
     //show Lists layout
     public void showLists(){
 
-        //hide header (will be shown when list is chosen)
-        listsListAdapter.setHeaderGone();
-
-        //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
-        listNames.clear();
-        listNames.addAll(data.getLists());
-        listsListAdapter.notifyDataSetChanged();
+        listsListAdapter.reset();
 
         //enable all components in the Lists layout (setVisibility = VISIBLE)
         enableLayout(lists);

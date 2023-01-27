@@ -19,8 +19,8 @@ import java.util.ArrayList;
 
 public class DropTaskListAdapter extends TaskListAdapter{
 
-    public DropTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
-        super(context, data, entries);
+    public DropTaskListAdapter(Context context, Data data){
+        super(context, data, data.getDropped());
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -91,6 +91,15 @@ public class DropTaskListAdapter extends TaskListAdapter{
     public void add(String task){
         Entry entry = data.add(task);
         entries.add(entry);
+        notifyDataSetChanged();
+
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void reset(){
+        //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
+        entries.clear();
+        entries.addAll(data.getDropped());
         notifyDataSetChanged();
 
     }

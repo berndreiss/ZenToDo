@@ -40,8 +40,8 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
     private PickTaskListAdapter moveToListAdapter;
     private final boolean checkboxTicked;//Tasks that are in the doNowAdapter are ticked
 
-    public PickTaskListAdapter(Context context, Data data,  ArrayList<Entry> entries, boolean checkboxTicked){
-        super(context, data, entries);
+    public PickTaskListAdapter(Context context, Data data, boolean checkboxTicked){
+        super(context, data, new ArrayList<>());
 
         this.checkboxTicked = checkboxTicked;
 
@@ -160,6 +160,34 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
         }
 
+
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void reset(){
+
+
+        //clear ArrayList for Pick, add current tasks from data and notify adapter (in case they have been altered in another layout)
+        entries.clear();
+        entries.addAll(data.getTasksToPick());
+
+        //Reset and Update Adapters to reflect changes
+        //Also update itemCountChanged, so that RecyclerViews get resized properly
+
+        pickAdapter.notifyDataSetChanged();
+        pickAdapter.itemCountChanged();
+
+        doNowAdapter.entries.clear();
+        doNowAdapter.notifyDataSetChanged();
+        doNowAdapter.itemCountChanged();
+
+        doLaterAdapter.entries.clear();
+        doLaterAdapter.notifyDataSetChanged();
+        doLaterAdapter.itemCountChanged();
+
+        moveToListAdapter.entries.clear();
+        moveToListAdapter.notifyDataSetChanged();
+        moveToListAdapter.itemCountChanged();
 
     }
 

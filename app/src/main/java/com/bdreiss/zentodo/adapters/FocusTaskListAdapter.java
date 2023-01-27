@@ -27,8 +27,8 @@ import java.util.ArrayList;
 
 public class FocusTaskListAdapter extends TaskListAdapter {
 
-    public FocusTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
-        super(context, data, entries);
+    public FocusTaskListAdapter(Context context, Data data){
+        super(context, data, data.getFocus());
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -172,6 +172,15 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         builder.show();
         imageView.setOnClickListener(v -> builder.dismiss());
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void reset(){
+        //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
+        entries.clear();
+        entries.addAll(data.getFocus());
+        notifyDataSetChanged();
+
     }
 
 
