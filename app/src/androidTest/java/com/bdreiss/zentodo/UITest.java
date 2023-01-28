@@ -22,6 +22,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import android.content.Context;
+import android.util.Log;
+
+import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
+import com.bdreiss.zentodo.dataManipulation.Data;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -89,20 +93,23 @@ public class UITest {
     @Test
     public void testDrop(){
 
-        String text = "";
+        String[] tests = {"","0","1","Test","'","'Test","T'e'st","Test'"};
 
-        try {
+        String[][] results = {{},{"0"},{"0","1"},{"0","1","Test"},{"0","1","Test","'"},
+                                {"0","1","Test","'","'Test"},
+                                {"0","1","Test","'","'Test","T'e'st"},
+                                {"0","1","Test","'","'Test","T'e'st","Test'"}};
 
-            BufferedReader br = new BufferedReader(new FileReader(appContext.getFilesDir() + "/" + TEST_MODE_FILE));
+        for (int i = 0; i < tests.length; i++) {
+            onView(withId(R.id.edit_text_drop)).perform(typeText(tests[i]), closeSoftKeyboard());
+            onView(withId(R.id.button_drop)).perform(click());
 
-            text = br.readLine();
+            DropTaskListAdapter adapter = new DropTaskListAdapter(appContext, new Data(appContext, DATABASE_NAME));
 
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            for (int j = 0; j < results[i].length; j++)
+                assert(adapter.entries.get(j).getTask().equals(results[i][j]));
+
         }
-        onView(withId(R.id.edit_text_drop)).perform(typeText(text), closeSoftKeyboard());
-        onView(withId(R.id.button_drop)).perform(click());
     }
 
     @After
