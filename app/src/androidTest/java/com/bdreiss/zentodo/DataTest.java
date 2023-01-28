@@ -19,43 +19,6 @@ import java.util.ArrayList;
 @RunWith(AndroidJUnit4.class)
 public class DataTest {
 
-    static class TestClass{
-
-        private final String[] entryStrings;
-
-        private String[] listStrings;
-
-        private Data data;
-
-        TestClass(String[] entryStrings) {
-            this.entryStrings = entryStrings;
-        }
-        TestClass(String[] entryStrings, String[] listStrings) {
-
-            this.entryStrings = entryStrings;
-
-            this.listStrings = listStrings;
-        }
-
-        public void set(){
-
-            appContext.deleteDatabase(DATABASE_NAME);
-
-            data = new Data(appContext,DATABASE_NAME);
-
-            for (String s : entryStrings)
-                data.add(s);
-
-            if (listStrings != null)
-                for (int i = 0; i < data.getEntries().size(); i++)
-                    data.editList(i, listStrings[i]);
-
-        }
-
-        public Data getData(){return data;}
-
-    }
-
     private static Context appContext;
 
     private static final String DATABASE_NAME = "TEST.db";
@@ -111,7 +74,7 @@ public class DataTest {
     public void idGeneration(){
         String[] strings = {"0","1","2","3"};
 
-        TestClass test = new TestClass(strings);
+        TestClass test = new TestClass(appContext, strings);
 
         test.set();
 
@@ -145,7 +108,7 @@ public class DataTest {
         int[][] resultsPosition = {{0,1,2}, {0,1}, {0,1}, {0,1}, {0},{0},{0},{}};
 
         String[] entryStrings = {"0","1","2"};
-        TestClass test = new TestClass(entryStrings);
+        TestClass test = new TestClass(appContext, entryStrings);
 
         for (int i = 0; i < tests.length; i++){
 
@@ -179,7 +142,7 @@ public class DataTest {
 
         String[] entryStrings = {"0","1","2"};
 
-        TestClass test = new TestClass(entryStrings);
+        TestClass test = new TestClass(appContext, entryStrings);
 
         for (int i = 0; i < tests.length; i++){
 
@@ -236,7 +199,7 @@ public class DataTest {
 
         };
 
-        TestClass test = new TestClass(stringData, tests);
+        TestClass test = new TestClass(appContext, stringData, tests);
 
 
         for (int i = 0; i < swaps.length; i++){
@@ -261,7 +224,7 @@ public class DataTest {
 
         String[] taskStrings = {"0","1","2","3"};
 
-        TestClass test = new TestClass(taskStrings);
+        TestClass test = new TestClass(appContext, taskStrings);
 
         test.set();
 
@@ -275,7 +238,7 @@ public class DataTest {
 
         String[] stringData = {"0","1","2"};
 
-        TestClass test = new TestClass(stringData);
+        TestClass test = new TestClass(appContext, stringData);
 
         test.set();
 
@@ -298,7 +261,7 @@ public class DataTest {
 
         String[] stringData = {"0","1","2"};
 
-        TestClass test = new TestClass(stringData);
+        TestClass test = new TestClass(appContext, stringData);
 
         test.set();
 
@@ -331,7 +294,7 @@ public class DataTest {
 
         String[] stringData = {"0","1","2"};
 
-        TestClass test = new TestClass(stringData);
+        TestClass test = new TestClass(appContext, stringData);
 
         test.set();
 
@@ -366,7 +329,7 @@ public class DataTest {
 
         int[] tests = {0, 20110311, 0, 2000};
 
-        TestClass test = new TestClass(taskStrings);
+        TestClass test = new TestClass(appContext, taskStrings);
 
         test.set();
 
@@ -390,7 +353,7 @@ public class DataTest {
 
         String[] tests = {"w2", "d999", "y88", "m3"};
 
-        TestClass test = new TestClass(taskStrings);
+        TestClass test = new TestClass(appContext, taskStrings);
 
         test.set();
 
@@ -427,7 +390,7 @@ public class DataTest {
 
         int[] resultsPosition = {0,0,1,1,2,2};
 
-        TestClass test = new TestClass(stringData, tests);
+        TestClass test = new TestClass(appContext, stringData, tests);
 
         test.set();
 
@@ -525,7 +488,7 @@ public class DataTest {
 
         };
 
-        TestClass test = new TestClass(tasks,lists);
+        TestClass test = new TestClass(appContext, tasks,lists);
 
         for (int i = 0; i < tests.length; i++){
 
@@ -552,7 +515,7 @@ public class DataTest {
 
         String[] lists = {"0","1","2","3"};
 
-        TestClass test = new TestClass(tasks,lists);
+        TestClass test = new TestClass(appContext,tasks,lists);
 
         test.set();
 
@@ -582,7 +545,7 @@ public class DataTest {
 
         String[] lists = {"0","1","2","3"};
 
-        TestClass test = new TestClass(tasks,lists);
+        TestClass test = new TestClass(appContext,tasks,lists);
 
         test.set();
 
@@ -615,7 +578,7 @@ public class DataTest {
 
         String[] results = {"0","2"};
 
-        TestClass test = new TestClass(tasks);
+        TestClass test = new TestClass(appContext, tasks);
 
         test.set();
 
@@ -647,7 +610,7 @@ public class DataTest {
 
         String[] lists = {"0","0","0","1","1","1"};
 
-        TestClass test = new TestClass(tasks,lists);
+        TestClass test = new TestClass(appContext,tasks,lists);
 
         test.set();
 
@@ -675,7 +638,7 @@ public class DataTest {
 
         String[] tasks = {"0","1","2"};
 
-        TestClass test = new TestClass(tasks);
+        TestClass test = new TestClass(appContext, tasks);
 
         test.set();
 
@@ -688,7 +651,7 @@ public class DataTest {
 
         tasks = new String[0];
 
-        test = new TestClass(tasks);
+        test = new TestClass(appContext, tasks);
 
         test.set();
 
@@ -713,7 +676,7 @@ public class DataTest {
 
         String[] results = {"0","2"};
 
-        TestClass test = new TestClass(tasks);
+        TestClass test = new TestClass(appContext, tasks);
 
         test.set();
 
@@ -760,7 +723,7 @@ public class DataTest {
 
         String[] results = {"2","3"};
 
-        TestClass test = new TestClass(tasks, lists);
+        TestClass test = new TestClass(appContext,tasks, lists);
 
         test.set();
 
@@ -788,7 +751,7 @@ public class DataTest {
                                 {"0","2","1"},{"1","0","2"},{"1","2","0"}
                                 };
 
-        TestClass test = new TestClass(tasks);
+        TestClass test = new TestClass(appContext, tasks);
 
 
         for (int i = 0; i < tests.length; i++) {
