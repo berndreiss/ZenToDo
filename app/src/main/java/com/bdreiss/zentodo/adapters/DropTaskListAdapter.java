@@ -15,8 +15,6 @@ import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
-import java.util.ArrayList;
-
 public class DropTaskListAdapter extends TaskListAdapter{
 
     public DropTaskListAdapter(Context context, Data data){
