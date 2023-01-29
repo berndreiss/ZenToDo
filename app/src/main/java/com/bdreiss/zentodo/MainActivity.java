@@ -53,11 +53,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.Buffer;
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 

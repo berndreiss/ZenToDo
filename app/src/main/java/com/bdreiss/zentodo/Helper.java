@@ -40,7 +40,7 @@ public class Helper{
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
             dialog.setOnDismissListener(dialogInterface -> {
-                //nothing;
+
             });
 
             ScrollView scrollView = new ScrollView(context);
