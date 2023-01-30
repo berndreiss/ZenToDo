@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.ViewGroup;
@@ -140,6 +141,22 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                     notifyDataSetChanged();
 
                 }, entryYear, entryMonth, entryDay);
+
+                datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,context.getResources().getString(R.string.cancel), (dialog, which) -> {
+
+                    //set date when task is due to 0
+                    data.editReminderDate(entry.getId(),0);
+                    entries.get(position).setReminderDate(0);
+
+                    //change color of reminder date Button marking if Date is set
+                    markSet(holder,entry);
+
+                    //notify adapter
+                    notifyItemChanged(position);
+
+                    //return to original layout
+                    setOriginal(holder);
+                });
 
                 //return Dialog
                 return datePickerDialog;
