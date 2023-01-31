@@ -69,6 +69,7 @@ public class SetDateListenerPick extends SetDateListener{
             if (e.getList() != null){
                 moveToListAdapter.entries.add(e);
                 moveToListAdapter.notifyDataSetChanged();
+                moveToListAdapter.itemCountChanged();
 
                 adapter.entries.remove(e);
                 adapter.notifyDataSetChanged();
