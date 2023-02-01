@@ -1,12 +1,16 @@
 package com.bdreiss.zentodo;
 
+import androidx.test.espresso.UiController;
+import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.contrib.PickerActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import androidx.test.espresso.action.ViewActions;
-import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.espresso.contrib.RecyclerViewActions;
 
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,29 +21,21 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.typeText;
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import android.content.Context;
-import android.util.Log;
+import android.view.View;
+import android.widget.DatePicker;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.io.Writer;
-import java.nio.Buffer;
+import java.time.MonthDay;
+import java.time.Year;
 
 @RunWith(AndroidJUnit4.class)
 public class UITest {
@@ -90,6 +86,7 @@ public class UITest {
     public ActivityScenarioRule<MainActivity> activityScenarioRule
             = new ActivityScenarioRule<>(MainActivity.class);
 
+
     @Test
     public void testDrop(){
 
@@ -110,6 +107,74 @@ public class UITest {
                 assert(adapter.entries.get(j).getTask().equals(results[i][j]));
 
         }
+    }
+
+    @Test
+    public void testCalendarDrop(){
+
+        int year = Year.now().getValue();
+        int month = MonthDay.now().getMonthValue();
+        int day = MonthDay.now().getDayOfMonth();
+
+        String[] strings = {"Test"};
+
+        int[][] tests = {{year,month,day+1}};
+
+
+
+        for (int i = 0; i < strings.length; i++) {
+            drop(strings[i]);
+
+            new RecyclerClickAction(R.id.list_view_drop, R.id.button_menu, 0);
+            new RecyclerClickAction(R.id.list_view_drop, R.id.button_calendar, 0);
+
+
+            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
+            onView(withId(android.R.id.button1)).perform(click());
+
+            Data data = new Data(appContext, DATABASE_NAME);
+
+            assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
+            assert (data.getDropped().isEmpty());
+        }
+    }
+
+    private static void drop(String text){
+        onView(withId(R.id.edit_text_drop)).perform(typeText(text), closeSoftKeyboard());
+        onView(withId(R.id.button_drop)).perform(click());
+
+    }
+
+    private static class RecyclerClickAction {
+
+        RecyclerClickAction(final int idView, final int id, final int position){
+            onView(withId(idView)).perform(RecyclerViewActions.actionOnItemAtPosition(position,clickChildViewWithId(id)));
+
+        }
+
+
+        private static ViewAction clickChildViewWithId(final int id) {
+
+
+            return new ViewAction() {
+                @Override
+                public Matcher<View> getConstraints() {
+                    return null;
+                }
+
+                @Override
+                public String getDescription() {
+                    return "Click on a child view with specified id.";
+                }
+
+                @Override
+                public void perform(UiController uiController, View view) {
+                    View v = view.findViewById(id);
+                    v.performClick();
+                }
+            };
+        }
+
     }
 
     @After
