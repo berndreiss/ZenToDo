@@ -116,11 +116,13 @@ public class UITest {
         int month = MonthDay.now().getMonthValue();
         int day = MonthDay.now().getDayOfMonth();
 
-        String[] strings = {"Test"};
+        String[] strings = {"Test", "Test1"};
 
-        int[][] tests = {{year,month,day+1}};
+        int[][] tests = {{year,month,day+1},{0,0,0}};
 
+        int[] results = {0,1};
 
+        int[] buttons = {android.R.id.button1, android.R.id.button2};
 
         for (int i = 0; i < strings.length; i++) {
             drop(strings[i]);
@@ -130,12 +132,12 @@ public class UITest {
 
 
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
-            onView(withId(android.R.id.button1)).perform(click());
+            onView(withId(buttons[i])).perform(click());
 
             Data data = new Data(appContext, DATABASE_NAME);
 
             assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
-            assert (data.getDropped().isEmpty());
+            assert (data.getDropped().size() == results[i]);
         }
     }
 
