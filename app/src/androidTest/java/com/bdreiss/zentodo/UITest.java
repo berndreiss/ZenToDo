@@ -196,6 +196,45 @@ public class UITest {
         }
     }
 
+    @Test
+    public void testCalendarListNoList(){
+
+        int year = Year.now().getValue();
+        int month = MonthDay.now().getMonthValue();
+        int day = MonthDay.now().getDayOfMonth();
+
+        String[] strings = {"Test", "Test1"};
+
+        int[][] tests = {{year,month,day+1},{0,0,0}};
+
+        int[][] results = {{1,0},{2,1}};
+
+        int[] buttons = {android.R.id.button1, android.R.id.button2};
+
+        for (int i = 0; i < strings.length; i++) {
+            onView(withId(R.id.toolbar_drop)).perform(click());
+
+            drop(strings[i]);
+
+            onView(withId(R.id.toolbar_lists)).perform(click());
+
+            onData(hasToString("No list")).inAdapterView(withId(R.id.list_view_lists)).atPosition(0).perform(click());
+
+
+            new RecyclerClickAction(R.id.recycle_view_lists, R.id.button_menu, i);
+            new RecyclerClickAction(R.id.recycle_view_lists, R.id.button_calendar, i);
+
+            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
+            onView(withId(buttons[i])).perform(click());
+
+            Data data = new Data(appContext, DATABASE_NAME);
+
+            assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
+            assert(data.getNoList().size()== results[i][0]);
+            assert (data.getDropped().size() == results[i][1]);
+        }
+    }
+
     private static void drop(String text){
         onView(withId(R.id.edit_text_drop)).perform(typeText(text), closeSoftKeyboard());
         onView(withId(R.id.button_drop)).perform(click());
