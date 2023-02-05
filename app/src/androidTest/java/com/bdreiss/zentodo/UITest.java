@@ -218,7 +218,7 @@ public class UITest {
 
             onView(withId(R.id.toolbar_lists)).perform(click());
 
-            onData(hasToString("No list")).inAdapterView(withId(R.id.list_view_lists)).atPosition(0).perform(click());
+            onData(hasToString(appContext.getString(R.string.noList))).inAdapterView(withId(R.id.list_view_lists)).atPosition(0).perform(click());
 
 
             new RecyclerClickAction(R.id.recycle_view_lists, R.id.button_menu, i);
@@ -234,6 +234,7 @@ public class UITest {
             assert (data.getDropped().size() == results[i][1]);
         }
     }
+
 
     private static void drop(String text){
         onView(withId(R.id.edit_text_drop)).perform(typeText(text), closeSoftKeyboard());
