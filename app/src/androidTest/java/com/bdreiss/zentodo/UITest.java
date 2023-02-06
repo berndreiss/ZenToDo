@@ -2,7 +2,6 @@ package com.bdreiss.zentodo;
 
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
-import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.contrib.PickerActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -26,6 +25,7 @@ import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 
@@ -34,7 +34,6 @@ import android.view.View;
 import android.widget.DatePicker;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
-import com.bdreiss.zentodo.adapters.ListsListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
 import java.io.FileWriter;
@@ -133,8 +132,8 @@ public class UITest {
         for (int i = 0; i < strings.length; i++) {
             drop(strings[i]);
 
-            new RecyclerClickAction(R.id.list_view_drop, R.id.button_menu, 0);
-            new RecyclerClickAction(R.id.list_view_drop, R.id.button_calendar, 0);
+            new RecyclerAction(R.id.list_view_drop, R.id.button_menu, 0);
+            new RecyclerAction(R.id.list_view_drop, R.id.button_calendar, 0);
 
 
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
@@ -172,19 +171,19 @@ public class UITest {
             onData(hasToString("No list")).inAdapterView(withId(R.id.list_view_lists)).atPosition(0).perform(click());
 
 
-            new RecyclerClickAction(R.id.recycle_view_lists, R.id.button_menu, i);
-            new RecyclerClickAction(R.id.recycle_view_lists, R.id.button_calendar, i);
+            new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
+            new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
 
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(1988, 11, 3));
             onView(withId(buttons[i])).perform(click());
 
-            new RecyclerClickAction(R.id.recycle_view_lists, R.id.button_menu, i);
-            new RecyclerClickAction(R.id.recycle_view_lists, R.id.button_focus, i);
+            new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
+            new RecyclerAction(R.id.recycle_view_lists, R.id.button_focus, i);
 
             onView(withId(R.id.toolbar_focus)).perform(click());
 
-            new RecyclerClickAction(R.id.list_view_focus, R.id.button_menu, 0);
-            new RecyclerClickAction(R.id.list_view_focus, R.id.button_calendar, 0);
+            new RecyclerAction(R.id.list_view_focus, R.id.button_menu, 0);
+            new RecyclerAction(R.id.list_view_focus, R.id.button_calendar, 0);
 
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
@@ -221,8 +220,8 @@ public class UITest {
             onData(hasToString(appContext.getString(R.string.noList))).inAdapterView(withId(R.id.list_view_lists)).atPosition(0).perform(click());
 
 
-            new RecyclerClickAction(R.id.recycle_view_lists, R.id.button_menu, i);
-            new RecyclerClickAction(R.id.recycle_view_lists, R.id.button_calendar, i);
+            new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
+            new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
 
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
@@ -235,6 +234,53 @@ public class UITest {
         }
     }
 
+    @Test
+    public void testCalendarList(){
+
+        int year = Year.now().getValue();
+        int month = MonthDay.now().getMonthValue();
+        int day = MonthDay.now().getDayOfMonth();
+
+        String[] strings = {"Test"};
+
+        String[] lists = {"Test"};
+
+        int[][] tests = {{year,month,day+1}};
+
+        int[][] results = {{3,0}};
+
+        int[] buttons = {android.R.id.button1, android.R.id.button2};
+
+        for (int i = 0; i < strings.length; i++) {
+            onView(withId(R.id.toolbar_drop)).perform(click());
+
+            drop(strings[i]);
+
+            new RecyclerAction(R.id.list_view_drop, R.id.button_menu, 0);
+
+            new RecyclerAction(R.id.list_view_drop,R.id.button_list,0);
+
+            new RecyclerAction(R.id.list_view_drop,0,lists[i]);
+
+            new RecyclerAction(R.id.list_view_drop,R.id.button_back_list,0);
+
+            onView(withId(R.id.toolbar_lists)).perform(click());
+
+            onData(allOf(instanceOf(String.class))).atPosition(0).perform(click());
+
+            new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
+            new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
+
+            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
+            onView(withId(buttons[i])).perform(click());
+
+            Data data = new Data(appContext, DATABASE_NAME);
+
+            assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
+            assert(data.getLists().size() == results[i][0]);
+            assert (data.getDropped().size() == results[i][1]);
+        }
+    }
 
     private static void drop(String text){
         onView(withId(R.id.edit_text_drop)).perform(typeText(text), closeSoftKeyboard());
@@ -242,10 +288,15 @@ public class UITest {
 
     }
 
-    private static class RecyclerClickAction {
 
-        RecyclerClickAction(final int idView, final int id, final int position){
+    private static class RecyclerAction {
+
+        RecyclerAction(final int idView, final int id, final int position){
             onView(withId(idView)).perform(RecyclerViewActions.actionOnItemAtPosition(position,clickChildViewWithId(id)));
+
+        }
+        RecyclerAction(final int idView, final int position,String text){
+            onView(withId(idView)).perform(RecyclerViewActions.actionOnItemAtPosition(position,typeText(text)));
 
         }
 
