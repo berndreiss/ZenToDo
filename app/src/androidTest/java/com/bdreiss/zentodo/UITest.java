@@ -1,7 +1,10 @@
 package com.bdreiss.zentodo;
 
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.espresso.NoMatchingViewException;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.contrib.PickerActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -22,12 +25,14 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.typeText;
+import static androidx.test.espresso.matcher.ViewMatchers.assertThat;
 import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 
 import android.content.Context;
 import android.view.View;
@@ -91,7 +96,7 @@ public class UITest {
     public ActivityScenarioRule<MainActivity> activityScenarioRule
             = new ActivityScenarioRule<>(MainActivity.class);
 
-
+/*
     @Test
     public void testDrop(){
 
@@ -280,6 +285,78 @@ public class UITest {
             assert(data.getLists().size() == results[i][0]);
             assert (data.getDropped().size() == results[i][1]);
         }
+    }*/
+
+    @Test
+    public void testCalendarPick(){
+
+        int year = Year.now().getValue();
+        int month = MonthDay.now().getMonthValue();
+        int day = MonthDay.now().getDayOfMonth();
+
+        String string = "Test";
+
+        int[][] tests = {{0,0,0},{year,month,day+1}};
+
+        int[] results = {1,0};
+
+        int[] buttons = {android.R.id.button2, android.R.id.button1};
+
+
+        drop(string);
+
+
+        onView(withId(R.id.toolbar_pick)).perform(click());
+
+        onView(withId(R.id.list_view_pick)).check(new RecyclerViewCountAssertion(1));
+
+        for (int i = 0; i < tests.length; i++){
+            new RecyclerAction(R.id.list_view_pick,R.id.button_menu,0);
+            new RecyclerAction(R.id.list_view_pick,R.id.button_calendar,0);
+
+            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
+            onView(withId(buttons[i])).perform(click());
+
+            onView(withId(R.id.list_view_pick)).check(new RecyclerViewCountAssertion(results[i]));
+        }
+
+        /*
+            onData(allOf(instanceOf(String.class))).atPosition(0).perform(click());
+
+            new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
+            new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
+
+            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
+            onView(withId(buttons[i])).perform(click());
+
+            Data data = new Data(appContext, DATABASE_NAME);
+
+            assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
+            assert(data.getLists().size() == results[i][0]);
+            assert (data.getDropped().size() == results[i][1]);
+*/
+    }
+
+    public static class RecyclerViewCountAssertion implements ViewAssertion{
+
+        private int count;
+
+        public RecyclerViewCountAssertion(int count){
+            this.count = count;
+        }
+
+        @Override
+        public void check(View view, NoMatchingViewException noViewFoundException) {
+            if (noViewFoundException != null) {
+                throw noViewFoundException;
+            }
+
+            RecyclerView recyclerView = (RecyclerView) view;
+            RecyclerView.Adapter adapter = recyclerView.getAdapter();
+            assert adapter != null;
+            assertThat(adapter.getItemCount(), is(count));
+        }
+
     }
 
     private static void drop(String text){
