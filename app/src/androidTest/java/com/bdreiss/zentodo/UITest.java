@@ -96,7 +96,7 @@ public class UITest {
     public ActivityScenarioRule<MainActivity> activityScenarioRule
             = new ActivityScenarioRule<>(MainActivity.class);
 
-/*
+
     @Test
     public void testDrop(){
 
@@ -285,7 +285,7 @@ public class UITest {
             assert(data.getLists().size() == results[i][0]);
             assert (data.getDropped().size() == results[i][1]);
         }
-    }*/
+    }
 
     @Test
     public void testCalendarPick(){
@@ -301,6 +301,13 @@ public class UITest {
         int[] results = {1,0};
 
         int[] buttons = {android.R.id.button2, android.R.id.button1};
+
+        int[][] testsDoLater = {{year,month,day+1},{0,0,0}};
+
+        int[] resultsDoLater = {1,0};
+
+        int[] buttonsDoLater = {android.R.id.button1,android.R.id.button2};
+
 
 
         drop(string);
@@ -318,6 +325,18 @@ public class UITest {
             onView(withId(buttons[i])).perform(click());
 
             onView(withId(R.id.list_view_pick)).check(new RecyclerViewCountAssertion(results[i]));
+        }
+
+        onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(1));
+
+        for (int i = 0; i < tests.length; i++){
+            new RecyclerAction(R.id.list_view_pick_doLater,R.id.button_menu,0);
+            new RecyclerAction(R.id.list_view_pick_doLater,R.id.button_calendar,0);
+
+            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(testsDoLater[i][0], testsDoLater[i][1], testsDoLater[i][2]));
+            onView(withId(buttonsDoLater[i])).perform(click());
+
+            onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(resultsDoLater[i]));
         }
 
         /*
