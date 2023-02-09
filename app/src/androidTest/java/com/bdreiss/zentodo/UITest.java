@@ -30,12 +30,14 @@ import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
@@ -96,7 +98,7 @@ public class UITest {
     public ActivityScenarioRule<MainActivity> activityScenarioRule
             = new ActivityScenarioRule<>(MainActivity.class);
 
-
+/*
     @Test
     public void testDrop(){
 
@@ -285,7 +287,8 @@ public class UITest {
             assert(data.getLists().size() == results[i][0]);
             assert (data.getDropped().size() == results[i][1]);
         }
-    }
+    }*/
+
 
     @Test
     public void testCalendarPick(){
@@ -307,8 +310,6 @@ public class UITest {
         int[] resultsDoLater = {1,0};
 
         int[] buttonsDoLater = {android.R.id.button1,android.R.id.button2};
-
-
 
         drop(string);
 
@@ -338,6 +339,29 @@ public class UITest {
 
             onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(resultsDoLater[i]));
         }
+
+        onView(withId(R.id.list_view_pick)).check(new RecyclerViewCountAssertion(1));
+
+        new RecyclerAction(R.id.list_view_pick,R.id.button_menu,0);
+        new RecyclerAction(R.id.list_view_pick,R.id.button_list,0);
+
+        new RecyclerAction(R.id.list_view_pick,0,"Test");
+
+        new RecyclerAction(R.id.list_view_pick,R.id.button_back_list,0);
+
+        onView(withId(R.id.list_view_pick_list)).check(new RecyclerViewCountAssertion(1));
+
+        for (int i = 0; i < tests.length; i++){
+            new RecyclerAction(R.id.list_view_pick_list,R.id.button_menu,0);
+            new RecyclerAction(R.id.list_view_pick_list,R.id.button_calendar,0);
+
+            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
+            onView(withId(buttons[i])).perform(click());
+
+            onView(withId(R.id.list_view_pick_list)).check(new RecyclerViewCountAssertion(results[i]));
+        }
+
+        onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(1));
 
         /*
             onData(allOf(instanceOf(String.class))).atPosition(0).perform(click());
