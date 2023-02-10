@@ -30,14 +30,12 @@ import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
@@ -98,20 +96,22 @@ public class UITest {
     public ActivityScenarioRule<MainActivity> activityScenarioRule
             = new ActivityScenarioRule<>(MainActivity.class);
 
-/*
+
+    //Tests if dropping tasks functions properly
     @Test
     public void testDrop(){
 
+        //test data
         String[] tests = {"","0","1","Test","'","'Test","T'e'st","Test'"};
 
+        //expected results in data.entries
         String[][] results = {{},{"0"},{"0","1"},{"0","1","Test"},{"0","1","Test","'"},
                                 {"0","1","Test","'","'Test"},
                                 {"0","1","Test","'","'Test","T'e'st"},
                                 {"0","1","Test","'","'Test","T'e'st","Test'"}};
 
         for (int i = 0; i < tests.length; i++) {
-            onView(withId(R.id.edit_text_drop)).perform(typeText(tests[i]), closeSoftKeyboard());
-            onView(withId(R.id.button_drop)).perform(click());
+            drop(tests[i]);
 
             DropTaskListAdapter adapter = new DropTaskListAdapter(appContext, new Data(appContext, DATABASE_NAME));
 
@@ -121,6 +121,7 @@ public class UITest {
         }
     }
 
+    //tests the functionality of the calendar in DROP: when a date is set, tasks should disappear
     @Test
     public void testCalendarDrop(){
 
@@ -128,21 +129,24 @@ public class UITest {
         int month = MonthDay.now().getMonthValue();
         int day = MonthDay.now().getDayOfMonth();
 
+        //dummy test Strings for adding tasks to perform tests on
         String[] strings = {"Test", "Test1"};
 
+        //test data
         int[][] tests = {{year,month,day+1},{0,0,0}};
 
+        //expected sizes of data.entries
         int[] results = {0,1};
 
+        //button1 == OK, button2 == No Date
         int[] buttons = {android.R.id.button1, android.R.id.button2};
 
         for (int i = 0; i < strings.length; i++) {
             drop(strings[i]);
 
+            //open calendar and set test date
             new RecyclerAction(R.id.list_view_drop, R.id.button_menu, 0);
             new RecyclerAction(R.id.list_view_drop, R.id.button_calendar, 0);
-
-
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
 
@@ -153,6 +157,7 @@ public class UITest {
         }
     }
 
+    //test the functionality of the calendar in FOCUS: when a date is set, tasks should disappear
     @Test
     public void testCalendarFocus(){
 
@@ -160,33 +165,40 @@ public class UITest {
         int month = MonthDay.now().getMonthValue();
         int day = MonthDay.now().getDayOfMonth();
 
+        //dummy test Strings for adding tasks
         String[] strings = {"Test", "Test1"};
 
+        //test data
         int[][] tests = {{year,month,day+1},{0,0,0}};
 
+        //expected sizes of data.getFocus()
         int[] results = {0,1};
 
+        //button1 == OK, button2 == No Date
         int[] buttons = {android.R.id.button1, android.R.id.button2};
 
         for (int i = 0; i < strings.length; i++) {
-            onView(withId(R.id.toolbar_drop)).perform(click());
 
+            //switch to DROP and drop tasks
+            onView(withId(R.id.toolbar_drop)).perform(click());
             drop(strings[i]);
 
+            //switch to No List in LISTS -> since we want to test tasks, that already have a date,
+            //we need to set that in lists, so tasks don't disappear from the list and
+            //we can still set focused = true
             onView(withId(R.id.toolbar_lists)).perform(click());
-
             onData(hasToString("No list")).inAdapterView(withId(R.id.list_view_lists)).atPosition(0).perform(click());
 
-
+            //set date and set focused = true
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
-
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(1988, 11, 3));
             onView(withId(buttons[i])).perform(click());
 
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_focus, i);
 
+            //switch to FOCUS and start calendar tests
             onView(withId(R.id.toolbar_focus)).perform(click());
 
             new RecyclerAction(R.id.list_view_focus, R.id.button_menu, 0);
@@ -287,7 +299,7 @@ public class UITest {
             assert(data.getLists().size() == results[i][0]);
             assert (data.getDropped().size() == results[i][1]);
         }
-    }*/
+    }
 
 
     @Test
@@ -382,7 +394,7 @@ public class UITest {
 
     public static class RecyclerViewCountAssertion implements ViewAssertion{
 
-        private int count;
+        private final int count;
 
         public RecyclerViewCountAssertion(int count){
             this.count = count;
