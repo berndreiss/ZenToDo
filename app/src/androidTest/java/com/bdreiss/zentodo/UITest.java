@@ -150,6 +150,7 @@ public class UITest {
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
 
+            //assert results
             Data data = new Data(appContext, DATABASE_NAME);
 
             assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
@@ -207,6 +208,7 @@ public class UITest {
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
 
+            //assert results
             Data data = new Data(appContext, DATABASE_NAME);
 
             assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
@@ -214,37 +216,44 @@ public class UITest {
         }
     }
 
+    //test calendar function for items in no list in LIST
     @Test
     public void testCalendarListNoList(){
 
+        //get current dates
         int year = Year.now().getValue();
         int month = MonthDay.now().getMonthValue();
         int day = MonthDay.now().getDayOfMonth();
 
+        //dummy task names for test data
         String[] strings = {"Test", "Test1"};
 
+        //test data
         int[][] tests = {{year,month,day+1},{0,0,0}};
 
+        //expected number of tasks in data.getNoList() and data.getDropped()
         int[][] results = {{1,0},{2,1}};
 
+        //button1 == OK, button2 == No Date
         int[] buttons = {android.R.id.button1, android.R.id.button2};
 
         for (int i = 0; i < strings.length; i++) {
-            onView(withId(R.id.toolbar_drop)).perform(click());
 
+            //switch to DROP and drop test data
+            onView(withId(R.id.toolbar_drop)).perform(click());
             drop(strings[i]);
 
+            //switch to LISTS and select no list
             onView(withId(R.id.toolbar_lists)).perform(click());
-
             onData(hasToString(appContext.getString(R.string.noList))).inAdapterView(withId(R.id.list_view_lists)).atPosition(0).perform(click());
 
-
+            //set date
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
-
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
 
+            //assert results
             Data data = new Data(appContext, DATABASE_NAME);
 
             assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
@@ -253,46 +262,56 @@ public class UITest {
         }
     }
 
+    //tests the calendar function in a list in LISTS
     @Test
     public void testCalendarList(){
 
+        //get current dates
         int year = Year.now().getValue();
         int month = MonthDay.now().getMonthValue();
         int day = MonthDay.now().getDayOfMonth();
 
+        //dummy task name for test data
         String[] strings = {"Test"};
 
+        //dummy list name for test data
         String[] lists = {"Test"};
 
+        //test dates
         int[][] tests = {{year,month,day+1}};
 
+        //expected sizes of data.getLists() and data.getDropped()
         int[][] results = {{3,0}};
 
+        //button1 == OK, button2 == No Date
         int[] buttons = {android.R.id.button1, android.R.id.button2};
 
         for (int i = 0; i < strings.length; i++) {
-            onView(withId(R.id.toolbar_drop)).perform(click());
 
+            //switch to DROP and drop tasks
+            onView(withId(R.id.toolbar_drop)).perform(click());
             drop(strings[i]);
 
+            //assign lists
             new RecyclerAction(R.id.list_view_drop, R.id.button_menu, 0);
-
             new RecyclerAction(R.id.list_view_drop,R.id.button_list,0);
-
             new RecyclerAction(R.id.list_view_drop,0,lists[i]);
-
             new RecyclerAction(R.id.list_view_drop,R.id.button_back_list,0);
 
+            //switch to LISTS
             onView(withId(R.id.toolbar_lists)).perform(click());
 
+            //choose first item in adapter since there is only one list
             onData(allOf(instanceOf(String.class))).atPosition(0).perform(click());
 
+            //set dates
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
 
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
 
+            //assert results
             Data data = new Data(appContext, DATABASE_NAME);
 
             assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);

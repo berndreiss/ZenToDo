@@ -55,7 +55,6 @@ import android.widget.TextView;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-//Test
 public class MainActivity extends AppCompatActivity {
 
     private static String DATABASE_NAME = "Data.db";
