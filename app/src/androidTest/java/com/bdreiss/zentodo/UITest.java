@@ -320,10 +320,28 @@ public class UITest {
         }
     }
 
-
+    /*
+     *   the expected results for the calendar function in PICK are more complex than in the other modes
+     *   the behaviour in the different adapters is as follows:
+     *
+     *   tasksToPick:   noDate  -> task stays in adapter
+     *                  setDate -> move task to doLater
+     *
+     *   doNow:         noDate  -> task stays in adapter
+     *                  setDate -> move task to doLater
+     *
+     *   doLater:       noDate  -> if no list is assigned -> move to tasksToPick
+     *                             if list is assigned    -> move to moveToLists
+     *
+     *                  setDate -> task stays in adapter
+     *
+     *  moveToLists:    noDate -> tasks stays in adapter
+     *                  setDate-> move task to doLater
+     *
+    */
     @Test
     public void testCalendarPick(){
-
+        
         int year = Year.now().getValue();
         int month = MonthDay.now().getMonthValue();
         int day = MonthDay.now().getDayOfMonth();
