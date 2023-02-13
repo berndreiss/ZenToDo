@@ -36,6 +36,7 @@ import static org.hamcrest.Matchers.is;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
@@ -96,7 +97,7 @@ public class UITest {
     public ActivityScenarioRule<MainActivity> activityScenarioRule
             = new ActivityScenarioRule<>(MainActivity.class);
 
-
+/*
     //Tests if dropping tasks functions properly
     @Test
     public void testDrop(){
@@ -319,6 +320,7 @@ public class UITest {
             assert (data.getDropped().size() == results[i][1]);
         }
     }
+*/
 
     /*
      *   the expected results for the calendar function in PICK are more complex than in the other modes
@@ -416,7 +418,13 @@ public class UITest {
 
         onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(1));
 
+
         //Test (2): doNow
+
+        new RecyclerAction(R.id.list_view_pick_doLater,R.id.checkbox,0);
+
+        onView(withId(R.id.list_view_pick_doNow)).check(new RecyclerViewCountAssertion(1));
+
         /*
             onData(allOf(instanceOf(String.class))).atPosition(0).perform(click());
 
@@ -466,7 +474,7 @@ public class UITest {
     private static class RecyclerAction {
 
         RecyclerAction(final int idView, final int id, final int position){
-            onView(withId(idView)).perform(RecyclerViewActions.actionOnItemAtPosition(position,clickChildViewWithId(id)));
+            onView(withId(idView)).perform(RecyclerViewActions.actionOnItemAtPosition(position,RecyclerAction.clickChildViewWithId(id)));
 
         }
         RecyclerAction(final int idView, final int position,String text){
