@@ -324,24 +324,26 @@ public class UITest {
      *   the expected results for the calendar function in PICK are more complex than in the other modes
      *   the behaviour in the different adapters is as follows:
      *
-     *   tasksToPick:   noDate  -> task stays in adapter
-     *                  setDate -> move task to doLater
+     *   (1) tasksToPick:   noDate  -> task stays in adapter
+     *                      setDate -> move task to doLater
      *
-     *   doNow:         noDate  -> task stays in adapter
-     *                  setDate -> move task to doLater
+     *   (2) doNow:         noDate  -> task stays in adapter
+     *                      setDate -> move task to doLater
      *
-     *   doLater:       noDate  -> if no list is assigned -> move to tasksToPick
-     *                             if list is assigned    -> move to moveToLists
+     *   (3) doLater:       noDate  -> if no list is assigned -> move to tasksToPick
+     *                                 if list is assigned    -> move to moveToLists
      *
-     *                  setDate -> task stays in adapter
+     *                      setDate -> task stays in adapter
      *
-     *  moveToLists:    noDate -> tasks stays in adapter
-     *                  setDate-> move task to doLater
+     *    (4) moveToLists:  noDate -> tasks stays in adapter
+     *                      setDate-> move task to doLater
      *
     */
     @Test
     public void testCalendarPick(){
-        
+
+        //Test (1): tasksToPick
+
         int year = Year.now().getValue();
         int month = MonthDay.now().getMonthValue();
         int day = MonthDay.now().getDayOfMonth();
@@ -377,6 +379,7 @@ public class UITest {
             onView(withId(R.id.list_view_pick)).check(new RecyclerViewCountAssertion(results[i]));
         }
 
+        //Test (3): doLater
         onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(1));
 
         for (int i = 0; i < tests.length; i++){
@@ -389,6 +392,7 @@ public class UITest {
             onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(resultsDoLater[i]));
         }
 
+        //Test (4): moveToList
         onView(withId(R.id.list_view_pick)).check(new RecyclerViewCountAssertion(1));
 
         new RecyclerAction(R.id.list_view_pick,R.id.button_menu,0);
@@ -412,6 +416,7 @@ public class UITest {
 
         onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(1));
 
+        //Test (2): doNow
         /*
             onData(allOf(instanceOf(String.class))).atPosition(0).perform(click());
 
