@@ -425,21 +425,15 @@ public class UITest {
 
         onView(withId(R.id.list_view_pick_doNow)).check(new RecyclerViewCountAssertion(1));
 
-        /*
-            onData(allOf(instanceOf(String.class))).atPosition(0).perform(click());
-
-            new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
-            new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
+        for (int i = 0; i < tests.length; i++){
+            new RecyclerAction(R.id.list_view_pick_doNow,R.id.button_menu,0);
+            new RecyclerAction(R.id.list_view_pick_doNow,R.id.button_calendar,0);
 
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
 
-            Data data = new Data(appContext, DATABASE_NAME);
-
-            assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
-            assert(data.getLists().size() == results[i][0]);
-            assert (data.getDropped().size() == results[i][1]);
-*/
+            onView(withId(R.id.list_view_pick_doNow)).check(new RecyclerViewCountAssertion(results[i]));
+        }
     }
 
     public static class RecyclerViewCountAssertion implements ViewAssertion{
