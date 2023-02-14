@@ -66,7 +66,7 @@ public class SetDateListenerPick extends SetDateListener{
 
             Entry e = adapter.entries.get(position);
 
-            if (e.getList() != null){
+            if (e.getList() != null && !((PickTaskListAdapter) adapter).isCheckboxTicked()){
                 moveToListAdapter.entries.add(e);
                 moveToListAdapter.notifyDataSetChanged();
                 moveToListAdapter.itemCountChanged();

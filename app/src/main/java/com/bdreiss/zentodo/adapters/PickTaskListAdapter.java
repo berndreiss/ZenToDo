@@ -63,6 +63,10 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
         this.moveToListAdapter = moveToListAdapter;
     }
 
+    public boolean isCheckboxTicked(){
+        return checkboxTicked;
+    }
+
 
 
     @SuppressLint("NotifyDataSetChanged")
