@@ -344,98 +344,111 @@ public class UITest {
     @Test
     public void testCalendarPick(){
 
-        //Test (1): tasksToPick
-
+        //Get current date
         int year = Year.now().getValue();
         int month = MonthDay.now().getMonthValue();
         int day = MonthDay.now().getDayOfMonth();
 
+        //dummy task
         String string = "Test";
 
+        //test data for (1), (2) and (4)
         int[][] tests = {{0,0,0},{year,month,day+1}};
 
+        //expected size of adapter for (1), (2) and (4)
         int[] results = {1,0};
 
+        //button1 == OK, button2 == No Date
         int[] buttons = {android.R.id.button2, android.R.id.button1};
 
+        //test data for (3)
         int[][] testsDoLater = {{year,month,day+1},{0,0,0}};
 
+        //expected results for (3)
         int[] resultsDoLater = {1,0};
 
+        //button1 == OK, button2 == No Date
         int[] buttonsDoLater = {android.R.id.button1,android.R.id.button2};
 
         drop(string);
 
-
+        //switch to PICK
         onView(withId(R.id.toolbar_pick)).perform(click());
 
+        //assert that dropped task is present
         onView(withId(R.id.list_view_pick)).check(new RecyclerViewCountAssertion(1));
 
+        //Test (1): tasksToPick
         for (int i = 0; i < tests.length; i++){
             new RecyclerAction(R.id.list_view_pick,R.id.button_menu,0);
             new RecyclerAction(R.id.list_view_pick,R.id.button_calendar,0);
 
+            //assert results
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
-
             onView(withId(R.id.list_view_pick)).check(new RecyclerViewCountAssertion(results[i]));
         }
 
-        //Test (3): doLater
+        //assert task was moved to doLater
         onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(1));
 
+        //Test (3): doLater
         for (int i = 0; i < tests.length; i++){
             new RecyclerAction(R.id.list_view_pick_doLater,R.id.button_menu,0);
             new RecyclerAction(R.id.list_view_pick_doLater,R.id.button_calendar,0);
 
+            //assert results
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(testsDoLater[i][0], testsDoLater[i][1], testsDoLater[i][2]));
             onView(withId(buttonsDoLater[i])).perform(click());
-
             onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(resultsDoLater[i]));
         }
 
-        //Test (4): moveToList
+        //assert task was moved back to tasksToPick
         onView(withId(R.id.list_view_pick)).check(new RecyclerViewCountAssertion(1));
 
+        //assign list to task
         new RecyclerAction(R.id.list_view_pick,R.id.button_menu,0);
         new RecyclerAction(R.id.list_view_pick,R.id.button_list,0);
 
         new RecyclerAction(R.id.list_view_pick,0,"Test");
-
         new RecyclerAction(R.id.list_view_pick,R.id.button_back_list,0);
 
+        //assert task was moved to list
         onView(withId(R.id.list_view_pick_list)).check(new RecyclerViewCountAssertion(1));
 
+        //Test (4): moveToList
         for (int i = 0; i < tests.length; i++){
             new RecyclerAction(R.id.list_view_pick_list,R.id.button_menu,0);
             new RecyclerAction(R.id.list_view_pick_list,R.id.button_calendar,0);
 
+            //assert results
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
-
             onView(withId(R.id.list_view_pick_list)).check(new RecyclerViewCountAssertion(results[i]));
         }
 
+        //assert task was moved to do later
         onView(withId(R.id.list_view_pick_doLater)).check(new RecyclerViewCountAssertion(1));
 
-
-        //Test (2): doNow
-
+        //press checkbox
         new RecyclerAction(R.id.list_view_pick_doLater,R.id.checkbox,0);
 
+        //assert task was moved to doNow
         onView(withId(R.id.list_view_pick_doNow)).check(new RecyclerViewCountAssertion(1));
 
+        //Test (2): doNow
         for (int i = 0; i < tests.length; i++){
             new RecyclerAction(R.id.list_view_pick_doNow,R.id.button_menu,0);
             new RecyclerAction(R.id.list_view_pick_doNow,R.id.button_calendar,0);
 
+            //assert results
             onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
             onView(withId(buttons[i])).perform(click());
-
             onView(withId(R.id.list_view_pick_doNow)).check(new RecyclerViewCountAssertion(results[i]));
         }
     }
 
+    //assert RecyclerViewAdapter has number of items
     public static class RecyclerViewCountAssertion implements ViewAssertion{
 
         private final int count;
@@ -458,13 +471,14 @@ public class UITest {
 
     }
 
+    //drop new task
     private static void drop(String text){
         onView(withId(R.id.edit_text_drop)).perform(typeText(text), closeSoftKeyboard());
         onView(withId(R.id.button_drop)).perform(click());
 
     }
 
-
+    //perform action on element within item in RecyclerView
     private static class RecyclerAction {
 
         RecyclerAction(final int idView, final int id, final int position){
