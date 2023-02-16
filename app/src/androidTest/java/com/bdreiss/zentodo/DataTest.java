@@ -28,6 +28,7 @@ public class DataTest {
         appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
     }
 
+    //Test if the Data object is instantiated correctly
     @Test
     public void constructor(){
         Data data = new Data(appContext, DATABASE_NAME);
@@ -41,22 +42,29 @@ public class DataTest {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //Tests if tasks are added correctly
     @Test
     public void add(){
 
+        //Test data that contains all commonly used special characters and in particular "'", since
+        //there have been problems adding tasks containing "'", have been causing problems for
+        //SQL commands. Should be fixed now but better safe than sorry.
         String[] stringData = DbHelper_V1Test.stringTestData;
 
         Data data = new Data(appContext, DATABASE_NAME);
 
         for (int i = 0; i < stringData.length; i++){
+
             data.add(stringData[i]);
 
+            //get entries of Data instance and assert results
             Entry entry = data.getEntries().get(i);
 
             assert(entry.getTask().equals(stringData[i]));
             assert(entry.getId() == i);
             assert(entry.getPosition() == i);
 
+            //get new instance with data from the save file and assert results
             DbHelper db = new DbHelper(appContext, DATABASE_NAME);
             entry = db.loadEntries().get(i);
 
@@ -70,27 +78,42 @@ public class DataTest {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //test if ids are generated correctly. The id will always be the lowest number still not used
+    //by a task starting from 0, i.e. the first task will be 0, the second 1 and so on. If the
+    //first task is removed however, the third one will be 0 again, but the fourth will be 2.
     @Test
     public void idGeneration(){
+
+        //strings representing ids for creating test tasks
         String[] strings = {"0","1","2","3"};
 
+        //instantiate TestClass
         TestClass test = new TestClass(appContext, strings);
-
         test.set();
 
         Data data = test.getData();
 
+        //assert ids match task
+        for (Entry e: data.getEntries())
+            assert(e.getId() == Integer.parseInt(e.getTask()));
+
+        //remove second task with expected result: "0": 0, "2": 2, "3": 3}
         data.remove(1);
 
+        //add task with expected result: {"0": 0, "2": 2, "3": 3, "4": 1}
         data.add("4");
 
+        //assert that added task has expected id
         for (Entry e : data.getEntries())
             assert !e.getTask().equals("4") || (e.getId() == 1);
 
+        //remove third task with expected result: {"0": 0, "3": 3, "4": 1}
         data.remove(2);
 
+        //add task with expected result: {"0": 0, "3": 3, "4": 1, "5": 2}
         data.add("5");
 
+        //assert that task has expected id
         for (Entry e : data.getEntries())
             assert !e.getTask().equals("5") || (e.getId() == 2);
 

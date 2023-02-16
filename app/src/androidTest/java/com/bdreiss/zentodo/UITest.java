@@ -97,7 +97,7 @@ public class UITest {
     public ActivityScenarioRule<MainActivity> activityScenarioRule
             = new ActivityScenarioRule<>(MainActivity.class);
 
-/*
+
     //Tests if dropping tasks functions properly
     @Test
     public void testDrop(){
@@ -320,7 +320,7 @@ public class UITest {
             assert (data.getDropped().size() == results[i][1]);
         }
     }
-*/
+
 
     /*
      *   the expected results for the calendar function in PICK are more complex than in the other modes
