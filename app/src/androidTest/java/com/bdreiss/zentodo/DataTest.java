@@ -120,17 +120,24 @@ public class DataTest {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //tests the removal of tasks from entryStrings via their ids
+    //for each consecutive test the tasks are reset, so all tests are run on the same data
+    //besides tasks being removed, also the position of other tasks might change
     @Test
     public void remove(){
 
-
+        //ids to be removed
         int[][] tests = {{},{0}, {1}, {2},{0,1},{1,2},{0,2},{0,1,2}};
 
+        //expected entries after removal
         int[][] results = {{0,1,2},{1,2},{0,2},{0,1},{2},{0},{1},{},};
 
+        //expected positions of tasks after removal
         int[][] resultsPosition = {{0,1,2}, {0,1}, {0,1}, {0,1}, {0},{0},{0},{}};
 
+        //dummy tasks
         String[] entryStrings = {"0","1","2"};
+
         TestClass test = new TestClass(appContext, entryStrings);
 
         for (int i = 0; i < tests.length; i++){
@@ -151,18 +158,21 @@ public class DataTest {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //tests swapping tasks
     @Test
     public void swap(){
 
-
+        //ids being swapped
         int[][][] tests = {{{0,1}}, {{1,2}}, {{0,2}}, {{1,0}}, {{2,1}}, {{2,0}},
                             {{0,1},{1,0}}, {{0,2},{1,2}},{{0,1},{1,2}}
                             };
 
+        //expected results in entries
         int[][] results = {{1,0,2}, {0,2,1}, {2,1,0}, {1,0,2}, {0,2,1}, {2,1,0},
                             {0,1,2}, {1,2,0}, {2,0,1}
                             };
 
+        //dummy test data
         String[] entryStrings = {"0","1","2"};
 
         TestClass test = new TestClass(appContext, entryStrings);
@@ -183,8 +193,8 @@ public class DataTest {
 
         appContext.deleteDatabase(DATABASE_NAME);
 
-
     }
+
 
     @Test
     public void swapList(){
