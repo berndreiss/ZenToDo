@@ -196,17 +196,23 @@ public class DataTest {
     }
 
 
+    //tests swapping items in lists: when items in a list are swapped, not only the Entry.listPosition
+    //but also Entry.position
     @Test
     public void swapList(){
 
+        //dummy test data
         String[] stringData = {"0","1","2","3","4","5"};
 
+        //lists assigned to tasks in stringData
         String[] tests = {"0", "1", "0", "1", "0", "1"};
 
+        //ids being swapped
         int[][][] swaps = {{{0,2}},{{0,4}}, {{2,4}},{{2,0}},{{4,0}}, {{4,2}},
                 {{0,2},{2,4}},{{0,2},{2,4},{0,4}},{{0,2},{2,4},{0,4},{2,4}}
         };
 
+        //expected results in list (which is generated dynamically)
         int[][] resultsListPosition = {
                 {1,0,0,1,2,2},
                 {2,0,1,1,0,2},
@@ -219,6 +225,7 @@ public class DataTest {
                 {0,0,1,1,2,2}
         };
 
+        //expected results in Data.entries
         int[][] resultsPosition = {
                 {2,1,0,3,4,5},
                 {4,1,2,3,0,5},
@@ -234,7 +241,6 @@ public class DataTest {
 
         TestClass test = new TestClass(appContext, stringData, tests);
 
-
         for (int i = 0; i < swaps.length; i++){
             test.set();
 
@@ -243,6 +249,7 @@ public class DataTest {
             for (int j = 0; j < swaps[i].length; j++)
                 data.swapList(swaps[i][j][0],swaps[i][j][1]);
 
+            //assert results
             for (Entry e : data.getEntries()) {
                 assert (e.getListPosition() == resultsListPosition[i][e.getId()]);
                 assert (e.getPosition() == resultsPosition[i][e.getId()]);
@@ -252,38 +259,44 @@ public class DataTest {
 
     }
 
+    //tests if the position of tasks in Data.entries is returned correctly
     @Test
     public void getPosition(){
 
+        //dummy test data
         String[] taskStrings = {"0","1","2","3"};
 
         TestClass test = new TestClass(appContext, taskStrings);
 
         test.set();
 
+        //assert results
         for (int i = 0; i < taskStrings.length; i++)
             assert(test.getData().getPosition(i)==i);
 
     }
 
+    //tests if task is set properly
     @Test
     public void setTask(){
 
+        //dummy test data
         String[] stringData = {"0","1","2"};
 
         TestClass test = new TestClass(appContext, stringData);
-
         test.set();
-
         Data data = test.getData();
 
+        //set every task to "TEST"
         for (int i = 0; i < stringData.length; i++){
             data.setTask(i, "TEST");
         }
 
+        //assert that every task has been set to "TEST"
         for (Entry e : data.getEntries())
             assert(e.getTask().equals("TEST"));
 
+        //assert that all changes have been made persistent
         for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
             assert(e.getTask().equals("TEST"));
 
