@@ -302,35 +302,41 @@ public class DataTest {
 
     }
 
+    //test the function to set Entry.focus
+    //first sets all tasks focus to true and asserts, than to false and asserts
     @Test
     public void setFocus(){
 
+        //dummy tasks
         String[] stringData = {"0","1","2"};
 
         TestClass test = new TestClass(appContext, stringData);
-
         test.set();
-
         Data data = test.getData();
 
+        //set all tasks focus to true
         for (int i = 0; i < stringData.length; i++){
             data.setFocus(i, true);
         }
 
+        //assert results
         for (Entry e : data.getEntries())
             assert(e.getFocus());
 
+        //assert results are persistent
         for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
             assert(e.getFocus());
 
-
+        //set all tasks focus to false
         for (int i = 0; i < stringData.length; i++){
             data.setFocus(i, false);
         }
 
+        //assert results
         for (Entry e : data.getEntries())
             assert(!e.getFocus());
 
+        //assert results are persistent
         for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
             assert(!e.getFocus());
     }
