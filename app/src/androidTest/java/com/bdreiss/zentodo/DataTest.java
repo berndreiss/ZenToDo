@@ -341,35 +341,41 @@ public class DataTest {
             assert(!e.getFocus());
     }
 
+    //test the function to set Entry.dropped
+    //first sets all tasks focus to true and asserts, than to false and asserts
     @Test
     public void setDropped(){
 
+        //dummy test data
         String[] stringData = {"0","1","2"};
 
         TestClass test = new TestClass(appContext, stringData);
-
         test.set();
-
         Data data = test.getData();
 
+        //set all tasks dropped to true
         for (int i = 0; i < stringData.length; i++){
             data.setDropped(i, true);
         }
 
+        //assert results
         for (Entry e : data.getEntries())
             assert(e.getDropped());
 
+        //assert results are persistent
         for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
             assert(e.getDropped());
 
-
+        //set all tasks dropped to false
         for (int i = 0; i < stringData.length; i++){
             data.setDropped(i, false);
         }
 
+        //assert results
         for (Entry e : data.getEntries())
             assert(!e.getDropped());
 
+        //assert results are persistent
         for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
             assert(!e.getDropped());
     }
