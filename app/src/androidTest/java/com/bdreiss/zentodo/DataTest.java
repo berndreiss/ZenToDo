@@ -380,56 +380,65 @@ public class DataTest {
             assert(!e.getDropped());
     }
 
+    //tests setting a reminder date
     @Test
     public void editReminderDate(){
 
+        //dummy test tasks
         String[] taskStrings = {"0","1","2","3"};
 
+        //test data = results
         int[] tests = {0, 20110311, 0, 2000};
 
         TestClass test = new TestClass(appContext, taskStrings);
-
         test.set();
-
         Data data = test.getData();
 
+        //set respective date for each task
         for (int i = 0; i < taskStrings.length; i++)
             data.editReminderDate(i,tests[i]);
 
         ArrayList<Entry> entries = new DbHelper(appContext, DATABASE_NAME).loadEntries();
 
+        //asser results from save file
         for (int i = 0; i < taskStrings.length; i++)
             assert(entries.get(0).getReminderDate()== tests[entries.get(0).getId()]);
 
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //tests setting recurrence
     @Test
     public void editRecurrence(){
 
+        //dummy test tasks
         String[] taskStrings = {"0","1","2","3"};
 
+        //test data
         String[] tests = {"w2", "d999", "y88", "m3"};
 
+
         TestClass test = new TestClass(appContext, taskStrings);
-
         test.set();
-
         Data data = test.getData();
 
+        //set recurrence for each task
         for (int i = 0; i < taskStrings.length; i++)
             data.editRecurrence(i,tests[i]);
 
         ArrayList<Entry> entries = new DbHelper(appContext, DATABASE_NAME).loadEntries();
 
+        //assert results from save file
         for (int i = 0; i < taskStrings.length; i++)
             assert(entries.get(0).getRecurrence().equals(tests[entries.get(0).getId()]));
 
+        //set all tasks recurrence to null
         for (int i = 0; i < tests.length; i++)
             data.editRecurrence(i,null);
 
         entries = new DbHelper(appContext, DATABASE_NAME).loadEntries();
 
+        //assert results from save file
         for (Entry e : entries)
             assert(e.getRecurrence()==null);
 
