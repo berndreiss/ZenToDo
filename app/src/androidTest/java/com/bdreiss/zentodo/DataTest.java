@@ -35,6 +35,7 @@ public class DataTest {
 
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
+        //assert all main data structures are empty
         assert(db.loadEntries().size() == 0);
         assert(db.loadLists().size() == 0);
         assert(data.getEntries().size() == 0);
@@ -87,10 +88,9 @@ public class DataTest {
         //strings representing ids for creating test tasks
         String[] strings = {"0","1","2","3"};
 
-        //instantiate TestClass
+        //initialize test data
         TestClass test = new TestClass(appContext, strings);
         test.set();
-
         Data data = test.getData();
 
         //assert ids match task
@@ -138,17 +138,19 @@ public class DataTest {
         //dummy tasks
         String[] entryStrings = {"0","1","2"};
 
+        //initialize test data
         TestClass test = new TestClass(appContext, entryStrings);
 
         for (int i = 0; i < tests.length; i++){
 
             test.set();
-
             Data data = test.getData();
 
+            //remove tasks
             for (int j = 0; j < tests[i].length; j++)
                 data.remove(tests[i][j]);
 
+            //assert results
             for (int j = 0; j < data.getEntries().size(); j++) {
                 assert (data.getEntries().get(j).getId() == results[i][j]);
                 assert (data.getEntries().get(j).getPosition() == resultsPosition[i][j]);
@@ -175,17 +177,19 @@ public class DataTest {
         //dummy test data
         String[] entryStrings = {"0","1","2"};
 
+        //initialize test data
         TestClass test = new TestClass(appContext, entryStrings);
 
         for (int i = 0; i < tests.length; i++){
 
             test.set();
-
             Data data = test.getData();
 
+            //swap tasks
             for (int j = 0; j < tests[i].length; j++)
                 data.swap(tests[i][j][0],tests[i][j][1]);
 
+            //assert results
             for (int j = 0; j < data.getEntries().size(); j++)
                 assert(data.getEntries().get(j).getId() == results[i][j]);
 
@@ -239,6 +243,7 @@ public class DataTest {
 
         };
 
+        //initialize test data
         TestClass test = new TestClass(appContext, stringData, tests);
 
         for (int i = 0; i < swaps.length; i++){
@@ -246,6 +251,7 @@ public class DataTest {
 
             Data data = test.getData();
 
+            //swap items
             for (int j = 0; j < swaps[i].length; j++)
                 data.swapList(swaps[i][j][0],swaps[i][j][1]);
 
@@ -266,8 +272,8 @@ public class DataTest {
         //dummy test data
         String[] taskStrings = {"0","1","2","3"};
 
+        //initialize test data
         TestClass test = new TestClass(appContext, taskStrings);
-
         test.set();
 
         //assert results
@@ -283,6 +289,7 @@ public class DataTest {
         //dummy test data
         String[] stringData = {"0","1","2"};
 
+        //initialize test data
         TestClass test = new TestClass(appContext, stringData);
         test.set();
         Data data = test.getData();
@@ -310,6 +317,7 @@ public class DataTest {
         //dummy tasks
         String[] stringData = {"0","1","2"};
 
+        //initialize test data
         TestClass test = new TestClass(appContext, stringData);
         test.set();
         Data data = test.getData();
@@ -349,6 +357,7 @@ public class DataTest {
         //dummy test data
         String[] stringData = {"0","1","2"};
 
+        //initialize test data
         TestClass test = new TestClass(appContext, stringData);
         test.set();
         Data data = test.getData();
@@ -390,6 +399,7 @@ public class DataTest {
         //test data = results
         int[] tests = {0, 20110311, 0, 2000};
 
+        //initialize test data
         TestClass test = new TestClass(appContext, taskStrings);
         test.set();
         Data data = test.getData();
@@ -417,7 +427,7 @@ public class DataTest {
         //test data
         String[] tests = {"w2", "d999", "y88", "m3"};
 
-
+        //initialize test data
         TestClass test = new TestClass(appContext, taskStrings);
         test.set();
         Data data = test.getData();
@@ -446,45 +456,69 @@ public class DataTest {
 
     }
 
+    //tests editing list names is implemented correctly and list positions are assigned correctly
     @Test
     public void editList(){
 
+        //dummy task names
         String[] stringData = {"0","1","2","3","4","5"};
 
+        //lists, tasks are assigned to
         String[] tests = {"0", "1", "0", "1", "0", "1"};
 
+        //expected lists name for every task
         String[] resultsList = {"0", "1", "0", "1", "0", "1"};
 
+        //expected position in respective list for every task
         int[] resultsPosition = {0,0,1,1,2,2};
 
+        //initialize test data
         TestClass test = new TestClass(appContext, stringData, tests);
-
         test.set();
-
         Data data = test.getData();
 
+        //load entries from save file to check whether changes were made persistent
         ArrayList<Entry> entries = new DbHelper(appContext,DATABASE_NAME).loadEntries();
+
+        //assert results
         for (int i = 0; i < entries.size(); i++) {
             assert(entries.get(i).getList().equals(resultsList[i]));
             assert(entries.get(i).getListPosition() == resultsPosition[i]);
         }
 
+        //assert lists are returned by data.getLists()
         for (String s : tests) {
             assert (data.getLists().contains(s));
             assert(new DbHelper(appContext,DATABASE_NAME).loadLists().containsKey(s));
         }
 
+        /*
+        *   remove list of first task: originally the list contains 0,2,4
+        *   the list positions are:
+        *   0:0
+        *   2:1
+        *   4:2
+        *   if the first item is removed, the positions are:
+        *   2:0
+        *   4:1
+        *   and so on.
+        */
         data.editList(0,null);
 
+        //assert list positions are correct
         assert(data.getEntries().get(2).getListPosition() == 0);
         assert(data.getEntries().get(4).getListPosition() == 1);
 
+        //remove list of second task
         data.editList(2,null);
 
+        //assert list position of item in same list changed
         assert(data.getEntries().get(4).getListPosition() == 0);
 
+        //remove list of fourth task
         data.editList(4,null);
 
+        //assert that list was removed (2 lists are added, for No List and ALL TASKS
         assert(data.getLists().size() == 3);
 
         appContext.deleteDatabase(DATABASE_NAME);
