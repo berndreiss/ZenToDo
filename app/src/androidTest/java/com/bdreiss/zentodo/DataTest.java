@@ -410,7 +410,7 @@ public class DataTest {
 
         ArrayList<Entry> entries = new DbHelper(appContext, DATABASE_NAME).loadEntries();
 
-        //asser results from save file
+        //assert results from save file
         for (int i = 0; i < taskStrings.length; i++)
             assert(entries.get(0).getReminderDate()== tests[entries.get(0).getId()]);
 
@@ -524,22 +524,30 @@ public class DataTest {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //test function for editing list color
     @Test
     public void editListColor(){
 
         DbHelper db = new DbHelper(appContext,DATABASE_NAME);
 
+        //dummy lists and colors
         String[] lists = {"0", "1", "2"};
         String[] initialColors = {"WHITE", "RED", "BLUE"};
+
+        //tests and expected results
         String[] results = {"BLUE", "WHITE", "RED"};
+
+        //add lists with initial color
         for (int i = 0; i < lists.length; i++)
             db.addList(lists[i],initialColors[i]);
 
         Data data = new Data(appContext,DATABASE_NAME);
 
+        //set test colors in lists
         for (int i = 0; i < lists.length;i++)
             data.editListColor(lists[i],results[i]);
 
+        //assert results
         for (int i = 0; i < lists.length; i++)
             assert(data.getListColor(lists[i]).equals(results[i]));
 
