@@ -556,19 +556,25 @@ public class DataTest {
 
     }
 
+    //test getting ListColor
     @Test
     public void getListColor(){
 
         DbHelper db = new DbHelper(appContext,DATABASE_NAME);
 
+        //dummy lists
         String[] lists = {"0", "1", "2"};
+
+        //tests and results
         String[] colors = {"WHITE", "RED", "BLUE"};
 
+        //assigns lists with colors
         for (int i = 0; i < lists.length; i++)
             db.addList(lists[i],colors[i]);
 
         Data data = new Data(appContext,DATABASE_NAME);
 
+        //assert results
         for (int i = 0; i < lists.length; i++)
             assert(data.getListColor(lists[i]).equals(colors[i]));
 
@@ -578,18 +584,37 @@ public class DataTest {
 
     //TODO test for incrementListPositionCount
 
+    /*  tests whether positions of tasks in lists are decremented properly
+    *   the principle is similar to that of the overall positions
+    *   i.e. given a list with task:list position:
+    *
+    *   0:0
+    *   1:1
+    *   2:2
+    *
+    *   if task 1 was removed, the list should look like this:
+    *
+    *   0:0
+    *   2:1
+    */
+
     @Test
     public void decrementListPositionCount(){
+
+        //dummy tasks
         String[] tasks = {"0","1","2", "3", "4", "5"};
+
+        //lists being assigned according to tasks above
         String[] lists = {"0","0", "0", "1", "1", "1"};
 
-
-        String[][][] tests = {{{"2",null}},{{"1",null}},{{"0", null}},
-                {{"2", null},{"1",null}},{{"1", null},{"0",null}},{{"2", null},{"0",null}},
-                {{"1", null},{"2",null}},{{"0", null},{"1",null}},{{"0", null},{"2",null}},
-                {{"2", null},{"1",null},{"0",null}}, {{"1", null},{"2",null},{"0",null}}, {{"0", null},{"1",null},{"2",null}}
+        //task ids to be removed for testing purposes
+        int[][] tests = {{2},{1},{0},
+                {2,1},{1,0},{2,0},
+                {1,2},{0,1},{0,2},
+                {2,1,0}, {1,2,0}, {0,1,2}
         };
 
+        //expected results
         int[][] results = {{0, 1, -1, 0, 1, 2},{0, -1, 1, 0, 1, 2},{-1, 0, 1, 0, 1, 2},
                 {0, -1, -1, 0, 1, 2},{-1, -1, 0, 0, 1, 2},{-1, 0, -1, 0, 1, 2},
                 {0, -1, -1, 0, 1, 2},{-1, -1, 0, 0, 1, 2},{-1, 0, -1, 0, 1, 2},
@@ -599,15 +624,17 @@ public class DataTest {
 
         TestClass test = new TestClass(appContext, tasks,lists);
 
+        //iterate through tests
         for (int i = 0; i < tests.length; i++){
 
             test.set();
-
             Data data = test.getData();
 
+            //set list for test tasks to null to remove it
             for (int j = 0; j < tests[i].length; j++)
-                data.editList(Integer.parseInt(tests[i][j][0]),tests[i][j][1]);
+                data.editList(tests[i][j],null);
 
+            //assert results
             for (Entry e : data.getEntries())
                 assert (e.getListPosition() == results[i][e.getId()]);
 
