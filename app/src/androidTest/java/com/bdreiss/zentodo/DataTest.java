@@ -31,6 +31,7 @@ public class DataTest {
     //Test if the Data object is instantiated correctly
     @Test
     public void constructor(){
+
         Data data = new Data(appContext, DATABASE_NAME);
 
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
@@ -88,8 +89,9 @@ public class DataTest {
         //strings representing ids for creating test tasks
         String[] strings = {"0","1","2","3"};
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, strings);
+        //set test data to initial values
         test.set();
         Data data = test.getData();
 
@@ -138,11 +140,12 @@ public class DataTest {
         //dummy tasks
         String[] entryStrings = {"0","1","2"};
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, entryStrings);
 
         for (int i = 0; i < tests.length; i++){
 
+            //set test data to initial values
             test.set();
             Data data = test.getData();
 
@@ -177,11 +180,12 @@ public class DataTest {
         //dummy test data
         String[] entryStrings = {"0","1","2"};
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, entryStrings);
 
         for (int i = 0; i < tests.length; i++){
 
+            //set test data to initial values
             test.set();
             Data data = test.getData();
 
@@ -243,10 +247,12 @@ public class DataTest {
 
         };
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, stringData, tests);
 
         for (int i = 0; i < swaps.length; i++){
+
+            //set test data to initial values
             test.set();
 
             Data data = test.getData();
@@ -272,8 +278,9 @@ public class DataTest {
         //dummy test data
         String[] taskStrings = {"0","1","2","3"};
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, taskStrings);
+        //set test data to initial values
         test.set();
 
         //assert results
@@ -289,8 +296,9 @@ public class DataTest {
         //dummy test data
         String[] stringData = {"0","1","2"};
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, stringData);
+        //set test data to initial values
         test.set();
         Data data = test.getData();
 
@@ -317,8 +325,9 @@ public class DataTest {
         //dummy tasks
         String[] stringData = {"0","1","2"};
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, stringData);
+        //set test data to initial values
         test.set();
         Data data = test.getData();
 
@@ -357,8 +366,9 @@ public class DataTest {
         //dummy test data
         String[] stringData = {"0","1","2"};
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, stringData);
+        //set test data to initial values
         test.set();
         Data data = test.getData();
 
@@ -399,8 +409,9 @@ public class DataTest {
         //test data = results
         int[] tests = {0, 20110311, 0, 2000};
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, taskStrings);
+        //set test data to initial values
         test.set();
         Data data = test.getData();
 
@@ -427,8 +438,9 @@ public class DataTest {
         //test data
         String[] tests = {"w2", "d999", "y88", "m3"};
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, taskStrings);
+        //set test data to initial values
         test.set();
         Data data = test.getData();
 
@@ -472,8 +484,9 @@ public class DataTest {
         //expected position in respective list for every task
         int[] resultsPosition = {0,0,1,1,2,2};
 
-        //initialize test data
+        //instantiate test class
         TestClass test = new TestClass(appContext, stringData, tests);
+        //set test data to initial values
         test.set();
         Data data = test.getData();
 
@@ -622,11 +635,13 @@ public class DataTest {
 
         };
 
+        //instantiate test class
         TestClass test = new TestClass(appContext, tasks,lists);
 
         //iterate through tests
         for (int i = 0; i < tests.length; i++){
 
+            //set test data to initial values
             test.set();
             Data data = test.getData();
 
@@ -644,23 +659,29 @@ public class DataTest {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //check whether lists are returned as String[] correctly
     @Test
     public void returnListAsArray(){
 
+        //dummy tasks
         String[] tasks = {"0","1","2","3"};
 
+        //dummy lists
         String[] lists = {"0","1","2","3"};
 
+        //instantiate test class
         TestClass test = new TestClass(appContext,tasks,lists);
 
+        //set test data to initial values
         test.set();
-
         Data data = test.getData();
 
         String[] returnedLists = data.returnListsAsArray();
 
+        //check if returnedLists is the size of lists plus items "No list" and "ALL TASKS"
         assert(returnedLists.length == lists.length+2);
 
+        //assert whether returnedLists contains every item in lists
         for (String s : lists) {
             boolean contains = false;
             for (String rs :returnedLists)
