@@ -695,31 +695,33 @@ public class DataTest {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //tests getting lists as ArrayList<String>
     @Test
     public void getLists(){
 
+        //dummy tasks
         String[] tasks = {"0","1","2","3"};
 
+        //lists -> expected to be in ArrayList
         String[] lists = {"0","1","2","3"};
 
+        //instantiate test class
         TestClass test = new TestClass(appContext,tasks,lists);
 
+        //set data to initial values
         test.set();
-
         Data data = test.getData();
 
+        //get lists
         ArrayList<String> returnedLists = data.getLists();
 
+        //assert size is lists + "No List" + "ALL TASKS"
         assert(returnedLists.size() == lists.length+2);
 
+        //assert all lists are contained in ArrayList
+
         for (String s : lists) {
-            boolean contains = false;
-            for (String rs :returnedLists)
-                if (rs.equals(s)) {
-                    contains = true;
-                    break;
-                }
-            assert (contains);
+            assert(returnedLists.contains(s));
         }
 
         appContext.deleteDatabase(DATABASE_NAME);
