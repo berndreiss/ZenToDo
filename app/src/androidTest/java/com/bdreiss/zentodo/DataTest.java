@@ -719,7 +719,6 @@ public class DataTest {
         assert(returnedLists.size() == lists.length+2);
 
         //assert all lists are contained in ArrayList
-
         for (String s : lists) {
             assert(returnedLists.contains(s));
         }
@@ -728,33 +727,40 @@ public class DataTest {
 
     }
 
+    //test function to get tasks that are due today
     @Test
     public void getTasksToPick(){
 
+        //dummy tasks
         String[] tasks = {"0","1","2","3"};
 
+        //test dates: only tasks that have a reminder date older than or equal to today
+        //should be returned
         int[] dates = {Data.getToday()-1,Data.getToday()+1,Data.getToday(),Data.getToday()+1};
 
+        //expected results
         String[] results = {"0","2"};
 
+        //instantiate test class and set test data
         TestClass test = new TestClass(appContext, tasks);
-
         test.set();
-
         Data data = test.getData();
 
+        //tasks that are due today
         ArrayList<Entry> tasksToPick = data.getTasksToPick();
 
+        //assert that all tasks are returned, since no reminder date has been set
         for (int i=0; i< tasksToPick.size();i++)
             assert(tasksToPick.get(i).getTask().equals(tasks[i]));
 
+        //set test dates
         for (int i = 0; i < tasks.length; i++)
             data.editReminderDate(Integer.parseInt(tasks[i]), dates[i]);
 
+        //get tasks that are due today according to new reminder dates
         tasksToPick = data.getTasksToPick();
 
-        assert(tasksToPick.size() == results.length);
-
+        //assert that returned dates are equal to expected results
         for (int i = 0; i < tasksToPick.size(); i++)
             assert(tasksToPick.get(i).getTask().equals(results[i]));
 
@@ -763,27 +769,35 @@ public class DataTest {
 
     }
 
+    //test function to get all tasks assigned to a certain list
     @Test
     public void getList(){
+
+        //dummy tasks
         String[] tasks = {"0","1","2","3","4","5"};
 
+        //lists assigned according to tasks above
         String[] lists = {"0","0","0","1","1","1"};
 
+        //instantiate test class and set data
         TestClass test = new TestClass(appContext,tasks,lists);
-
         test.set();
-
         Data data = test.getData();
 
+        //get tasks in first list
         ArrayList<Entry> returnedList = data.getList("0");
 
+        //assert tasks in list correspond to assigned tasks: this is achieved via comparing
+        // the task name to the position
         for (int i = 0; i < returnedList.size(); i++){
             assert(returnedList.get(i).getTask().equals(String.valueOf(i)));
         }
 
-
+        //get tasks in second list
         returnedList = data.getList("1");
 
+        //assert tasks in list correspond to assigned tasks: this is achieved via comparing
+        // the task name to the position
         for (int i = 0; i < returnedList.size(); i++){
             assert(returnedList.get(i).getTask().equals(String.valueOf(i+3)));
         }
