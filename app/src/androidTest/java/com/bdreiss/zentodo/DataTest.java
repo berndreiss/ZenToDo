@@ -806,32 +806,56 @@ public class DataTest {
 
     }
 
+    //tests getting tasks that have been freshly dropped
     @Test
     public void getDropped(){
 
+        //dummy tasks
         String[] tasks = {"0","1","2"};
 
+        //instantiate test class and set initial data
         TestClass test = new TestClass(appContext, tasks);
-
         test.set();
-
         Data data = test.getData();
 
+        //get freshly dropped tasks
         ArrayList<Entry> dropped = data.getDropped();
 
+        //assert all new tasks have been returned
         for (int i = 0; i < tasks.length; i++)
             assert(dropped.get(i).getTask().equals(tasks[i]));
 
+
+        //starting from the back one by one set all tasks dropped status to false
+        //then check whether it is returned anymore
+        for (int i = 0; i < tasks.length; i++) {
+
+            //set last item in list to dropped == false
+            data.getEntries().get(tasks.length-1-i).setDropped(false);
+
+            //get dropped
+            dropped = data.getDropped();
+
+            //assert dropped has shrunken
+            assert(dropped.size()==tasks.length-1-i);
+
+            //assert right tasks are in dropped
+            for (int j = 0; j < dropped.size();j++)
+                assert(dropped.get(j).getTask().equals(tasks[j]));
+        }
+
+        //make tasks empty array
         tasks = new String[0];
 
+        //instantiate test class with empty data
         test = new TestClass(appContext, tasks);
-
         test.set();
-
         data = test.getData();
 
+        //get dropped
         dropped = data.getDropped();
 
+        //assert dropped is empty
         assert(dropped.size()==0);
 
         appContext.deleteDatabase(DATABASE_NAME);
