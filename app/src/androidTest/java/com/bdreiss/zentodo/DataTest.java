@@ -862,47 +862,59 @@ public class DataTest {
     }
 
 
-
+    //test function to get all tasks where focus == true
+    //however, if a task focus attribute is false but the task is recurring and the reminder date fits,
+    //it should also be shown in FOCUS
+    //if the task has been removed from FOCUS and therefore is in the ArrayList
+    //recuringButRemovedFromToday in Data the task should not be returned
     @Test
     public void getFocus(){
 
-
+        //dummy tasks
         String[] tasks = {"0","1","2","3"};
 
+        //focus assigned to tasks above
         boolean[] focus = {true,false,false,false};
 
+        //expected results
         String[] results = {"0","2"};
 
+        //instantiate new test class and set to initial values
         TestClass test = new TestClass(appContext, tasks);
-
         test.set();
 
         Data data = test.getData();
 
+        //set task 2 to recurring, so it should be returned
         data.editRecurrence(2, "w2");
+        //set task 3 ro recurring, but also add it to recurringButRemovedFromToday
+        //so it should not be returned
         data.editRecurrence(3, "w2");
-
-        for (String s : tasks)
-            data.setFocus(Integer.parseInt(s),focus[Integer.parseInt(s)]);
-
         data.addToRecurringButRemoved(3);
 
+        //set focus values for all tasks
+        for (int i = 0; i < tasks.length; i++)
+            data.setFocus(i,focus[i]);
 
+        //get data
         ArrayList<Entry> focused = data.getFocus();
 
+        //assert results
         for (int i = 0; i < focused.size(); i++)
             assert(focused.get(i).getTask().equals(results[i]));
 
+        //remove task 3 from recurringButRemovedFromToday so it should be returned
         data.removeFromRecurringButRemoved(3);
 
+        //get data
         focused = data.getFocus();
 
+        //copy old results into new Array and add task 3 as being expected to be returned
         String[] resultsNew = new String[results.length+1];
-
         System.arraycopy(results, 0, resultsNew, 0, results.length);
-
         resultsNew[results.length] = "3";
 
+        //assert results
         for (int i = 0; i < focused.size(); i++)
             assert(focused.get(i).getTask().equals(resultsNew[i]));
 
