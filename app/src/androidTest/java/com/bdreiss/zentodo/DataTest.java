@@ -923,23 +923,28 @@ public class DataTest {
 
     }
 
+    //tests function to get all tasks without a list assigned
     @Test
     public void getNoList(){
 
+        //dummy tasks
         String[] tasks = {"0","1","2","3"};
 
+        //lists assigned to tasks above
         String[] lists = {"0","1",null,null};
 
+        //expected results
         String[] results = {"2","3"};
 
+        //instantiate test class and set to intial values
         TestClass test = new TestClass(appContext,tasks, lists);
-
         test.set();
-
         Data data = test.getData();
 
+        //get tasks without list
         ArrayList<Entry> noList = data.getNoList();
 
+        //assert results
         for (int i=0;i<noList.size();i++)
             assert(noList.get(i).getTask().equals(results[i]));
 
@@ -947,33 +952,41 @@ public class DataTest {
 
     }
 
+    //tests whether entries are returned ordered by date
     @Test
     public void getEntriesOrderedByDate(){
 
+        //dummy tasks
         String[] tasks = {"0","1","2"};
 
+        //tests: each task is assigned a date on each successive run
         int[][] tests = {{0,20221231,20230110},{20221231,20230110,0},{20230110,20221231,0},
                             {0,20230110,20221231},{20221231,0,20230110},{20230110,0,20221231}
                             };
 
+        //expected results
         String[][] results = {{"0","1","2"},{"2","0","1"},{"2","1","0"},
                                 {"0","2","1"},{"1","0","2"},{"1","2","0"}
                                 };
 
+        //instantiate test class
         TestClass test = new TestClass(appContext, tasks);
 
-
+        //run tests
         for (int i = 0; i < tests.length; i++) {
 
+            //set test data for run
             test.set();
-
             Data data = test.getData();
 
+            //set reminder dates
             for (int j = 0; j < tests[i].length; j++)
                 data.editReminderDate(j, tests[i][j]);
 
+            //get entries
             ArrayList<Entry> entries = data.getEntriesOrderedByDate();
 
+            //assert results
             for (int j = 0; j < entries.size(); j++)
                 assert(entries.get(j).getTask().equals(results[i][j]));
 
@@ -983,9 +996,11 @@ public class DataTest {
 
     }
 
+    //tests setting recurring attribute of tasks.
     @Test
     public void setRecurring(){
 
+        //different dates representing today.
         int[] today = {20231015,20231015,20231015,20231015,20231015,20231015,20231015,
                         20230131,20230228,20240228,20231231,
                         20231015,20231015,20231015,20231030,20231231,
@@ -993,20 +1008,33 @@ public class DataTest {
                         20230101,20230101
         };
 
-        String[] mode = {"d1","d2","d3","d4","d5","d6","d7",
+        //intervals in which tasks reoccur. the letter represents days/weeks/months/years
+        //i.e.: w2 -> reoccurs every two weeks, m3 -> reoccurs every three months, d1 -> reoccurs every day
+        String[] intervals = {"d1","d2","d3","d4","d5","d6","d7",
                         "d1","d1","d1","d1",
                         "w1","w2","w1","w1","w1",
                         "m1","m2","m1",
                         "y1","y2"
         };
 
-        int[] tests ={20231015,20231015,20231015,20231015,20231015,20231015,20231015,
-                        20230131,20230228,20240228,20231231,
-                        20231015,20231015,20231008,20231025,20231204,
-                        20230101,20230101,20230101,
-                        20230101,20221501
+        //reminder dates for tasks -> the interval above should be added to the initial reminder dates
+        //unless reminder date + interval <= today -> in that case the interval is added x times so
+        // that date + x * interval > today
+        int[] tests ={20231015, 20231015, 20231015, 20231015, 20231015, 20231015, 20231015, //adding one to seven days
+                      20230131, //adding one day and incrementing month
+                      20230228, //adding one day and incrementing month in February
+                      20240228, //adding one day in leap year therefore not incrementing month
+                      20231231, //adding one day and incrementing month + year
+                      20231015, 20231015, //adding one and two weeks
+                      20231008, //adding one week and today is 2023-10-15 -> another week is added
+                      20231025, //adding one week and month is incremented too
+                      20231204, //adding one week and today is 2023-12-31 -> four weeks are added and month/year increment
+                      20230101, 20230101, //adding one and two months
+                      20230101, //adding one month but today is 2023-12-01 -> year is incremented too
+                      20230101, 20221501 //adding one and two years
         };
 
+        //expected results
         int[] results = {20231016,20231017,20231018,20231019,20231020,20231021,20231022,
                         20230201,20230301,20240229,20240101,
                         20231022,20231029,20231022,20231101,20240101,
@@ -1014,19 +1042,25 @@ public class DataTest {
                         20240101,20241501
         };
 
+
         Data data = new Data(appContext, DATABASE_NAME);
 
+        //add single test task
         data.add("Test");
 
+        //run tests
         for (int i = 0; i < tests.length; i++){
 
-
+            //set reminder date
             data.editReminderDate(0,tests[i]);
 
-            data.getEntries().get(0).setRecurrence(mode[i]);
+            //set recurrence interval
+            data.getEntries().get(0).setRecurrence(intervals[i]);
 
+            //increment tasks recurrence
             data.setRecurring(0,today[i]);
 
+            //assert results
             assert(data.getEntries().get(0).getReminderDate()==results[i]);
 
         }
