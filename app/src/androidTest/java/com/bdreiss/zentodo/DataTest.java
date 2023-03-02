@@ -866,7 +866,7 @@ public class DataTest {
     //however, if a task focus attribute is false but the task is recurring and the reminder date fits,
     //it should also be shown in FOCUS
     //if the task has been removed from FOCUS and therefore is in the ArrayList
-    //recuringButRemovedFromToday in Data the task should not be returned
+    //recurringButRemovedFromToday in Data the task should not be returned
     @Test
     public void getFocus(){
 
@@ -936,7 +936,7 @@ public class DataTest {
         //expected results
         String[] results = {"2","3"};
 
-        //instantiate test class and set to intial values
+        //instantiate test class and set to initial values
         TestClass test = new TestClass(appContext,tasks, lists);
         test.set();
         Data data = test.getData();
