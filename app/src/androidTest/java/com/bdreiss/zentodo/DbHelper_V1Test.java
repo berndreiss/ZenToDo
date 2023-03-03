@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * Instrumented test, which will execute on an Android device.
+ * Tests to ensure database interaction works flawlessly
  *
- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ *
  */
 @RunWith(AndroidJUnit4.class)
 public class DbHelper_V1Test {
@@ -34,6 +34,7 @@ public class DbHelper_V1Test {
 
     private static final String DATABASE_NAME = "TEST.db";
 
+    //test data including all important special characters in particular "'"
     public static final String[] stringTestData = {"Test", ",", ".", ";", ":", "-", "_", "#",
             "'", " '", "' ", "'A", "A'", "A'A", "'A'A'",
             "*", "~", "+", "`", "´", "?", "\\", "=",
@@ -41,10 +42,12 @@ public class DbHelper_V1Test {
             "%", "$", "§", "\"", "!", "^", "°", "<", ">", "|"
     };
 
+    //add dummy task where all attributes are set to null
     public void addTestDataNull(DbHelper db){
         insertQuery("0, \"NEW TASK\", 0, 1, NULL, -1, 0, NULL, 0", db);
     }
 
+    //add dummy list
     public void addTestDataList(DbHelper db, String string){
         db.getWritableDatabase().execSQL("INSERT INTO " + TABLES_V1.TABLE_LISTS + "(" +
                         COLUMNS_LISTS_V1.LIST_NAME_COL + ", " +
@@ -54,6 +57,7 @@ public class DbHelper_V1Test {
                 );
     }
 
+    //takes String argument containing values for the different fields
     public void insertQuery(String data, DbHelper db){
         db.getWritableDatabase().execSQL("INSERT INTO " + TABLES_V1.TABLE_ENTRIES + "(" +
                 COLUMNS_ENTRIES_V1.ID_COL + ", " +
@@ -76,6 +80,7 @@ public class DbHelper_V1Test {
     }
 
 
+    //test whether empty database is created
     @Test
     public void createDatabase(){
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
@@ -91,7 +96,6 @@ public class DbHelper_V1Test {
     public void loadNewTask() {
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
-        // Context of the app under test.
         addTestDataNull(db);
 
         ArrayList<Entry> entries = db.loadEntries();
