@@ -1,7 +1,6 @@
 package com.bdreiss.zentodo;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -92,6 +91,7 @@ public class DbHelper_V1Test {
 
     }
 
+    //adds new task and checks whether it is loaded correctly
     @Test
     public void loadNewTask() {
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
@@ -115,6 +115,7 @@ public class DbHelper_V1Test {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //add entries with test Strings and check whether they are entered into the database correctly
     @Test
     public void addEntry(){
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
@@ -130,6 +131,7 @@ public class DbHelper_V1Test {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //test whether entries are loaded correctly
     @Test
     public void loadEntries(){
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
@@ -138,8 +140,6 @@ public class DbHelper_V1Test {
 
             db.addEntry(new Entry(i, i, "NEW TASK"));
 
-            Log.d("SIZE ENTRIES: ", String.valueOf(db.loadEntries().size()));
-//            assert (db.loadEntries().size() == i+1);
             Entry entry = db.loadEntries().get(i);
 
             assert(entry.getId() == i);
@@ -156,64 +156,75 @@ public class DbHelper_V1Test {
 
     }
 
+    //test whether entries are removed properly
     @Test
     public void removeEntry(){
         DbHelper db = new DbHelper(appContext,DATABASE_NAME);
 
+        //add and remove entry and assert result
         db.addEntry(new Entry(0,0,"NEW TASK"));
-
         db.removeEntry(0);
-
         assert(db.loadEntries().size() == 0);
 
+        //add two entries
         Entry entry0 = new Entry(0,0,"NEW TASK");
         db.addEntry(entry0);
-
         Entry entry1 = new Entry(1,1,"NEW TASK");
         db.addEntry(entry1);
 
+        //remove the first one
         db.removeEntry(0);
 
+        //assert list size is 1 and list does not contain entry
         assert(db.loadEntries().size() == 1);
         assert(!db.loadEntries().contains(entry0));
 
-        db.addEntry(entry0);
-        db.removeEntry(0);
 
-        assert(db.loadEntries().size() == 1);
-        assert(!db.loadEntries().contains(entry0));
-
+        //add first entry and thrid one
         db.addEntry(entry0);
         db.addEntry(new Entry(2,2, "NEW TASK"));
+
+        //remove first one again
         db.removeEntry(0);
 
+        //assert list size is 2 and does not contain removed entry
         assert(db.loadEntries().size() == 2);
         assert(!db.loadEntries().contains(entry0));
 
+        //remove second entry
         db.removeEntry(1);
 
+        //assert list size is 1 and list does not contain second entry
         assert(db.loadEntries().size() == 1);
         assert(!db.loadEntries().contains(entry1));
 
+        //remove third entry
         db.removeEntry(2);
 
+        //assert list is empty
         assert(db.loadEntries().size() == 0);
 
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //test whether lists are loaded properly
     @Test
     public void loadLists(){
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
+        //assert not list was created when database was instantiated
         assert(db.loadLists().isEmpty());
 
+        //add entry to check whether list is being created automatically
         db.addEntry(new Entry(0,0,"NEW TASK"));
 
+        //assert no list has been created
         assert(db.loadLists().isEmpty());
 
+        //add dummy test list
         addTestDataList(db, "TEST");
 
+        //assert list is loaded and contains right default color
         assert (db.loadLists().containsKey("TEST"));
         assert (Objects.equals(Objects.requireNonNull(db.loadLists().get("TEST")).getColor(), "WHITE"));
 
