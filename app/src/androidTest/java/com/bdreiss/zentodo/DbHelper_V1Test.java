@@ -180,7 +180,7 @@ public class DbHelper_V1Test {
         assert(!db.loadEntries().contains(entry0));
 
 
-        //add first entry and thrid one
+        //add first entry and third one
         db.addEntry(entry0);
         db.addEntry(new Entry(2,2, "NEW TASK"));
 
@@ -232,33 +232,41 @@ public class DbHelper_V1Test {
 
     }
 
+    //tests whether lists are added correctly
     @Test
     public void addList(){
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
+        //add dummy list with default color white
         db.addList("|", "WHITE");
 
+        //assert list is returned
         assert(db.loadLists().containsKey("|"));
 
+        //add a list for every String in stringTestData containing most widely used special characters
+        for (String stringTestDate : stringTestData) db.addList(stringTestDate, "WHITE");
 
-        for (String stringTestDatum : stringTestData) db.addList(stringTestDatum, "WHITE");
-
-        for (String stringTestDatum : stringTestData) {
-            assert (db.loadLists().containsKey(stringTestDatum));
-            assert (Objects.equals(Objects.requireNonNull(db.loadLists().get(stringTestDatum)).getColor(), "WHITE"));
+        //assert lists have been added with color attribute set to "WHITE"
+        for (String stringTestDate : stringTestData) {
+            assert (db.loadLists().containsKey(stringTestDate));
+            assert (Objects.equals(Objects.requireNonNull(db.loadLists().get(stringTestDate)).getColor(), "WHITE"));
         }
         appContext.deleteDatabase(DATABASE_NAME);
 
     }
 
+    //tests whether lists are removed properly
     @Test
     public void removeList(){
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
+        //add dummy list
         addTestDataList(db, "TEST");
 
+        //remove dummy list
         db.removeList("TEST");
 
+        //assert no lists are loaded
         assert(db.loadLists().isEmpty());
 
         appContext.deleteDatabase(DATABASE_NAME);
