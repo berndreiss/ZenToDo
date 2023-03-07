@@ -355,33 +355,41 @@ public class DbHelper_V1Test {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //tests function to swap entries in TABLE_ENTRIES:
+    //takes the ids of two tasks as parameters and swaps the values of the positions/list positions of the two tasks
     @Test
     public void swapEntries(){
 
+        //class containing test runs for columns, test data and expected results
         class Test{
+            //columns to be tested
             final COLUMNS_ENTRIES_V1[] fields = {COLUMNS_ENTRIES_V1.POSITION_COL, COLUMNS_ENTRIES_V1.LIST_POSITION_COL};
+            //test data representing swaps of tasks represented by their ids
             final int[][][] testData = {{{0,1},{0,2}, {1,2}},{{0,1},{0,2}, {1,2}}};
+            //expected results represented by tasks ids
             final int[][][] results = {{{1,0,2},{2,0,1},{2,1,0}},{{1,0,2},{2,0,1},{2,1,0}}};
         }
 
+        //instantiate new Test
         Test test = new Test();
 
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
+        //add dummy tasks and set list
         for (int i = 0; i < test.results[0][0].length; i++){
             db.addEntry(new Entry(i,i,"NEW TASK"));
             db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, i,i);
 
         }
 
-
-        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, 1,1);
-        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, 2,2);
-
+        //run tests for column
         for (int i = 0; i < test.fields.length; i++)
-            for (int j = 0; j < test.testData[i].length; j++) {
-                db.swapEntries(test.fields[i], test.testData[i][j][0], test.testData[i][j][1]);
 
+            //run test cases
+            for (int j = 0; j < test.testData[i].length; j++) {
+
+                //do swaps and assert results according to column
+                db.swapEntries(test.fields[i], test.testData[i][j][0], test.testData[i][j][1]);
                 switch (test.fields[i]){
                     case POSITION_COL:
                         for (int k = 0; k < test.results[0][0].length; k++ )
@@ -399,43 +407,42 @@ public class DbHelper_V1Test {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //tests whether ArrayList<Integer> recurringButRemovedFromToday (see documentation in FocusTaskListAdapter.java, Data.java, DbHelper.java)
+    //is saved/loaded correctly
     @Test
     public void saveLoadRecurring(){
 
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
+        //get date of today
         int filename = Data.getToday();
 
         ArrayList<Integer> ids = new ArrayList<>();
 
+        //save empty ArrayList and assert load returns empty
         db.saveRecurring(ids);
-
         assert(db.loadRecurring().size()==0);
 
+        //add first element, save and assert results upon load
         ids.add(0);
-
         db.saveRecurring(ids);
-
         assert(db.loadRecurring().get(0)==0);
 
+        //add second and third element, save and assert results upon load
         ids.add(1);
-
         ids.add(2);
-
         db.saveRecurring(ids);
-
         for (int i=0; i<ids.size();i++)
             assert(db.loadRecurring().get(i)==i);
 
+        //remove second element, save and assert results upon load
         ids.remove(1);
-
         db.saveRecurring(ids);
-
         assert(db.loadRecurring().get(0)==0);
         assert(db.loadRecurring().get(1)==2);
 
+        //clean up
         appContext.deleteDatabase(DATABASE_NAME);
-
         new File(appContext.getFilesDir() + "/" + filename).delete();
 
 

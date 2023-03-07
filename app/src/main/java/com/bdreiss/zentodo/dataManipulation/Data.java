@@ -32,6 +32,9 @@ public class Data {
 
     protected Map<String, TaskList> listPositionCount;//keeps track of lists and  of number items in list: stores list position (n-1)
 
+    //recurring tasks are automatically added to FOCUS
+    //when they are removed however, the ids are stored in this ArrayList and the tasks are not shown until the next day
+    //see also: FocusTaskListAdapter
     private final ArrayList<Integer> recurringButRemovedFromToday;
 
     private final Context context;
@@ -736,8 +739,7 @@ public class Data {
 
     }
 
-
-    //calculates if year is leap year
+    //check whether year is leap year
     private Boolean isLeapYear(int year) {
         if (year % 4 == 0) {
             return year % 400 != 0;
@@ -745,7 +747,7 @@ public class Data {
         return false;
     }
 
-
+    //add ids to recurringButRemovedFromToday and make a call to the database making changes permanent
     public void addToRecurringButRemoved(int id){
         recurringButRemovedFromToday.add(id);
 
@@ -753,7 +755,7 @@ public class Data {
 
     }
 
-
+    //remove ids from recurringButRemovedFromToday and make a call to the database making changes permanent
     public void removeFromRecurringButRemoved(int id){
         for (int i = 0; i < recurringButRemovedFromToday.size(); i++)
             if (recurringButRemovedFromToday.get(i)==id) {

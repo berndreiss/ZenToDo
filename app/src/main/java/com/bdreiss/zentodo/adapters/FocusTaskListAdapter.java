@@ -1,7 +1,12 @@
 package com.bdreiss.zentodo.adapters;
 
 /*
- *       Extends TaskListAdapter but removes tasks when focus or date is changed.
+ *      Shows all tasks the user chose to focus on today.
+ *      Tasks are usually chosen in PICK but can also be manually added via the FOCUS-button in the menu of a task.
+ *      Recurring tasks are added automatically to FOCUS (see also MainActivity.java).
+ *
+ *      Extends TaskListAdapter but removes tasks when focus or date is changed.
+ *
  */
 
 import android.annotation.SuppressLint;
