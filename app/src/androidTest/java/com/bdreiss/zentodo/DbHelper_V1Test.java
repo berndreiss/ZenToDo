@@ -272,82 +272,84 @@ public class DbHelper_V1Test {
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //tests whether entries are updated properly in database
     @Test
     public void updateEntry(){
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
+        //add dummy task
         db.addEntry(new Entry(0,0,"NEW TASK"));
 
+        //update that tasks name, list and recurrence attributes for all Strings in stringTestData
+        for (String stringTestDate : stringTestData) {
 
-        for (String stringTestDatum : stringTestData) {
+            //change task name and assert
+            db.updateEntry(COLUMNS_ENTRIES_V1.TASK_COL, 0, stringTestDate);
+            assert (db.loadEntries().get(0).getTask().equals(stringTestDate));
 
+            //change list name and assert
+            db.updateEntry(COLUMNS_ENTRIES_V1.LIST_COL, 0, stringTestDate);
+            assert (db.loadEntries().get(0).getList().equals(stringTestDate));
 
-            db.updateEntry(COLUMNS_ENTRIES_V1.TASK_COL, 0, stringTestDatum);
-
-            assert (db.loadEntries().get(0).getTask().equals(stringTestDatum));
-
-
-            db.updateEntry(COLUMNS_ENTRIES_V1.LIST_COL, 0, stringTestDatum);
-
-            assert (db.loadEntries().get(0).getList().equals(stringTestDatum));
-
-
-            db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, 0, stringTestDatum);
-
-            assert (db.loadEntries().get(0).getRecurrence().equals(stringTestDatum));
+            //change recurrence and assert
+            db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, 0, stringTestDate);
+            assert (db.loadEntries().get(0).getRecurrence().equals(stringTestDate));
 
         }
 
+        //set list to null and assert
         db.updateEntry(COLUMNS_ENTRIES_V1.LIST_COL, 0, null);
-
         assert (db.loadEntries().get(0).getList() == null);
 
+        //set recurrence to null and assert
         db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, 0, null);
-
         assert (db.loadEntries().get(0).getRecurrence() == null);
 
+        //set focus to false/true and assert
         db.updateEntry(COLUMNS_ENTRIES_V1.FOCUS_COL, 0, false);
-
         assert(!db.loadEntries().get(0).getFocus());
-
         db.updateEntry(COLUMNS_ENTRIES_V1.FOCUS_COL, 0, true);
-
         assert(db.loadEntries().get(0).getFocus());
 
+        //set dropped to false/true and assert
         db.updateEntry(COLUMNS_ENTRIES_V1.DROPPED_COL, 0, false);
-
         assert(!db.loadEntries().get(0).getDropped());
-
         db.updateEntry(COLUMNS_ENTRIES_V1.DROPPED_COL, 0, true);
-
         assert(db.loadEntries().get(0).getDropped());
 
-        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, 0, 0);
+        //set position to 99/0 and assert
+        db.updateEntry(COLUMNS_ENTRIES_V1.POSITION_COL, 0, 99);
+        assert(db.loadEntries().get(0).getPosition() == 99);
+        db.updateEntry(COLUMNS_ENTRIES_V1.POSITION_COL, 0, 0);
+        assert(db.loadEntries().get(0).getPosition() == 0);
 
+        //set list position to 99/0 and assert
+        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, 0, 99);
+        assert(db.loadEntries().get(0).getListPosition() == 99);
+        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_POSITION_COL, 0, 0);
         assert(db.loadEntries().get(0).getListPosition() == 0);
 
+        //set reminder date to 2000/0 and assert
         db.updateEntry(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL, 0, 2000);
-
         assert(db.loadEntries().get(0).getReminderDate() == 2000);
-
-        db.updateEntry(COLUMNS_ENTRIES_V1.POSITION_COL, 0, 99);
-
-        assert(db.loadEntries().get(0).getPosition() == 99);
-
+        db.updateEntry(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL, 0, 0);
+        assert(db.loadEntries().get(0).getReminderDate() == 0);
 
         appContext.deleteDatabase(DATABASE_NAME);
     }
 
+    //tests whether lists color is updated correctly
     @Test
     public void updateList(){
         DbHelper db = new DbHelper(appContext, DATABASE_NAME);
 
-        for (String stringTestDatum : stringTestData) {
-            db.addList(stringTestDatum, "WHITE");
+        //add lists for all test cases in stringTestData
+        for (String stringTestDate : stringTestData) {
+            db.addList(stringTestDate, "WHITE");
 
-            db.updateList(stringTestDatum, "RED");
-
-            assert (Objects.requireNonNull(db.loadLists().get(stringTestDatum)).getColor().equals("RED"));
+            //update color and assert result
+            db.updateList(stringTestDate, "RED");
+            assert (Objects.requireNonNull(db.loadLists().get(stringTestDate)).getColor().equals("RED"));
 
         }
         appContext.deleteDatabase(DATABASE_NAME);
