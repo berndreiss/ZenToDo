@@ -606,7 +606,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //initialize RecylcerView with according adapter
+    //initialize RecyclerView with according adapter
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void initializeRecyclerView(RecyclerView view, PickTaskListAdapter adapter){
