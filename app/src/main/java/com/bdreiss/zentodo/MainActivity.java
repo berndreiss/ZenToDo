@@ -4,16 +4,34 @@ package com.bdreiss.zentodo;
 *   A simple To-Do-List.
 *
 *   The idea is, that you drop tasks you need to do, so you don't have to think about them anymore.
-*   When you want to make your list for the day, you pick out of all the task that have been
+*   When you want to make your to-do-list for the day, you pick out of all the task that have been
 *   dropped. In this step you decide, which tasks you want to do now. For all the tasks you don't
 *   want to get done right away, you can set a reminder date or add them to a list.
 *
 *   Basically the app has the following structure implemented in different layouts:
 *
-*   -Drop -> Pick -> Focus
+*   -DROP -> PICK -> FOCUS
 *
-*   -Lists: shows all the lists and upon choosing one shows all tasks assigned to the list
+*   -Lists: shows all the lists and containing tasks assigned to it.
 *
+*   These layouts consist of RecyclerViews. Each item in these RecyclerViews represents a task (dataManipulation.Entry).
+*   It shows the description of the task, a checkbox and a menu button. The checkbox removes a task.
+*
+*   The menu consist of the following buttons:
+*       moveToFocus -> adds task to RecyclerView in FOCUS
+*       editTask -> option to edit description of the task
+*       setReminderDate -> set a reminder date for the task
+*       setRecurrence -> option to make task repeatable
+*       editList -> assign task to a list
+*
+*   These are the basic functionalities for the buttons and the checkbox. They may vary from
+*   layout to layout. A precise description of these functions can be found in adapters.
+*
+*   The adapters handle the functionality of the buttons. Each layouts RecyclerView has its own
+*   adapter although all are derived from TaskListAdapter. I.e. the layout FOCUS is handled by
+*   FocusTaskListAdapter.
+*
+*   If you got any questions/suggestions feel free to email me: bd_reiss@yahoo.de
  */
 
 import android.annotation.SuppressLint;
@@ -59,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static String DATABASE_NAME = "Data.db";
 
-    //Layouts for different modes
     private LinearLayout pick;//Layout to pick tasks that have been dropped and show them in focus
     private LinearLayout drop;//Layout to drop new tasks
     private LinearLayout focus;//Layout to show tasks to do today
@@ -71,13 +88,14 @@ public class MainActivity extends AppCompatActivity {
     private Button toolbarFocus;
     private Button toolbarLists;
 
+    //floating action button on the bottom right corner
     private FloatingActionButton fab;
 
-    //Data-object that stores all tasks, reminders, lists etc. (See Data.java and Entry.java)
+    //Data-object that stores all tasks, reminders, lists etc. (See dataManipulation.Data and dataManipulation.Entry.java)
     private Data data;
 
     //The adapters fill the RecyclerViews of layouts above and are all derived from TaskListAdapter
-    //for more information on the implementation see the according java files
+    //for more information on the implementation see the according java files in adapters
     PickTaskListAdapter pickAdapter;
     PickTaskListAdapter doNowAdapter;
     PickTaskListAdapter doLaterAdapter;
@@ -95,6 +113,11 @@ public class MainActivity extends AppCompatActivity {
         com.bdreiss.zentodo.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        //when testing a file called "mode" with the value 1 is stored in the files directory.
+        //This block checks whether we are in testing mode or not. The reason for this is so that
+        //we can create a testing database without affecting the user data. I got a feeling that this
+        //is not best practice but haven't had the time to do my homework. If you read this and
+        //have a better way of doing this, please let me know: bd_reiss@yahoo.de
         try {
             BufferedReader br = new BufferedReader(new FileReader(getFilesDir() + "/" + getResources().getString(R.string.mode_file)));
             if (br.readLine().equals("1"))
@@ -122,6 +145,8 @@ public class MainActivity extends AppCompatActivity {
 
         //Floating action button that shows help on press
         fab = findViewById(R.id.fab);
+        //the fab will be gone by default and only be shown when user interacts with the app.
+        //This is achieved via OnTouchListeners on the RecyclerViews (see class ShowFab in this file).
         fab.setVisibility(View.GONE);
 
         //OnClickListeners for buttons in toolbar which show according layout onClick
@@ -245,6 +270,8 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     public void showPick(){
 
+        //Reset and Update Adapters to reflect changes
+        //Also update itemCountChanged, so that RecyclerViews get resized properly
         pickAdapter.reset();
 
         //enable components of Pick layout (setVisibility = VISIBLE)
@@ -315,8 +342,8 @@ public class MainActivity extends AppCompatActivity {
         //button to drop task in EditText
         Button buttonDrop = findViewById(R.id.button_drop);
 
-        buttonDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
         //set Button BackgroundColor to toolbar default color
+        buttonDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
 
         //set listener for drop button
         dropListener(editText, buttonDrop);
@@ -346,6 +373,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
 
+        //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
         dropAdapter.reset();
 
         //enable all components of Drop layout (setVisibility = VISIBLE)
@@ -411,6 +439,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     public void showFocus(){
 
+        //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
         focusAdapter.reset();
 
         //enable all components in the Focus layout (setVisibility = VISIBLE)
@@ -473,6 +502,7 @@ public class MainActivity extends AppCompatActivity {
     //show Lists layout
     public void showLists(){
 
+        //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
         listsListAdapter.reset();
 
         //enable all components in the Lists layout (setVisibility = VISIBLE)
@@ -561,8 +591,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //custom onTouchListener that hides fab until View is touched upon. If view is being touched
+    //show fab for 3 seconds
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public class ShowFab implements View.OnTouchListener {
+    private class ShowFab implements View.OnTouchListener {
 
         @SuppressLint("ClickableViewAccessibility")
         @Override
@@ -574,6 +606,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //initialize RecylcerView with according adapter
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void initializeRecyclerView(RecyclerView view, PickTaskListAdapter adapter){
@@ -604,6 +637,5 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
 
 }
