@@ -1,8 +1,12 @@
 package com.bdreiss.zentodo.adapters.listeners;
 
+import android.annotation.SuppressLint;
 import android.view.View;
 
+import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
+import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
 import com.bdreiss.zentodo.adapters.TaskListAdapter;
+import com.bdreiss.zentodo.dataManipulation.Data;
 
 /*
  *
@@ -17,6 +21,7 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
         super(adapter, holder, position);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onClick(View v){
 
@@ -55,6 +60,16 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
             //write back
             adapter.data.editRecurrence(id,recurrence);
             adapter.entries.get(position).setRecurrence(recurrence);
+            if (adapter.entries.get(position).getReminderDate() == 0)
+                if (adapter instanceof DropTaskListAdapter || adapter instanceof PickTaskListAdapter) {
+                    adapter.entries.get(position).setReminderDate(Data.getToday());
+                    adapter.data.setDropped(adapter.entries.get(position).getId(), false);
+                    adapter.entries.remove(position);
+                    adapter.notifyDataSetChanged();
+                    if (adapter instanceof PickTaskListAdapter)
+                        ((PickTaskListAdapter) adapter).itemCountChanged();
+                    return;
+                }
 
         }
 
