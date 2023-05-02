@@ -16,12 +16,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import com.bdreiss.zentodo.R;
@@ -29,12 +31,16 @@ import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
+import java.time.LocalDate;
+
 public class FocusTaskListAdapter extends TaskListAdapter {
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public FocusTaskListAdapter(Context context, Data data){
         super(context, data, data.getFocus());
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
@@ -67,7 +73,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             //if recurring do not remove but set new reminder date, otherwise remove from data
             if (recurring) {
                 //calculate new reminder date and write to data and entries
-                entries.get(position).setReminderDate(data.setRecurring(id,Data.getToday()));
+                entries.get(position).setReminderDate(data.setRecurring(id, LocalDate.now()));
 
                 //reset focus in data and entries
                 data.setFocus(id,false);
@@ -109,8 +115,8 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             if (entry.getRecurrence() != null)
                 data.addToRecurringButRemoved(id);
 
-            if (entry.getReminderDate() == 0)
-                data.editReminderDate(id, Data.getToday());
+            if (entry.getReminderDate() == null)
+                data.editReminderDate(id, LocalDate.now());
 
             //write back change to data
             data.setFocus(id, false);
@@ -130,8 +136,10 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
                 datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
 
-                    //encode format "YYYYMMDD"
-                    int date = year*10000+(month+1)*100+day;
+                    LocalDate date = LocalDate.of(year, month,day);
+
+                    //for some strange reason the month is returned -1 in the DatePickerDialog
+                    date = date.plusMonths(1);
 
                     //write back to data
                     data.editReminderDate(entry.getId(), date);
@@ -150,8 +158,8 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                 datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
                     //set date when task is due to 0
-                    data.editReminderDate(entry.getId(),0);
-                    entries.get(position).setReminderDate(0);
+                    data.editReminderDate(entry.getId(),null);
+                    entries.get(position).setReminderDate(null);
 
                     //change color of reminder date Button marking if Date is set
                     markSet(holder,entry);
@@ -194,6 +202,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
         imageView.setOnClickListener(v -> builder.dismiss());
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     public void reset(){
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)

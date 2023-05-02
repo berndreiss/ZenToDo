@@ -43,7 +43,7 @@ public class BackListListenerPick extends BackListListener{
             e.setList(list);
         }
 
-        if (e.getReminderDate()==0 && !moveToListAdapter.entries.contains(e)){
+        if (e.getReminderDate()==null && !moveToListAdapter.entries.contains(e)){
 
             moveToListAdapter.entries.add(e);
             moveToListAdapter.notifyDataSetChanged();

@@ -36,7 +36,6 @@ package com.bdreiss.zentodo;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
@@ -47,7 +46,6 @@ import com.bdreiss.zentodo.adapters.ListsListAdapter;
 import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Data;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -105,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
     ListsListAdapter listsListAdapter;
 
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -183,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
 
     //initialize Pick layout
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializePick() {
 
         //initialize adapter for RecyclerView with all tasks that have been dropped, have been in Focus or are due today
@@ -306,7 +302,6 @@ public class MainActivity extends AppCompatActivity {
 
     //initialize Drop layout
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializeDrop(){
 
         //initialize adapter for ListView that shows tasks dropped
@@ -407,7 +402,6 @@ public class MainActivity extends AppCompatActivity {
 
     //initialize Focus layout
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializeFocus(){
 
         //initialize the adapter for the ListView to show the tasks to focus on
@@ -474,7 +468,6 @@ public class MainActivity extends AppCompatActivity {
 
     //initialize Lists layout
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public void initializeLists() {
 
         //initialize ListView to show lists available
@@ -593,7 +586,6 @@ public class MainActivity extends AppCompatActivity {
 
     //custom onTouchListener that hides fab until View is touched upon. If view is being touched
     //show fab for 3 seconds
-    @RequiresApi(api = Build.VERSION_CODES.M)
     private class ShowFab implements View.OnTouchListener {
 
         @SuppressLint("ClickableViewAccessibility")
@@ -608,7 +600,6 @@ public class MainActivity extends AppCompatActivity {
 
     //initialize RecyclerView with according adapter
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(api = Build.VERSION_CODES.M)
     private void initializeRecyclerView(RecyclerView view, PickTaskListAdapter adapter){
 
         //show fab when view is being touched

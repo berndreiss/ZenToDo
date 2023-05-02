@@ -30,11 +30,13 @@ import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
@@ -45,6 +47,7 @@ import com.bdreiss.zentodo.dataManipulation.Data;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.Year;
 
@@ -126,15 +129,11 @@ public class UITest {
     @Test
     public void testCalendarDrop(){
 
-        int year = Year.now().getValue();
-        int month = MonthDay.now().getMonthValue();
-        int day = MonthDay.now().getDayOfMonth();
-
         //dummy test Strings for adding tasks to perform tests on
         String[] strings = {"Test", "Test1"};
 
         //test data
-        int[][] tests = {{year,month,day+1},{0,0,0}};
+        LocalDate[] tests = {LocalDate.now(),null};
 
         //expected sizes of data.entries
         int[] results = {0,1};
@@ -148,13 +147,17 @@ public class UITest {
             //open calendar and set test date
             new RecyclerAction(R.id.list_view_drop, R.id.button_menu, 0);
             new RecyclerAction(R.id.list_view_drop, R.id.button_calendar, 0);
-            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
+            if (tests[i]!=null)
+                onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i].getYear(),tests[i].getMonthValue(),tests[i].getDayOfMonth()));
             onView(withId(buttons[i])).perform(click());
 
             //assert results
             Data data = new Data(appContext, DATABASE_NAME);
 
-            assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
+            if (tests[i]==null)
+                assert(data.getEntries().get(i).getReminderDate()==null);
+            else
+                assert (data.getEntries().get(i).getReminderDate().equals(tests[i]));
             assert (data.getDropped().size() == results[i]);
         }
     }
@@ -163,15 +166,11 @@ public class UITest {
     @Test
     public void testCalendarFocus(){
 
-        int year = Year.now().getValue();
-        int month = MonthDay.now().getMonthValue();
-        int day = MonthDay.now().getDayOfMonth();
-
         //dummy test Strings for adding tasks
         String[] strings = {"Test", "Test1"};
 
         //test data
-        int[][] tests = {{year,month,day+1},{0,0,0}};
+        LocalDate[] tests = {LocalDate.now(),null};
 
         //expected sizes of data.getFocus()
         int[] results = {0,1};
@@ -194,7 +193,8 @@ public class UITest {
             //set date and set focused = true
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
-            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(1988, 11, 3));
+            if (tests[i]!=null)
+                onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i].getYear(),tests[i].getMonthValue(),tests[i].getDayOfMonth()));
             onView(withId(buttons[i])).perform(click());
 
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
@@ -206,13 +206,18 @@ public class UITest {
             new RecyclerAction(R.id.list_view_focus, R.id.button_menu, 0);
             new RecyclerAction(R.id.list_view_focus, R.id.button_calendar, 0);
 
-            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
+            if (tests[i]!=null)
+                onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i].getYear(), tests[i].getMonthValue(), tests[i].getDayOfMonth()));
+
             onView(withId(buttons[i])).perform(click());
 
             //assert results
             Data data = new Data(appContext, DATABASE_NAME);
 
-            assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
+            if (tests[i] == null)
+                assert(data.getEntries().get(i).getReminderDate()==null);
+            else
+                assert (data.getEntries().get(i).getReminderDate().equals(tests[i]));
             assert (data.getFocus().size() == results[i]);
         }
     }
@@ -221,16 +226,12 @@ public class UITest {
     @Test
     public void testCalendarListNoList(){
 
-        //get current dates
-        int year = Year.now().getValue();
-        int month = MonthDay.now().getMonthValue();
-        int day = MonthDay.now().getDayOfMonth();
-
         //dummy task names for test data
         String[] strings = {"Test", "Test1"};
 
         //test data
-        int[][] tests = {{year,month,day+1},{0,0,0}};
+        LocalDate[] tests = {LocalDate.now(),null};
+
 
         //expected number of tasks in data.getNoList() and data.getDropped()
         int[][] results = {{1,0},{2,1}};
@@ -251,13 +252,20 @@ public class UITest {
             //set date
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
-            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
+            if (tests[i]!=null)
+                onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i].getYear(), tests[i].getMonthValue(), tests[i].getDayOfMonth()));
+
+
+
             onView(withId(buttons[i])).perform(click());
 
             //assert results
             Data data = new Data(appContext, DATABASE_NAME);
 
-            assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
+            if (tests[i]==null)
+                assert(data.getEntries().get(i).getReminderDate()==null);
+            else
+                assert (data.getEntries().get(i).getReminderDate().equals(tests[i]));
             assert(data.getNoList().size()== results[i][0]);
             assert (data.getDropped().size() == results[i][1]);
         }
@@ -279,7 +287,7 @@ public class UITest {
         String[] lists = {"Test"};
 
         //test dates
-        int[][] tests = {{year,month,day+1}};
+        LocalDate[] tests = {LocalDate.now().plusDays(1)};
 
         //expected sizes of data.getLists() and data.getDropped()
         int[][] results = {{3,0}};
@@ -309,13 +317,17 @@ public class UITest {
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_menu, i);
             new RecyclerAction(R.id.recycle_view_lists, R.id.button_calendar, i);
 
-            onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i][0], tests[i][1], tests[i][2]));
+            if (tests[i]!=null)
+                onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i].getYear(), tests[i].getMonthValue(), tests[i].getDayOfMonth()));
             onView(withId(buttons[i])).perform(click());
 
             //assert results
             Data data = new Data(appContext, DATABASE_NAME);
 
-            assert (data.getEntries().get(i).getReminderDate() == tests[i][0] * 10000 + tests[i][1] * 100 + tests[i][2]);
+            if (tests[i]==null)
+                assert(data.getEntries().get(i).getReminderDate()==null);
+            else
+                assert (data.getEntries().get(i).getReminderDate().equals(tests[i]));
             assert(data.getLists().size() == results[i][0]);
             assert (data.getDropped().size() == results[i][1]);
         }

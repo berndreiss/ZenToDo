@@ -1,20 +1,21 @@
 package com.bdreiss.zentodo.dataManipulation;
-import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_ENTRIES_V1;
-import com.bdreiss.zentodo.dataManipulation.database.DbHelper;
+import com.bdreiss.zentodo.dataManipulation.database.DbHelperV1;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSort;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByReminderDate;
 import com.bdreiss.zentodo.dataManipulation.mergeSort.MergeSortByListPosition;
 
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.ArrayList;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,16 +40,17 @@ public class Data {
 
     private final Context context;
 
-    private final DbHelper db;//database
+    private final DbHelperV1 db;//database
 
 
     //initialize instance of Data, load content of database into entries, populate ids and listPositionCount
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public Data(Context context, String databaseName) {
 
         this.context = context;
 
         //get new Database-handler
-        this.db = new DbHelper(context, databaseName);
+        this.db = new DbHelperV1(context, databaseName);
 
         if (listPositionCount != null)
             listPositionCount.clear();
@@ -237,7 +239,7 @@ public class Data {
     }
 
 
-    public void editReminderDate(int id, int date) {
+    public void editReminderDate(int id, LocalDate date) {
         Entry entry = entries.get(getPosition(id));
         entry.setReminderDate(date);
         db.updateEntry(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL, id, date);
@@ -402,12 +404,13 @@ public class Data {
 
     //get entries that can be picked today. These include tasks that are due, tasks that have been dropped,
     //or tasks that have already been in focus-
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public ArrayList<Entry> getTasksToPick(){
 
         ArrayList<Entry> tasksToPick= new ArrayList<>();
 
         //get current date as "yyyyMMdd" to check if task is due
-        int date = getToday();
+        LocalDate date = LocalDate.now();
 
 
         /*
@@ -435,7 +438,7 @@ public class Data {
             } else {
 
                 //2. check date set
-                if (e.getReminderDate() == 0) {
+                if (e.getReminderDate() == null) {
 
                     //2.1 check dropped and list set
                     if (e.getDropped() || e.getList()==null) {
@@ -444,7 +447,7 @@ public class Data {
                 } else {
 
                     //3. check task is due
-                    if (e.getReminderDate() <= date) {
+                    if (e.getReminderDate().compareTo(date) <= 0) {
                         tasksToPick.add(e);
                     }
                 }
@@ -494,12 +497,13 @@ public class Data {
 
 
     //get entries where focus == true
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public ArrayList<Entry> getFocus(){
         ArrayList<Entry> focus = new ArrayList<>();
 
         for (Entry e : entries){
 
-            if (( (e.getRecurrence() != null) && (e.getReminderDate() <= getToday())) &&
+            if (( (e.getRecurrence() != null) && (e.getReminderDate() == null || e.getReminderDate().compareTo(LocalDate.now()) <= 0)) &&
                             !recurringButRemovedFromToday.contains(e.getId()))
                 e.setFocus(true);
 
@@ -535,18 +539,6 @@ public class Data {
         ids.add(id);
         Collections.sort(ids);
         return id;
-    }
-
-
-    //return current date as "yyyyMMdd"
-    public static int getToday(){
-
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-
-        Date date = new Date();
-
-        return Integer.parseInt(df.format(date));
-
     }
 
 
@@ -592,7 +584,8 @@ public class Data {
 
 
     //this routine calculates a new reminder date for recurring tasks
-    public int setRecurring(int id, int today) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public LocalDate setRecurring(int id, LocalDate today) {
 
         //get Entry
         Entry entry = entries.get(getPosition(id));
@@ -615,27 +608,15 @@ public class Data {
         int offSet = Integer.parseInt(offSetStr.toString());
 
         //get reminder date
-        int date = entry.getReminderDate();
+        LocalDate date = entry.getReminderDate();
 
-        if (date == 0) {
+        if (date == null) {
             date = today;
         }
 
-        //decode reminder date and store in array: <[day][month][year]>
-        int[] dateArray = new int[3];
-
-        //get day
-        dateArray[0] = date % 100;
-
-        //get month
-        dateArray[1] = ((date - dateArray[0]) / 100) % 100;
-
-        //get year
-        dateArray[2] = ((date - dateArray[1] * 100 - dateArray[0]) / 10000);
-
         //increment date by offset and repeat until it is greater than today
-        while (date <= today) {
-            date = incrementRecurring(mode, dateArray, offSet);
+        while (date.compareTo(today) <= 0) {
+            date = incrementRecurring(mode, date, offSet);
         }
 
         //write reminder date to entries
@@ -649,105 +630,29 @@ public class Data {
 
 
     //return date incremented by offset
-    private int incrementRecurring(char mode, int[] dateArray, int offSet) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private LocalDate incrementRecurring(char mode, LocalDate date, int offSet) {
 
-        //if day and week ist incremented month and year may be incremented too
-        if (mode == 'd' || mode == 'w') {
-
-            //if offset is measured in weeks increment day by offset*7, increment by offSet otherwise
-            // (because it is simply measured in days)
-            if (mode == 'w') {
-                dateArray[0] += offSet * 7;
-
-            } else {
-                dateArray[0] += offSet;
-            }
-
-            //get days of the current month
-            int daysOfTheMonth = returnDaysOfTheMonth(dateArray[1], dateArray[2]);
-
-            //in a loop check if day is bigger than day of the month increment month and even year if necessary
-            while (daysOfTheMonth < dateArray[0]) {
-
-                //increment month
-                dateArray[1]++;
-
-                //reset day
-                dateArray[0] -= daysOfTheMonth;
-
-
-                //if month is bigger than 12 increment year too
-                while (dateArray[1] > 12) {
-                    dateArray[2]++;
-                    dateArray[1] -= 12;
-                }
-
-                //recalculate days of the month for next month
-                daysOfTheMonth = returnDaysOfTheMonth(dateArray[1], dateArray[2]);
-            }
-
-        }
-
-        //if month is incremented, year may be incremented too
-        if (mode == 'm') {
-
-            //increment month by offset
-            dateArray[1] += offSet;
-
-            //if month is bigger than 12 increment year too
-            while (dateArray[1] > 12) {
-                dateArray[2]++;
-                dateArray[1] -= 12;
-            }
-
-        }
-
-        //if offset is measured in years, just increment years by offset
-        if (mode == 'y') {
-
-            dateArray[2] += offSet;
-
-        }
-
-        //return date in format yyyymmdd
-        return dateArray[0] + dateArray[1] * 100 + dateArray[2] * 10000;
-    }
-
-
-    //returns days of the month
-    private int returnDaysOfTheMonth(int month, int year) {
-        switch (month) {
-            case 1:
-            case 3:
-            case 5:
-            case 7:
-            case 8:
-            case 10:
-            case 12:
-                return 31;
-            case 2:
-                return isLeapYear(year) ? 29 : 28;
-            case 4:
-            case 6:
-            case 9:
-            case 11:
-                return 30;
+        switch(mode){
+            case 'd':
+                return date.plusDays(offSet);
+            case 'w':
+                return date.plusWeeks(offSet);
+            case 'm':
+                return date.plusMonths(offSet);
+            case 'y':
+                return date.plusYears(offSet);
             default:
-                return 0;
+                return date;
         }
-
 
     }
 
-    //check whether year is leap year
-    private Boolean isLeapYear(int year) {
-        if (year % 4 == 0) {
-            return year % 400 != 0;
-        }
-        return false;
-    }
+
+
 
     //add ids to recurringButRemovedFromToday and make a call to the database making changes permanent
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void addToRecurringButRemoved(int id){
         recurringButRemovedFromToday.add(id);
 
@@ -756,6 +661,7 @@ public class Data {
     }
 
     //remove ids from recurringButRemovedFromToday and make a call to the database making changes permanent
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void removeFromRecurringButRemoved(int id){
         for (int i = 0; i < recurringButRemovedFromToday.size(); i++)
             if (recurringButRemovedFromToday.get(i)==id) {

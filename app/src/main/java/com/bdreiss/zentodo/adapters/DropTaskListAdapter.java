@@ -8,12 +8,17 @@ package com.bdreiss.zentodo.adapters;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import com.bdreiss.zentodo.adapters.listeners.SetDateListener;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
+
+import java.time.LocalDate;
 
 public class DropTaskListAdapter extends TaskListAdapter{
 
@@ -67,11 +72,16 @@ public class DropTaskListAdapter extends TaskListAdapter{
 
         //Remove task from View if date is set
         holder.setDate.setOnClickListener(new SetDateListener(this, holder,position){
+
             @Override
             public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
                 DatePickerDialog datePickerDialog;
                 datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
-                    int date = year*10000+(month+1)*100+day;//Encode format "YYYYMMDD"
+                    LocalDate date = LocalDate.of(year,month,day);
+
+                    //for some strange reason the month is returned -1 in the DatePickerDialog
+                    date = date.plusMonths(1);
+
                     data.editReminderDate(entry.getId(), date);//Write back data
                     data.setDropped(entry.getId(), false);
                     entries.remove(position);

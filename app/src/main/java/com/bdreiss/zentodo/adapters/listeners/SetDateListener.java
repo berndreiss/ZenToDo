@@ -2,12 +2,18 @@ package com.bdreiss.zentodo.adapters.listeners;
 
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
+import android.os.Build;
+import android.util.Log;
 import android.view.View;
+import android.widget.DatePicker;
+
+import androidx.annotation.RequiresApi;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 
 /*
@@ -31,8 +37,6 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
         //Get entry
         Entry entry = adapter.entries.get(position);
 
-        //get current date when task is due
-        int entryDate = entry.getReminderDate();
 
         //variables for setting picker
         int entryDay;
@@ -62,8 +66,10 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
         //initialize DatePickerDialog
         datePickerDialog= new DatePickerDialog(adapter.context, (view, year, month, day) -> {
 
-            //Encode format "YYYYMMDD"
-            int date = year*10000+(month+1)*100+day;
+            LocalDate date = LocalDate.of(year, month, day);
+
+            //for some strange reason the month is returned -1 in the DatePickerDialog
+            date = date.plusMonths(1);
 
             //Write back data
             adapter.data.editReminderDate(entry.getId(), date);
@@ -83,8 +89,8 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
         datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
             //set date when task is due to 0
-            adapter.data.editReminderDate(entry.getId(),0);
-            adapter.entries.get(position).setReminderDate(0);
+            adapter.data.editReminderDate(entry.getId(),null);
+            adapter.entries.get(position).setReminderDate(null);
 
             //change color of reminder date Button marking if Date is set
             adapter.markSet(holder,entry);

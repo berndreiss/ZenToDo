@@ -18,9 +18,11 @@ package com.bdreiss.zentodo.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import com.bdreiss.zentodo.R;
@@ -30,6 +32,7 @@ import com.bdreiss.zentodo.adapters.listeners.SetDateListenerPick;
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class PickTaskListAdapter extends TaskListAdapter implements PickListener {
@@ -69,6 +72,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
@@ -98,11 +102,11 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
                 doNowAdapter.notifyDataSetChanged();
                 doNowAdapter.itemCountChanged();
 
-                if (entry.getReminderDate()> Data.getToday()){
+                if (entry.getReminderDate().compareTo(LocalDate.now())> 0){
                     doLaterAdapter.entries.add(entry);
                     doLaterAdapter.notifyDataSetChanged();
                     doLaterAdapter.itemCountChanged();
-                } else if (entry.getReminderDate() == 0 && entry.getList() != null){
+                } else if (entry.getReminderDate() == null && entry.getList() != null){
                     moveToListAdapter.entries.add(entry);
                     moveToListAdapter.notifyDataSetChanged();
                     moveToListAdapter.itemCountChanged();
@@ -167,6 +171,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     public void reset(){
 

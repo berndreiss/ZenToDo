@@ -3,11 +3,16 @@ package com.bdreiss.zentodo.adapters.listeners;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
 import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Entry;
+
+import java.time.LocalDate;
 
 public class SetDateListenerPick extends SetDateListener{
 
@@ -32,8 +37,10 @@ public class SetDateListenerPick extends SetDateListener{
         //initialize DatePickerDialog
         datePickerDialog= new DatePickerDialog(adapter.context, (view, year, month, day) -> {
 
-            //Encode format "YYYYMMDD"
-            int date = year*10000+(month+1)*100+day;
+            LocalDate date = LocalDate.of(year, month, day);
+
+            date = date.plusMonths(1);
+
 
             Entry e = adapter.entries.get(position);
             //Write back data
@@ -51,9 +58,9 @@ public class SetDateListenerPick extends SetDateListener{
 
         datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
-            //set date when task is due to 0
-            adapter.data.editReminderDate(entry.getId(),0);
-            adapter.entries.get(position).setReminderDate(0);
+            //set date when task is due to null
+            adapter.data.editReminderDate(entry.getId(),null);
+            adapter.entries.get(position).setReminderDate(null);
 
             //change color of reminder date Button marking if Date is set
             adapter.markSet(holder,entry);

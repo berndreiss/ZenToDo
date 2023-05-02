@@ -5,9 +5,8 @@ import android.content.Context;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
-import com.bdreiss.zentodo.dataManipulation.database.DbHelper;
+import com.bdreiss.zentodo.dataManipulation.database.DbHelperV1;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_ENTRIES_V1;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_LISTS_V1;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.TABLES_V1;
@@ -18,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -42,12 +42,12 @@ public class DbHelper_V1Test {
     };
 
     //add dummy task where all attributes are set to null
-    public void addTestDataNull(DbHelper db){
-        insertQuery("0, \"NEW TASK\", 0, 1, NULL, -1, 0, NULL, 0", db);
+    public void addTestDataNull(DbHelperV1 db){
+        insertQuery("0, \"NEW TASK\", 0, 1, NULL, -1, NULL, NULL, 0", db);
     }
 
     //add dummy list
-    public void addTestDataList(DbHelper db, String string){
+    public void addTestDataList(DbHelperV1 db, String string){
         db.getWritableDatabase().execSQL("INSERT INTO " + TABLES_V1.TABLE_LISTS + "(" +
                         COLUMNS_LISTS_V1.LIST_NAME_COL + ", " +
                         COLUMNS_LISTS_V1.LIST_COLOR_COL + ") VALUES ('" +
@@ -57,7 +57,7 @@ public class DbHelper_V1Test {
     }
 
     //takes String argument containing values for the different fields
-    public void insertQuery(String data, DbHelper db){
+    public void insertQuery(String data, DbHelperV1 db){
         db.getWritableDatabase().execSQL("INSERT INTO " + TABLES_V1.TABLE_ENTRIES + "(" +
                 COLUMNS_ENTRIES_V1.ID_COL + ", " +
                 COLUMNS_ENTRIES_V1.TASK_COL + ", " +
@@ -82,7 +82,7 @@ public class DbHelper_V1Test {
     //test whether empty database is created
     @Test
     public void createDatabase(){
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         assert(appContext.getDatabasePath("TEST") != null);
         assert(db.loadEntries().size() == 0);
@@ -94,7 +94,7 @@ public class DbHelper_V1Test {
     //adds new task and checks whether it is loaded correctly
     @Test
     public void loadNewTask() {
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         addTestDataNull(db);
 
@@ -108,7 +108,7 @@ public class DbHelper_V1Test {
         assert(entry.getDropped());
         assert(entry.getList() == null);
         assert(entry.getListPosition() == -1);
-        assert(entry.getReminderDate() == 0);
+        assert(entry.getReminderDate() == null);
         assert(entry.getRecurrence() == null);
         assert(entry.getPosition() == 0);
 
@@ -118,7 +118,7 @@ public class DbHelper_V1Test {
     //add entries with test Strings and check whether they are entered into the database correctly
     @Test
     public void addEntry(){
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         String[] tasks = stringTestData;
 
@@ -134,7 +134,7 @@ public class DbHelper_V1Test {
     //test whether entries are loaded correctly
     @Test
     public void loadEntries(){
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         for (int i = 0; i < 3; i++) {
 
@@ -148,7 +148,7 @@ public class DbHelper_V1Test {
             assert(entry.getDropped());
             assert(entry.getList() == null);
             assert(entry.getListPosition() == -1);
-            assert(entry.getReminderDate() == 0);
+            assert(entry.getReminderDate() == null);
             assert(entry.getRecurrence() == null);
             assert(entry.getPosition() == i);
         }
@@ -159,7 +159,7 @@ public class DbHelper_V1Test {
     //test whether entries are removed properly
     @Test
     public void removeEntry(){
-        DbHelper db = new DbHelper(appContext,DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext,DATABASE_NAME);
 
         //add and remove entry and assert result
         db.addEntry(new Entry(0,0,"NEW TASK"));
@@ -210,7 +210,7 @@ public class DbHelper_V1Test {
     //test whether lists are loaded properly
     @Test
     public void loadLists(){
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         //assert not list was created when database was instantiated
         assert(db.loadLists().isEmpty());
@@ -235,7 +235,7 @@ public class DbHelper_V1Test {
     //tests whether lists are added correctly
     @Test
     public void addList(){
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         //add dummy list with default color white
         db.addList("|", "WHITE");
@@ -258,7 +258,7 @@ public class DbHelper_V1Test {
     //tests whether lists are removed properly
     @Test
     public void removeList(){
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         //add dummy list
         addTestDataList(db, "TEST");
@@ -275,7 +275,7 @@ public class DbHelper_V1Test {
     //tests whether entries are updated properly in database
     @Test
     public void updateEntry(){
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         //add dummy task
         db.addEntry(new Entry(0,0,"NEW TASK"));
@@ -298,11 +298,11 @@ public class DbHelper_V1Test {
         }
 
         //set list to null and assert
-        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_COL, 0, null);
+        db.updateEntry(COLUMNS_ENTRIES_V1.LIST_COL, 0, (String) null);
         assert (db.loadEntries().get(0).getList() == null);
 
         //set recurrence to null and assert
-        db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, 0, null);
+        db.updateEntry(COLUMNS_ENTRIES_V1.RECURRENCE_COL, 0, (String) null);
         assert (db.loadEntries().get(0).getRecurrence() == null);
 
         //set focus to false/true and assert
@@ -330,10 +330,10 @@ public class DbHelper_V1Test {
         assert(db.loadEntries().get(0).getListPosition() == 0);
 
         //set reminder date to 2000/0 and assert
-        db.updateEntry(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL, 0, 2000);
-        assert(db.loadEntries().get(0).getReminderDate() == 2000);
-        db.updateEntry(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL, 0, 0);
-        assert(db.loadEntries().get(0).getReminderDate() == 0);
+        db.updateEntry(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL, 0, LocalDate.of(2000,1,1).toString());
+        assert(db.loadEntries().get(0).getReminderDate().equals(LocalDate.of(2000,1,1)));
+        db.updateEntry(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL, 0, (LocalDate) null);
+        assert(db.loadEntries().get(0).getReminderDate() == null);
 
         appContext.deleteDatabase(DATABASE_NAME);
     }
@@ -341,7 +341,7 @@ public class DbHelper_V1Test {
     //tests whether lists color is updated correctly
     @Test
     public void updateList(){
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         //add lists for all test cases in stringTestData
         for (String stringTestDate : stringTestData) {
@@ -373,7 +373,7 @@ public class DbHelper_V1Test {
         //instantiate new Test
         Test test = new Test();
 
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         //add dummy tasks and set list
         for (int i = 0; i < test.results[0][0].length; i++){
@@ -412,10 +412,10 @@ public class DbHelper_V1Test {
     @Test
     public void saveLoadRecurring(){
 
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         //get date of today
-        int filename = Data.getToday();
+        String filename = LocalDate.now().toString();
 
         ArrayList<Integer> ids = new ArrayList<>();
 

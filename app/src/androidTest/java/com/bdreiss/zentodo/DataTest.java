@@ -7,13 +7,14 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
 import com.bdreiss.zentodo.dataManipulation.Entry;
-import com.bdreiss.zentodo.dataManipulation.database.DbHelper;
+import com.bdreiss.zentodo.dataManipulation.database.DbHelperV1;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 @RunWith(AndroidJUnit4.class)
@@ -34,7 +35,7 @@ public class DataTest {
 
         Data data = new Data(appContext, DATABASE_NAME);
 
-        DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
 
         //assert all main data structures are empty
         assert(db.loadEntries().size() == 0);
@@ -67,7 +68,7 @@ public class DataTest {
             assert(entry.getPosition() == i);
 
             //get new instance with data from the save file and assert results
-            DbHelper db = new DbHelper(appContext, DATABASE_NAME);
+            DbHelperV1 db = new DbHelperV1(appContext, DATABASE_NAME);
             entry = db.loadEntries().get(i);
 
             assert(entry.getTask().equals(stringData[i]));
@@ -312,7 +313,7 @@ public class DataTest {
             assert(e.getTask().equals("TEST"));
 
         //assert that all changes have been made persistent
-        for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
+        for (Entry e : new DbHelperV1(appContext, DATABASE_NAME).loadEntries())
             assert(e.getTask().equals("TEST"));
 
     }
@@ -341,7 +342,7 @@ public class DataTest {
             assert(e.getFocus());
 
         //assert results are persistent
-        for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
+        for (Entry e : new DbHelperV1(appContext, DATABASE_NAME).loadEntries())
             assert(e.getFocus());
 
         //set all tasks focus to false
@@ -354,7 +355,7 @@ public class DataTest {
             assert(!e.getFocus());
 
         //assert results are persistent
-        for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
+        for (Entry e : new DbHelperV1(appContext, DATABASE_NAME).loadEntries())
             assert(!e.getFocus());
     }
 
@@ -382,7 +383,7 @@ public class DataTest {
             assert(e.getDropped());
 
         //assert results are persistent
-        for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
+        for (Entry e : new DbHelperV1(appContext, DATABASE_NAME).loadEntries())
             assert(e.getDropped());
 
         //set all tasks dropped to false
@@ -395,7 +396,7 @@ public class DataTest {
             assert(!e.getDropped());
 
         //assert results are persistent
-        for (Entry e : new DbHelper(appContext, DATABASE_NAME).loadEntries())
+        for (Entry e : new DbHelperV1(appContext, DATABASE_NAME).loadEntries())
             assert(!e.getDropped());
     }
 
@@ -407,7 +408,7 @@ public class DataTest {
         String[] taskStrings = {"0","1","2","3"};
 
         //test data = results
-        int[] tests = {0, 20110311, 0, 2000};
+        LocalDate[] tests = {null, LocalDate.of(2011,3,11), null, LocalDate.of(2000,1,1)};
 
         //instantiate test class
         TestClass test = new TestClass(appContext, taskStrings);
@@ -419,7 +420,7 @@ public class DataTest {
         for (int i = 0; i < taskStrings.length; i++)
             data.editReminderDate(i,tests[i]);
 
-        ArrayList<Entry> entries = new DbHelper(appContext, DATABASE_NAME).loadEntries();
+        ArrayList<Entry> entries = new DbHelperV1(appContext, DATABASE_NAME).loadEntries();
 
         //assert results from save file
         for (int i = 0; i < taskStrings.length; i++)
@@ -448,7 +449,7 @@ public class DataTest {
         for (int i = 0; i < taskStrings.length; i++)
             data.editRecurrence(i,tests[i]);
 
-        ArrayList<Entry> entries = new DbHelper(appContext, DATABASE_NAME).loadEntries();
+        ArrayList<Entry> entries = new DbHelperV1(appContext, DATABASE_NAME).loadEntries();
 
         //assert results from save file
         for (int i = 0; i < taskStrings.length; i++)
@@ -458,7 +459,7 @@ public class DataTest {
         for (int i = 0; i < tests.length; i++)
             data.editRecurrence(i,null);
 
-        entries = new DbHelper(appContext, DATABASE_NAME).loadEntries();
+        entries = new DbHelperV1(appContext, DATABASE_NAME).loadEntries();
 
         //assert results from save file
         for (Entry e : entries)
@@ -491,7 +492,7 @@ public class DataTest {
         Data data = test.getData();
 
         //load entries from save file to check whether changes were made persistent
-        ArrayList<Entry> entries = new DbHelper(appContext,DATABASE_NAME).loadEntries();
+        ArrayList<Entry> entries = new DbHelperV1(appContext,DATABASE_NAME).loadEntries();
 
         //assert results
         for (int i = 0; i < entries.size(); i++) {
@@ -502,7 +503,7 @@ public class DataTest {
         //assert lists are returned by data.getLists()
         for (String s : tests) {
             assert (data.getLists().contains(s));
-            assert(new DbHelper(appContext,DATABASE_NAME).loadLists().containsKey(s));
+            assert(new DbHelperV1(appContext,DATABASE_NAME).loadLists().containsKey(s));
         }
 
         /*
@@ -541,7 +542,7 @@ public class DataTest {
     @Test
     public void editListColor(){
 
-        DbHelper db = new DbHelper(appContext,DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext,DATABASE_NAME);
 
         //dummy lists and colors
         String[] lists = {"0", "1", "2"};
@@ -573,7 +574,7 @@ public class DataTest {
     @Test
     public void getListColor(){
 
-        DbHelper db = new DbHelper(appContext,DATABASE_NAME);
+        DbHelperV1 db = new DbHelperV1(appContext,DATABASE_NAME);
 
         //dummy lists
         String[] lists = {"0", "1", "2"};
@@ -736,7 +737,7 @@ public class DataTest {
 
         //test dates: only tasks that have a reminder date older than or equal to today
         //should be returned
-        int[] dates = {Data.getToday()-1,Data.getToday()+1,Data.getToday(),Data.getToday()+1};
+        LocalDate[] dates = {LocalDate.now().minusDays(1),LocalDate.now().plusDays(1),LocalDate.now(),LocalDate.now().plusDays(1)};
 
         //expected results
         String[] results = {"0","2"};
@@ -960,8 +961,12 @@ public class DataTest {
         String[] tasks = {"0","1","2"};
 
         //tests: each task is assigned a date on each successive run
-        int[][] tests = {{0,20221231,20230110},{20221231,20230110,0},{20230110,20221231,0},
-                            {0,20230110,20221231},{20221231,0,20230110},{20230110,0,20221231}
+        LocalDate[][] tests = {{null,LocalDate.of(2022,12,31),LocalDate.of(2023,01,10)},
+                {LocalDate.of(2022,12,31),LocalDate.of(2023,01,10),null},
+                {LocalDate.of(2023,01,10),LocalDate.of(2022,12,31),null},
+                {null,LocalDate.of(2023,01,10),LocalDate.of(2022,12,31)},
+                {LocalDate.of(2022,12,31),null,LocalDate.of(2023,01,10)},
+                {LocalDate.of(2023,01,10),null,LocalDate.of(2022,12,31)}
                             };
 
         //expected results
@@ -1001,11 +1006,27 @@ public class DataTest {
     public void setRecurring(){
 
         //different dates representing today.
-        int[] today = {20231015,20231015,20231015,20231015,20231015,20231015,20231015,
-                        20230131,20230228,20240228,20231231,
-                        20231015,20231015,20231015,20231030,20231231,
-                        20230101,20230101,20231201,
-                        20230101,20230101
+        LocalDate[] today = {LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,01,31),
+                LocalDate.of(2023,02,28),
+                LocalDate.of(2024,02,28),
+                LocalDate.of(2023,12,31),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,30),
+                LocalDate.of(2023,12,31),
+                LocalDate.of(2023,01,01),
+                LocalDate.of(2023,01,01),
+                LocalDate.of(2023,12,01),
+                LocalDate.of(2023,01,01),
+                LocalDate.of(2023,01,01)
         };
 
         //intervals in which tasks reoccur. the letter represents days/weeks/months/years
@@ -1020,26 +1041,52 @@ public class DataTest {
         //reminder dates for tasks -> the interval above should be added to the initial reminder dates
         //unless reminder date + interval <= today -> in that case the interval is added x times so
         // that date + x * interval > today
-        int[] tests ={20231015, 20231015, 20231015, 20231015, 20231015, 20231015, 20231015, //adding one to seven days
-                      20230131, //adding one day and incrementing month
-                      20230228, //adding one day and incrementing month in February
-                      20240228, //adding one day in leap year therefore not incrementing month
-                      20231231, //adding one day and incrementing month + year
-                      20231015, 20231015, //adding one and two weeks
-                      20231008, //adding one week and today is 2023-10-15 -> another week is added
-                      20231025, //adding one week and month is incremented too
-                      20231204, //adding one week and today is 2023-12-31 -> four weeks are added and month/year increment
-                      20230101, 20230101, //adding one and two months
-                      20230101, //adding one month but today is 2023-12-01 -> year is incremented too
-                      20230101, 20221501 //adding one and two years
+        LocalDate[] tests ={LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15), //adding one to seven days
+                LocalDate.of(2023,1,31), //adding one day and incrementing month
+                LocalDate.of(2023,2,28), //adding one day and incrementing month in February
+                LocalDate.of(2024,2,28), //adding one day in leap year therefore not incrementing month
+                LocalDate.of(2023,12,31), //adding one day and incrementing month + year
+                LocalDate.of(2023,10,15),
+                LocalDate.of(2023,10,15), //adding one and two weeks
+                LocalDate.of(2023,10,8), //adding one week and today is 2023-10-15 -> another week is added
+                LocalDate.of(2023,10,25), //adding one week and month is incremented too
+                LocalDate.of(2023,12,4), //adding one week and today is 2023-12-31 -> four weeks are added and month/year increment
+                LocalDate.of(2023,1,1),
+                LocalDate.of(2023,1,1), //adding one and two months
+                LocalDate.of(2023,1,1), //adding one month but today is 2023-12-01 -> year is incremented too
+                LocalDate.of(2023,1,1),
+                LocalDate.of(2022,1,1) //adding one and two years
         };
 
         //expected results
-        int[] results = {20231016,20231017,20231018,20231019,20231020,20231021,20231022,
-                        20230201,20230301,20240229,20240101,
-                        20231022,20231029,20231022,20231101,20240101,
-                        20230201,20230301,20240101,
-                        20240101,20241501
+        LocalDate[] results = {
+                LocalDate.of(2023,10,16),
+                LocalDate.of(2023,10,17),
+                LocalDate.of(2023,10,18),
+                LocalDate.of(2023,10,19),
+                LocalDate.of(2023,10,20),
+                LocalDate.of(2023,10,21),
+                LocalDate.of(2023,10,22),
+                LocalDate.of(2023,02,01),
+                LocalDate.of(2023,03,01),
+                LocalDate.of(2024,02,29),
+                LocalDate.of(2024,01,01),
+                LocalDate.of(2023,10,22),
+                LocalDate.of(2023,10,29),
+                LocalDate.of(2023,10,22),
+                LocalDate.of(2023,11,01),
+                LocalDate.of(2024,01,01),
+                LocalDate.of(2023,02,01),
+                LocalDate.of(2023,03,01),
+                LocalDate.of(2024,01,01),
+                LocalDate.of(2024,1,1),
+                LocalDate.of(2024,01,01)
         };
 
 
@@ -1061,7 +1108,7 @@ public class DataTest {
             data.setRecurring(0,today[i]);
 
             //assert results
-            assert(data.getEntries().get(0).getReminderDate()==results[i]);
+            assert(data.getEntries().get(0).getReminderDate().equals(results[i]));
 
         }
 

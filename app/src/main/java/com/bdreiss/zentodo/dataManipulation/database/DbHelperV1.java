@@ -20,8 +20,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 
-import com.bdreiss.zentodo.dataManipulation.Data;
+import androidx.annotation.RequiresApi;
+
 import com.bdreiss.zentodo.dataManipulation.Entry;
 import com.bdreiss.zentodo.dataManipulation.TaskList;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_ENTRIES_V1;
@@ -34,18 +36,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 
-public class DbHelper extends SQLiteOpenHelper{
+public class DbHelperV1 extends SQLiteOpenHelper{
 
     private static final int DB_VERSION = 1;
 
     private final Context context;
 
-    public DbHelper(Context context, String DB_NAME){
+    public DbHelperV1(Context context, String DB_NAME){
         super(context,DB_NAME,null, DB_VERSION);
         this.context = context;
     }
@@ -60,7 +64,7 @@ public class DbHelper extends SQLiteOpenHelper{
                 + COLUMNS_ENTRIES_V1.DROPPED_COL + " INTEGER, "
                 + COLUMNS_ENTRIES_V1.LIST_COL + " TEXT, "
                 + COLUMNS_ENTRIES_V1.LIST_POSITION_COL + " INTEGER, "
-                + COLUMNS_ENTRIES_V1.REMINDER_DATE_COL + " INTEGER, "
+                + COLUMNS_ENTRIES_V1.REMINDER_DATE_COL + " TEXT,"
                 + COLUMNS_ENTRIES_V1.RECURRENCE_COL + " TEXT,"
                 + COLUMNS_ENTRIES_V1.POSITION_COL + " INTEGER "
                 + ")";
@@ -94,7 +98,9 @@ public class DbHelper extends SQLiteOpenHelper{
         values.put(COLUMNS_ENTRIES_V1.DROPPED_COL.toString(),entry.getDropped());
         values.put(COLUMNS_ENTRIES_V1.LIST_COL.toString(),entry.getList());
         values.put(COLUMNS_ENTRIES_V1.LIST_POSITION_COL.toString(),entry.getListPosition());
-        values.put(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL.toString(),entry.getReminderDate());
+
+        values.put(COLUMNS_ENTRIES_V1.REMINDER_DATE_COL.toString(),
+                entry.getReminderDate()== null ? null : entry.getReminderDate().toString() );
         values.put(COLUMNS_ENTRIES_V1.RECURRENCE_COL.toString(),entry.getRecurrence());
         values.put(COLUMNS_ENTRIES_V1.POSITION_COL.toString(), entry.getPosition());
 
@@ -138,6 +144,20 @@ public class DbHelper extends SQLiteOpenHelper{
 
         db.execSQL(query);
 
+        db.close();
+    }
+    //takes a column name (see COLUMNS_ENTRIES_V1), id and string and updates field of entry in TABLE_ENTRIES
+    public void updateEntry(COLUMNS_ENTRIES_V1 field, int id, LocalDate value){
+
+        String query;
+
+        if (value == null)
+            query = "UPDATE " + TABLES_V1.TABLE_ENTRIES + " SET " + field + "= NULL WHERE " + COLUMNS_ENTRIES_V1.ID_COL + "=" + id + ";";
+        else
+            query = "UPDATE " + TABLES_V1.TABLE_ENTRIES + " SET " + field + "='" + value + "' WHERE " + COLUMNS_ENTRIES_V1.ID_COL + "=" + id + ";";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(query);
         db.close();
     }
 
@@ -211,7 +231,7 @@ public class DbHelper extends SQLiteOpenHelper{
             boolean dropped = intToBool(cursor.getInt(3));
             String list = cursor.getString(4);
             int listPosition = cursor.getInt(5);
-            int reminderDate = cursor.getInt(6);
+            String reminderDate = cursor.getString(6);
             String recurrence = cursor.getString(7);
             int position = cursor.getInt(8);
 
@@ -221,7 +241,28 @@ public class DbHelper extends SQLiteOpenHelper{
             if (!(list==null))
                 entry.setList(list);
             entry.setListPosition(listPosition);
-            entry.setReminderDate(reminderDate);
+
+            //this try/catch block is necessary, as in older versions of this database the date was stored as an
+            //Integer represented by YYYYMMDD and not as LocalDate
+            if (reminderDate != null){
+                try {
+                    entry.setReminderDate(reminderDate == null ? null : LocalDate.parse(reminderDate));
+
+                }catch (DateTimeParseException e){
+
+                    int reminderDateInt = Integer.parseInt(reminderDate);
+
+                    if (reminderDateInt == 0)
+                        entry.setReminderDate(null);
+                    else {
+                        int year = reminderDateInt / 10000;
+                        int month = reminderDateInt % 10000 / 100;
+                        int day = reminderDateInt % 100;
+
+                        entry.setReminderDate(LocalDate.of(year, month, day));
+                    }
+                }
+            }
             if (!(recurrence==null))
                 entry.setRecurrence(recurrence);
 
@@ -345,7 +386,7 @@ public class DbHelper extends SQLiteOpenHelper{
     public void saveRecurring(ArrayList<Integer> arrayList){
 
         try {
-            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" +  Data.getToday());
+            FileOutputStream fos = new FileOutputStream(context.getFilesDir() + "/" +  LocalDate.now());
             ObjectOutputStream oos = new ObjectOutputStream(fos);
 
             oos.writeObject(arrayList);
@@ -366,7 +407,7 @@ public class DbHelper extends SQLiteOpenHelper{
         ArrayList<Integer> toReturn = new ArrayList<>();
 
         //get name of save file
-        File saveFile = new File(context.getFilesDir() + "/" + Data.getToday());
+        File saveFile = new File(context.getFilesDir() + "/" + LocalDate.now());
 
         //get all file names in files directory
         String[] fileNames = context.getFilesDir().list();
@@ -381,11 +422,18 @@ public class DbHelper extends SQLiteOpenHelper{
             if (fileNames[i].equals("mode"))
                 continue;
 
-            //if file name (which is a date) is smaller than today, delete it
-            if (Integer.parseInt(fileNames[i]) < Data.getToday()) {
-                assert files != null;
-                if (files[i] != null) files[i].delete();
+            try {
+                //if file name (which is a date) is smaller than today, delete it
+                if (LocalDate.parse(fileNames[i]).compareTo(LocalDate.now()) < 0) {
+                    assert files != null;
+                    if (files[i] != null) files[i].delete();
+                }
+
+                // in old versions the file was stored under a different naming logic this block removes old files
+            } catch (DateTimeParseException e){
+                files[i].delete();
             }
+
         }
 
         //if save file exists return contents as ArrayList<Integer>

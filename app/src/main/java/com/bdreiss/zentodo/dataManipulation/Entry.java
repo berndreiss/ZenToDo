@@ -1,5 +1,7 @@
 package com.bdreiss.zentodo.dataManipulation;
 
+import java.time.LocalDate;
+
 public class Entry{
 //this class represents the entry of a task
 //it consists of the following fields:
@@ -11,7 +13,7 @@ public class Entry{
     private Boolean dropped;//true if task has been dropped and not been used in brainstorm and pick
     private String list;//a list to which the task belongs to
     private int listPosition;//position in according list
-    private int reminderDate;//a date, when the task is due -> "yyyyMMdd"
+    private LocalDate reminderDate;//a date, when the task is due -> "yyyyMMdd"
     private String recurrence;//consisting of a String in the form of "y/m/w/d0-90-9" where the
                               //two digit number defines the offset in years (y), months(m),
                               //weeks (w) or days(d) when the task is going to reoccur
@@ -45,7 +47,7 @@ public class Entry{
 
     public int getListPosition(){return listPosition;}
 
-    public int getReminderDate(){
+    public LocalDate getReminderDate(){
         return reminderDate;
     }
     
@@ -70,7 +72,7 @@ public class Entry{
 
     public void setListPosition(int listPosition){this.listPosition=listPosition;}
 
-    public void setReminderDate(int reminderDate){
+    public void setReminderDate(LocalDate reminderDate){
         this.reminderDate=reminderDate;
     }
 
