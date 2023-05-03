@@ -2,12 +2,7 @@ package com.bdreiss.zentodo.adapters.listeners;
 
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
-import android.os.Build;
-import android.util.Log;
 import android.view.View;
-import android.widget.DatePicker;
-
-import androidx.annotation.RequiresApi;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.adapters.TaskListAdapter;

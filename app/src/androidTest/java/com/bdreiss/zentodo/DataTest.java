@@ -961,12 +961,12 @@ public class DataTest {
         String[] tasks = {"0","1","2"};
 
         //tests: each task is assigned a date on each successive run
-        LocalDate[][] tests = {{null,LocalDate.of(2022,12,31),LocalDate.of(2023,01,10)},
-                {LocalDate.of(2022,12,31),LocalDate.of(2023,01,10),null},
-                {LocalDate.of(2023,01,10),LocalDate.of(2022,12,31),null},
-                {null,LocalDate.of(2023,01,10),LocalDate.of(2022,12,31)},
-                {LocalDate.of(2022,12,31),null,LocalDate.of(2023,01,10)},
-                {LocalDate.of(2023,01,10),null,LocalDate.of(2022,12,31)}
+        LocalDate[][] tests = {{null,LocalDate.of(2022,12,31),LocalDate.of(2023,1,10)},
+                {LocalDate.of(2022,12,31),LocalDate.of(2023,1,10),null},
+                {LocalDate.of(2023,1,10),LocalDate.of(2022,12,31),null},
+                {null,LocalDate.of(2023,1,10),LocalDate.of(2022,12,31)},
+                {LocalDate.of(2022,12,31),null,LocalDate.of(2023,1,10)},
+                {LocalDate.of(2023,1,10),null,LocalDate.of(2022,12,31)}
                             };
 
         //expected results
@@ -1013,20 +1013,20 @@ public class DataTest {
                 LocalDate.of(2023,10,15),
                 LocalDate.of(2023,10,15),
                 LocalDate.of(2023,10,15),
-                LocalDate.of(2023,01,31),
-                LocalDate.of(2023,02,28),
-                LocalDate.of(2024,02,28),
+                LocalDate.of(2023,1,31),
+                LocalDate.of(2023,2,28),
+                LocalDate.of(2024,2,28),
                 LocalDate.of(2023,12,31),
                 LocalDate.of(2023,10,15),
                 LocalDate.of(2023,10,15),
                 LocalDate.of(2023,10,15),
                 LocalDate.of(2023,10,30),
                 LocalDate.of(2023,12,31),
-                LocalDate.of(2023,01,01),
-                LocalDate.of(2023,01,01),
-                LocalDate.of(2023,12,01),
-                LocalDate.of(2023,01,01),
-                LocalDate.of(2023,01,01)
+                LocalDate.of(2023,1,1),
+                LocalDate.of(2023,1,1),
+                LocalDate.of(2023,12,1),
+                LocalDate.of(2023,1,1),
+                LocalDate.of(2023,1,1)
         };
 
         //intervals in which tasks reoccur. the letter represents days/weeks/months/years
@@ -1073,20 +1073,20 @@ public class DataTest {
                 LocalDate.of(2023,10,20),
                 LocalDate.of(2023,10,21),
                 LocalDate.of(2023,10,22),
-                LocalDate.of(2023,02,01),
-                LocalDate.of(2023,03,01),
-                LocalDate.of(2024,02,29),
-                LocalDate.of(2024,01,01),
+                LocalDate.of(2023,2,1),
+                LocalDate.of(2023,3,1),
+                LocalDate.of(2024,2,29),
+                LocalDate.of(2024,1,1),
                 LocalDate.of(2023,10,22),
                 LocalDate.of(2023,10,29),
                 LocalDate.of(2023,10,22),
-                LocalDate.of(2023,11,01),
-                LocalDate.of(2024,01,01),
-                LocalDate.of(2023,02,01),
-                LocalDate.of(2023,03,01),
-                LocalDate.of(2024,01,01),
+                LocalDate.of(2023,11,1),
                 LocalDate.of(2024,1,1),
-                LocalDate.of(2024,01,01)
+                LocalDate.of(2023,2,1),
+                LocalDate.of(2023,3,1),
+                LocalDate.of(2024,1,1),
+                LocalDate.of(2024,1,1),
+                LocalDate.of(2024,1,1)
         };
 
 

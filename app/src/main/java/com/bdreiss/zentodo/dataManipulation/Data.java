@@ -1,8 +1,5 @@
 package com.bdreiss.zentodo.dataManipulation;
 import android.content.Context;
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_ENTRIES_V1;
@@ -44,7 +41,6 @@ public class Data {
 
 
     //initialize instance of Data, load content of database into entries, populate ids and listPositionCount
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public Data(Context context, String databaseName) {
 
         this.context = context;
@@ -404,7 +400,6 @@ public class Data {
 
     //get entries that can be picked today. These include tasks that are due, tasks that have been dropped,
     //or tasks that have already been in focus-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public ArrayList<Entry> getTasksToPick(){
 
         ArrayList<Entry> tasksToPick= new ArrayList<>();
@@ -497,7 +492,6 @@ public class Data {
 
 
     //get entries where focus == true
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public ArrayList<Entry> getFocus(){
         ArrayList<Entry> focus = new ArrayList<>();
 
@@ -584,7 +578,6 @@ public class Data {
 
 
     //this routine calculates a new reminder date for recurring tasks
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public LocalDate setRecurring(int id, LocalDate today) {
 
         //get Entry
@@ -630,7 +623,6 @@ public class Data {
 
 
     //return date incremented by offset
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private LocalDate incrementRecurring(char mode, LocalDate date, int offSet) {
 
         switch(mode){
@@ -652,7 +644,6 @@ public class Data {
 
 
     //add ids to recurringButRemovedFromToday and make a call to the database making changes permanent
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void addToRecurringButRemoved(int id){
         recurringButRemovedFromToday.add(id);
 
@@ -661,7 +652,6 @@ public class Data {
     }
 
     //remove ids from recurringButRemovedFromToday and make a call to the database making changes permanent
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void removeFromRecurringButRemoved(int id){
         for (int i = 0; i < recurringButRemovedFromToday.size(); i++)
             if (recurringButRemovedFromToday.get(i)==id) {

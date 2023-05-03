@@ -1,10 +1,7 @@
 package com.bdreiss.zentodo.adapters.listeners;
 
 import android.annotation.SuppressLint;
-import android.os.Build;
 import android.view.View;
-
-import androidx.annotation.RequiresApi;
 
 import com.bdreiss.zentodo.adapters.TaskListAdapter;
 import com.bdreiss.zentodo.dataManipulation.Entry;
@@ -26,7 +23,6 @@ public class CheckBoxListener extends BasicListener implements View.OnClickListe
         super(adapter, holder, position);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onClick(View v){

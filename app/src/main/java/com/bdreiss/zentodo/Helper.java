@@ -12,6 +12,7 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
 
 
@@ -52,8 +53,9 @@ public class Helper{
 
             textView.setText(HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY, s -> {
 
-                        int id = context.getResources().getIdentifier(s, "drawable", context.getPackageName());
-                        @SuppressLint("UseCompatLoadingForDrawables") Drawable drawable = context.getResources().getDrawable(id);
+                        @SuppressLint("DiscouragedApi") int id = context.getResources().getIdentifier(s, "drawable", context.getPackageName());
+                        Drawable drawable = ContextCompat.getDrawable(context, id);
+                        assert drawable != null;
                         drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
                         return drawable;
                     }

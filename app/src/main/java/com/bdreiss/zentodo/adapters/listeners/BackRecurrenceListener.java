@@ -1,10 +1,7 @@
 package com.bdreiss.zentodo.adapters.listeners;
 
 import android.annotation.SuppressLint;
-import android.os.Build;
 import android.view.View;
-
-import androidx.annotation.RequiresApi;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
 import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
@@ -25,7 +22,6 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
         super(adapter, holder, position);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onClick(View v){

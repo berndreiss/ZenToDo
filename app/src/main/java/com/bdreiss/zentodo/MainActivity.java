@@ -282,19 +282,19 @@ public class MainActivity extends AppCompatActivity {
         disableLayout(lists);
 
         //set color of Pick-Button in toolbar to chosen, set all other Buttons to toolbar default
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
+        toolbarPick.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary_accent));
         toolbarPick.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarPick.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary));
 
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarDrop.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarDrop.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarFocus.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarFocus.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarFocus.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarLists.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
@@ -383,19 +383,19 @@ public class MainActivity extends AppCompatActivity {
         disableLayout(lists);
 
         //set background color of Drop to chosen, all others to toolbar default
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
+        toolbarDrop.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary_accent));
         toolbarDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarDrop.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary));
 
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarPick.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarPick.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarPick.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarFocus.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarFocus.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarFocus.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarLists.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
     }
@@ -448,19 +448,19 @@ public class MainActivity extends AppCompatActivity {
         disableLayout(pick);
 
         //set background color of Focus to chosen, all others to toolbar default
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
+        toolbarFocus.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary_accent));
         toolbarFocus.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarFocus.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary));
 
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarDrop.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarDrop.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarPick.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarPick.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarPick.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarLists.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
@@ -510,19 +510,19 @@ public class MainActivity extends AppCompatActivity {
         disableLayout(focus);
 
         //set color of Lists-Button in toolbar to chosen, set all other Buttons to toolbar default
-        toolbarLists.setBackgroundColor(getResources().getColor(R.color.color_primary_accent));
+        toolbarLists.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary_accent));
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary));
 
-        toolbarDrop.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarDrop.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarDrop.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
-        toolbarPick.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarPick.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarPick.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarPick.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
-        toolbarFocus.setBackgroundColor(getResources().getColor(R.color.color_primary));
+        toolbarFocus.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarFocus.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarFocus.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 

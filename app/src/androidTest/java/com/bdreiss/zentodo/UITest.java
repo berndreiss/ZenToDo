@@ -30,15 +30,12 @@ import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 
 import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
@@ -274,11 +271,6 @@ public class UITest {
     //tests the calendar function in a list in LISTS
     @Test
     public void testCalendarList(){
-
-        //get current dates
-        int year = Year.now().getValue();
-        int month = MonthDay.now().getMonthValue();
-        int day = MonthDay.now().getDayOfMonth();
 
         //dummy task name for test data
         String[] strings = {"Test"};

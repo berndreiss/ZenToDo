@@ -18,11 +18,9 @@ package com.bdreiss.zentodo.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Build;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import com.bdreiss.zentodo.R;
@@ -70,9 +68,6 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
         return checkboxTicked;
     }
 
-
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
@@ -171,7 +166,6 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     public void reset(){
 

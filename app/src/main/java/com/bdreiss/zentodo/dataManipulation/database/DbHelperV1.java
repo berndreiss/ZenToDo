@@ -20,9 +20,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
 
 import com.bdreiss.zentodo.dataManipulation.Entry;
 import com.bdreiss.zentodo.dataManipulation.TaskList;
@@ -246,7 +243,7 @@ public class DbHelperV1 extends SQLiteOpenHelper{
             //Integer represented by YYYYMMDD and not as LocalDate
             if (reminderDate != null){
                 try {
-                    entry.setReminderDate(reminderDate == null ? null : LocalDate.parse(reminderDate));
+                    entry.setReminderDate(LocalDate.parse(reminderDate));
 
                 }catch (DateTimeParseException e){
 
@@ -431,6 +428,7 @@ public class DbHelperV1 extends SQLiteOpenHelper{
 
                 // in old versions the file was stored under a different naming logic this block removes old files
             } catch (DateTimeParseException e){
+                assert files != null;
                 files[i].delete();
             }
 

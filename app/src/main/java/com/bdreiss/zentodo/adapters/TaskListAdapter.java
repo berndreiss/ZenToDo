@@ -32,6 +32,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bdreiss.zentodo.R;
@@ -386,32 +387,33 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
         //Set date button to alternative color if !=0, original color otherwise
         if (entry.getReminderDate()!=null){
-            holder.setDate.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+
+            holder.setDate.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt_edited));
 
         }else{
-            holder.setDate.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
+            holder.setDate.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt));
         }
 
         //Set recurrence button to alternative color if !isEmpty(), original color otherwise
         if (entry.getRecurrence()!=null){
-            holder.recurrence.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+            holder.recurrence.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt_edited));
         }else{
-            holder.recurrence.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
+            holder.recurrence.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt));
         }
 
         //Set list button to alternative color if !isEmpty(), original color otherwise
         if (entry.getList()!=null){
-            holder.setList.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+            holder.setList.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt_edited));
         }else{
-            holder.setList.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
+            holder.setList.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt));
         }
 
         if (entry.getFocus()){
-            holder.focus.setBackground(context.getResources().getDrawable(R.drawable.button_alt_edited));
+            holder.focus.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt_edited));
 
 
         } else{
-            holder.focus.setBackground(context.getResources().getDrawable(R.drawable.button_alt));
+            holder.focus.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt));
         }
 
     }

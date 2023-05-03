@@ -2,10 +2,6 @@ package com.bdreiss.zentodo.dataManipulation.mergeSort;
 
 //code adapted from https://www.withexample.com/merge-sort-using-arraylist-java-example/
 
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
-
 import com.bdreiss.zentodo.dataManipulation.Entry;
 
 import java.time.LocalDate;

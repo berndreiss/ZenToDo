@@ -16,14 +16,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import com.bdreiss.zentodo.R;
@@ -35,12 +33,10 @@ import java.time.LocalDate;
 
 public class FocusTaskListAdapter extends TaskListAdapter {
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public FocusTaskListAdapter(Context context, Data data){
         super(context, data, data.getFocus());
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
@@ -202,7 +198,6 @@ public class FocusTaskListAdapter extends TaskListAdapter {
         imageView.setOnClickListener(v -> builder.dismiss());
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     public void reset(){
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)

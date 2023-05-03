@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -96,7 +97,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                         //set header color to chosen color or default if white is chosen
                         if (color.startsWith("ffffff", 3)) {
 
-                            this.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                            this.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
 
                         } else {
 
@@ -108,7 +109,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                     })
                     .setNegativeButton("no color", (dialog, which) -> {
-                        this.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                        this.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
                         data.editListColor(headerText.getText().toString(), "#00ffffff");
                         listsTaskListAdapter.notifyDataSetChanged();
 
@@ -191,7 +192,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //set header text
                 header.headerText.setText(context.getResources().getString(R.string.allTasks));
 
-                header.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                header.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
 
                 headerColor = standardColor;
 
@@ -219,7 +220,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //set header text
                 header.headerText.setText(context.getResources().getString(R.string.noList));
 
-                header.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                header.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
 
                 headerColor = standardColor;
 
@@ -249,7 +250,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //set color of header to default if color is white, set it to color otherwise
                 if (data.getListColor(list).startsWith("ffffff", 3)) {
 
-                    header.layout.setBackgroundColor(context.getResources().getColor(R.color.header_background));
+                    header.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
 
                     headerColor = standardColor;
 

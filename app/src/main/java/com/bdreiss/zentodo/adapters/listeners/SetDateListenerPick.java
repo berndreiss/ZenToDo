@@ -3,9 +3,6 @@ package com.bdreiss.zentodo.adapters.listeners;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
 
 import com.bdreiss.zentodo.R;
 import com.bdreiss.zentodo.adapters.PickTaskListAdapter;
