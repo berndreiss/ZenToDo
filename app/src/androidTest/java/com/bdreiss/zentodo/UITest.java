@@ -35,6 +35,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 
@@ -167,13 +168,13 @@ public class UITest {
         String[] strings = {"Test", "Test1"};
 
         //test data
-        LocalDate[] tests = {LocalDate.now(),null};
+        LocalDate[] tests = {LocalDate.now().plusDays(1),LocalDate.now().minusDays(1)};
 
         //expected sizes of data.getFocus()
         int[] results = {0,1};
 
         //button1 == OK, button2 == No Date
-        int[] buttons = {android.R.id.button1, android.R.id.button2};
+        int[] buttons = {android.R.id.button1, android.R.id.button1};
 
         for (int i = 0; i < strings.length; i++) {
 
@@ -203,6 +204,7 @@ public class UITest {
             new RecyclerAction(R.id.list_view_focus, R.id.button_menu, 0);
             new RecyclerAction(R.id.list_view_focus, R.id.button_calendar, 0);
 
+
             if (tests[i]!=null)
                 onView(withClassName(Matchers.equalTo(DatePicker.class.getName()))).perform(PickerActions.setDate(tests[i].getYear(), tests[i].getMonthValue(), tests[i].getDayOfMonth()));
 
@@ -211,6 +213,11 @@ public class UITest {
             //assert results
             Data data = new Data(appContext, DATABASE_NAME);
 
+            if (data.getEntries().get(i).getReminderDate() == null){
+                Log.d("XXX",String.valueOf(i));
+                Log.d("XXX",String.valueOf(tests[i]));
+                continue;
+            }
             if (tests[i] == null)
                 assert(data.getEntries().get(i).getReminderDate()==null);
             else

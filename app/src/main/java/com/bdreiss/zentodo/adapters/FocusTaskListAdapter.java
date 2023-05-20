@@ -140,14 +140,19 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                     //write back to data
                     data.editReminderDate(entry.getId(), date);
 
-                    //also set focus to false in data
-                    data.setFocus(entry.getId(),false);
+                    //only remove task from FOCUS, if date is in the future (a scenario where one
+                    //might change the date to the past is recurring tasks -> in this scenario
+                    //the task should remain in FOCUS)
+                    if (date.compareTo(LocalDate.now())>0) {
+                        //also set focus to false in data
+                        data.setFocus(entry.getId(), false);
 
-                    //remove from adapter
-                    entries.remove(position);
+                        //remove from adapter
+                        entries.remove(position);
 
-                    //notify adapter
-                    notifyDataSetChanged();
+                        //notify adapter
+                        notifyDataSetChanged();
+                    }
 
                 }, entryYear, entryMonth, entryDay);
 

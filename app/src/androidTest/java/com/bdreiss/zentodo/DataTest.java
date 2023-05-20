@@ -2,7 +2,6 @@ package com.bdreiss.zentodo;
 
 import android.content.Context;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.bdreiss.zentodo.dataManipulation.Data;
@@ -12,12 +11,10 @@ import com.bdreiss.zentodo.dataManipulation.database.DbHelperV1;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-@RunWith(AndroidJUnit4.class)
 public class DataTest {
 
     private static Context appContext;
