@@ -97,11 +97,11 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
                 doNowAdapter.notifyDataSetChanged();
                 doNowAdapter.itemCountChanged();
 
-                if (entry.getReminderDate().compareTo(LocalDate.now())> 0){
+                if (entry.getReminderDate() != null && entry.getReminderDate().compareTo(LocalDate.now())> 0){
                     doLaterAdapter.entries.add(entry);
                     doLaterAdapter.notifyDataSetChanged();
                     doLaterAdapter.itemCountChanged();
-                } else if (entry.getReminderDate() == null && entry.getList() != null){
+                } if (entry.getReminderDate() == null && entry.getList() != null){
                     moveToListAdapter.entries.add(entry);
                     moveToListAdapter.notifyDataSetChanged();
                     moveToListAdapter.itemCountChanged();
