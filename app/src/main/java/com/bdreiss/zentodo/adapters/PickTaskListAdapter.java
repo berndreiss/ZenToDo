@@ -75,10 +75,10 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
         holder.checkBox.setChecked(checkboxTicked);
 
+        //listener for opening the menu
         holder.menu.setOnClickListener(v -> {
             //setting alternative row layout visible and active, everything else disabled
             setAlt(holder);
-
             //setting delete drawable VISIBLE
             holder.delete.setVisibility(View.VISIBLE);
 
@@ -86,26 +86,37 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
             holder.focus.setVisibility(View.GONE);
         });
 
-        //on checkBox tick if task is
+        //on checkBox tick
         holder.checkBox.setOnClickListener(v ->{
 
             //get current entry
             Entry entry = entries.get(position);
 
+            //if the entry is in DO NOW, remove it and check in which adapter it should go:
+            // (1) -> has a date and date is > today -> doLaterAdapter
+            // (2) -> has no date, but a list -> moveToListAdapter
+            // (3) -> else move back to pickAdapter
+
+            //if it is not in DO NOW -> move it to doNowAdapter
             if (doNowAdapter.entries.contains(entry)){
                 doNowAdapter.entries.remove(entry);
                 doNowAdapter.notifyDataSetChanged();
                 doNowAdapter.itemCountChanged();
 
+                //(1)
                 if (entry.getReminderDate() != null && entry.getReminderDate().compareTo(LocalDate.now())> 0){
                     doLaterAdapter.entries.add(entry);
                     doLaterAdapter.notifyDataSetChanged();
                     doLaterAdapter.itemCountChanged();
-                } if (entry.getReminderDate() == null && entry.getList() != null){
+                } else
+                //(2)
+                if (entry.getReminderDate() == null && entry.getList() != null){
                     moveToListAdapter.entries.add(entry);
                     moveToListAdapter.notifyDataSetChanged();
                     moveToListAdapter.itemCountChanged();
-                } else{
+                }
+                //(3)
+                else{
                     pickAdapter.entries.add(entry);
                     pickAdapter.notifyDataSetChanged();
                     pickAdapter.itemCountChanged();
@@ -113,7 +124,9 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
 
 
-            } else{
+            }
+            //move item to doNowAdapter
+            else{
                 doNowAdapter.entries.add(entry);
                 doNowAdapter.notifyDataSetChanged();
                 doNowAdapter.itemCountChanged();
@@ -125,6 +138,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
         });
 
+        //the focus button is disabled in this view
         holder.focus.setOnClickListener(c -> {});
 
         holder.delete.setOnClickListener(v ->{
