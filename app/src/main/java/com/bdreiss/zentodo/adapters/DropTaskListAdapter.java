@@ -74,10 +74,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
             public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
                 DatePickerDialog datePickerDialog;
                 datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
-                    LocalDate date = LocalDate.of(year,month,day);
-
-                    //for some strange reason the month is returned -1 in the DatePickerDialog
-                    date = date.plusMonths(1);
+                    LocalDate date = LocalDate.of(year,month + 1,day);
 
                     data.editReminderDate(entry.getId(), date);//Write back data
                     data.setDropped(entry.getId(), false);

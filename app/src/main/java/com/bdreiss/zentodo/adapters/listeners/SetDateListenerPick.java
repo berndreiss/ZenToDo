@@ -34,10 +34,7 @@ public class SetDateListenerPick extends SetDateListener{
         //initialize DatePickerDialog
         datePickerDialog= new DatePickerDialog(adapter.context, (view, year, month, day) -> {
 
-            LocalDate date = LocalDate.of(year, month, day);
-
-            date = date.plusMonths(1);
-
+            LocalDate date = LocalDate.of(year, month + 1, day);
 
             Entry e = adapter.entries.get(position);
             //Write back data

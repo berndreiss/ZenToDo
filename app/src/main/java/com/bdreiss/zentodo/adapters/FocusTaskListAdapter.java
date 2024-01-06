@@ -132,10 +132,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
                 datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
 
-                    LocalDate date = LocalDate.of(year, month,day);
-
-                    //for some strange reason the month is returned -1 in the DatePickerDialog
-                    date = date.plusMonths(1);
+                    LocalDate date = LocalDate.of(year, month + 1,day);
 
                     //write back to data
                     data.editReminderDate(entry.getId(), date);

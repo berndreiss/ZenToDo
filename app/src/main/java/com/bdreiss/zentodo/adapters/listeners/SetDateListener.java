@@ -2,6 +2,7 @@ package com.bdreiss.zentodo.adapters.listeners;
 
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.view.View;
 
 import com.bdreiss.zentodo.R;
@@ -60,6 +61,8 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
 
         //initialize DatePickerDialog
         datePickerDialog= new DatePickerDialog(adapter.context, (view, year, month, day) -> {
+
+            Log.d("DATELOG", String.valueOf(month));
 
             LocalDate date = LocalDate.of(year, month, day);
 
