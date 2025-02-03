@@ -4,9 +4,9 @@ import android.content.Context;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.bdreiss.zentodo.dataManipulation.Data;
-import com.bdreiss.zentodo.dataManipulation.Entry;
-import com.bdreiss.zentodo.dataManipulation.database.DbHelperV1;
+import net.berndreiss.zentodo.dataManipulation.Data;
+import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.dataManipulation.database.DbHelperV1;
 
 import org.junit.After;
 import org.junit.Before;

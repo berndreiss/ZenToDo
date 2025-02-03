@@ -2,7 +2,7 @@ package com.bdreiss.zentodo;
 
 import android.content.Context;
 
-import com.bdreiss.zentodo.dataManipulation.Data;
+import net.berndreiss.zentodo.dataManipulation.Data;
 
 public class TestClass{
 

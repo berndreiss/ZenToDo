@@ -5,11 +5,11 @@ import android.content.Context;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.bdreiss.zentodo.dataManipulation.Entry;
-import com.bdreiss.zentodo.dataManipulation.database.DbHelperV1;
-import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_ENTRIES_V1;
-import com.bdreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_LISTS_V1;
-import com.bdreiss.zentodo.dataManipulation.database.valuesV1.TABLES_V1;
+import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.dataManipulation.database.DbHelperV1;
+import net.berndreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_ENTRIES_V1;
+import net.berndreiss.zentodo.dataManipulation.database.valuesV1.COLUMNS_LISTS_V1;
+import net.berndreiss.zentodo.dataManipulation.database.valuesV1.TABLES_V1;
 
 import org.junit.After;
 import org.junit.BeforeClass;

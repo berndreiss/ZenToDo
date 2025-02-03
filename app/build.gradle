@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 35
 
     defaultConfig {
-        applicationId "com.bdreiss.zentodo"
+        applicationId "net.berndreiss.zentodo"
         minSdk 26
-        targetSdk 33
+        targetSdk 35
         versionCode 1
         versionName "1.0"
 
@@ -28,22 +28,23 @@ android {
     buildFeatures {
         viewBinding true
     }
+    namespace 'net.berndreiss.zentodo'
 }
 
 dependencies {
 
-    implementation 'androidx.appcompat:appcompat:1.6.0'
-    implementation 'com.google.android.material:material:1.8.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.navigation:navigation-fragment:2.5.3'
-    implementation 'androidx.navigation:navigation-ui:2.5.3'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'androidx.test.espresso:espresso-contrib:3.5.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+    implementation 'androidx.navigation:navigation-fragment:2.8.6'
+    implementation 'androidx.navigation:navigation-ui:2.8.6'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation 'androidx.test.espresso:espresso-contrib:3.6.1'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-contrib:3.0.2'
-    implementation 'com.github.QuadFlask:colorpicker:0.0.15'
-    androidTestImplementation 'androidx.test:runner:1.5.2'
-    androidTestImplementation 'androidx.test:rules:1.5.0'
+    implementation 'com.github.QuadFlask:colorpicker:0.0.13'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
 }

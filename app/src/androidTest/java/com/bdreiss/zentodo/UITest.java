@@ -39,8 +39,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 
-import com.bdreiss.zentodo.adapters.DropTaskListAdapter;
-import com.bdreiss.zentodo.dataManipulation.Data;
+import net.berndreiss.zentodo.MainActivity;
+import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
+import net.berndreiss.zentodo.dataManipulation.Data;
 
 import java.io.FileWriter;
 import java.io.IOException;
