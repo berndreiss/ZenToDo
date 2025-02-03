@@ -30,6 +30,7 @@ import net.berndreiss.zentodo.dataManipulation.Data;
 import net.berndreiss.zentodo.dataManipulation.Entry;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class FocusTaskListAdapter extends TaskListAdapter {
 
@@ -88,7 +89,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             //remove from adapter and notify
             entries.remove(position);
 
-            if (entries.size()==0)
+            if (entries.isEmpty())
                 showImage();
 
             notifyDataSetChanged();
@@ -140,7 +141,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                     //only remove task from FOCUS, if date is in the future (a scenario where one
                     //might change the date to the past is recurring tasks -> in this scenario
                     //the task should remain in FOCUS)
-                    if (date.compareTo(LocalDate.now())>0) {
+                    if (date.isAfter(LocalDate.now())) {
                         //also set focus to false in data
                         data.setFocus(entry.getId(), false);
 
@@ -180,7 +181,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
     private void showImage() {
         Dialog builder = new Dialog(context);
         builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        builder.getWindow().setBackgroundDrawable(
+        Objects.requireNonNull(builder.getWindow()).setBackgroundDrawable(
                 new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
         builder.setOnDismissListener(dialogInterface -> {

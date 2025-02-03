@@ -6,7 +6,7 @@ public enum TABLES_V1 {
     TABLE_ENTRIES("entries"),
     TABLE_LISTS("lists");
 
-    private String name;
+    private final String name;
 
     TABLES_V1(String name){
         this.name = name;

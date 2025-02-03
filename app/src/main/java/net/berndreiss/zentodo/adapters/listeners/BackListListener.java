@@ -29,7 +29,7 @@ public class BackListListener extends BasicListener implements View.OnClickListe
         String list = holder.autoCompleteList.getText().toString();
 
         //set to no list if AutoComplete is empty
-        if (list.trim().isEmpty() || list.equals("")) {
+        if (list.trim().isEmpty() || list.isEmpty()) {
             //reset to no list
             adapter.entries.get(position).setListPosition(adapter.data.editList(id, null));
             adapter.entries.get(position).setList(null);

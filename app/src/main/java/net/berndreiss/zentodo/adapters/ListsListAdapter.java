@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -139,9 +140,10 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     }
 
     //get View for ListView
+    @NonNull
     @SuppressLint({"InflateParams", "NotifyDataSetChanged"})
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 
         //holder for Views
         final ViewHolder holder;

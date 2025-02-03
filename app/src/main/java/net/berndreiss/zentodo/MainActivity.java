@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
         pickButton.setOnClickListener(view -> {
 
             //Continue if all tasks have been categorized, show hint otherwise
-            if (pickAdapter.entries.size() != 0){
+            if (!pickAdapter.entries.isEmpty()){
                 Helper.showPickHelper(this);
             }
             else {

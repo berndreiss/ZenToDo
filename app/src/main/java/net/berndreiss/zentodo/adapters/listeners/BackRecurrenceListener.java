@@ -36,7 +36,7 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
         int intervalInt;
 
         //if editText is empty number is set to 0, assign content otherwise
-        if (interval.equals("")){
+        if (interval.isEmpty()){
             intervalInt = 0;
         } else {
             intervalInt = Integer.parseInt(interval);

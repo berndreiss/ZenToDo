@@ -13,7 +13,7 @@ public enum COLUMNS_ENTRIES_V1 {
     RECURRENCE_COL("recurrence"),
     POSITION_COL("position");
 
-    private String name;
+    private final String name;
 
     COLUMNS_ENTRIES_V1(String name){
         this.name = name;

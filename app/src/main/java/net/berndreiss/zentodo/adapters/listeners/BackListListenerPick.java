@@ -33,7 +33,7 @@ public class BackListListenerPick extends BackListListener{
         Entry e = adapter.entries.get(position);
 
         //set to no list if AutoComplete is empty
-        if (list.trim().isEmpty() || list.equals("")) {
+        if (list.trim().isEmpty() || list.isEmpty()) {
             //reset to no list
             e.setListPosition(adapter.data.editList(id, null));
             e.setList(null);
