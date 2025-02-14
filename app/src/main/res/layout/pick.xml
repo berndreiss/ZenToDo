@@ -17,7 +17,8 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="40">
+            android:layout_weight="40"
+            android:scrollbars="none">
 
         <LinearLayout
         android:id="@+id/layout_pick_lists"
