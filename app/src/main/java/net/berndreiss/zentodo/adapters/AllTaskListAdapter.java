@@ -11,15 +11,15 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import net.berndreiss.zentodo.dataManipulation.Data;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class AllTaskListAdapter extends TaskListAdapter{
 
-    AllTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
-        super(context,data,entries);
+    AllTaskListAdapter(Context context, List<Entry> entries){
+        super(context, entries);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -33,14 +33,8 @@ public class AllTaskListAdapter extends TaskListAdapter{
             //get entry
             Entry entry = entries.get(position);
 
-            //get id
-            int id = entry.getId();//get ID
-
             //remove from data
-            data.remove(id);
-
-            //remove from adapter
-            entries.remove(position);
+            DataManager.remove(context, entries, entry);
 
             //notify adapter
             notifyDataSetChanged();

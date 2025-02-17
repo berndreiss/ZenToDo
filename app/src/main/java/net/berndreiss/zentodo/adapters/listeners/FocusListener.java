@@ -3,7 +3,8 @@ package net.berndreiss.zentodo.adapters.listeners;
 import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
 
 /*
  *
@@ -27,15 +28,8 @@ public class FocusListener extends BasicListener implements View.OnClickListener
 
         boolean focused = entry.getFocus();
 
-        //get ID for manipulation in data
-        int id = entry.getId();//get id
-
-        //set dropped to false: as soon as item is in focus it is not dropped anymore
-        adapter.data.setDropped(id, false);
-
         //change state of focus in entry
-        adapter.data.setFocus(id, !focused);
-        entry.setFocus(!focused);
+        DataManager.setFocus(adapter.context, entry, !focused);
 
         //change color of Focus Button marking whether task is focused or not
         adapter.markSet(holder,entry);

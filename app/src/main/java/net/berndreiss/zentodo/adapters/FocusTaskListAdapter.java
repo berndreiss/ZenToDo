@@ -26,16 +26,16 @@ import androidx.core.content.ContextCompat;
 
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
-import net.berndreiss.zentodo.dataManipulation.Data;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 public class FocusTaskListAdapter extends TaskListAdapter {
 
-    public FocusTaskListAdapter(Context context, Data data){
-        super(context, data, data.getFocus());
+    public FocusTaskListAdapter(Context context){
+        super(context, DataManager.getFocus(context));
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -46,7 +46,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
         if (entries.get(position).getList() != null){
 
-            String color = data.getListColor(entries.get(position).getList());
+            String color = DataManager.getListColor(context, entries.get(position).getList());
 
             holder.linearLayout.setBackgroundColor(Color.parseColor(color));
 
@@ -61,33 +61,26 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             //current entry
             Entry entry = entries.get(position);
 
-            //get ID for manipulation in data
-            int id = entry.getId();
-
             //see if item is recurring
             boolean recurring = entry.getRecurrence()!=null;
 
             //if recurring do not remove but set new reminder date, otherwise remove from data
             if (recurring) {
                 //calculate new reminder date and write to data and entries
-                entries.get(position).setReminderDate(data.setRecurring(id, LocalDate.now()));
+                DataManager.setRecurring(context, entry, LocalDate.now());
 
                 //reset focus in data and entries
-                data.setFocus(id,false);
-                entries.get(position).setFocus(false);
+                DataManager.setFocus(context, entry,false);
 
                 //reset dropped in data and entries
-                data.setDropped(id,false);
-                entries.get(position).setDropped(false);
+                DataManager.setDropped(context, entry,false);
+
+                entries.remove(position);
 
                 notifyItemChanged(position);
             } else {
-                data.remove(id);
+                DataManager.remove(context, entries, entry);
             }
-
-
-            //remove from adapter and notify
-            entries.remove(position);
 
             if (entries.isEmpty())
                 showImage();
@@ -105,18 +98,14 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             //get entry
             Entry entry = entries.get(position);
 
-            //get id
-            int id = entry.getId();
-
-
             if (entry.getRecurrence() != null)
-                data.addToRecurringButRemoved(id);
+                DataManager.addToRecurringButRemoved(context, entry.getId());
 
             if (entry.getReminderDate() == null)
-                data.editReminderDate(id, LocalDate.now());
+                DataManager.editReminderDate(context, entry, LocalDate.now());
 
             //write back change to data
-            data.setFocus(id, false);
+            DataManager.setFocus(context, entry, false);
 
             //remove from adapter
             entries.remove(position);
@@ -136,14 +125,14 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                     LocalDate date = LocalDate.of(year, month + 1,day);
 
                     //write back to data
-                    data.editReminderDate(entry.getId(), date);
+                    DataManager.editReminderDate(context, entry, date);
 
                     //only remove task from FOCUS, if date is in the future (a scenario where one
                     //might change the date to the past is recurring tasks -> in this scenario
                     //the task should remain in FOCUS)
                     if (date.isAfter(LocalDate.now())) {
                         //also set focus to false in data
-                        data.setFocus(entry.getId(), false);
+                        DataManager.setFocus(context, entry, false);
 
                         //remove from adapter
                         entries.remove(position);
@@ -157,8 +146,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                 datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
                     //set date when task is due to 0
-                    data.editReminderDate(entry.getId(),null);
-                    entries.get(position).setReminderDate(null);
+                    DataManager.editReminderDate(context, entry,null);
 
                     //change color of reminder date Button marking if Date is set
                     markSet(holder,entry);
@@ -205,7 +193,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
     public void reset(){
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
         entries.clear();
-        entries.addAll(data.getFocus());
+        entries.addAll(DataManager.getFocus(context));
         notifyDataSetChanged();
 
     }

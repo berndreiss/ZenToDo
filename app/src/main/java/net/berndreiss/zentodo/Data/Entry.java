@@ -1,4 +1,4 @@
-package net.berndreiss.zentodo.dataManipulation;
+package net.berndreiss.zentodo.Data;
 
 import java.time.LocalDate;
 
@@ -12,7 +12,7 @@ public class Entry{
     private Boolean focus;//true if task has been chosen today
     private Boolean dropped;//true if task has been dropped and not been used in brainstorm and pick
     private String list;//a list to which the task belongs to
-    private int listPosition;//position in according list
+    private Integer listPosition;//position in according list
     private LocalDate reminderDate;//a date, when the task is due -> "yyyyMMdd"
     private String recurrence;//consisting of a String in the form of "y/m/w/d0-90-9" where the
                               //two digit number defines the offset in years (y), months(m),
@@ -25,7 +25,9 @@ public class Entry{
         this.task=task;
         this.dropped = true;
         this.focus = false;
-        this.listPosition=-1;
+        this.listPosition=null;
+        this.reminderDate = null;
+        this.recurrence = null;
     }
 
     //the following functions simply return the different fields of the entry
@@ -45,7 +47,7 @@ public class Entry{
         return list;
     }
 
-    public int getListPosition(){return listPosition;}
+    public Integer getListPosition(){return listPosition;}
 
     public LocalDate getReminderDate(){
         return reminderDate;
@@ -56,27 +58,27 @@ public class Entry{
     }
 
     //The following functions are to update the different fields
-    public void setPosition(int position){this.position = position;}
+    void setPosition(int position){this.position = position;}
 
-    public void setTask(String task){
+    void setTask(String task){
         this.task=task;
     }
 
-    public void setFocus(Boolean focus){this.focus = focus;}
+    void setFocus(Boolean focus){this.focus = focus;}
 
-    public void setDropped(Boolean dropped){this.dropped = dropped;}
+    void setDropped(Boolean dropped){this.dropped = dropped;}
 
-    public void setList(String list){
+    void setList(String list){
         this.list=list;
     }
 
-    public void setListPosition(int listPosition){this.listPosition=listPosition;}
+    void setListPosition(Integer listPosition){this.listPosition=listPosition;}
 
-    public void setReminderDate(LocalDate reminderDate){
+    void setReminderDate(LocalDate reminderDate){
         this.reminderDate=reminderDate;
     }
 
-    public void setRecurrence(String recurrence){
+    void setRecurrence(String recurrence){
         this.recurrence=recurrence;
     }
 

@@ -5,7 +5,8 @@ import android.view.View;
 
 import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
 
 public class BackListListenerPick extends BackListListener{
 
@@ -24,40 +25,35 @@ public class BackListListenerPick extends BackListListener{
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onClick(View v){
-        //Get id of task
-        int id = adapter.entries.get(position).getId();
-
         //get new list name
         String list = holder.autoCompleteList.getText().toString();
 
-        Entry e = adapter.entries.get(position);
+        Entry entry = adapter.entries.get(position);
 
         //set to no list if AutoComplete is empty
         if (list.trim().isEmpty() || list.isEmpty()) {
             //reset to no list
-            e.setListPosition(adapter.data.editList(id, null));
-            e.setList(null);
+            DataManager.editList(adapter.context, adapter.entries, entry, null);
         } else {
             //write back otherwise
-            e.setListPosition(adapter.data.editList(id, list));
-            e.setList(list);
+            DataManager.editList(adapter.context, adapter.entries,  entry, list);
         }
 
-        if (e.getReminderDate()==null && !moveToListAdapter.entries.contains(e)){
+        if (entry.getReminderDate()==null && !moveToListAdapter.entries.contains(entry)){
 
-            moveToListAdapter.entries.add(e);
+            moveToListAdapter.entries.add(entry);
             moveToListAdapter.notifyDataSetChanged();
             moveToListAdapter.itemCountChanged();
-            adapter.entries.remove(e);
+            adapter.entries.remove(entry);
             adapter.notifyDataSetChanged();
             currentAdapter.itemCountChanged();
         }
 
-        if (e.getList() == null && moveToListAdapter.entries.contains(e)){
-            moveToListAdapter.entries.remove(e);
+        if (entry.getList() == null && moveToListAdapter.entries.contains(entry)){
+            moveToListAdapter.entries.remove(entry);
             moveToListAdapter.notifyDataSetChanged();
             moveToListAdapter.itemCountChanged();
-            pickAdapter.entries.add(e);
+            pickAdapter.entries.add(entry);
             pickAdapter.notifyDataSetChanged();
             pickAdapter.itemCountChanged();
         }

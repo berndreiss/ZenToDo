@@ -12,17 +12,20 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import net.berndreiss.zentodo.dataManipulation.Data;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class ListTaskListAdapter extends TaskListAdapter{
 
-    public ListTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
-        super(context, data, entries);
+    public ListTaskListAdapter(Context context, List<Entry> entries){
+        super(context, entries);
     }
+
+    public static String DEFAULT_COLOR = "#00ffffff";
 
 
     @SuppressLint("NotifyDataSetChanged")
@@ -36,14 +39,8 @@ public class ListTaskListAdapter extends TaskListAdapter{
             //get entry
             Entry entry = entries.get(position);
 
-            //get id
-            int id = entry.getId();//get ID
-
             //remove from data
-            data.remove(id);
-
-            //remove from adapter
-            entries.remove(position);
+            DataManager.remove(context, entries, entry);
 
             //notify adapter
             notifyDataSetChanged();
@@ -53,7 +50,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
         holder.backList.setOnClickListener(view161 -> {
 
             //get id of task
-            int id = entries.get(position).getId();
+            Entry entry = entries.get(position);
 
             //get name of new list
             String list = holder.autoCompleteList.getText().toString();
@@ -66,10 +63,10 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
                 //set to null if AutoComplete is empty, write back otherwise
                 if (list.trim().isEmpty())
-                    data.editList(id, null);
+                    DataManager.editList(context, entries, entry, null);
 
                 else
-                    data.editList(id, list);
+                    DataManager.editList(context, entries, entry, list);
 
                 //remove entry from adapter
                 entries.remove(position);
@@ -96,11 +93,11 @@ public class ListTaskListAdapter extends TaskListAdapter{
         //swap entries in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                data.swapList(entries.get(i).getId(),entries.get(i+1).getId());
+                DataManager.swapLists(context, entries, entries.get(i),entries.get(i+1));
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                data.swapList(entries.get(i).getId(),entries.get(i-1).getId());
+                DataManager.swapLists(context, entries, entries.get(i),entries.get(i-1));
             }
         }
 

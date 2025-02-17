@@ -3,6 +3,8 @@ package net.berndreiss.zentodo.adapters.listeners;
 import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
 
 /*
  *
@@ -22,7 +24,7 @@ public class BackEditListener extends BasicListener implements View.OnClickListe
     @Override
     public void onClick(View v){
         //getting the id of task
-        int id = adapter.entries.get(position).getId();
+        Entry entry = adapter.entries.get(position);
 
         //get new Task from EditText
         String newTask = holder.editText.getText().toString();
@@ -31,8 +33,7 @@ public class BackEditListener extends BasicListener implements View.OnClickListe
         if (!newTask.isEmpty()) {
 
             //save new task description in data
-            adapter.data.setTask(id, newTask);
-            adapter.entries.get(position).setTask(newTask);
+            DataManager.setTask(adapter.context, entry, newTask);
 
             //notify adapter
             adapter.notifyItemChanged(position);

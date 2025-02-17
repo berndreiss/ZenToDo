@@ -44,7 +44,7 @@ import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperC
 import net.berndreiss.zentodo.adapters.FocusTaskListAdapter;
 import net.berndreiss.zentodo.adapters.ListsListAdapter;
 import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
-import net.berndreiss.zentodo.dataManipulation.Data;
+import net.berndreiss.zentodo.Data.DataManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -56,7 +56,7 @@ import android.text.InputFilter;
 import android.view.MotionEvent;
 import android.view.View;
 
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.Entry;
 import net.berndreiss.zentodo.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -68,12 +68,10 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
-    private static String DATABASE_NAME = "Data.db";
+    public static final String DATABASE_NAME = "Data.db";
+    public static final int DATABASE_VERSION = 1;
 
     private LinearLayout pick;//Layout to pick tasks that have been dropped and show them in focus
     private LinearLayout drop;//Layout to drop new tasks
@@ -88,9 +86,6 @@ public class MainActivity extends AppCompatActivity {
 
     //floating action button on the bottom right corner
     private FloatingActionButton fab;
-
-    //Data-object that stores all tasks, reminders, lists etc. (See dataManipulation.Data and dataManipulation.Entry.java)
-    private Data data;
 
     //The adapters fill the RecyclerViews of layouts above and are all derived from TaskListAdapter
     //for more information on the implementation see the according java files in adapters
@@ -115,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         //we can create a testing database without affecting the user data. I got a feeling that this
         //is not best practice but haven't had the time to do my homework. If you read this and
         //have a better way of doing this, please let me know: bd_reiss@yahoo.de
+        /*
         try {
             BufferedReader br = new BufferedReader(new FileReader(getFilesDir() + "/" + getResources().getString(R.string.mode_file)));
             if (br.readLine().equals("1"))
@@ -125,9 +121,9 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+         */
 
-        //Initialize Data-object and load data
-        data = new Data(this, DATABASE_NAME);
+
 
         //Assign views to variables
         drop = findViewById(R.id.layout_drop);
@@ -183,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
     public void initializePick() {
 
         //initialize adapter for RecyclerView with all tasks that have been dropped, have been in Focus or are due today
-        pickAdapter = new PickTaskListAdapter(this, data, false){
+        pickAdapter = new PickTaskListAdapter(this, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick).getLayoutParams();
@@ -193,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         //initialize empty adapters for the other RecyclerViews
-        doNowAdapter = new PickTaskListAdapter(this, data, true){
+        doNowAdapter = new PickTaskListAdapter(this, true){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doNow).getLayoutParams();
@@ -202,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        doLaterAdapter = new PickTaskListAdapter(this, data, false){
+        doLaterAdapter = new PickTaskListAdapter(this, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doLater).getLayoutParams();
@@ -211,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        moveToListAdapter = new PickTaskListAdapter(this, data, false){
+        moveToListAdapter = new PickTaskListAdapter(this, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_list).getLayoutParams();
@@ -243,17 +239,17 @@ public class MainActivity extends AppCompatActivity {
 
                 //if checked reset dropped and focus attributes of all task in tasksToDoNow
                 for (Entry e : doNowAdapter.entries) {
-                    data.setFocus(e.getId(), true);
-                    data.setDropped(e.getId(), false);
+                    DataManager.setFocus(this, e, true);
+                    DataManager.setDropped(this, e, false);
                 }
 
                 //set focus to false for all tasks in tasksToDoLater
                 for (Entry e : doLaterAdapter.entries)
-                        data.setFocus(e.getId(), false);
+                        DataManager.setFocus(this, e, false);
 
                 //set focus to false for all tasks in tasksToMoveToList
                 for (Entry e : moveToListAdapter.entries)
-                        data.setFocus(e.getId(), false);
+                        DataManager.setFocus(this, e, false);
 
                 //show Focus layout
                 showFocus();
@@ -305,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
     public void initializeDrop(){
 
         //initialize adapter for ListView that shows tasks dropped
-        dropAdapter = new DropTaskListAdapter(this, data);
+        dropAdapter = new DropTaskListAdapter(this);
 
         //assign ListView
         RecyclerView listView = findViewById(R.id.list_view_drop);
@@ -405,7 +401,7 @@ public class MainActivity extends AppCompatActivity {
     public void initializeFocus(){
 
         //initialize the adapter for the ListView to show the tasks to focus on
-        focusAdapter = new FocusTaskListAdapter(this,data);
+        focusAdapter = new FocusTaskListAdapter(this);
 
         //assign RecyclerView
         RecyclerView listView = findViewById(R.id.list_view_focus);
@@ -485,7 +481,7 @@ public class MainActivity extends AppCompatActivity {
         TextView headerTextView = findViewById(R.id.text_view_lists_header);
         Button headerButton = findViewById(R.id.button_header);
 
-        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, headerLayout, headerTextView, headerButton, data);
+        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, headerLayout, headerTextView, headerButton);
 
         //set adapter
         listView.setAdapter(listsListAdapter);

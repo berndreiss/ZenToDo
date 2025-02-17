@@ -5,7 +5,7 @@ package net.berndreiss.zentodo.adapters;
 *       The PickTaskListAdapter actually consists of four distinct adapters:
 *
 *       pickAdapter: contains all tasks that are due today.
-*       doNowAdapter: contains all tasks ticked in any of the three other adapters (and therefore tasks that haven been chosen for todays FOCUS)
+*       doNowAdapter: contains all tasks ticked in any of the three other adapters (and therefore tasks that haven been chosen for today's FOCUS)
 *       doLaterAdapter: contains all tasks for which a reminder date has been set in any of the other adapters
 *       moveToListAdapter: contains all tasks for which a list has been set, but that don't have a reminder date
 *
@@ -27,8 +27,8 @@ import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.listeners.BackListListenerPick;
 import net.berndreiss.zentodo.adapters.listeners.PickListener;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListenerPick;
-import net.berndreiss.zentodo.dataManipulation.Data;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -41,8 +41,8 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
     private PickTaskListAdapter moveToListAdapter;
     private final boolean checkboxTicked;//Tasks that are in the doNowAdapter are ticked
 
-    public PickTaskListAdapter(Context context, Data data, boolean checkboxTicked){
-        super(context, data, new ArrayList<>());
+    public PickTaskListAdapter(Context context, boolean checkboxTicked){
+        super(context, new ArrayList<>());
 
         this.checkboxTicked = checkboxTicked;
 
@@ -145,14 +145,8 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
             //get current entry
             Entry entry = entries.get(position);
 
-            //get ID for manipulation in data
-            int id = entry.getId();//get id
-
             //remove entry from data
-            data.remove(id);
-
-            //remove entry from adapter
-            entries.remove(position);
+            DataManager.remove(context, entries, entry);
 
             itemCountChanged();
 
@@ -167,7 +161,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
         if (entries.get(position).getList() != null){
 
-            String color = data.getListColor(entries.get(position).getList());
+            String color = DataManager.getListColor(context, entries.get(position).getList());
             //color = color.substring(2,8);
 
             holder.linearLayout.setBackgroundColor(Color.parseColor( color));
@@ -186,7 +180,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
         //clear ArrayList for Pick, add current tasks from data and notify adapter (in case they have been altered in another layout)
         entries.clear();
-        entries.addAll(data.getTasksToPick());
+        entries.addAll(DataManager.getTasksToPick(context));
 
         //Reset and Update Adapters to reflect changes
         //Also update itemCountChanged, so that RecyclerViews get resized properly

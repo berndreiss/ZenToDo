@@ -44,11 +44,12 @@ import net.berndreiss.zentodo.adapters.listeners.FocusListener;
 import net.berndreiss.zentodo.adapters.listeners.RecurrenceListener;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.ItemTouchHelperAdapter;
-import net.berndreiss.zentodo.dataManipulation.Data;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.Data.SQLiteHelper;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHolder> implements ItemTouchHelperAdapter {
 
@@ -120,14 +121,11 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         }
     }
 
-    public ArrayList<Entry> entries;//ArrayList that holds task shown in RecyclerView
+    public List<Entry> entries;//ArrayList that holds task shown in RecyclerView
 
     public Context context;
 
-    public Data data;
-
-    public TaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
-        this.data = data;
+    public TaskListAdapter(Context context, List<Entry> entries){
         this.entries = entries;
         this.context = context;
 
@@ -218,8 +216,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
             //set list row view
             setList(holder);
 
+            SQLiteHelper db = new SQLiteHelper(context);
             //array of names of all lists in task (as singletons)
-            String[] array = data.returnListsAsArray();
+            List<String> array = db.getLists();
+            db.close();
 
             //initialize adapter with all existing list options
             ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, array);
@@ -344,11 +344,11 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         //swap entries in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                data.swap(entries.get(i).getId(),entries.get(i+1).getId());
+                DataManager.swap(context, entries, entries.get(i),entries.get(i+1));
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                data.swap(entries.get(i).getId(),entries.get(i-1).getId());
+                DataManager.swap(context, entries, entries.get(i),entries.get(i-1));
             }
         }
 

@@ -3,6 +3,8 @@ package net.berndreiss.zentodo.adapters.listeners;
 import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
 
 /*
  *
@@ -23,7 +25,7 @@ public class BackListListener extends BasicListener implements View.OnClickListe
     @Override
     public void onClick(View v){
         //Get id of task
-        int id = adapter.entries.get(position).getId();
+        Entry entry = adapter.entries.get(position);
 
         //get new list name
         String list = holder.autoCompleteList.getText().toString();
@@ -31,12 +33,10 @@ public class BackListListener extends BasicListener implements View.OnClickListe
         //set to no list if AutoComplete is empty
         if (list.trim().isEmpty() || list.isEmpty()) {
             //reset to no list
-            adapter.entries.get(position).setListPosition(adapter.data.editList(id, null));
-            adapter.entries.get(position).setList(null);
+            DataManager.editList(adapter.context, adapter.entries, entry, null);
         } else {
             //write back otherwise
-            adapter.entries.get(position).setListPosition(adapter.data.editList(id, list));
-            adapter.entries.get(position).setList(list);
+            DataManager.editList(adapter.context, adapter.entries, entry, list);
         }
 
         //change Color of setList Button to mark if list is set

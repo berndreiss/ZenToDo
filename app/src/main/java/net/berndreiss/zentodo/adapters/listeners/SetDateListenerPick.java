@@ -7,7 +7,8 @@ import android.content.DialogInterface;
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
 
 import java.time.LocalDate;
 
@@ -38,8 +39,7 @@ public class SetDateListenerPick extends SetDateListener{
 
             Entry e = adapter.entries.get(position);
             //Write back data
-            adapter.data.editReminderDate(entry.getId(), date);
-            e.setReminderDate(date);
+            DataManager.editReminderDate(adapter.context, entry, date);
 
             doLaterAdapter.entries.add(e);
             doLaterAdapter.notifyDataSetChanged();
@@ -53,8 +53,7 @@ public class SetDateListenerPick extends SetDateListener{
         datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
             //set date when task is due to null
-            adapter.data.editReminderDate(entry.getId(),null);
-            adapter.entries.get(position).setReminderDate(null);
+            DataManager.editReminderDate(adapter.context, entry,null);
 
             //change color of reminder date Button marking if Date is set
             adapter.markSet(holder,entry);

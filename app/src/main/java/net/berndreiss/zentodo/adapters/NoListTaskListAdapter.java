@@ -10,15 +10,15 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import net.berndreiss.zentodo.dataManipulation.Data;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class NoListTaskListAdapter extends AllTaskListAdapter{
 
-    NoListTaskListAdapter(Context context, Data data, ArrayList<Entry> entries){
-        super(context,data,entries);
+    NoListTaskListAdapter(Context context, List<Entry> entries){
+        super(context, entries);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -30,7 +30,7 @@ public class NoListTaskListAdapter extends AllTaskListAdapter{
         holder.backList.setOnClickListener(v -> {
 
             //get id of task
-            int id = entries.get(position).getId();
+            Entry entry = entries.get(position);
 
             //get name of new list
             String list = holder.autoCompleteList.getText().toString();
@@ -39,7 +39,7 @@ public class NoListTaskListAdapter extends AllTaskListAdapter{
             if (!list.isEmpty()) {
 
                 //write back new list
-                data.editList(id, list);
+                DataManager.editList(context, entries, entry, list);
 
                 //remove entry from adapter
                 entries.remove(position);

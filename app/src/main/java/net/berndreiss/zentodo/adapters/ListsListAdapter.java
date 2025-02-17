@@ -9,7 +9,6 @@ package net.berndreiss.zentodo.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,12 +26,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
-import net.berndreiss.zentodo.dataManipulation.Data;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.Data.SQLiteHelper;
+
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class ListsListAdapter extends ArrayAdapter<String> {
@@ -40,12 +42,11 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private final Context context;
     private final ListView listView;//ListView to show lists (recyclerView is disabled before choosing)
     private final RecyclerView recyclerView;//RecyclerView for showing tasks of list chosen (listView gets disabled)
-    private final ArrayList<String> lists;//Dynamically generated Array of all lists in data
-    private final Data data;//Database
+    private final List<String> lists;//Dynamically generated Array of all lists in data
     private final Header header;//header of ListView. setVisibility=GONE by default and =VISIBLE when recyclerView is shown
     private String headerColor;
     private final String standardColor = "#35ff0000";
-    private final ArrayList<Entry> listTasks = new ArrayList<>();//ArrayList that serves as a container for tasks that are in the list that has been chosen
+    private final List<Entry> listTasks = new ArrayList<>();//ArrayList that serves as a container for tasks that are in the list that has been chosen
 
     ListTaskListAdapter listsTaskListAdapter;//adapter for items in lists (items can be moved and get removed when list of task is changed)
     AllTaskListAdapter allTasksAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed)
@@ -105,13 +106,13 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                             this.layout.setBackgroundColor(Color.parseColor(color));
 
                         }
-                        data.editListColor(headerText.getText().toString(), color);
+                        DataManager.editListColor(context, headerText.getText().toString(), color);
                         listsTaskListAdapter.notifyDataSetChanged();
 
                     })
                     .setNegativeButton("no color", (dialog, which) -> {
                         this.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
-                        data.editListColor(headerText.getText().toString(), "#00ffffff");
+                        DataManager.editListColor(context, headerText.getText().toString(), ListTaskListAdapter.DEFAULT_COLOR);
                         listsTaskListAdapter.notifyDataSetChanged();
 
                     })
@@ -122,21 +123,17 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
     }
 
-    public ListsListAdapter(Context context, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton, Data data){
-        super(context, R.layout.lists_row,data.getLists());
+    public ListsListAdapter(Context context, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton){
+        super(context, R.layout.lists_row, DataManager.getLists(context));
         this.context=context;
-        this.data = data;
-        this.lists = data.getLists();
+        this.lists = DataManager.getLists(context);
         this.listView = listView;
         this.recyclerView = recyclerView;
         recyclerView.setVisibility(View.GONE);
 
-
         header = new Header(context, headerLayout, headerTextView, headerButton);
 
         this.headerColor = standardColor;
-        int color = header.headerText.getCurrentTextColor();
-        Log.d("COLOR",String.format("#%06X", (0xFFFFFF & color)));
     }
 
     //get View for ListView
@@ -189,7 +186,9 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //clear ArrayList for list, add all tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
-                listTasks.addAll(data.getEntriesOrderedByDate());
+                try (SQLiteHelper db = new SQLiteHelper(context)) {
+                    listTasks.addAll(db.getEntriesOrderedByDate());
+                }
 
                 //set header text
                 header.headerText.setText(context.getResources().getString(R.string.allTasks));
@@ -204,7 +203,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 if (allTasksAdapter == null) {
 
                     //initialize and set adapter
-                    allTasksAdapter = new AllTaskListAdapter(context, data, listTasks);
+                    allTasksAdapter = new AllTaskListAdapter(context, listTasks);
                     recyclerView.setAdapter(allTasksAdapter);//set adapter
 
                 } else{
@@ -217,7 +216,10 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //clear ArrayList for list, add tasks without a list from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
-                listTasks.addAll(data.getNoList());
+
+                try (SQLiteHelper db = new SQLiteHelper(context)) {
+                    listTasks.addAll(db.getNoList());
+                }
 
                 //set header text
                 header.headerText.setText(context.getResources().getString(R.string.noList));
@@ -232,7 +234,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 if (noListAdapter == null) {
 
                     //initialize and set adapter
-                    noListAdapter = new NoListTaskListAdapter(context, data, listTasks);
+                    noListAdapter = new NoListTaskListAdapter(context, listTasks);
                     recyclerView.setAdapter(noListAdapter);
 
                 }else{
@@ -249,8 +251,11 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //set header text
                 header.headerText.setText(list);
 
+                String color = DataManager.getListColor(context, list);
+                if (color == null)
+                    color = ListTaskListAdapter.DEFAULT_COLOR;
                 //set color of header to default if color is white, set it to color otherwise
-                if (data.getListColor(list).startsWith("ffffff", 3)) {
+                if (color.startsWith("ffffff", 3)) {
 
                     header.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
 
@@ -258,7 +263,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 } else{
 
-                    String color = data.getListColor(list);
+                    color = DataManager.getListColor(context, list);
 
                     header.layout.setBackgroundColor(Color.parseColor(color));
 
@@ -268,12 +273,14 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //clear ArrayList for list, add current tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
-                listTasks.addAll(data.getList(list));
+                try (SQLiteHelper db = new SQLiteHelper(context)) {
+                    listTasks.addAll(db.loadList(list));
+                }
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if(listsTaskListAdapter==null){
                     //initialize and set adapter
-                    listsTaskListAdapter = new ListTaskListAdapter(context, data, listTasks);
+                    listsTaskListAdapter = new ListTaskListAdapter(context, listTasks);
                     recyclerView.setAdapter(listsTaskListAdapter);
 
                     //allows items to be moved and reordered in RecyclerView
@@ -310,7 +317,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
         //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
         lists.clear();
-        lists.addAll(data.getLists());
+        lists.addAll(DataManager.getLists(context));
         notifyDataSetChanged();
 
     }

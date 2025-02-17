@@ -12,15 +12,16 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
-import net.berndreiss.zentodo.dataManipulation.Data;
-import net.berndreiss.zentodo.dataManipulation.Entry;
+import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.Data.SQLiteHelper;
 
 import java.time.LocalDate;
 
 public class DropTaskListAdapter extends TaskListAdapter{
 
-    public DropTaskListAdapter(Context context, Data data){
-        super(context, data, data.getDropped());
+    public DropTaskListAdapter(Context context){
+        super(context, DataManager.getDropped(context));
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -31,11 +32,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
         //Remove task from View if task is being sent to Focus
         holder.focus.setOnClickListener(v -> {
             Entry entry = entries.get(position);
-            int id = entry.getId();//get id
-            data.setFocus(id, !entry.getFocus());//change state of focus in entry
-
-            //change dropped in entry to false
-            data.setDropped(id, false);//change to false
+            DataManager.setFocus(context, entry, !entry.getFocus());//change state of focus in entry
             entries.remove(position);
             notifyDataSetChanged();
         });
@@ -43,7 +40,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
         //Remove task from View if list is set
         holder.backList.setOnClickListener(view161 -> {
             //Get id of task
-            int id = entries.get(position).getId();
+            Entry entry = entries.get(position);
 
             //get new list name
             String list = holder.autoCompleteList.getText().toString();
@@ -52,12 +49,8 @@ public class DropTaskListAdapter extends TaskListAdapter{
             if (!list.trim().isEmpty()) {
 
                 //write back
-                entries.get(position).setListPosition(data.editList(id, list));
-
-                data.setDropped(id, false);//set dropped to false
-
+                DataManager.editList(context, entries, entry, list);
                 entries.remove(position);
-
                 notifyDataSetChanged();
 
             }
@@ -76,8 +69,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
                 datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
                     LocalDate date = LocalDate.of(year,month + 1,day);
 
-                    data.editReminderDate(entry.getId(), date);//Write back data
-                    data.setDropped(entry.getId(), false);
+                    DataManager.editReminderDate(context, entry, date);//Write back data
                     entries.remove(position);
                     notifyDataSetChanged();
 
@@ -91,8 +83,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
 
     @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
     public void add(String task){
-        Entry entry = data.add(task);
-        entries.add(entry);
+        DataManager.add(context, entries, task);
         notifyDataSetChanged();
 
     }
@@ -101,7 +92,9 @@ public class DropTaskListAdapter extends TaskListAdapter{
     public void reset(){
         //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
         entries.clear();
-        entries.addAll(data.getDropped());
+        try (SQLiteHelper db = new SQLiteHelper(context)) {
+            entries.addAll(db.loadDropped());
+        }
         notifyDataSetChanged();
 
     }
