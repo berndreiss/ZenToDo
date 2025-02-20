@@ -75,8 +75,12 @@ public class DataManager {
             //swap position in Database
             db.swapEntries(entry1, entry2.getPosition());
         }
+        //get positions of items
+        int pos1 = getPosition(entries, entry1.getId());
+        int pos2 = getPosition(entries, entry2.getId());
+
         //swap items in entries
-        Collections.swap(entries, entry1.getPosition(), entry2.getPosition());
+        Collections.swap(entries, pos1, pos2);
 
         //swap position in both Entries
         int posTemp = entry1.getPosition();

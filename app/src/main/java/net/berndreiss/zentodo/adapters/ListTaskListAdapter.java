@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 import net.berndreiss.zentodo.Data.DataManager;
 import net.berndreiss.zentodo.api.Entry;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -99,9 +98,6 @@ public class ListTaskListAdapter extends TaskListAdapter{
                 DataManager.swapLists(context, entries, entries.get(i),entries.get(i-1));
             }
         }
-
-        //swap items in entries
-        Collections.swap(entries, fromPosition, toPosition);
 
         //notify the adapter
         notifyItemMoved(fromPosition,toPosition);
