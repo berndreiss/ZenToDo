@@ -1,14 +1,5 @@
 package net.berndreiss.zentodo.adapters;
 
-/*
- *      Shows all tasks the user chose to focus on today.
- *      Tasks are usually chosen in PICK but can also be manually added via the FOCUS-button in the menu of a task.
- *      Recurring tasks are added automatically to FOCUS (see also MainActivity.java).
- *
- *      Extends TaskListAdapter but removes tasks when focus or date is changed.
- *
- */
-
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -27,11 +18,19 @@ import androidx.core.content.ContextCompat;
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ *      Shows all tasks the user chose to focus on today.
+ *      Tasks are usually chosen in PICK but can also be manually added via the FOCUS-button in the menu of a task.
+ *      Recurring tasks are added automatically to FOCUS (see also MainActivity.java).
+ * <p>
+ *      Extends TaskListAdapter but removes tasks when focus or date is changed.
+ *
+ */
 public class FocusTaskListAdapter extends TaskListAdapter {
 
     public FocusTaskListAdapter(Context context){
@@ -166,6 +165,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
     }
 
+    //TODO COMMENT
     private void showImage() {
         Dialog builder = new Dialog(context);
         builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -190,6 +190,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
     }
 
     @SuppressLint("NotifyDataSetChanged")
+    @Override
     public void reset(){
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
         entries.clear();
@@ -197,6 +198,4 @@ public class FocusTaskListAdapter extends TaskListAdapter {
         notifyDataSetChanged();
 
     }
-
-
 }

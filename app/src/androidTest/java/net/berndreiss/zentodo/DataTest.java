@@ -5,7 +5,7 @@ import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 import net.berndreiss.zentodo.Data.SQLiteHelper;
 
 import org.junit.Before;
@@ -14,7 +14,6 @@ import org.junit.Test;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

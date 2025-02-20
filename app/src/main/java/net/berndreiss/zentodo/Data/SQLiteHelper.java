@@ -1,17 +1,3 @@
-/*
-*
-*     Methods to interact with SQLite database:
-*
-*     public void addEntry(Entry entry) -> adds entry to database
-*     public void removeEntry(int id) -> removes entry from database by id
-*     public void updateEntry(String field, int id, String value) -> updates entry via id using String
-*     public void updateEntry(String field, int id, int value) -> update entry via id using Integer
-*     public ArrayList<Entry> loadEntries() -> returns all entries as ArrayList
-*     static boolean intToBool(int i) -> converts Integer to Boolean (false if 0, true otherwise)
-*     static int boolToInt(boolean b) -> converts Boolean to Integer (0 if false, 1 if true)
-*
-*/
-
 package net.berndreiss.zentodo.Data;
 
 import android.content.ContentValues;
@@ -20,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import net.berndreiss.zentodo.api.DatabaseClient;
+import net.berndreiss.zentodo.api.Entry;
+import net.berndreiss.zentodo.api.TaskList;
 import net.berndreiss.zentodo.MainActivity;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
 
@@ -40,7 +29,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-public class SQLiteHelper extends SQLiteOpenHelper implements Database{
+/**
+ * TODO DESCRIBE
+ */
+public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
 
     private final Context context;
 
@@ -94,9 +86,67 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
     }
 
+    private Entry getById(int id){
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE ID=?", new String[]{String.valueOf(id)});
+
+        List<Entry> entries = getList(cursor);
+
+        cursor.close();
+        db.close();
+
+        if (entries.isEmpty())
+            return null;
+
+        return entries.get(0);
+    }
+
+    @Override
+    public void post(List<Entry> entries){
+
+        //TODO implement
+    }
+
+
+
+    /**
+     *
+     * @param task
+     * @return
+     */
+    Entry addEntry(String task){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Random random = new Random();
+
+        int id = random.nextInt();
+
+        while (true){
+            Cursor cursorId = db.rawQuery("SELECT ID FROM ENTRIES WHERE ID=" + id, null);
+
+            cursorId.moveToFirst();
+
+            if (!cursorId.isAfterLast()) {
+                id = random.nextInt();
+                cursorId.close();
+            }
+            else {
+                cursorId.close();
+                break;
+            }
+        }
+
+        db.close();
+        return addEntry(id, task);
+    }
+
+    @Override
+    public void addNewEntry(int id, String task){
+
+    }
     //adds new entry to TABLE_ENTRIES
-    Entry addEntry(String task) {
+    private Entry addEntry(int id, String task) {
 
         ContentValues values = new ContentValues();
         SQLiteDatabase db = this.getWritableDatabase();
@@ -120,25 +170,6 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         }
         cursor.close();
 
-        Random random = new Random();
-
-        int id = random.nextInt();
-
-        while (true){
-            Cursor cursorId = db.rawQuery("SELECT ID FROM ENTRIES WHERE ID=" + id, null);
-
-            cursorId.moveToFirst();
-
-            if (!cursorId.isAfterLast()) {
-                id = random.nextInt();
-                cursorId.close();
-            }
-            else {
-                cursorId.close();
-                break;
-            }
-        }
-
         values.put("ID",id);
         values.put("TASK",task);
         values.put("POSITION", maxPosition+1);
@@ -149,7 +180,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         return new Entry(id, maxPosition+1, task);
     }
 
-    //takes id of entry and removes it from TABLE_ENTRIES
+    /**
+     *
+     * @param entry
+     */
     void removeEntry(Entry entry){
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete("ENTRIES", "ID=?", new String[]{String.valueOf(entry.getId())});
@@ -159,37 +193,69 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         db.close();
     }
 
-    //takes a column name (see COLUMNS_ENTRIES_V1), id and string and updates field of entry in TABLE_ENTRIES
-    void updateReminderDate(Entry entry, LocalDate value){
+    @Override
+    public void delete(int id){
+
+        Entry entry = getById(id);
+
+        if (entry == null)
+            return;
+
+        removeEntry(entry);
+    }
+
+    public void updateReminderDate(Entry entry, LocalDate value){
+        updateReminderDate(entry.getId(), value == null ? null : value.atStartOfDay(ZoneOffset.UTC).toEpochSecond());
+    }
+
+    @Override
+    public void updateReminderDate(int id, Long value){
         ContentValues values = new ContentValues();
-        values.put("DUE", value == null ? null : value.atStartOfDay(ZoneOffset.UTC).toEpochSecond());
+        values.put("DUE", value);
         SQLiteDatabase db = this.getWritableDatabase();
-        db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(entry.getId())});
+        db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
         db.close();
     }
 
-    //takes a column name (see COLUMNS_ENTRIES_V1), id and string and updates field of entry in TABLE_ENTRIES
     void updateTask(Entry entry, String value){
+        updateTask(entry.getId(), value);
+    }
+
+    @Override
+    public void updateTask(int id, String value){
         ContentValues values = new ContentValues();
         values.put("TASK", value == null ? "" : value);
         SQLiteDatabase db = this.getWritableDatabase();
-        db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(entry.getId())});
+        db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
         db.close();
     }
 
-    //takes a column name (see COLUMNS_ENTRIES_V1), id and string and updates field of entry in TABLE_ENTRIES
-    void updateRecurrence(Entry entry, String value){      //handle potential "'" so database interaction works
+    void updateRecurrence(Entry entry, String value){
+        updateRecurrence(entry.getId(), entry.getReminderDate() == null ? null : dateToEpoch(entry.getReminderDate()), value);
+    }
+
+    @Override
+    public void updateRecurrence(int id, Long reminderDate, String value){
         ContentValues values = new ContentValues();
         values.put("RECURRENCE", value);
-        if (entry.getReminderDate() == null)
+        if (reminderDate == null)
             values.put("DUE", dateToEpoch(LocalDate.now()));
         SQLiteDatabase db = this.getWritableDatabase();
-        db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(entry.getId())});
+        db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
         db.close();
+
     }
 
-    //takes a column name (see COLUMNS_ENTRIES_V1), id and string and updates field of entry in TABLE_ENTRIES
-    void updateList(Entry entry, String name){
+    @Override
+    public void updateList(int id, String name){
+
+        updateList(getById(id), name);
+    }
+
+    public void updateList(Entry entry, String name){
+
+        if (entry == null)
+            return;
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -235,27 +301,44 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         db.close();
     }
 
-    //takes a column name (see COLUMNS_ENTRIES_V1), id and boolean and updates field of entry in TABLE_ENTRIES
     void updateFocus(Entry entry, boolean valueBool){
 
-        //convert bool to int
-        int value = boolToInt(valueBool);
+        updateFocus(entry.getId(), boolToInt(valueBool));
+    }
+
+    @Override
+    public void updateFocus(int id, int value){
+
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("UPDATE ENTRIES SET FOCUS=? WHERE ID=?;", new String[]{String.valueOf(value), String.valueOf(entry.getId())});
+        db.execSQL("UPDATE ENTRIES SET FOCUS=? WHERE ID=?;", new String[]{String.valueOf(value), String.valueOf(id)});
         db.close();
     }
 
-    //takes a column name (see COLUMNS_ENTRIES_V1), id and boolean and updates field of entry in TABLE_ENTRIES
     void updateDropped(Entry entry, boolean valueBool){
+        updateDropped(entry.getId(), boolToInt(valueBool));
+    }
+
+    @Override
+    public void updateDropped(int id, int value){
 
         //convert bool to int
-        int value = boolToInt(valueBool);
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("UPDATE ENTRIES SET DROPPED=? WHERE ID=?;",  new String[]{String.valueOf(value), String.valueOf(entry.getId())});
+        db.execSQL("UPDATE ENTRIES SET DROPPED=? WHERE ID=?;",  new String[]{String.valueOf(value), String.valueOf(id)});
         db.close();
     }
-    //takes list name and color as Strings and updates color in entry in TABLE_LISTS
-    void updateListColor(String list, String color){
+
+    @Override
+    public void updatePosition(int id, int position){
+        //TODO IMPLEMENT
+    }
+
+    @Override
+    public void updateListPosition(int id, int position){
+        //TODO IMPLEMENT
+    }
+
+    @Override
+    public void updateListColor(String list, String color){
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -271,7 +354,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         db.close();
     }
 
-    //load all entries from TABLE_ENTRIES and return as ArrayList
+    /**
+     * TODO DESCRIBE
+     * @return
+     */
     public List<Entry> loadEntries(){
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -286,6 +372,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         return entries;
     }
 
+    /**
+     * TODO DESCRIBE
+     * @return
+     */
     public List<Entry> loadFocus(){
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -305,6 +395,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         return new ArrayList<>(entries.stream().filter(e -> e.getFocus() || !removed.contains(e.getId())).toList());
     }
 
+    /**
+     * TODO DESCRIBE
+     * @return
+     */
     public List<Entry> loadDropped(){
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -319,6 +413,11 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         return entries;
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param name
+     * @return
+     */
     public List<Entry> loadList(String name){
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -333,6 +432,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         return entries;
     }
 
+    //TODO COMMENT
     private List<Entry> getList(Cursor cursor){
         List<Entry> entries = new ArrayList<>();
         cursor.moveToFirst();
@@ -377,6 +477,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
 
     }
 
+    /**
+     * TODO DESCRIBE
+     * @return
+     */
     public List<String> getLists(){
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -398,7 +502,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
 
     }
 
-    //return all entries in TABLE_LISTS as Map<String,TaskList> (see TaskList.java)
+    /**
+     * TODO DESCRIBE
+     * @return
+     */
     public Map<String, TaskList> loadLists(){
         Map<String, TaskList> lists = new Hashtable<>();
 
@@ -424,6 +531,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         return lists;
     }
 
+    /**
+     * TODO DESCRIBE
+     * @return
+     */
     public Map<String, String> getListColors(){
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -444,10 +555,16 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         return map;
     }
 
-    //swaps two entries in the database: the function looks up the ids in the database and swaps
-    //values of the position/list position attributes
+    @Override
+    public void swapEntries(int id, int position){
+
+        swapEntries(getById(id), position);
+    }
+
     void swapEntries(Entry entry, int pos){
 
+        if (entry == null)
+            return;
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values1 = new ContentValues();
@@ -462,8 +579,12 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         db.close();
     }
 
-    //swaps two entries in the database: the function looks up the ids in the database and swaps
-    //values of the position/list position attributes
+    @Override
+    public void swapListEntries(int id, int position){
+
+        swapListEntries(getById(id), position);
+    }
+
     void swapListEntries(Entry entry, int pos){
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -481,29 +602,46 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
 
     }
 
-    //converts Integer to Boolean (false if 0, true otherwise)
+    /**
+     * TODO DESRIBE
+     * @param i
+     * @return
+     */
     public static boolean intToBool(int i){
         return i!=0;
     }
 
-
-    //converts Boolean to Integer (0 if false, 1 if true)
+    /**
+     * TODO DESCRIBE
+     * @param b
+     * @return
+     */
     public static int boolToInt(boolean b){
         return b ? 1 : 0;
     }
 
-    private static LocalDate epochToDate(long epoch){
+    /**
+     * TODO DESCRIBE
+     * @param epoch
+     * @return
+     */
+    public static LocalDate epochToDate(long epoch){
         return Instant.ofEpochSecond(epoch).atZone(ZoneOffset.UTC).toLocalDate();
     }
 
-    private static long dateToEpoch(LocalDate date){
+    /**
+     * TODO DESCRIBE
+     * @param date
+     * @return
+     */
+    public static long dateToEpoch(LocalDate date){
         return date.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
     }
 
-    //recurring tasks are automatically added to FOCUS
-    //when they are removed however, the ids are stored in this ArrayList and the tasks are not shown until the next day
-    //this function makes changes permanent storing the data as today's date
-    //see also: Data.java && FocusTaskListAdapter
+    /**
+     * TODO DESCRIBE
+     * @param arrayList
+     */
     void saveRecurring(List<Integer> arrayList){
         ByteBuffer buffer = ByteBuffer.allocate(arrayList.size()* Integer.BYTES);
         for (int i: arrayList)
@@ -515,8 +653,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
 
     }
 
-    //loads ids stored via saveRecurring(ArrayList<Integer>) that have been saved today
-    //deletes all files stored vie saveRecurring that are older
+    /**
+     * TODO DESCRIBE
+     * @return
+     */
     public List<Integer> loadRecurring(){
 
         //get all file names in files directory
@@ -560,6 +700,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
 
     }
 
+    /**
+     * TODO DESCRIBE
+     * @return
+     */
     public List<Entry> getEntriesOrderedByDate() {
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -574,6 +718,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
 
     }
 
+    /**
+     * TODO DESCRIBE
+     * @return
+     */
     public List<Entry> getNoList() {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -586,6 +734,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         return  entries;
     }
 
+    /**
+     * TODO DESCRIBE
+     * @return
+     */
     public List<Entry> loadTasksToPick() {
 
         List<Entry> tasksToPick;
@@ -622,29 +774,11 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database{
         return  tasksToPick;
     }
 
-    //METHODS FOR SERVER SIDE COMMUNICATION
-    @Override
-    public void post(Entry entry) {
-
-    }
 
     @Override
-    public void delete(int id) {
+    public void updateId(int entry, int id){
 
+        //TODO implement
     }
 
-    @Override
-    public void swap(int id, int position) {
-
-    }
-
-    @Override
-    public void swapList(int id, int position) {
-
-    }
-
-    @Override
-    public void update(int id, String field, String value) {
-
-    }
 }

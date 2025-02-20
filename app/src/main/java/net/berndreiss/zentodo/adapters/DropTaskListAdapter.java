@@ -1,10 +1,5 @@
 package net.berndreiss.zentodo.adapters;
 
-/*
-*       TaskListAdapter that removes tasks from RecyclerView if task is being sent to Focus or
-*       list or date is set
- */
-
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -13,10 +8,15 @@ import androidx.annotation.NonNull;
 
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 import net.berndreiss.zentodo.Data.SQLiteHelper;
 
 import java.time.LocalDate;
+
+/**
+ *       TaskListAdapter that removes tasks from RecyclerView if task is being sent to Focus or
+ *       list or date is set
+ */
 
 public class DropTaskListAdapter extends TaskListAdapter{
 
@@ -82,6 +82,9 @@ public class DropTaskListAdapter extends TaskListAdapter{
 
 
     @SuppressLint("NotifyDataSetChanged")//although notifyDataSetChanged might not be ideal the graphics are much smoother
+    /**
+     * TODO DESCRIBE
+     */
     public void add(String task){
         DataManager.add(context, entries, task);
         notifyDataSetChanged();
@@ -89,6 +92,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
     }
 
     @SuppressLint("NotifyDataSetChanged")
+    @Override
     public void reset(){
         //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
         entries.clear();

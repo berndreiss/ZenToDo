@@ -1,11 +1,5 @@
 package net.berndreiss.zentodo.adapters;
 
-/*
-*   Simple ListView adapter that shows all lists in Data as Buttons. onClick it opens a TaskListAdapter in the same ListView
-*   that shows all tasks associated with the list.
-*
- */
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
@@ -27,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 import net.berndreiss.zentodo.Data.SQLiteHelper;
 
 import com.flask.colorpicker.ColorPickerView;
@@ -37,6 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ *   Simple ListView adapter that shows all lists in Data as Buttons. onClick it opens a TaskListAdapter in the same ListView
+ *   that shows all tasks associated with the list.
+ *
+ */
 public class ListsListAdapter extends ArrayAdapter<String> {
 
     private final Context context;
@@ -305,12 +304,18 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         return convertView;
     }
 
+    /**
+     * TODO DESCRIBE
+     */
     public void setHeaderGone(){
         header.layout.setVisibility(View.GONE);
         header.headerText.setVisibility(View.GONE);
         header.colorButton.setVisibility(View.GONE);
     }
 
+    /**
+     *  TODO DESCRIBE
+     */
     public void reset(){
         //hide header (will be shown when list is chosen)
         setHeaderGone();

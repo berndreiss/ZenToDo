@@ -1,23 +1,22 @@
 package net.berndreiss.zentodo.adapters;
 
-/*
- *       Extends TaskListAdapter but removes tasks when list is changed. Also removes item when
- *       CheckBox is clicked regardless of whether task is recurring or not. Also upon swap
- *        the positions in the list get swapped and stored additionally to the the overall positions.
- *
- */
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+/**
+ *       Extends TaskListAdapter but removes tasks when list is changed. Also removes item when
+ *       CheckBox is clicked regardless of whether task is recurring or not. Also upon swap
+ *        the positions in the list get swapped and stored additionally to the the overall positions.
+ *
+ */
 
 public class ListTaskListAdapter extends TaskListAdapter{
 
@@ -25,8 +24,8 @@ public class ListTaskListAdapter extends TaskListAdapter{
         super(context, entries);
     }
 
+    /** TODO DESCRIBE */
     public static String DEFAULT_COLOR = "#00ffffff";
-
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
@@ -108,4 +107,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
         notifyItemMoved(fromPosition,toPosition);
 
     }
+
+    @Override
+    public void reset() {}
 }

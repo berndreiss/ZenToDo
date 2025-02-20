@@ -1,21 +1,4 @@
 package net.berndreiss.zentodo.adapters;
-/*
- *   A custom ArrayAdapter<Entry> that creates rows with checkboxes that
- *   when checked remove the associated task.
- *
- *   The row can have different views. It initially starts with a default view, that shows the task and the checkbox to remove it.
- *   There is also a menu button that opens an alternative row view. In this view different Buttons are shown through which certain
- *   information of the task can be changed (for data fields associated with a task see Entry.java).
- *
- *   original view --(menu Button)--> alternative view --(focus Button)--> default view
- *                                                     --(edit Button)--> edit task view --(back Button)--> original view
- *                                                     --(set date Button)--> datePickerDialog --(cancel/ok Button)-->original view
- *                                                     --(recurrence Button)--> recurrence view --(back Button)--> original view
- *                                                     --(set list Button)--> set list view --(back Button)-->  original view
- *                                                     --(back Button)--> original view
- *
- */
-
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -45,16 +28,34 @@ import net.berndreiss.zentodo.adapters.listeners.RecurrenceListener;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.ItemTouchHelperAdapter;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 import net.berndreiss.zentodo.Data.SQLiteHelper;
 
 import java.util.Collections;
 import java.util.List;
 
-public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHolder> implements ItemTouchHelperAdapter {
+/**
+ *   A custom ArrayAdapter<Entry> that creates rows with checkboxes that
+ *   when checked remove the associated task.
+ * <p>
+ *   The row can have different views. It initially starts with a default view, that shows the task and the checkbox to remove it.
+ *   There is also a menu button that opens an alternative row view. In this view different Buttons are shown through which certain
+ *   information of the task can be changed (for data fields associated with a task see Entry.java).
+ * <p>
+ *   original view --(menu Button)--> alternative view --(focus Button)--> default view
+ *                                                     --(edit Button)--> edit task view --(back Button)--> original view
+ *                                                     --(set date Button)--> datePickerDialog --(cancel/ok Button)-->original view
+ *                                                     --(recurrence Button)--> recurrence view --(back Button)--> original view
+ *                                                     --(set list Button)--> set list view --(back Button)-->  original view
+ *                                                     --(back Button)--> original view
+ *
+ */
 
+public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHolder> implements ItemTouchHelperAdapter {
 
-
+    /**
+     * TODO DESCRIBE
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public LinearLayout linearLayout;//"normal" row layout that shows checkbox and task
         protected CheckBox checkBox;//Checkbox to remove entry
@@ -86,6 +87,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         public Button clearList;//clears AutoComplete
         public Button backList;//return to original layout and save
 
+        /**
+         * TODO DECRIBE
+         * @param view
+         */
         public ViewHolder(View view){
 
             super(view);
@@ -121,14 +126,16 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         }
     }
 
+    /** TODO COMMENT */
     public List<Entry> entries;//ArrayList that holds task shown in RecyclerView
 
+    /** TODO COMMENT */
     public Context context;
 
+    /** TODO COMMENT */
     public TaskListAdapter(Context context, List<Entry> entries){
         this.entries = entries;
         this.context = context;
-
     }
 
     @NonNull
@@ -260,6 +267,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
     }
 
 
+    /**
+     * TODO DESCRIBE
+     * @param holder
+     */
     //Setting original row view
     public void setOriginal(TaskListAdapter.ViewHolder holder){
         //Set original row view to visible and active
@@ -284,6 +295,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         disable(holder.linearLayoutList);
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param holder
+     */
     //Setting alternative row view coming from original
     public void setAlt(TaskListAdapter.ViewHolder holder){
         //Set alternative row view to visible and active
@@ -297,6 +312,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param holder
+     */
     //Setting edit row view coming from alternative view
     public void setEdit(TaskListAdapter.ViewHolder holder){
 
@@ -311,6 +330,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param holder
+     */
     //Setting recurrence row view coming from alternative view
     public void setRecurrence(TaskListAdapter.ViewHolder holder){
         //Set recurrence row view to visible and active
@@ -323,6 +346,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
         disable(holder.linearLayoutAlt);
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param holder
+     */
     //Setting list row view coming from alternative view
     public void setList(TaskListAdapter.ViewHolder holder){
         //Set list row view to visible and active
@@ -336,6 +363,11 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param fromPosition
+     * @param toPosition
+     */
     //write item movement to data and notify adapter: tasks can be dragged and dropped.
     // Upon drop notifyDataSetChanged is invoked -> see recyclerViewHelper.CustomItemTouchHelperCallback
     @Override
@@ -360,8 +392,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
-
-
+    /**
+     * TODO DESCRIBE
+     * @param layout
+     */
     //Disables view and first generation children
     public void disable(LinearLayout layout){
         for (int i = 0; i < layout.getChildCount(); i++) {
@@ -372,6 +406,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param layout
+     */
     //Enables view and first generation children
     public void enable(LinearLayout layout){
         for (int i = 0; i < layout.getChildCount(); i++) {
@@ -381,6 +419,11 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param holder
+     * @param entry
+     */
     //marks Buttons that have been set in a different color
     @SuppressLint("UseCompatLoadingForDrawables")
     public void markSet(TaskListAdapter.ViewHolder holder, Entry entry){
@@ -418,8 +461,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHo
 
     }
 
-    public void reset() {
-    }
+    /**
+     * TODO DESCRIBE
+     */
+    public abstract void reset();
 
 
 }

@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 
+/**
+ * TODO DESCRIBE
+ */
 public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
 

@@ -5,19 +5,17 @@ import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
 import java.time.LocalDate;
 
-/*
+/**
  *
  *  Implements listener for checkBox of a task.
- *
+ *  <p>
  *  Removes task if it is not recurring. Otherwise resets the reminder date adding the given interval.
  *
  */
-
-
 public class CheckBoxListener extends BasicListener implements View.OnClickListener{
 
     public CheckBoxListener(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position){

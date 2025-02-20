@@ -4,20 +4,18 @@ import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
-/*
+/**
  *
  *  Implements listener for the Button to return from editing a task.
- *
+ * <p>
  *  Sets TextView to new task and writes back data if new task is not empty.
  *
  */
-
 public class BackEditListener extends BasicListener implements View.OnClickListener{
 
     public BackEditListener(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position){
-
         super(adapter, holder,position);
     }
 

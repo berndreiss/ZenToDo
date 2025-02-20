@@ -4,17 +4,15 @@ import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
-/*
+/**
  *
  *  Implements listener for the Button to return from editing the list of a task.
- *
+ * <p>
  *  Sets list to null if new list-String is empty. Writes back data and resets color of the list Button.
  *
  */
-
-
 public class BackListListener extends BasicListener implements View.OnClickListener{
 
 

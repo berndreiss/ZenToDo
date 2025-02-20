@@ -56,7 +56,7 @@ import android.text.InputFilter;
 import android.view.MotionEvent;
 import android.view.View;
 
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 import net.berndreiss.zentodo.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -104,26 +104,6 @@ public class MainActivity extends AppCompatActivity {
 
         net.berndreiss.zentodo.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        //when testing a file called "mode" with the value 1 is stored in the files directory.
-        //This block checks whether we are in testing mode or not. The reason for this is so that
-        //we can create a testing database without affecting the user data. I got a feeling that this
-        //is not best practice but haven't had the time to do my homework. If you read this and
-        //have a better way of doing this, please let me know: bd_reiss@yahoo.de
-        /*
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(getFilesDir() + "/" + getResources().getString(R.string.mode_file)));
-            if (br.readLine().equals("1"))
-                DATABASE_NAME = getResources().getString(R.string.db_test);
-            br.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-         */
-
-
 
         //Assign views to variables
         drop = findViewById(R.id.layout_drop);
@@ -174,7 +154,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //initialize Pick layout
+    /**
+     * TODO DESCRIBE
+     */
     @SuppressLint("ClickableViewAccessibility")
     public void initializePick() {
 
@@ -258,7 +240,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //show Pick layout
+    /**
+     * TODO DESCRIBE
+     */
     @SuppressLint("NotifyDataSetChanged")
     public void showPick(){
 
@@ -296,7 +280,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //initialize Drop layout
+    /**
+     * TODO DESCRIBE
+     */
     @SuppressLint("ClickableViewAccessibility")
     public void initializeDrop(){
 
@@ -340,7 +326,11 @@ public class MainActivity extends AppCompatActivity {
         dropListener(editText, buttonDrop);
     }
 
-    //initialize drop button that takes text from editText and passes it to the adapter
+    /**
+     * TODO DESCRIBE
+     * @param editText
+     * @param buttonDrop
+     */
     public void dropListener(EditText editText, Button buttonDrop){
 
         //OnClickListener that adds task in EditText to Data
@@ -360,7 +350,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //show Drop layout
+    /**
+     * TODO DESCRIBE
+     */
     @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
 
@@ -396,7 +388,9 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
     }
 
-    //initialize Focus layout
+    /**
+     * TODO DESCRIBE
+     */
     @SuppressLint("ClickableViewAccessibility")
     public void initializeFocus(){
 
@@ -425,7 +419,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //show Focus layout
+    /**
+     * TODO DESCRIBE
+     */
     @SuppressLint("NotifyDataSetChanged")
     public void showFocus(){
 
@@ -462,7 +458,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //initialize Lists layout
+    /**
+     * TODO DESCRIBE
+     */
     @SuppressLint("ClickableViewAccessibility")
     public void initializeLists() {
 
@@ -488,7 +486,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //show Lists layout
+    /**
+     * TODO DESCRIBE
+     */
     public void showLists(){
 
         //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
@@ -535,6 +535,10 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setVisibility(View.GONE);
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param layout
+     */
     //set Visibility of all first generation children of layout to VISIBLE and bring layout to front
     public void enableLayout(LinearLayout layout){
 
@@ -546,6 +550,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param layout
+     */
     //set Visibility of all first generation children of layout to GONE
     public void disableLayout(LinearLayout layout){
 

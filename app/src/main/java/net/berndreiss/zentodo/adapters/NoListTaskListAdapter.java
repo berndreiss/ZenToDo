@@ -1,20 +1,19 @@
 package net.berndreiss.zentodo.adapters;
 
-/*
- *       Extends AllTaskListAdapter but when list is changed task is removed from adapter.
- *
- */
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
 import java.util.List;
 
+/**
+ *       Extends AllTaskListAdapter but when list is changed task is removed from adapter.
+ *
+ */
 public class NoListTaskListAdapter extends AllTaskListAdapter{
 
     NoListTaskListAdapter(Context context, List<Entry> entries){

@@ -1,20 +1,5 @@
 package net.berndreiss.zentodo.adapters;
 
-/*
-*       Extends TaskListAdapter but does not remove tasks when CheckBox is clicked.
-*       The PickTaskListAdapter actually consists of four distinct adapters:
-*
-*       pickAdapter: contains all tasks that are due today.
-*       doNowAdapter: contains all tasks ticked in any of the three other adapters (and therefore tasks that haven been chosen for today's FOCUS)
-*       doLaterAdapter: contains all tasks for which a reminder date has been set in any of the other adapters
-*       moveToListAdapter: contains all tasks for which a list has been set, but that don't have a reminder date
-*
-*       If the pickAdapter is empty clicking the PickButton in MainActivity sends all ticked tasks to Focus.
-*       Because of that the Focus Button does not have much use in this adapter. Its new
-*       function is to delete tasks (being marked by a delete drawable).
-*
- */
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
@@ -28,10 +13,25 @@ import net.berndreiss.zentodo.adapters.listeners.BackListListenerPick;
 import net.berndreiss.zentodo.adapters.listeners.PickListener;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListenerPick;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+
+/**
+ *       Extends TaskListAdapter but does not remove tasks when CheckBox is clicked.
+ *       The PickTaskListAdapter actually consists of four distinct adapters:
+ *
+ *       pickAdapter: contains all tasks that are due today.
+ *       doNowAdapter: contains all tasks ticked in any of the three other adapters (and therefore tasks that haven been chosen for today's FOCUS)
+ *       doLaterAdapter: contains all tasks for which a reminder date has been set in any of the other adapters
+ *       moveToListAdapter: contains all tasks for which a list has been set, but that don't have a reminder date
+ *
+ *       If the pickAdapter is empty clicking the PickButton in MainActivity sends all ticked tasks to Focus.
+ *       Because of that the Focus Button does not have much use in this adapter. Its new
+ *       function is to delete tasks (being marked by a delete drawable).
+ *
+ */
 
 public class PickTaskListAdapter extends TaskListAdapter implements PickListener {
 
@@ -43,27 +43,15 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
     public PickTaskListAdapter(Context context, boolean checkboxTicked){
         super(context, new ArrayList<>());
-
         this.checkboxTicked = checkboxTicked;
-
     }
-
 
     public void setPickAdapter (PickTaskListAdapter pickAdapter){
         this.pickAdapter = pickAdapter;
     }
-    public void setDoNowAdapter(PickTaskListAdapter doNowAdapter){
-        this.doNowAdapter = doNowAdapter;
-    }
-
-    public void setDoLaterAdapter(PickTaskListAdapter doLaterAdapter){
-        this.doLaterAdapter = doLaterAdapter;
-    }
-
-    public void setMoveToListAdapter (PickTaskListAdapter moveToListAdapter){
-        this.moveToListAdapter = moveToListAdapter;
-    }
-
+    public void setDoNowAdapter(PickTaskListAdapter doNowAdapter){ this.doNowAdapter = doNowAdapter; }
+    public void setDoLaterAdapter(PickTaskListAdapter doLaterAdapter){ this.doLaterAdapter = doLaterAdapter; }
+    public void setMoveToListAdapter (PickTaskListAdapter moveToListAdapter){ this.moveToListAdapter = moveToListAdapter; }
     public boolean isCheckboxTicked(){
         return checkboxTicked;
     }
@@ -170,11 +158,10 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
             holder.linearLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.color_primary));
 
         }
-
-
     }
 
     @SuppressLint("NotifyDataSetChanged")
+    @Override
     public void reset(){
 
 

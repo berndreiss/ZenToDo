@@ -1,6 +1,7 @@
 package net.berndreiss.zentodo.Data;
 import android.content.Context;
 
+import net.berndreiss.zentodo.api.Entry;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
 
 import java.time.LocalDate;
@@ -16,10 +17,15 @@ public class DataManager {
     //see also: FocusTaskListAdapter
     private static List<Integer> recurringButRemovedFromToday = null;
 
-
+    /** TODO COMMENT */
     public static Map<String, String> listColors = null;
 
-    //adds an Entry to Data and the Database
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entries
+     * @param task
+     */
     public static void add(Context context, List<Entry> entries, String task) {
 
         try (SQLiteHelper db = new SQLiteHelper(context)) {
@@ -31,8 +37,12 @@ public class DataManager {
 
     }
 
-
-    //removes an id from Data and the Database
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entries
+     * @param entry
+     */
     public static void remove(Context context, List<Entry> entries, Entry entry) {
 
         try (SQLiteHelper db = new SQLiteHelper(context)) {
@@ -52,8 +62,13 @@ public class DataManager {
 
     }
 
-
-    //swap entries if item is moved by drag and drop
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entries
+     * @param entry1
+     * @param entry2
+     */
     public static void swap(Context context, List<Entry> entries, Entry entry1, Entry entry2) {
 
         try (SQLiteHelper db = new SQLiteHelper(context)) {
@@ -70,7 +85,13 @@ public class DataManager {
 
     }
 
-    //swap entries if item is moved by drag and drop
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entries
+     * @param entry1
+     * @param entry2
+     */
     public static void swapLists(Context context, List<Entry> entries, Entry entry1, Entry entry2) {
 
         try (SQLiteHelper db = new SQLiteHelper(context)) {
@@ -107,10 +128,12 @@ public class DataManager {
     }
 
 
-    /*
-    *   The following functions edit different fields of entries by their id.
-    */
-
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entry
+     * @param newTask
+     */
     public static void setTask(Context context, Entry entry, String newTask) {
         if (entry==null || entry.getTask().equals(newTask))
             return;
@@ -121,7 +144,12 @@ public class DataManager {
         entry.setTask(newTask);
     }
 
-
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entry
+     * @param focus
+     */
     public static void setFocus(Context context, Entry entry, Boolean focus) {
         if (entry==null || entry.getFocus() == focus)
             return;
@@ -137,7 +165,12 @@ public class DataManager {
 
     }
 
-
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entry
+     * @param dropped
+     */
     public static void setDropped(Context context, Entry entry, Boolean dropped) {
         if (entry == null || entry.getDropped() == dropped)
             return;
@@ -148,6 +181,12 @@ public class DataManager {
         entry.setDropped(dropped);
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entry
+     * @param date
+     */
     public static void editReminderDate(Context context, Entry entry, LocalDate date) {
         if (entry == null || entry.getReminderDate() != null && entry.getReminderDate().equals(date))
             return;
@@ -163,7 +202,12 @@ public class DataManager {
         entry.setReminderDate(date);
     }
 
-
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entry
+     * @param recurrence
+     */
     public static void editRecurrence(Context context, Entry entry, String recurrence) {
         if (entry == null || entry.getRecurrence() != null && entry.getRecurrence().equals(recurrence))
             return;
@@ -180,7 +224,13 @@ public class DataManager {
             setDropped(context, entry, false);
     }
 
-
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entries
+     * @param entry
+     * @param list
+     */
     public static void editList(Context context, List<Entry> entries, Entry entry, String list) {
         if (entry == null || entry.getList() != null && entry.getList().equals(list))
             return;
@@ -204,7 +254,12 @@ public class DataManager {
 
     }
 
-
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param list
+     * @param color
+     */
     public static void editListColor(Context context, String list, String color) {
         if (listColors == null) {
             try (SQLiteHelper db = new SQLiteHelper(context)) {
@@ -219,6 +274,12 @@ public class DataManager {
         }
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param list
+     * @return
+     */
     public static String getListColor(Context context, String list){
 
         if (listColors == null){
@@ -237,6 +298,11 @@ public class DataManager {
         }
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @return
+     */
     public static List<String> getLists(Context context){
 
         List<String> lists;
@@ -249,7 +315,12 @@ public class DataManager {
         return lists;
     }
 
-    //this routine calculates a new reminder date for recurring tasks
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @param entry
+     * @param today
+     */
     public static void setRecurring(Context context, Entry entry, LocalDate today) {
 
         //get recurrence as <['d'/'w'/'m'/'y']['0'-'9']['0'-'9']['0'-'9']...> (i.e. "d15" means the task repeats every 15 days)
@@ -290,7 +361,6 @@ public class DataManager {
         }
 
     }
-
 
     //return date incremented by offset
     private static LocalDate incrementRecurring(char mode, LocalDate date, int offSet) {

@@ -6,14 +6,16 @@ import android.view.View;
 import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
+/**
+ * TODO DESCRIBE
+ */
 public class BackListListenerPick extends BackListListener{
 
     PickTaskListAdapter currentAdapter;
     private final PickTaskListAdapter pickAdapter;
     private final PickTaskListAdapter moveToListAdapter;
-
 
     public BackListListenerPick(PickTaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position, PickTaskListAdapter pickAdapter, PickTaskListAdapter moveToListAdapter){
         super(adapter, holder, position);
@@ -24,7 +26,7 @@ public class BackListListenerPick extends BackListListener{
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
-    public void onClick(View v){
+    public void onClick(View v) {
         //get new list name
         String list = holder.autoCompleteList.getText().toString();
 
@@ -36,10 +38,10 @@ public class BackListListenerPick extends BackListListener{
             DataManager.editList(adapter.context, adapter.entries, entry, null);
         } else {
             //write back otherwise
-            DataManager.editList(adapter.context, adapter.entries,  entry, list);
+            DataManager.editList(adapter.context, adapter.entries, entry, list);
         }
 
-        if (entry.getReminderDate()==null && !moveToListAdapter.entries.contains(entry)){
+        if (entry.getReminderDate() == null && !moveToListAdapter.entries.contains(entry)) {
 
             moveToListAdapter.entries.add(entry);
             moveToListAdapter.notifyDataSetChanged();
@@ -49,7 +51,7 @@ public class BackListListenerPick extends BackListListener{
             currentAdapter.itemCountChanged();
         }
 
-        if (entry.getList() == null && moveToListAdapter.entries.contains(entry)){
+        if (entry.getList() == null && moveToListAdapter.entries.contains(entry)) {
             moveToListAdapter.entries.remove(entry);
             moveToListAdapter.notifyDataSetChanged();
             moveToListAdapter.itemCountChanged();
@@ -59,8 +61,5 @@ public class BackListListenerPick extends BackListListener{
         }
 
         adapter.notifyDataSetChanged();
-
-
     }
-
 }

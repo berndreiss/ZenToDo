@@ -15,7 +15,9 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
 
-
+/**
+ * TODO DESCRIBE
+ */
 public class Helper{
 
 
@@ -74,6 +76,11 @@ public class Helper{
         }
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @return
+     */
     public static HelpListener getPickListener(Context context){
         String help = "<p><b>PICK MODE</b></p>" +
                 "<p>All tasks you dropped and that are due today are shown here." +
@@ -101,6 +108,11 @@ public class Helper{
         return new HelpListener(context, help);
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @return
+     */
     public static HelpListener getFocusListener(Context context){
         String help = "<p><b>FOCUS MODE</b></p>" +
                 "<p>All tasks you picked are shown here.</p>" +
@@ -126,6 +138,11 @@ public class Helper{
         return new HelpListener(context, help);
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @return
+     */
     public static HelpListener getDropListener(Context context){
         String help = "<p><b>DROP MODE</b></p>" +
                 "<p>You can drop todos here and pick them later.</p>" +
@@ -152,6 +169,11 @@ public class Helper{
         return new HelpListener(context, help);
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @return
+     */
     public static HelpListener getListListener(Context context) {
         String help = "<p><b>LISTS MODE</b></p>" +
                 "<p>If you would like to <b>create a list</b> go to the menu of a task and assign a list. It will then be created and shown here.</p>" +
@@ -164,13 +186,16 @@ public class Helper{
         return new HelpListener(context, help);
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param context
+     * @return
+     */
     public static void showPickHelper(Context context){
         String help = "<p><b>Please categorize all tasks first.</b></p> " +
                 "<p><img src = \"ic_action_checkbox\"> Tasks that are ticked are shown in DO NOW and moved to FOCUS.</p>" +
                 "<p><img src = \"ic_action_calendar\"> Tasks for which a reminder date is set are shown in DO LATER and will be shown in PICK again on the given date (or if the date is in the past tomorrow).</p>" +
                 "<p><img src = \"ic_action_list\"> Tasks without a reminder date and with a list are shown in MOVE TO LIST. These tasks will never be shown again in PICK. You can find them in LISTS.</p>";
         new Helper.HelpListener(context,help).showDialog();
-
     }
-
 }

@@ -7,20 +7,18 @@ import android.view.View;
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
 import java.time.LocalDate;
 import java.util.Calendar;
 
-/*
+/**
  *
  *  Implements listener for the setting the reminder date of a task.
- *
+ *  <p>
  *  Gets current reminder date from task and shows datePickerDialog.
  *
  */
-
-
 public class SetDateListener extends BasicListener implements View.OnClickListener {
 
     public SetDateListener(TaskListAdapter adapter, TaskListAdapter.ViewHolder holder, int position){
@@ -53,6 +51,16 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
 
     }
 
+    /**
+     * TODO DESCRIBE
+     * @param entry
+     * @param entryDay
+     * @param entryMonth
+     * @param entryYear
+     * @param holder
+     * @param position
+     * @return
+     */
     //return DatePickerDialog
     public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, TaskListAdapter.ViewHolder holder, int position){
 
@@ -98,7 +106,4 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
 
         return datePickerDialog;
     }
-
 }
-
-

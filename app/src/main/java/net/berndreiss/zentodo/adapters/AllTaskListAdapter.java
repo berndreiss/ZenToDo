@@ -1,21 +1,20 @@
 package net.berndreiss.zentodo.adapters;
 
-/*
-*       Adapter that shows all tasks sorted by their reminder date. Items are removed upon CheckBox-click
-*       even if they are recurring.
-*
- */
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
 import java.util.List;
 
+/**
+ *       Adapter that shows all tasks sorted by their reminder date. Items are removed upon CheckBox-click
+ *       even if they are recurring.
+ *
+ */
 public class AllTaskListAdapter extends TaskListAdapter{
 
     AllTaskListAdapter(Context context, List<Entry> entries){
@@ -42,4 +41,7 @@ public class AllTaskListAdapter extends TaskListAdapter{
 
 
     }
+
+    @Override
+    public void reset() {}
 }

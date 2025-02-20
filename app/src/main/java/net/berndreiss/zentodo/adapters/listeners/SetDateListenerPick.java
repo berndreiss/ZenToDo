@@ -8,10 +8,13 @@ import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.Data.Entry;
+import net.berndreiss.zentodo.api.Entry;
 
 import java.time.LocalDate;
 
+/**
+ * TODO DESCRIBE
+ */
 public class SetDateListenerPick extends SetDateListener{
 
     private final PickTaskListAdapter pickAdapter;
@@ -91,5 +94,4 @@ public class SetDateListenerPick extends SetDateListener{
 
         return datePickerDialog;
     }
-
 }
