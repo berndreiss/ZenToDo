@@ -47,7 +47,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
 
     //Create TABLE_ENTRIES for entries TABLE_LISTS for lists onCreate
     public void onCreate(SQLiteDatabase db){
-        String query = "CREATE TABLE ENTRIES ("
+        db.execSQL("CREATE TABLE ENTRIES ("
                 + "USER TEXT DEFAULT NULL,"
                 + "ID INTEGER NOT NULL, "
                 + "TASK TEXT NOT NULL, "
@@ -55,16 +55,15 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
                 + "DROPPED INTEGER DEFAULT 1, "
                 + "LIST TEXT DEFAULT NULL, "
                 + "LIST_POSITION INTEGER DEFAULT NULL, "
-                + "DUE INTEGER DEFAULT NULL,"
+                + "REMINDER_DATE INTEGER DEFAULT NULL,"
                 + "RECURRENCE TEXT DEFAULT NULL,"
                 + "POSITION INTEGER NOT NULL,"
                 + "PRIMARY KEY (ID, USER),"
                 + "FOREIGN KEY (LIST) REFERENCES LISTS(NAME),"
                 + "FOREIGN KEY (USER) REFERENCES USERS(MAIL)"
-                + ")";
-        db.execSQL(query);
+                + ")");
 
-        query = "CREATE TABLE LISTS (NAME TEXT PRIMARY KEY, COLOR TEXT DEFAULT '" + ListTaskListAdapter.DEFAULT_COLOR + "')";
+        String query = "CREATE TABLE LISTS (NAME TEXT PRIMARY KEY, COLOR TEXT DEFAULT '" + ListTaskListAdapter.DEFAULT_COLOR + "')";
         db.execSQL(query);
 
         query = "CREATE TABLE USERS (NAME TEXT DEFAULT NULL, MAIL TEXT PRIMARY KEY)";
@@ -76,7 +75,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
         db.execSQL(query);
         query = "CREATE INDEX IDX_LIST ON ENTRIES(LIST, LIST_POSITION)";
         db.execSQL(query);
-        query = "CREATE INDEX IDX_DUE ON ENTRIES(DUE)";
+        query = "CREATE INDEX IDX_REMINDER_DATE ON ENTRIES(REMINDER_DATE)";
         db.execSQL(query);
         query = "CREATE INDEX IDX_POSITION ON ENTRIES(POSITION)";
         db.execSQL(query);
@@ -211,7 +210,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
     @Override
     public void updateReminderDate(int id, Long value){
         ContentValues values = new ContentValues();
-        values.put("DUE", value);
+        values.put("REMINDER_DATE", value);
         SQLiteDatabase db = this.getWritableDatabase();
         db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
         db.close();
@@ -239,7 +238,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
         ContentValues values = new ContentValues();
         values.put("RECURRENCE", value);
         if (reminderDate == null)
-            values.put("DUE", dateToEpoch(LocalDate.now()));
+            values.put("REMINDER_DATE", dateToEpoch(LocalDate.now()));
         SQLiteDatabase db = this.getWritableDatabase();
         db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
         db.close();
@@ -247,12 +246,15 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
     }
 
     @Override
-    public void updateList(int id, String name){
-
-        updateList(getById(id), name);
+    public void updateList(int id, String name, int position){
+        updateList(getById(id), name, position);
     }
 
     public void updateList(Entry entry, String name){
+        updateList(entry, name, null);
+    }
+
+    public void updateList(Entry entry, String name, Integer position){
 
         if (entry == null)
             return;
@@ -260,11 +262,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        //get the list position
-        Integer position = null;
+        if (position != null)
+            db.execSQL("UPDATE ENTRIES SET LIST_POSITION = LIST_POSITION + 1 WHERE LIST=?", new String[]{name});
 
-
-        if (name != null) {
+        if (name != null && position == null) {
             position = 0;
             Cursor cursor = db.rawQuery("SELECT 1 FROM ENTRIES WHERE LIST=?", new String[]{name});
 
@@ -328,16 +329,6 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
     }
 
     @Override
-    public void updatePosition(int id, int position){
-        //TODO IMPLEMENT
-    }
-
-    @Override
-    public void updateListPosition(int id, int position){
-        //TODO IMPLEMENT
-    }
-
-    @Override
     public void updateListColor(String list, String color){
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -382,7 +373,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
 
         long epoch = dateToEpoch(LocalDate.now());
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE FOCUS>0 OR (RECURRENCE IS NOT NULL AND DUE <= " + epoch +  ")" +
+        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE FOCUS>0 OR (RECURRENCE IS NOT NULL AND REMINDER_DATE <= " + epoch +  ")" +
                 " ORDER BY POSITION", null);
 
         List<Entry> entries = getList(cursor);
@@ -708,7 +699,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES ORDER BY DUE", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES ORDER BY REMINDER_DATE", null);
 
         List<Entry> entries = getList(cursor);
         cursor.close();
@@ -762,8 +753,8 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
 
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE RECURRENCE IS NULL AND (FOCUS>0 OR " +
-                "(DUE IS NULL AND (DROPPED>0 OR LIST=NULL)) OR " +
-                "(DUE IS NOT NULL AND DUE<=" + epoch + ")) ORDER BY POSITION", null );
+                "(REMINDER_DATE IS NULL AND (DROPPED>0 OR LIST=NULL)) OR " +
+                "(REMINDER_DATE IS NOT NULL AND REMINDER_DATE<=" + epoch + ")) ORDER BY POSITION", null );
 
 
         tasksToPick = getList(cursor);
