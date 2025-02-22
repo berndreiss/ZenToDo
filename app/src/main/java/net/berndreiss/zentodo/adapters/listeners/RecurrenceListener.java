@@ -3,7 +3,7 @@ package net.berndreiss.zentodo.adapters.listeners;
 import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
-import net.berndreiss.zentodo.api.Entry;
+import net.berndreiss.zentodo.data.Entry;
 
 /**
  *

@@ -7,8 +7,8 @@ import android.content.DialogInterface;
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
-import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.api.Entry;
+import net.berndreiss.zentodo.data.DataManager;
+import net.berndreiss.zentodo.data.Entry;
 
 import java.time.LocalDate;
 

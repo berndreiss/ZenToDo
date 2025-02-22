@@ -1,7 +1,6 @@
-package net.berndreiss.zentodo.Data;
+package net.berndreiss.zentodo.data;
 import android.content.Context;
 
-import net.berndreiss.zentodo.api.Entry;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
 
 import java.time.LocalDate;

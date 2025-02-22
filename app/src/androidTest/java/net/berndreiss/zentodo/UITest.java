@@ -39,8 +39,8 @@ import android.view.View;
 import android.widget.DatePicker;
 
 import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
-import net.berndreiss.zentodo.Data.Entry;
-import net.berndreiss.zentodo.Data.SQLiteHelper;
+import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.SQLiteHelper;
 
 import java.time.LocalDate;
 import java.time.MonthDay;

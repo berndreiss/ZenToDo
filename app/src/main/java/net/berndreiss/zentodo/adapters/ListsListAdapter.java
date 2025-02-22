@@ -20,9 +20,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
-import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.api.Entry;
-import net.berndreiss.zentodo.Data.SQLiteHelper;
+import net.berndreiss.zentodo.data.DataManager;
+import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.SQLiteHelper;
 
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;

@@ -5,8 +5,8 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import net.berndreiss.zentodo.Data.DataManager;
-import net.berndreiss.zentodo.api.Entry;
+import net.berndreiss.zentodo.data.DataManager;
+import net.berndreiss.zentodo.data.Entry;
 
 import java.util.List;
 

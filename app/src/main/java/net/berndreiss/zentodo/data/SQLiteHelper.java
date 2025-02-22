@@ -1,4 +1,4 @@
-package net.berndreiss.zentodo.Data;
+package net.berndreiss.zentodo.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,11 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import net.berndreiss.zentodo.api.DatabaseClient;
-import net.berndreiss.zentodo.api.Entry;
-import net.berndreiss.zentodo.api.TaskList;
+import androidx.fragment.app.SpecialEffectsController;
+
 import net.berndreiss.zentodo.MainActivity;
+import net.berndreiss.zentodo.OperationType;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
+import net.berndreiss.zentodo.util.Message;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -32,7 +34,7 @@ import java.util.Random;
 /**
  * TODO DESCRIBE
  */
-public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
+public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHandler {
 
     private final Context context;
 
@@ -79,6 +81,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
         db.execSQL(query);
         query = "CREATE INDEX IDX_POSITION ON ENTRIES(POSITION)";
         db.execSQL(query);
+
+
+        //TODO ADD METADATA TABLE WITH VERSION AND TIMEDELAY
+        //TODO ADD QUEUE TABLE FOR CHANGES
     }
 
 
@@ -770,6 +776,24 @@ public class SQLiteHelper extends SQLiteOpenHelper implements DatabaseClient {
     public void updateId(int entry, int id){
 
         //TODO implement
+    }
+
+    @Override
+    public void setTimeDelay(long l) {
+
+        //TODO implement
+    }
+
+    @Override
+    public void addToQueue(OperationType type, List<Object> arguments) {
+
+        //TODO implement
+    }
+
+    @Override
+    public List<Message> geQueued() {
+        //TODO implement
+        return Collections.emptyList();
     }
 
 }

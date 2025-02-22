@@ -4,9 +4,9 @@ import android.content.Context;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.api.Entry;
-import net.berndreiss.zentodo.Data.SQLiteHelper;
+import net.berndreiss.zentodo.data.SQLiteHelper;
 
 import org.junit.Before;
 import org.junit.Test;

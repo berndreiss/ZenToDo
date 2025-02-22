@@ -44,7 +44,7 @@ import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperC
 import net.berndreiss.zentodo.adapters.FocusTaskListAdapter;
 import net.berndreiss.zentodo.adapters.ListsListAdapter;
 import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
-import net.berndreiss.zentodo.Data.DataManager;
+import net.berndreiss.zentodo.data.DataManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -56,7 +56,7 @@ import android.text.InputFilter;
 import android.view.MotionEvent;
 import android.view.View;
 
-import net.berndreiss.zentodo.api.Entry;
+import net.berndreiss.zentodo.data.Entry;
 import net.berndreiss.zentodo.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
