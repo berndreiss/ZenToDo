@@ -14,7 +14,7 @@ public class DataManager {
     //recurring tasks are automatically added to FOCUS
     //when they are removed however, the ids are stored in this ArrayList and the tasks are not shown until the next day
     //see also: FocusTaskListAdapter
-    private static List<Integer> recurringButRemovedFromToday = null;
+    private static List<Long> recurringButRemovedFromToday = null;
 
     /** TODO COMMENT */
     public static Map<String, String> listColors = null;
@@ -116,7 +116,7 @@ public class DataManager {
     }
 
     //Get position of entry by id, returns -1 if id not found
-    private static int getPosition(List<Entry> entries, int id) {
+    private static int getPosition(List<Entry> entries, long id) {
 
         //loop through entries and return position if id matches
         for (int i = 0; i < entries.size(); i++) {
@@ -387,7 +387,7 @@ public class DataManager {
 
 
     //add ids to recurringButRemovedFromToday and make a call to the database making changes permanent
-    public static void addToRecurringButRemoved(Context context, int id){
+    public static void addToRecurringButRemoved(Context context, long id){
 
         if (recurringButRemovedFromToday == null)
             try(SQLiteHelper db = new SQLiteHelper(context)){
@@ -402,7 +402,7 @@ public class DataManager {
     }
 
     //remove ids from recurringButRemovedFromToday and make a call to the database making changes permanent
-    public static void removeFromRecurringButRemoved(Context context, int id){
+    public static void removeFromRecurringButRemoved(Context context, long id){
         if (recurringButRemovedFromToday == null)
             try(SQLiteHelper db = new SQLiteHelper(context)){
                 recurringButRemovedFromToday = db.loadRecurring();
