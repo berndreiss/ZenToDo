@@ -6,12 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import androidx.fragment.app.SpecialEffectsController;
-
 import net.berndreiss.zentodo.MainActivity;
 import net.berndreiss.zentodo.OperationType;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
-import net.berndreiss.zentodo.util.Message;
+import net.berndreiss.zentodo.util.ZenMessage;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,7 +89,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
     }
 
-    private Entry getById(int id){
+    private Entry getById(long id){
         SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE ID=?", new String[]{String.valueOf(id)});
@@ -113,6 +111,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         //TODO implement
     }
 
+    @Override
+    public void addNewEntry(long l, String s, Long aLong) {
+
+    }
 
 
     /**
@@ -125,7 +127,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
         Random random = new Random();
 
-        int id = random.nextInt();
+        long id = random.nextInt();
 
         while (true){
             Cursor cursorId = db.rawQuery("SELECT ID FROM ENTRIES WHERE ID=" + id, null);
@@ -146,12 +148,8 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         return addEntry(id, task);
     }
 
-    @Override
-    public void addNewEntry(int id, String task){
-
-    }
     //adds new entry to TABLE_ENTRIES
-    private Entry addEntry(int id, String task) {
+    private Entry addEntry(long id, String task) {
 
         ContentValues values = new ContentValues();
         SQLiteDatabase db = this.getWritableDatabase();
@@ -182,7 +180,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         db.insert("ENTRIES",null,values);
         db.close();
 
-        return new Entry(id, maxPosition+1, task);
+        return new Entry(id, maxPosition+1, task, null);
     }
 
     /**
@@ -199,7 +197,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     @Override
-    public void delete(int id){
+    public void delete(long id){
 
         Entry entry = getById(id);
 
@@ -214,7 +212,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     @Override
-    public void updateReminderDate(int id, Long value){
+    public void updateReminderDate(long id, Long value){
         ContentValues values = new ContentValues();
         values.put("REMINDER_DATE", value);
         SQLiteDatabase db = this.getWritableDatabase();
@@ -227,7 +225,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     @Override
-    public void updateTask(int id, String value){
+    public void updateTask(long id, String value){
         ContentValues values = new ContentValues();
         values.put("TASK", value == null ? "" : value);
         SQLiteDatabase db = this.getWritableDatabase();
@@ -240,7 +238,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     @Override
-    public void updateRecurrence(int id, Long reminderDate, String value){
+    public void updateRecurrence(long id, Long reminderDate, String value){
         ContentValues values = new ContentValues();
         values.put("RECURRENCE", value);
         if (reminderDate == null)
@@ -252,7 +250,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     @Override
-    public void updateList(int id, String name, int position){
+    public void updateList(long id, String name, int position){
         updateList(getById(id), name, position);
     }
 
@@ -314,7 +312,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     @Override
-    public void updateFocus(int id, int value){
+    public void updateFocus(long id, int value){
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("UPDATE ENTRIES SET FOCUS=? WHERE ID=?;", new String[]{String.valueOf(value), String.valueOf(id)});
@@ -326,7 +324,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     @Override
-    public void updateDropped(int id, int value){
+    public void updateDropped(long id, int value){
 
         //convert bool to int
         SQLiteDatabase db = this.getWritableDatabase();
@@ -349,6 +347,16 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         }
 
         db.close();
+    }
+
+    @Override
+    public void updateUserName(long l, String s) {
+
+    }
+
+    @Override
+    public boolean updateEmail(long l, String s) {
+        return false;
     }
 
     /**
@@ -384,7 +392,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
         List<Entry> entries = getList(cursor);
 
-        List<Integer> removed = loadRecurring();
+        List<Long> removed = loadRecurring();
 
         cursor.close();
         db.close();
@@ -436,7 +444,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
         while (!cursor.isAfterLast()){
 
-            int id = cursor.getInt(1);
+            long id = cursor.getInt(1);
             String task = cursor.getString(2);
             boolean focus = intToBool(cursor.getInt(3));
             boolean dropped = intToBool(cursor.getInt(4));
@@ -446,7 +454,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
             String recurrence = cursor.getString(8);
             int position = cursor.getInt(9);
 
-            Entry entry = new Entry(id, position, task);
+            Entry entry = new Entry(id, position, task, null);
             entry.setFocus(focus);
             entry.setDropped(dropped);
             if (!(list==null)) {
@@ -553,7 +561,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     @Override
-    public void swapEntries(int id, int position){
+    public void swapEntries(long id, int position){
 
         swapEntries(getById(id), position);
     }
@@ -577,7 +585,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     @Override
-    public void swapListEntries(int id, int position){
+    public void swapListEntries(long id, int position){
 
         swapListEntries(getById(id), position);
     }
@@ -639,10 +647,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
      * TODO DESCRIBE
      * @param arrayList
      */
-    void saveRecurring(List<Integer> arrayList){
+    void saveRecurring(List<Long> arrayList){
         ByteBuffer buffer = ByteBuffer.allocate(arrayList.size()* Integer.BYTES);
-        for (int i: arrayList)
-            buffer.putInt(i);
+        for (long i: arrayList)
+            buffer.putLong(i);
 
         try {
             Files.write(Paths.get(context.getFilesDir() + "/" + LocalDate.now()), buffer.array());
@@ -654,7 +662,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
      * TODO DESCRIBE
      * @return
      */
-    public List<Integer> loadRecurring(){
+    public List<Long> loadRecurring(){
 
         //get all file names in files directory
         String[] fileNames = context.getFilesDir().list();
@@ -686,9 +694,9 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         try {
             byte[] bytes = Files.readAllBytes(Paths.get(context.getFilesDir() + "/" + LocalDate.now()));
             ByteBuffer buffer = ByteBuffer.wrap(bytes);
-            List<Integer> list = new ArrayList<>();
+            List<Long> list = new ArrayList<>();
             while(buffer.hasRemaining())
-                list.add(buffer.getInt());
+                list.add(buffer.getLong());
             return list;
 
         } catch(IOException ignored){
@@ -773,7 +781,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
 
     @Override
-    public void updateId(int entry, int id){
+    public void updateId(long entry, long id){
 
         //TODO implement
     }
@@ -791,9 +799,44 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     @Override
-    public List<Message> geQueued() {
+    public List<ZenMessage> geQueued() {
         //TODO implement
         return Collections.emptyList();
+    }
+
+    @Override
+    public void addUser(long id, String email, String userName) {
+
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return null;
+    }
+
+    @Override
+    public boolean userExists(String email) {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled(String email) {
+        return false;
+    }
+
+    @Override
+    public void enableUser(String email) {
+
+    }
+
+    @Override
+    public String getToken(long user) {
+        return "";
+    }
+
+    @Override
+    public void setToken(long user, String token) {
+
     }
 
 }
