@@ -6,12 +6,15 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 import net.berndreiss.zentodo.data.SQLiteHelper;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 /**
  *       TaskListAdapter that removes tasks from RecyclerView if task is being sent to Focus or
@@ -20,8 +23,8 @@ import java.time.LocalDate;
 
 public class DropTaskListAdapter extends TaskListAdapter{
 
-    public DropTaskListAdapter(Context context){
-        super(context, DataManager.getDropped(context));
+    public DropTaskListAdapter(SharedData sharedData){
+        super(sharedData, DataManager.getDropped(sharedData));
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -32,7 +35,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
         //Remove task from View if task is being sent to Focus
         holder.focus.setOnClickListener(v -> {
             Entry entry = entries.get(position);
-            DataManager.setFocus(context, entry, !entry.getFocus());//change state of focus in entry
+            DataManager.setFocus(sharedData, entry, !entry.getFocus());//change state of focus in entry
             entries.remove(position);
             notifyDataSetChanged();
         });
@@ -49,7 +52,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
             if (!list.trim().isEmpty()) {
 
                 //write back
-                DataManager.editList(context, entries, entry, list);
+                DataManager.editList(sharedData, entries, entry, list);
                 entries.remove(position);
                 notifyDataSetChanged();
 
@@ -66,10 +69,12 @@ public class DropTaskListAdapter extends TaskListAdapter{
             @Override
             public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
                 DatePickerDialog datePickerDialog;
-                datePickerDialog= new DatePickerDialog(context, (view, year, month, day) -> {
+                datePickerDialog= new DatePickerDialog(sharedData.context, (view, year, month, day) -> {
                     LocalDate date = LocalDate.of(year,month + 1,day);
 
-                    DataManager.editReminderDate(context, entry, date);//Write back data
+                    Instant dateInstant = date.atStartOfDay(ZoneId.systemDefault()).toInstant();
+
+                    DataManager.editReminderDate(sharedData, entry, dateInstant);//Write back data
                     entries.remove(position);
                     notifyDataSetChanged();
 
@@ -86,7 +91,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
      * TODO DESCRIBE
      */
     public void add(String task){
-        DataManager.add(context, entries, task);
+        DataManager.add(sharedData, entries, task);
         notifyDataSetChanged();
 
     }
@@ -96,9 +101,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
     public void reset(){
         //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
         entries.clear();
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
-            entries.addAll(db.loadDropped());
-        }
+        entries.addAll(sharedData.database.loadDropped());
         notifyDataSetChanged();
 
     }

@@ -51,13 +51,17 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.espresso.remote.EspressoRemoteMessage;
 
 import android.text.InputFilter;
 import android.view.MotionEvent;
 import android.view.View;
 
 import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.SQLiteHelper;
 import net.berndreiss.zentodo.databinding.ActivityMainBinding;
+import net.berndreiss.zentodo.util.ClientStub;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import android.view.ViewGroup;
@@ -67,6 +71,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -97,7 +102,14 @@ public class MainActivity extends AppCompatActivity {
     TaskListAdapter focusAdapter;
     ListsListAdapter listsListAdapter;
 
+    private SharedData sharedData;
 
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        if (sharedData != null)
+            sharedData.database.close();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,12 +154,19 @@ public class MainActivity extends AppCompatActivity {
             showLists();//show Lists layout
         });
 
-        //layouts are initialized
-        initializeDrop();
-        initializePick();
-        initializeFocus();
-        initializeLists();
+        sharedData = new SharedData(this);
 
+        //layouts are initialized
+        initializeDrop(sharedData);
+        initializePick(sharedData);
+        initializeFocus(sharedData);
+        initializeLists(sharedData);
+
+
+        //Toast.makeText(this, sharedData.database.getToken(8L), Toast.LENGTH_LONG).show();
+
+        //initialze client stub
+        DataManager.initClientStub(sharedData);
 
         //Drop is shown when app starts
         showDrop();
@@ -158,10 +177,10 @@ public class MainActivity extends AppCompatActivity {
      * TODO DESCRIBE
      */
     @SuppressLint("ClickableViewAccessibility")
-    public void initializePick() {
+    public void initializePick(SharedData sharedData) {
 
         //initialize adapter for RecyclerView with all tasks that have been dropped, have been in Focus or are due today
-        pickAdapter = new PickTaskListAdapter(this, false){
+        pickAdapter = new PickTaskListAdapter(sharedData, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick).getLayoutParams();
@@ -171,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         //initialize empty adapters for the other RecyclerViews
-        doNowAdapter = new PickTaskListAdapter(this, true){
+        doNowAdapter = new PickTaskListAdapter(sharedData, true){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doNow).getLayoutParams();
@@ -180,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        doLaterAdapter = new PickTaskListAdapter(this, false){
+        doLaterAdapter = new PickTaskListAdapter(sharedData, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doLater).getLayoutParams();
@@ -189,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        moveToListAdapter = new PickTaskListAdapter(this, false){
+        moveToListAdapter = new PickTaskListAdapter(sharedData, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_list).getLayoutParams();
@@ -221,17 +240,17 @@ public class MainActivity extends AppCompatActivity {
 
                 //if checked reset dropped and focus attributes of all task in tasksToDoNow
                 for (Entry e : doNowAdapter.entries) {
-                    DataManager.setFocus(this, e, true);
-                    DataManager.setDropped(this, e, false);
+                    DataManager.setFocus(sharedData, e, true);
+                    DataManager.setDropped(sharedData, e, false);
                 }
 
                 //set focus to false for all tasks in tasksToDoLater
                 for (Entry e : doLaterAdapter.entries)
-                        DataManager.setFocus(this, e, false);
+                        DataManager.setFocus(sharedData, e, false);
 
                 //set focus to false for all tasks in tasksToMoveToList
                 for (Entry e : moveToListAdapter.entries)
-                        DataManager.setFocus(this, e, false);
+                        DataManager.setFocus(sharedData, e, false);
 
                 //show Focus layout
                 showFocus();
@@ -284,10 +303,10 @@ public class MainActivity extends AppCompatActivity {
      * TODO DESCRIBE
      */
     @SuppressLint("ClickableViewAccessibility")
-    public void initializeDrop(){
+    public void initializeDrop(SharedData sharedData){
 
         //initialize adapter for ListView that shows tasks dropped
-        dropAdapter = new DropTaskListAdapter(this);
+        dropAdapter = new DropTaskListAdapter(sharedData);
 
         //assign ListView
         RecyclerView listView = findViewById(R.id.list_view_drop);
@@ -392,10 +411,10 @@ public class MainActivity extends AppCompatActivity {
      * TODO DESCRIBE
      */
     @SuppressLint("ClickableViewAccessibility")
-    public void initializeFocus(){
+    public void initializeFocus(SharedData sharedData){
 
         //initialize the adapter for the ListView to show the tasks to focus on
-        focusAdapter = new FocusTaskListAdapter(this);
+        focusAdapter = new FocusTaskListAdapter(sharedData);
 
         //assign RecyclerView
         RecyclerView listView = findViewById(R.id.list_view_focus);
@@ -462,7 +481,7 @@ public class MainActivity extends AppCompatActivity {
      * TODO DESCRIBE
      */
     @SuppressLint("ClickableViewAccessibility")
-    public void initializeLists() {
+    public void initializeLists(SharedData sharedData) {
 
         //initialize ListView to show lists available
         ListView listView = findViewById(R.id.list_view_lists);
@@ -479,7 +498,7 @@ public class MainActivity extends AppCompatActivity {
         TextView headerTextView = findViewById(R.id.text_view_lists_header);
         Button headerButton = findViewById(R.id.button_header);
 
-        listsListAdapter = new ListsListAdapter(this, listView, recyclerView, headerLayout, headerTextView, headerButton);
+        listsListAdapter = new ListsListAdapter(sharedData, listView, recyclerView, headerLayout, headerTextView, headerButton);
 
         //set adapter
         listView.setAdapter(listsListAdapter);

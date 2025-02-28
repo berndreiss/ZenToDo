@@ -9,7 +9,9 @@ import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 
 /**
@@ -68,15 +70,17 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
         DatePickerDialog datePickerDialog;
 
         //initialize DatePickerDialog
-        datePickerDialog= new DatePickerDialog(adapter.context, (view, year, month, day) -> {
+        datePickerDialog= new DatePickerDialog(adapter.sharedData.context, (view, year, month, day) -> {
 
             LocalDate date = LocalDate.of(year, month, day);
 
             //for some strange reason the month is returned -1 in the DatePickerDialog
             date = date.plusMonths(1);
 
+            Instant dateInstant = date.atStartOfDay(ZoneId.systemDefault()).toInstant();
+
             //Write back data
-            DataManager.editReminderDate(adapter.context, entry, date);
+            DataManager.editReminderDate(adapter.sharedData, entry, dateInstant);
 
             //change color of reminder date Button marking if Date is set
             adapter.markSet(holder,entry);
@@ -89,10 +93,10 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
 
         }, entryYear, entryMonth, entryDay);
 
-        datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.context.getResources().getString(R.string.cancel), (dialog, which) -> {
+        datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.sharedData.context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
             //set date when task is due to null
-            DataManager.editReminderDate(adapter.context, entry,null);
+            DataManager.editReminderDate(adapter.sharedData, entry,null);
 
             //change color of reminder date Button marking if Date is set
             adapter.markSet(holder,entry);

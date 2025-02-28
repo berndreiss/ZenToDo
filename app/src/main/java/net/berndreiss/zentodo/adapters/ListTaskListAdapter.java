@@ -5,6 +5,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 
@@ -19,8 +20,8 @@ import java.util.List;
 
 public class ListTaskListAdapter extends TaskListAdapter{
 
-    public ListTaskListAdapter(Context context, List<Entry> entries){
-        super(context, entries);
+    public ListTaskListAdapter(SharedData sharedData, List<Entry> entries){
+        super(sharedData, entries);
     }
 
     /** TODO DESCRIBE */
@@ -38,7 +39,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
             Entry entry = entries.get(position);
 
             //remove from data
-            DataManager.remove(context, entries, entry);
+            DataManager.remove(sharedData, entries, entry);
 
             //notify adapter
             notifyDataSetChanged();
@@ -61,10 +62,10 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
                 //set to null if AutoComplete is empty, write back otherwise
                 if (list.trim().isEmpty())
-                    DataManager.editList(context, entries, entry, null);
+                    DataManager.editList(sharedData, entries, entry, null);
 
                 else
-                    DataManager.editList(context, entries, entry, list);
+                    DataManager.editList(sharedData, entries, entry, list);
 
                 //remove entry from adapter
                 entries.remove(position);
@@ -91,11 +92,11 @@ public class ListTaskListAdapter extends TaskListAdapter{
         //swap entries in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                DataManager.swapLists(context, entries, entries.get(i),entries.get(i+1));
+                DataManager.swapLists(sharedData, entries, entries.get(i),entries.get(i+1));
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                DataManager.swapLists(context, entries, entries.get(i),entries.get(i-1));
+                DataManager.swapLists(sharedData, entries, entries.get(i),entries.get(i-1));
             }
         }
 

@@ -27,7 +27,7 @@ public class FocusListener extends BasicListener implements View.OnClickListener
         boolean focused = entry.getFocus();
 
         //change state of focus in entry
-        DataManager.setFocus(adapter.context, entry, !focused);
+        DataManager.setFocus(adapter.sharedData, entry, !focused);
 
         //change color of Focus Button marking whether task is focused or not
         adapter.markSet(holder,entry);

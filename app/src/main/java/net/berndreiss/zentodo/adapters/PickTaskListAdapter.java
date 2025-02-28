@@ -9,12 +9,14 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import net.berndreiss.zentodo.R;
+import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.listeners.BackListListenerPick;
 import net.berndreiss.zentodo.adapters.listeners.PickListener;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListenerPick;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -41,8 +43,8 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
     private PickTaskListAdapter moveToListAdapter;
     private final boolean checkboxTicked;//Tasks that are in the doNowAdapter are ticked
 
-    public PickTaskListAdapter(Context context, boolean checkboxTicked){
-        super(context, new ArrayList<>());
+    public PickTaskListAdapter(SharedData sharedData, boolean checkboxTicked){
+        super(sharedData, new ArrayList<>());
         this.checkboxTicked = checkboxTicked;
     }
 
@@ -92,7 +94,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
                 doNowAdapter.itemCountChanged();
 
                 //(1)
-                if (entry.getReminderDate() != null && entry.getReminderDate().isAfter(LocalDate.now())){
+                if (entry.getReminderDate() != null && entry.getReminderDate().isAfter(Instant.now())){
                     doLaterAdapter.entries.add(entry);
                     doLaterAdapter.notifyDataSetChanged();
                     doLaterAdapter.itemCountChanged();
@@ -134,7 +136,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
             Entry entry = entries.get(position);
 
             //remove entry from data
-            DataManager.remove(context, entries, entry);
+            DataManager.remove(sharedData, entries, entry);
 
             itemCountChanged();
 
@@ -149,13 +151,13 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
         if (entries.get(position).getList() != null){
 
-            String color = DataManager.getListColor(context, entries.get(position).getList());
+            String color = DataManager.getListColor(sharedData, entries.get(position).getList());
             //color = color.substring(2,8);
 
             holder.linearLayout.setBackgroundColor(Color.parseColor( color));
 
         } else{
-            holder.linearLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.color_primary));
+            holder.linearLayout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.color_primary));
 
         }
     }
@@ -167,7 +169,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
         //clear ArrayList for Pick, add current tasks from data and notify adapter (in case they have been altered in another layout)
         entries.clear();
-        entries.addAll(DataManager.getTasksToPick(context));
+        entries.addAll(DataManager.getTasksToPick(sharedData));
 
         //Reset and Update Adapters to reflect changes
         //Also update itemCountChanged, so that RecyclerViews get resized properly

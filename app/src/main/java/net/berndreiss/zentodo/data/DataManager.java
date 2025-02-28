@@ -1,9 +1,22 @@
 package net.berndreiss.zentodo.data;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.widget.Toast;
 
+import androidx.test.espresso.remote.EspressoRemoteMessage;
+
+import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
+import net.berndreiss.zentodo.util.ClientStub;
 
+import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 
 import java.util.List;
@@ -15,38 +28,61 @@ public class DataManager {
     //when they are removed however, the ids are stored in this ArrayList and the tasks are not shown until the next day
     //see also: FocusTaskListAdapter
     private static List<Long> recurringButRemovedFromToday = null;
+    private static ClientStub clientStub;
 
     /** TODO COMMENT */
     public static Map<String, String> listColors = null;
 
-    /**
-     * TODO DESCRIBE
-     * @param context
-     * @param entries
-     * @param task
-     */
-    public static void add(Context context, List<Entry> entries, String task) {
+    public static void initClientStub(SharedData sharedData){
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
+        clientStub = new ClientStub("bd_reiss@yahoo.de", sharedData.database);
 
-            //write changes to database
-            entries.add(db.addEntry(task));
-        }
+        clientStub.setMessagePrinter(message -> {
+            Looper.prepare();
+            new Handler(Looper.getMainLooper()).post(()-> Toast.makeText(sharedData.context, message, Toast.LENGTH_LONG).show());
+            Looper.loop();
+        });
+        Thread thread = new Thread(() -> {
+            clientStub.authenticate(() -> "test");
+        });
+
+        thread.start();
+
 
 
     }
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
+     * @param entries
+     * @param task
+     */
+    public static void add(SharedData sharedData, List<Entry> entries, String task) {
+
+
+            //write changes to database
+            entries.add(sharedData.database.addEntry(task));
+        if (clientStub != null && clientStub.getUser() != null) {
+            Thread thread = new Thread(() -> {
+                entries.forEach(e -> {
+                    clientStub.addNewEntry(e.getId(), e.getTask(), clientStub.getUser().getId(), e.getPosition());
+                });
+            });
+            thread.start();
+        }
+
+    }
+
+    /**
+     * TODO DESCRIBE
+     * @param sharedData
      * @param entries
      * @param entry
      */
-    public static void remove(Context context, List<Entry> entries, Entry entry) {
+    public static void remove(SharedData sharedData, List<Entry> entries, Entry entry) {
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
-            db.removeEntry(entry);
-        }
+            sharedData.database.removeEntry(entry);
 
         entries.remove(entry);
 
@@ -63,17 +99,15 @@ public class DataManager {
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param entries
      * @param entry1
      * @param entry2
      */
-    public static void swap(Context context, List<Entry> entries, Entry entry1, Entry entry2) {
+    public static void swap(SharedData sharedData, List<Entry> entries, Entry entry1, Entry entry2) {
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
             //swap position in Database
-            db.swapEntries(entry1, entry2.getPosition());
-        }
+            sharedData.database.swapEntries(entry1, entry2.getPosition());
         //get positions of items
         int pos1 = getPosition(entries, entry1.getId());
         int pos2 = getPosition(entries, entry2.getId());
@@ -90,17 +124,15 @@ public class DataManager {
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param entries
      * @param entry1
      * @param entry2
      */
-    public static void swapLists(Context context, List<Entry> entries, Entry entry1, Entry entry2) {
+    public static void swapLists(SharedData sharedData, List<Entry> entries, Entry entry1, Entry entry2) {
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
             //swap position in Database
-            db.swapListEntries(entry1, entry2.getListPosition());
-        }
+            sharedData.database.swapListEntries(entry1, entry2.getListPosition());
 
         //get positions of items
         int pos1 = getPosition(entries, entry1.getId());
@@ -133,108 +165,97 @@ public class DataManager {
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param entry
      * @param newTask
      */
-    public static void setTask(Context context, Entry entry, String newTask) {
+    public static void setTask(SharedData sharedData, Entry entry, String newTask) {
         if (entry==null || entry.getTask().equals(newTask))
             return;
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
-            db.updateTask(entry, newTask);
-        }
+        sharedData.database.updateTask(entry, newTask);
         entry.setTask(newTask);
     }
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param entry
      * @param focus
      */
-    public static void setFocus(Context context, Entry entry, Boolean focus) {
+    public static void setFocus(SharedData sharedData, Entry entry, Boolean focus) {
         if (entry==null || entry.getFocus() == focus)
             return;
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
-            db.updateFocus(entry, focus);
-        }
+        sharedData.database.updateFocus(entry, focus);
 
         entry.setFocus(focus);
 
         if (entry.getDropped())
-            setDropped(context, entry, false);
+            setDropped(sharedData, entry, false);
 
     }
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param entry
      * @param dropped
      */
-    public static void setDropped(Context context, Entry entry, Boolean dropped) {
+    public static void setDropped(SharedData sharedData, Entry entry, Boolean dropped) {
         if (entry == null || entry.getDropped() == dropped)
             return;
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
-            db.updateDropped(entry, dropped);
-        }
+        sharedData.database.updateDropped(entry, dropped);
         entry.setDropped(dropped);
     }
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param entry
      * @param date
      */
-    public static void editReminderDate(Context context, Entry entry, LocalDate date) {
+    public static void editReminderDate(SharedData sharedData, Entry entry, Instant date) {
         if (entry == null || entry.getReminderDate() != null && entry.getReminderDate().equals(date))
             return;
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
-            db.updateReminderDate(entry, date);
-        }
-
+        sharedData.database.updateReminderDate(entry, date);
 
         if (entry.getDropped() && entry.getReminderDate() != date)
-            setDropped(context, entry, false);
+            setDropped(sharedData, entry, false);
 
         entry.setReminderDate(date);
     }
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param entry
      * @param recurrence
      */
-    public static void editRecurrence(Context context, Entry entry, String recurrence) {
+    public static void editRecurrence(SharedData sharedData, Entry entry, String recurrence) {
         if (entry == null || entry.getRecurrence() != null && entry.getRecurrence().equals(recurrence))
             return;
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
-            db.updateRecurrence(entry, recurrence);
-        }
+        sharedData.database.updateRecurrence(entry, recurrence);
 
         entry.setRecurrence(recurrence);
         if (entry.getReminderDate() == null)
-            entry.setReminderDate(LocalDate.now());
+            entry.setReminderDate(Instant.now());
 
         if (entry.getDropped() && recurrence != null)
-            setDropped(context, entry, false);
+            setDropped(sharedData, entry, false);
     }
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param entries
      * @param entry
      * @param list
      */
-    public static void editList(Context context, List<Entry> entries, Entry entry, String list) {
+    public static void editList(SharedData sharedData, List<Entry> entries, Entry entry, String list) {
         if (entry == null || entry.getList() != null && entry.getList().equals(list))
             return;
 
@@ -245,74 +266,62 @@ public class DataManager {
             }
         }
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
 
-            db.updateList(entry, list);
-        }
+        sharedData.database.updateList(entry, list);
 
         entry.setList(list);
 
         if (entry.getDropped())
-            setDropped(context, entry, false);
+            setDropped(sharedData, entry, false);
 
     }
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param list
      * @param color
      */
-    public static void editListColor(Context context, String list, String color) {
+    public static void editListColor(SharedData sharedData, String list, String color) {
         if (listColors == null) {
-            try (SQLiteHelper db = new SQLiteHelper(context)) {
-                listColors = db.getListColors();
-            }
+            listColors = sharedData.database.getListColors();
         }
 
         listColors.put(list, color);
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
-            db.updateListColor(list, color);
-        }
+        sharedData.database.updateListColor(list, color);
     }
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param list
      * @return
      */
-    public static String getListColor(Context context, String list){
+    public static String getListColor(SharedData sharedData, String list){
 
         if (listColors == null){
-            try (SQLiteHelper db = new SQLiteHelper(context)) {
-                listColors = db.getListColors();
-            }
+                listColors = sharedData.database.getListColors();
         }
 
         String color = listColors.get(list);
         return color == null ? ListTaskListAdapter.DEFAULT_COLOR : color;
     }
 
-    public static List<Entry> getDropped(Context context) {
-        try (SQLiteHelper db = new SQLiteHelper(context)){
-            return db.loadDropped();
-        }
+    public static List<Entry> getDropped(SharedData sharedData) {
+        return sharedData.database.loadDropped();
     }
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @return
      */
-    public static List<String> getLists(Context context){
+    public static List<String> getLists(SharedData sharedData){
 
         List<String> lists;
 
-        try (SQLiteHelper db = new SQLiteHelper(context)){
-            lists = db.getLists();
-        }
+        lists = sharedData.database.getLists();
         lists.add("ALL TASKS");
         lists.add("No list");
         return lists;
@@ -320,11 +329,11 @@ public class DataManager {
 
     /**
      * TODO DESCRIBE
-     * @param context
+     * @param sharedData
      * @param entry
      * @param today
      */
-    public static void setRecurring(Context context, Entry entry, LocalDate today) {
+    public static void setRecurring(SharedData sharedData, Entry entry, LocalDate today) {
 
         //get recurrence as <['d'/'w'/'m'/'y']['0'-'9']['0'-'9']['0'-'9']...> (i.e. "d15" means the task repeats every 15 days)
         String recurrence = entry.getRecurrence();
@@ -344,42 +353,40 @@ public class DataManager {
         int offSet = Integer.parseInt(offSetStr.toString());
 
         //get reminder date
-        LocalDate date = entry.getReminderDate();
+        Instant date = entry.getReminderDate();
+
+        Instant todayInstant = today.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
         if (date == null) {
-            date = today;
+            date = todayInstant;
         }
 
+        if (date == null)
+            throw new DateTimeException("The provided date could not be converted to Instant.");
+
         //increment date by offset and repeat until it is greater than today
-        while (!date.isAfter(today)) {
+        while (!date.isAfter(todayInstant)) {
             date = incrementRecurring(mode, date, offSet);
         }
 
         //write reminder date to entries
         entry.setReminderDate(date);
 
-        try(SQLiteHelper db = new SQLiteHelper(context)) {
-            //write reminder date to Database
-            db.updateReminderDate(entry, date);
-        }
+        //write reminder date to Database
+        sharedData.database.updateReminderDate(entry, date);
 
     }
 
     //return date incremented by offset
-    private static LocalDate incrementRecurring(char mode, LocalDate date, int offSet) {
+    private static Instant incrementRecurring(char mode, Instant date, int offSet) {
 
-        switch(mode){
-            case 'd':
-                return date.plusDays(offSet);
-            case 'w':
-                return date.plusWeeks(offSet);
-            case 'm':
-                return date.plusMonths(offSet);
-            case 'y':
-                return date.plusYears(offSet);
-            default:
-                return date;
-        }
+        return switch (mode) {
+            case 'd' -> date.plus(offSet, ChronoUnit.DAYS);
+            case 'w' -> date.plus(offSet, ChronoUnit.WEEKS);
+            case 'm' -> date.plus(offSet, ChronoUnit.MONTHS);
+            case 'y' -> date.plus(offSet, ChronoUnit.YEARS);
+            default -> date;
+        };
 
     }
 
@@ -387,47 +394,35 @@ public class DataManager {
 
 
     //add ids to recurringButRemovedFromToday and make a call to the database making changes permanent
-    public static void addToRecurringButRemoved(Context context, long id){
+    public static void addToRecurringButRemoved(SharedData sharedData, long id){
 
         if (recurringButRemovedFromToday == null)
-            try(SQLiteHelper db = new SQLiteHelper(context)){
-                recurringButRemovedFromToday = db.loadRecurring();
-            }
+            recurringButRemovedFromToday = sharedData.database.loadRecurring();
         recurringButRemovedFromToday.add(id);
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
-            db.saveRecurring(recurringButRemovedFromToday);
-        }
+        sharedData.database.saveRecurring(recurringButRemovedFromToday);
 
     }
 
     //remove ids from recurringButRemovedFromToday and make a call to the database making changes permanent
-    public static void removeFromRecurringButRemoved(Context context, long id){
+    public static void removeFromRecurringButRemoved(SharedData sharedData, long id){
         if (recurringButRemovedFromToday == null)
-            try(SQLiteHelper db = new SQLiteHelper(context)){
-                recurringButRemovedFromToday = db.loadRecurring();
-            }
+            recurringButRemovedFromToday = sharedData.database.loadRecurring();
         for (int i = 0; i < recurringButRemovedFromToday.size(); i++)
             if (recurringButRemovedFromToday.get(i)==id) {
                 recurringButRemovedFromToday.remove(i);
                 break;
             }
 
-        try (SQLiteHelper db = new SQLiteHelper(context)) {
-            db.saveRecurring(recurringButRemovedFromToday);
-        }
+        sharedData.database.saveRecurring(recurringButRemovedFromToday);
 
     }
 
-    public static List<Entry> getFocus(Context context) {
-        try(SQLiteHelper db = new SQLiteHelper(context)){
-            return db.loadFocus();
-        }
+    public static List<Entry> getFocus(SharedData sharedData) {
+        return sharedData.database.loadFocus();
     }
 
-    public static List<Entry> getTasksToPick(Context context) {
-        try (SQLiteHelper db = new SQLiteHelper(context)){
-           return db.loadTasksToPick();
-        }
+    public static List<Entry> getTasksToPick(SharedData sharedData) {
+        return sharedData.database.loadTasksToPick();
     }
 }

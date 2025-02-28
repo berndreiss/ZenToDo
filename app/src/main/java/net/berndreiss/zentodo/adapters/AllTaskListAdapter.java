@@ -5,6 +5,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 
@@ -17,8 +18,8 @@ import java.util.List;
  */
 public class AllTaskListAdapter extends TaskListAdapter{
 
-    AllTaskListAdapter(Context context, List<Entry> entries){
-        super(context, entries);
+    AllTaskListAdapter(SharedData sharedData, List<Entry> entries){
+        super(sharedData, entries);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -33,7 +34,7 @@ public class AllTaskListAdapter extends TaskListAdapter{
             Entry entry = entries.get(position);
 
             //remove from data
-            DataManager.remove(context, entries, entry);
+            DataManager.remove(sharedData, entries, entry);
 
             //notify adapter
             notifyDataSetChanged();

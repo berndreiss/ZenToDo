@@ -34,16 +34,16 @@ public class CheckBoxListener extends BasicListener implements View.OnClickListe
         //if recurring do not remove but set new reminder date, otherwise remove from data
         if (recurring) {
             //calculate new reminder date and write to data and entries
-            DataManager.setRecurring(adapter.context, entry, LocalDate.now());
+            DataManager.setRecurring(adapter.sharedData, entry, LocalDate.now());
 
             //reset focus in data and entries
-            DataManager.setFocus(adapter.context, entry, false);
+            DataManager.setFocus(adapter.sharedData, entry, false);
 
             adapter.entries.remove(position);
 
             adapter.notifyItemChanged(position);
         } else {
-            DataManager.remove(adapter.context, adapter.entries, entry);
+            DataManager.remove(adapter.sharedData, adapter.entries, entry);
         }
 
         adapter.notifyDataSetChanged();

@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import net.berndreiss.zentodo.R;
+import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
@@ -38,7 +39,7 @@ import java.util.List;
  */
 public class ListsListAdapter extends ArrayAdapter<String> {
 
-    private final Context context;
+    private final SharedData sharedData;
     private final ListView listView;//ListView to show lists (recyclerView is disabled before choosing)
     private final RecyclerView recyclerView;//RecyclerView for showing tasks of list chosen (listView gets disabled)
     private final List<String> lists;//Dynamically generated Array of all lists in data
@@ -62,7 +63,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         Button colorButton;
 
         @SuppressLint("NotifyDataSetChanged")
-        Header(Context context, LinearLayout layout, TextView headerText, Button colorButton){
+        Header(SharedData sharedData, LinearLayout layout, TextView headerText, Button colorButton){
             this.layout = layout;
             this.headerText = headerText;
             this.colorButton = colorButton;
@@ -74,7 +75,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
             //set color choosing dialog
             this.colorButton.setOnClickListener(view -> ColorPickerDialogBuilder
-                    .with(context)
+                    .with(sharedData.context)
                     .setTitle("Choose color")
                     .initialColor(Color.parseColor(headerColor))
                     //.showAlphaSlider(false)
@@ -98,20 +99,20 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                         //set header color to chosen color or default if white is chosen
                         if (color.startsWith("ffffff", 3)) {
 
-                            this.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
+                            this.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
 
                         } else {
 
                             this.layout.setBackgroundColor(Color.parseColor(color));
 
                         }
-                        DataManager.editListColor(context, headerText.getText().toString(), color);
+                        DataManager.editListColor(sharedData, headerText.getText().toString(), color);
                         listsTaskListAdapter.notifyDataSetChanged();
 
                     })
                     .setNegativeButton("no color", (dialog, which) -> {
-                        this.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
-                        DataManager.editListColor(context, headerText.getText().toString(), ListTaskListAdapter.DEFAULT_COLOR);
+                        this.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
+                        DataManager.editListColor(sharedData, headerText.getText().toString(), ListTaskListAdapter.DEFAULT_COLOR);
                         listsTaskListAdapter.notifyDataSetChanged();
 
                     })
@@ -122,15 +123,15 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
     }
 
-    public ListsListAdapter(Context context, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton){
-        super(context, R.layout.lists_row, DataManager.getLists(context));
-        this.context=context;
-        this.lists = DataManager.getLists(context);
+    public ListsListAdapter(SharedData sharedData, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton){
+        super(sharedData.context, R.layout.lists_row, DataManager.getLists(sharedData));
+        this.sharedData=sharedData;
+        this.lists = DataManager.getLists(sharedData);
         this.listView = listView;
         this.recyclerView = recyclerView;
         recyclerView.setVisibility(View.GONE);
 
-        header = new Header(context, headerLayout, headerTextView, headerButton);
+        header = new Header(sharedData, headerLayout, headerTextView, headerButton);
 
         this.headerColor = standardColor;
     }
@@ -147,7 +148,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         if(convertView==null){
 
             //create holder
-            holder = new ListsListAdapter.ViewHolder(); LayoutInflater inflater = (LayoutInflater) context
+            holder = new ListsListAdapter.ViewHolder(); LayoutInflater inflater = (LayoutInflater) sharedData.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             //set row layout
@@ -181,18 +182,16 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             listView.setVisibility(View.GONE);
 
             //fill ListView with all tasks or according list
-            if (holder.button.getText().equals(context.getResources().getString(R.string.allTasks))){
+            if (holder.button.getText().equals(sharedData.context.getResources().getString(R.string.allTasks))){
 
                 //clear ArrayList for list, add all tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
-                try (SQLiteHelper db = new SQLiteHelper(context)) {
-                    listTasks.addAll(db.getEntriesOrderedByDate());
-                }
+                listTasks.addAll(sharedData.database.getEntriesOrderedByDate());
 
                 //set header text
-                header.headerText.setText(context.getResources().getString(R.string.allTasks));
+                header.headerText.setText(sharedData.context.getResources().getString(R.string.allTasks));
 
-                header.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
+                header.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
 
                 headerColor = standardColor;
 
@@ -202,7 +201,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 if (allTasksAdapter == null) {
 
                     //initialize and set adapter
-                    allTasksAdapter = new AllTaskListAdapter(context, listTasks);
+                    allTasksAdapter = new AllTaskListAdapter(sharedData, listTasks);
                     recyclerView.setAdapter(allTasksAdapter);//set adapter
 
                 } else{
@@ -211,19 +210,17 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 }
 
-            } else if (holder.button.getText().equals(context.getResources().getString(R.string.noList))) {
+            } else if (holder.button.getText().equals(sharedData.context.getResources().getString(R.string.noList))) {
 
                 //clear ArrayList for list, add tasks without a list from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
 
-                try (SQLiteHelper db = new SQLiteHelper(context)) {
-                    listTasks.addAll(db.getNoList());
-                }
+                listTasks.addAll(sharedData.database.getNoList());
 
                 //set header text
-                header.headerText.setText(context.getResources().getString(R.string.noList));
+                header.headerText.setText(sharedData.context.getResources().getString(R.string.noList));
 
-                header.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
+                header.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
 
                 headerColor = standardColor;
 
@@ -233,7 +230,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 if (noListAdapter == null) {
 
                     //initialize and set adapter
-                    noListAdapter = new NoListTaskListAdapter(context, listTasks);
+                    noListAdapter = new NoListTaskListAdapter(sharedData, listTasks);
                     recyclerView.setAdapter(noListAdapter);
 
                 }else{
@@ -250,19 +247,19 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //set header text
                 header.headerText.setText(list);
 
-                String color = DataManager.getListColor(context, list);
+                String color = DataManager.getListColor(sharedData, list);
                 if (color == null)
                     color = ListTaskListAdapter.DEFAULT_COLOR;
                 //set color of header to default if color is white, set it to color otherwise
                 if (color.startsWith("ffffff", 3)) {
 
-                    header.layout.setBackgroundColor(ContextCompat.getColor(context, R.color.header_background));
+                    header.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
 
                     headerColor = standardColor;
 
                 } else{
 
-                    color = DataManager.getListColor(context, list);
+                    color = DataManager.getListColor(sharedData, list);
 
                     header.layout.setBackgroundColor(Color.parseColor(color));
 
@@ -272,14 +269,12 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //clear ArrayList for list, add current tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
-                try (SQLiteHelper db = new SQLiteHelper(context)) {
-                    listTasks.addAll(db.loadList(list));
-                }
+                listTasks.addAll(sharedData.database.loadList(list));
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if(listsTaskListAdapter==null){
                     //initialize and set adapter
-                    listsTaskListAdapter = new ListTaskListAdapter(context, listTasks);
+                    listsTaskListAdapter = new ListTaskListAdapter(sharedData, listTasks);
                     recyclerView.setAdapter(listsTaskListAdapter);
 
                     //allows items to be moved and reordered in RecyclerView
@@ -297,7 +292,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
 
             }
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            recyclerView.setLayoutManager(new LinearLayoutManager(sharedData.context));
 
         });
 
@@ -322,7 +317,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
         //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
         lists.clear();
-        lists.addAll(DataManager.getLists(context));
+        lists.addAll(DataManager.getLists(sharedData));
         notifyDataSetChanged();
 
     }

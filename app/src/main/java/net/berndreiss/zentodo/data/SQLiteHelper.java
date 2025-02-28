@@ -5,14 +5,23 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import android.widget.Toast;
 
 import net.berndreiss.zentodo.MainActivity;
 import net.berndreiss.zentodo.OperationType;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
 import net.berndreiss.zentodo.util.ZenMessage;
+import net.berndreiss.zentodo.util.ZenServerMessage;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -28,6 +37,9 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 /**
  * TODO DESCRIBE
@@ -66,7 +78,13 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         String query = "CREATE TABLE LISTS (NAME TEXT PRIMARY KEY, COLOR TEXT DEFAULT '" + ListTaskListAdapter.DEFAULT_COLOR + "')";
         db.execSQL(query);
 
-        query = "CREATE TABLE USERS (NAME TEXT DEFAULT NULL, MAIL TEXT PRIMARY KEY)";
+        query = "CREATE TABLE USERS (ID INTEGER PRIMARY KEY, MAIL TEXT NOT NULL, NAME TEXT DEFAULT NULL, ENABLED INTEGER DEFAULT 0, DEVICE INTEGER NOT NULL)";
+        db.execSQL(query);
+
+        query = "CREATE TABLE QUEUE (TYPE INTEGER NOT NULL, ID INTEGER PRIMARY KEY AUTOINCREMENT, TIMESTAMP INTEGER NOT NULL, USER_ID INTEGER NOT NULL, ARGUMENTS TEXT NOT NULL)";
+        db.execSQL(query);
+
+        query = "CREATE TABLE TOKENS (USER INTEGER PRIMARY KEY, TOKEN TEXT NOT NULL)";
         db.execSQL(query);
 
         query = "CREATE INDEX IDX_FOCUS ON ENTRIES(FOCUS)";
@@ -97,7 +115,6 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         List<Entry> entries = getList(cursor);
 
         cursor.close();
-        db.close();
 
         if (entries.isEmpty())
             return null;
@@ -109,11 +126,6 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     public void post(List<Entry> entries){
 
         //TODO implement
-    }
-
-    @Override
-    public void addNewEntry(long l, String s, Long aLong) {
-
     }
 
 
@@ -144,7 +156,6 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
             }
         }
 
-        db.close();
         return addEntry(id, task);
     }
 
@@ -178,7 +189,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         values.put("POSITION", maxPosition+1);
 
         db.insert("ENTRIES",null,values);
-        db.close();
+        ;
 
         return new Entry(id, maxPosition+1, task, null);
     }
@@ -193,7 +204,12 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         db.execSQL("UPDATE ENTRIES SET POSITION=POSITION-1 WHERE POSITION >?", new String[]{String.valueOf(entry.getPosition())});
         if (entry.getList() != null)
             db.execSQL("UPDATE ENTRIES SET LIST_POSITION=LIST_POSITION-1 WHERE LIST=? AND LIST_POSITION>?", new String[]{entry.getList(), String.valueOf(entry.getListPosition())});
-        db.close();
+        ;
+    }
+
+    @Override
+    public void addNewEntry(long id, String task, Long userId, int position) {
+
     }
 
     @Override
@@ -207,8 +223,8 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         removeEntry(entry);
     }
 
-    public void updateReminderDate(Entry entry, LocalDate value){
-        updateReminderDate(entry.getId(), value == null ? null : value.atStartOfDay(ZoneOffset.UTC).toEpochSecond());
+    public void updateReminderDate(Entry entry, Instant value){
+        updateReminderDate(entry.getId(), value == null ? null : value.toEpochMilli());
     }
 
     @Override
@@ -217,7 +233,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         values.put("REMINDER_DATE", value);
         SQLiteDatabase db = this.getWritableDatabase();
         db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
-        db.close();
+        ;
     }
 
     void updateTask(Entry entry, String value){
@@ -230,7 +246,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         values.put("TASK", value == null ? "" : value);
         SQLiteDatabase db = this.getWritableDatabase();
         db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
-        db.close();
+        ;
     }
 
     void updateRecurrence(Entry entry, String value){
@@ -242,10 +258,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         ContentValues values = new ContentValues();
         values.put("RECURRENCE", value);
         if (reminderDate == null)
-            values.put("REMINDER_DATE", dateToEpoch(LocalDate.now()));
+            values.put("REMINDER_DATE", dateToEpoch(Instant.now()));
         SQLiteDatabase db = this.getWritableDatabase();
         db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
-        db.close();
+        ;
 
     }
 
@@ -303,7 +319,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
             db.execSQL("DELETE FROM LISTS WHERE NOT EXISTS ( SELECT 1 FROM ENTRIES WHERE LIST=NAME AND LIST=?)", new String[]{entry.getList()});
         }
 
-        db.close();
+        ;
     }
 
     void updateFocus(Entry entry, boolean valueBool){
@@ -316,7 +332,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("UPDATE ENTRIES SET FOCUS=? WHERE ID=?;", new String[]{String.valueOf(value), String.valueOf(id)});
-        db.close();
+        ;
     }
 
     void updateDropped(Entry entry, boolean valueBool){
@@ -329,7 +345,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         //convert bool to int
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("UPDATE ENTRIES SET DROPPED=? WHERE ID=?;",  new String[]{String.valueOf(value), String.valueOf(id)});
-        db.close();
+        ;
     }
 
     @Override
@@ -346,7 +362,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
             db.insert("LISTS", null, values);
         }
 
-        db.close();
+        ;
     }
 
     @Override
@@ -372,7 +388,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         List<Entry> entries = getList(cursor);
 
         cursor.close();
-        db.close();
+        ;
 
         return entries;
     }
@@ -385,7 +401,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        long epoch = dateToEpoch(LocalDate.now());
+        long epoch = dateToEpoch(Instant.now());
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE FOCUS>0 OR (RECURRENCE IS NOT NULL AND REMINDER_DATE <= " + epoch +  ")" +
                 " ORDER BY POSITION", null);
@@ -395,7 +411,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         List<Long> removed = loadRecurring();
 
         cursor.close();
-        db.close();
+        ;
 
         return new ArrayList<>(entries.stream().filter(e -> e.getFocus() || !removed.contains(e.getId())).toList());
     }
@@ -413,7 +429,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         List<Entry> entries = getList(cursor);
 
         cursor.close();
-        db.close();
+        ;
 
         return entries;
     }
@@ -432,7 +448,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         List<Entry> entries = getList(cursor);
 
         cursor.close();
-        db.close();
+        ;
 
         return entries;
     }
@@ -464,7 +480,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
 
             if (reminderDateEpoch != 0) {
-                LocalDate reminderDate = epochToDate(reminderDateEpoch);
+                Instant reminderDate = epochToDate(reminderDateEpoch);
 
                 if (reminderDate != null)
                     entry.setReminderDate(reminderDate);
@@ -501,7 +517,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
             cursor.moveToNext();
         }
         cursor.close();
-        db.close();
+        ;
 
         return lists;
 
@@ -532,7 +548,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
 
         cursor.close();
-        db.close();
+        ;
         return lists;
     }
 
@@ -555,7 +571,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         }
 
         cursor.close();
-        db.close();
+        ;
 
         return map;
     }
@@ -581,7 +597,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         db.update("ENTRIES", values0, "ID=?", new String[]{String.valueOf(entry.getId())});
 
         //clean up
-        db.close();
+        ;
     }
 
     @Override
@@ -603,7 +619,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         db.update("ENTRIES", values0, "ID=?", new String[]{String.valueOf(entry.getId())});
 
         //clean up
-        db.close();
+        ;
 
     }
 
@@ -630,8 +646,8 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
      * @param epoch
      * @return
      */
-    public static LocalDate epochToDate(long epoch){
-        return Instant.ofEpochSecond(epoch).atZone(ZoneOffset.UTC).toLocalDate();
+    public static Instant epochToDate(long epoch){
+        return Instant.ofEpochMilli(epoch);
     }
 
     /**
@@ -639,8 +655,8 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
      * @param date
      * @return
      */
-    public static long dateToEpoch(LocalDate date){
-        return date.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+    public static long dateToEpoch(Instant date){
+        return date.toEpochMilli();
     }
 
     /**
@@ -717,7 +733,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
         List<Entry> entries = getList(cursor);
         cursor.close();
-        db.close();
+        ;
 
         return  entries;
 
@@ -734,7 +750,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
         List<Entry> entries = getList(cursor);
         cursor.close();
-        db.close();
+        ;
 
         return  entries;
     }
@@ -747,7 +763,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
         List<Entry> tasksToPick;
 
-        long epoch = dateToEpoch(LocalDate.now());
+        long epoch = dateToEpoch(Instant.now());
 
         /*
          *  for all entries:
@@ -774,7 +790,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         tasksToPick = getList(cursor);
 
         cursor.close();
-        db.close();
+        ;
 
         return  tasksToPick;
     }
@@ -792,26 +808,104 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         //TODO implement
     }
 
-    @Override
-    public void addToQueue(OperationType type, List<Object> arguments) {
 
-        //TODO implement
+    @Override
+    public void addToQueue(long userId, ZenServerMessage message) {
+
+        Log.v("TEST", "INSERT INTO QUEUE");
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("{");
+
+        if (!message.getArguments().isEmpty()) {
+            sb.append(message.getArguments().get(1).toString());
+            message.getArguments().stream().skip(1).forEach(o -> sb.append(",").append(o.toString()));
+        }
+        sb.append("}");
+        String arguments = sb.toString();
+
+
+        values.put("TYPE", String.valueOf(message.getType().ordinal()));
+        values.put("ARGUMENTS", arguments);
+        values.put("TIMESTAMP", dateToEpoch(message.getTimeStamp()));
+        values.put("USER_ID", userId);
+
+        db.insert("QUEUE", null, values);
+
+        Cursor cursor = db.rawQuery("SELECT * FROM QUEUE", null);
+
+        cursor.moveToFirst();
+
+        if (cursor.isAfterLast())
+            Log.v("TEST", "NO ENTRIES");
+        else
+            Log.v("TEST", String.valueOf(cursor.getLong(1)));
+
+        cursor.close();
+
+        Log.v("TEST", "INSERT INTO QUEUE");
+        ;
+
     }
 
     @Override
-    public List<ZenMessage> geQueued() {
+    public List<ZenServerMessage> getQueued(long userId) {
         //TODO implement
         return Collections.emptyList();
     }
 
     @Override
-    public void addUser(long id, String email, String userName) {
+    public User addUser(long id, String email, String userName, long device) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put("ID", id);
+        values.put("MAIL", email);
+        values.put("NAME", userName);
+        values.put("DEVICE", device);
+
+        db.insert("USERS", null, values);
+
+        return new User(id, email, userName, device);
+
+    }
+
+    @Override
+    public void removeUser(long l) {
 
     }
 
     @Override
     public User getUserByEmail(String email) {
-        return null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM USERS WHERE MAIL=?", new String[]{email});
+
+        User user = null;
+
+        cursor.moveToFirst();
+
+        if (!cursor.isAfterLast()){
+
+            long id = cursor.getLong(0);
+            String mail = cursor.getString(1);
+            String name = cursor.getString(2);
+            boolean enabled = intToBool(cursor.getInt(3));
+            long device = cursor.getLong(4);
+
+            Log.v("TTTTTTTTTTTTT", String.valueOf(device));
+            user = new User(id, mail, name, device);
+            user.setEnabled(enabled);
+            Log.v("UUUUUUUUUUUUU", String.valueOf(user.getDevice()));
+        }
+
+        cursor.close();
+        ;
+        return user;
     }
 
     @Override
@@ -821,22 +915,64 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
     @Override
     public boolean isEnabled(String email) {
-        return false;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT ENABLED FROM USERS WHERE MAIL=?", new String[]{email});
+
+        cursor.moveToFirst();
+
+        boolean enabled = false;
+
+        if (!cursor.isAfterLast())
+            enabled = intToBool(cursor.getInt(0));
+
+        cursor.close();
+        ;
+
+        return enabled;
     }
 
     @Override
     public void enableUser(String email) {
 
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put("ENABLED", 1);
+
+        db.update("USERS", values, "MAIL=?", new String[]{email});
+        ;
+    }
+
+    @Override
+    public void setDevice(String s, long l) {
+
     }
 
     @Override
     public String getToken(long user) {
-        return "";
+        try (SQLiteDatabase db = this.getReadableDatabase()) {
+
+            try(Cursor cursor = db.rawQuery("SELECT TOKEN FROM TOKENS WHERE USER=?", new String[]{String.valueOf(user)})) {
+
+                cursor.moveToFirst();
+                if (cursor.isAfterLast())
+                    return null;
+                return cursor.getString(0);
+            }
+        }
     }
 
     @Override
     public void setToken(long user, String token) {
 
+        try (SQLiteDatabase db = this.getWritableDatabase()){
+            ContentValues values = new ContentValues();
+            values.put("USER", user);
+            values.put("TOKEN", token);
+            db.insertWithOnConflict("TOKENS", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        }
     }
 
 }

@@ -9,6 +9,7 @@ import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 /**
@@ -44,7 +45,7 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
 
         //if editText was empty or value=0 then recurrence is set to null, otherwise number and interval are written back
         if (intervalInt == 0){
-            DataManager.editRecurrence(adapter.context, entry, null);
+            DataManager.editRecurrence(adapter.sharedData, entry, null);
         }
         else{
             //String that will be written back
@@ -57,10 +58,10 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
             recurrence += interval;
 
             //write back
-            DataManager.editRecurrence(adapter.context, entry,recurrence);
+            DataManager.editRecurrence(adapter.sharedData, entry,recurrence);
 
             if (adapter instanceof DropTaskListAdapter || adapter instanceof PickTaskListAdapter) {
-                DataManager.editReminderDate(adapter.context, entry, LocalDate.now());
+                DataManager.editReminderDate(adapter.sharedData, entry, Instant.now());
                 adapter.entries.remove(position);
                 adapter.notifyDataSetChanged();
                 if (adapter instanceof PickTaskListAdapter)

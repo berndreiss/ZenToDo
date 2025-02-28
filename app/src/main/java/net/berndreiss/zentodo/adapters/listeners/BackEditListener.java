@@ -31,7 +31,7 @@ public class BackEditListener extends BasicListener implements View.OnClickListe
         if (!newTask.isEmpty()) {
 
             //save new task description in data
-            DataManager.setTask(adapter.context, entry, newTask);
+            DataManager.setTask(adapter.sharedData, entry, newTask);
 
             //notify adapter
             adapter.notifyItemChanged(position);

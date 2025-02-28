@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import net.berndreiss.zentodo.R;
+import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.listeners.BackEditListener;
 import net.berndreiss.zentodo.adapters.listeners.BackListListener;
 import net.berndreiss.zentodo.adapters.listeners.BackRecurrenceListener;
@@ -129,12 +130,12 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
     public List<Entry> entries;//ArrayList that holds task shown in RecyclerView
 
     /** TODO COMMENT */
-    public Context context;
+    public SharedData sharedData;
 
     /** TODO COMMENT */
-    public TaskListAdapter(Context context, List<Entry> entries){
+    public TaskListAdapter(SharedData sharedData, List<Entry> entries){
+        this.sharedData = sharedData;
         this.entries = entries;
-        this.context = context;
     }
 
     @NonNull
@@ -163,7 +164,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         //Creating adapter for spinner with entries days/weeks/months/years
         /* Adapter has to be declared here so that the dropdown element of the spinner is not shown in the background */
         /* I do not understand why, but this fixed it */
-        ArrayAdapter<CharSequence> adapterSpinner = ArrayAdapter.createFromResource(context,R.array.time_interval, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> adapterSpinner = ArrayAdapter.createFromResource(sharedData.context, R.array.time_interval, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
         holder.spinnerRecurrence.setAdapter(adapterSpinner);
 
         //setting default row layout visible and active and all others to invisible and invalid
@@ -222,13 +223,11 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
             //set list row view
             setList(holder);
 
-            SQLiteHelper db = new SQLiteHelper(context);
             //array of names of all lists in task (as singletons)
-            List<String> array = db.getLists();
-            db.close();
+            List<String> array = sharedData.database.getLists();
 
             //initialize adapter with all existing list options
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, array);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(sharedData.context, android.R.layout.simple_list_item_1, array);
 
             //edit Text that autocompletes with already existing lists
             holder.autoCompleteList.setAdapter(adapter);
@@ -375,11 +374,11 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         //swap entries in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                DataManager.swap(context, entries, entries.get(i),entries.get(i+1));
+                DataManager.swap(sharedData, entries, entries.get(i),entries.get(i+1));
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                DataManager.swap(context, entries, entries.get(i),entries.get(i-1));
+                DataManager.swap(sharedData, entries, entries.get(i),entries.get(i-1));
             }
         }
 
@@ -427,32 +426,32 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         //Set date button to alternative color if !=0, original color otherwise
         if (entry.getReminderDate()!=null){
 
-            holder.setDate.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt_edited));
+            holder.setDate.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
 
         }else{
-            holder.setDate.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt));
+            holder.setDate.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
         }
 
         //Set recurrence button to alternative color if !isEmpty(), original color otherwise
         if (entry.getRecurrence()!=null){
-            holder.recurrence.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt_edited));
+            holder.recurrence.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
         }else{
-            holder.recurrence.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt));
+            holder.recurrence.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
         }
 
         //Set list button to alternative color if !isEmpty(), original color otherwise
         if (entry.getList()!=null){
-            holder.setList.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt_edited));
+            holder.setList.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
         }else{
-            holder.setList.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt));
+            holder.setList.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
         }
 
         if (entry.getFocus()){
-            holder.focus.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt_edited));
+            holder.focus.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
 
 
         } else{
-            holder.focus.setBackground(ContextCompat.getDrawable(context, R.drawable.button_alt));
+            holder.focus.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
         }
 
     }
