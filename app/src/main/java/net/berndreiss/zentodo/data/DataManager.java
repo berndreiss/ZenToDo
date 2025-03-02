@@ -10,6 +10,8 @@ import androidx.test.espresso.remote.EspressoRemoteMessage;
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
 import net.berndreiss.zentodo.util.ClientStub;
+import net.berndreiss.zentodo.util.Status;
+import net.berndreiss.zentodo.util.ZenServerMessage;
 
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -21,6 +23,7 @@ import java.util.Collections;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class DataManager {
 
@@ -33,22 +36,39 @@ public class DataManager {
     /** TODO COMMENT */
     public static Map<String, String> listColors = null;
 
-    public static void initClientStub(SharedData sharedData){
+    public static void initClientStub(SharedData sharedData, String email) throws InterruptedException {
 
-        clientStub = new ClientStub("bd_reiss@yahoo.de", sharedData.database);
+        clientStub = new ClientStub(email, sharedData.database);
 
-        clientStub.setMessagePrinter(message -> {
+
+        boolean userExists = sharedData.database.getUserByEmail(email) != null;
+
+        Log.v("USEREXISTS", String.valueOf(userExists));
+
+        Consumer<String> messagePrinter = message -> {
             Looper.prepare();
             new Handler(Looper.getMainLooper()).post(()-> Toast.makeText(sharedData.context, message, Toast.LENGTH_LONG).show());
-            Looper.loop();
-        });
+        };
+
+        clientStub.setMessagePrinter(messagePrinter);
+        clientStub.addOperationHandler(sharedData.uiOperationHandler);
+
         Thread thread = new Thread(() -> {
-            clientStub.authenticate(() -> "test");
+            clientStub.init(() -> "test");
         });
 
         thread.start();
+        thread.join();
 
-
+        //for some strange reason Android refuses to establish a connection with the server
+        //when the user is created locally for the first time, so we have to init again
+        if (!userExists) {
+            Log.v("TEST", "THREAD2");
+            thread = new Thread(() -> {
+                clientStub.init(() -> "test");
+            });
+            thread.start();
+        }
 
     }
 
@@ -61,13 +81,17 @@ public class DataManager {
     public static void add(SharedData sharedData, List<Entry> entries, String task) {
 
 
-            //write changes to database
-            entries.add(sharedData.database.addEntry(task));
+        //write changes to database
+        Entry entry = sharedData.database.addEntry(task);
+        entries.add(entry);
+        Log.v("TEST", "USER NULL: " + String.valueOf(clientStub.getUser() == null));
         if (clientStub != null && clientStub.getUser() != null) {
             Thread thread = new Thread(() -> {
-                entries.forEach(e -> {
-                    clientStub.addNewEntry(e.getId(), e.getTask(), clientStub.getUser().getId(), e.getPosition());
-                });
+                clientStub.addNewEntry(
+                        entry.getId(),
+                        entry.getTask(),
+                        clientStub.getUser().getId(),
+                        entry.getPosition());
             });
             thread.start();
         }

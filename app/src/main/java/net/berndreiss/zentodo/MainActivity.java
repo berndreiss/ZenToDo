@@ -54,6 +54,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.espresso.remote.EspressoRemoteMessage;
 
 import android.text.InputFilter;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -166,7 +167,11 @@ public class MainActivity extends AppCompatActivity {
         //Toast.makeText(this, sharedData.database.getToken(8L), Toast.LENGTH_LONG).show();
 
         //initialze client stub
-        DataManager.initClientStub(sharedData);
+        try {
+            DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         //Drop is shown when app starts
         showDrop();
@@ -265,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     public void showPick(){
 
+        sharedData.uiOperationHandler.adapter = pickAdapter;
         //Reset and Update Adapters to reflect changes
         //Also update itemCountChanged, so that RecyclerViews get resized properly
         pickAdapter.reset();
@@ -360,10 +366,9 @@ public class MainActivity extends AppCompatActivity {
             editText.setText("");
 
             //add task to Data if it is not empty
-            if (!task.trim().isEmpty()) {
+            if (!task.trim().isEmpty())
                 dropAdapter.add(task);
-                dropListener(editText, buttonDrop);
-            }
+
         });
 
 
@@ -374,6 +379,8 @@ public class MainActivity extends AppCompatActivity {
      */
     @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
+
+        sharedData.uiOperationHandler.adapter = dropAdapter;
 
         //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
         dropAdapter.reset();
@@ -444,6 +451,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     public void showFocus(){
 
+        sharedData.uiOperationHandler.adapter = focusAdapter;
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
         focusAdapter.reset();
 
@@ -510,6 +518,8 @@ public class MainActivity extends AppCompatActivity {
      */
     public void showLists(){
 
+        //TODO INTEGRATE UIOPERATIONHANDLER
+        deleteDatabase("Data.db");
         //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
         listsListAdapter.reset();
 

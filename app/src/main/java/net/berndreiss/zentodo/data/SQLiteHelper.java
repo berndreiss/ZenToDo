@@ -11,6 +11,7 @@ import android.widget.Toast;
 import net.berndreiss.zentodo.MainActivity;
 import net.berndreiss.zentodo.OperationType;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
+import net.berndreiss.zentodo.util.VectorClock;
 import net.berndreiss.zentodo.util.ZenMessage;
 import net.berndreiss.zentodo.util.ZenServerMessage;
 
@@ -30,6 +31,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
@@ -60,7 +62,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     //Create TABLE_ENTRIES for entries TABLE_LISTS for lists onCreate
     public void onCreate(SQLiteDatabase db){
         db.execSQL("CREATE TABLE ENTRIES ("
-                + "USER TEXT DEFAULT NULL,"
+                + "USER INTEGER DEFAULT NULL,"
                 + "ID INTEGER NOT NULL, "
                 + "TASK TEXT NOT NULL, "
                 + "FOCUS INTEGER DEFAULT 0, "
@@ -75,16 +77,36 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
                 + "FOREIGN KEY (USER) REFERENCES USERS(MAIL)"
                 + ")");
 
-        String query = "CREATE TABLE LISTS (NAME TEXT PRIMARY KEY, COLOR TEXT DEFAULT '" + ListTaskListAdapter.DEFAULT_COLOR + "')";
+        String query = "CREATE TABLE LISTS (" +
+                "NAME TEXT PRIMARY KEY, " +
+                "COLOR TEXT DEFAULT '" + ListTaskListAdapter.DEFAULT_COLOR + "'" +
+                ")";
         db.execSQL(query);
 
-        query = "CREATE TABLE USERS (ID INTEGER PRIMARY KEY, MAIL TEXT NOT NULL, NAME TEXT DEFAULT NULL, ENABLED INTEGER DEFAULT 0, DEVICE INTEGER NOT NULL)";
+        query = "CREATE TABLE USERS (" +
+                "ID INTEGER PRIMARY KEY, " +
+                "MAIL TEXT NOT NULL, " +
+                "NAME TEXT DEFAULT NULL, " +
+                "ENABLED INTEGER DEFAULT 0, " +
+                "DEVICE INTEGER NOT NULL, " +
+                "CLOCK TEXT NOT NULL" +
+                ")";
         db.execSQL(query);
 
-        query = "CREATE TABLE QUEUE (TYPE INTEGER NOT NULL, ID INTEGER PRIMARY KEY AUTOINCREMENT, TIMESTAMP INTEGER NOT NULL, USER_ID INTEGER NOT NULL, ARGUMENTS TEXT NOT NULL)";
+        query = "CREATE TABLE QUEUE (" +
+                "TYPE INTEGER NOT NULL, " +
+                "ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "TIMESTAMP INTEGER NOT NULL, " +
+                "USER_ID INTEGER NOT NULL, " +
+                "ARGUMENTS TEXT NOT NULL," +
+                "CLOCK TEXT NOT NULL" +
+                ")";
         db.execSQL(query);
 
-        query = "CREATE TABLE TOKENS (USER INTEGER PRIMARY KEY, TOKEN TEXT NOT NULL)";
+        query = "CREATE TABLE TOKENS (" +
+                "USER INTEGER PRIMARY KEY, " +
+                "TOKEN TEXT NOT NULL" +
+                ")";
         db.execSQL(query);
 
         query = "CREATE INDEX IDX_FOCUS ON ENTRIES(FOCUS)";
@@ -155,16 +177,6 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
                 break;
             }
         }
-
-        return addEntry(id, task);
-    }
-
-    //adds new entry to TABLE_ENTRIES
-    private Entry addEntry(long id, String task) {
-
-        ContentValues values = new ContentValues();
-        SQLiteDatabase db = this.getWritableDatabase();
-
         Cursor cursor = db.rawQuery("SELECT 1 FROM ENTRIES", null);
 
         cursor.moveToFirst();
@@ -184,14 +196,27 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         }
         cursor.close();
 
+        return addNewEntry(id, task, null, maxPosition + 1);
+    }
+
+    //adds new entry to TABLE_ENTRIES
+    @Override
+    public Entry addNewEntry(long id, String task, Long userId, int position) {
+
+        ContentValues values = new ContentValues();
+        SQLiteDatabase db = this.getWritableDatabase();
+
+
         values.put("ID",id);
+        if (userId != null)
+            values.put("USER", userId);
         values.put("TASK",task);
-        values.put("POSITION", maxPosition+1);
+        values.put("POSITION", position);
 
+        db.execSQL("UPDATE ENTRIES SET POSITION=POSITION+1 WHERE POSITION >=?", new String[]{String.valueOf(position)});
         db.insert("ENTRIES",null,values);
-        ;
 
-        return new Entry(id, maxPosition+1, task, null);
+        return new Entry(id, task, null, position);
     }
 
     /**
@@ -207,10 +232,6 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         ;
     }
 
-    @Override
-    public void addNewEntry(long id, String task, Long userId, int position) {
-
-    }
 
     @Override
     public void delete(long id){
@@ -470,7 +491,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
             String recurrence = cursor.getString(8);
             int position = cursor.getInt(9);
 
-            Entry entry = new Entry(id, position, task, null);
+            Entry entry = new Entry(id, task, null, position);
             entry.setFocus(focus);
             entry.setDropped(dropped);
             if (!(list==null)) {
@@ -808,9 +829,8 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         //TODO implement
     }
 
-
     @Override
-    public void addToQueue(long userId, ZenServerMessage message) {
+    public void addToQueue(User user, ZenServerMessage message) {
 
         Log.v("TEST", "INSERT INTO QUEUE");
         SQLiteDatabase db = this.getWritableDatabase();
@@ -820,41 +840,61 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
         sb.append("{");
 
-        if (!message.getArguments().isEmpty()) {
-            sb.append(message.getArguments().get(1).toString());
-            message.getArguments().stream().skip(1).forEach(o -> sb.append(",").append(o.toString()));
+        if (!message.arguments.isEmpty()) {
+            sb.append(message.arguments.get(0).toString());
+            message.arguments.stream().skip(1).forEach(o -> sb.append(",").append(o.toString()));
         }
         sb.append("}");
         String arguments = sb.toString();
 
-
-        values.put("TYPE", String.valueOf(message.getType().ordinal()));
+        values.put("TYPE", String.valueOf(message.type.ordinal()));
         values.put("ARGUMENTS", arguments);
-        values.put("TIMESTAMP", dateToEpoch(message.getTimeStamp()));
-        values.put("USER_ID", userId);
+        values.put("TIMESTAMP", dateToEpoch(message.timeStamp));
+        values.put("USER_ID", user.getId());
+        values.put("CLOCK", message.clock.jsonify());
 
         db.insert("QUEUE", null, values);
-
-        Cursor cursor = db.rawQuery("SELECT * FROM QUEUE", null);
-
-        cursor.moveToFirst();
-
-        if (cursor.isAfterLast())
-            Log.v("TEST", "NO ENTRIES");
-        else
-            Log.v("TEST", String.valueOf(cursor.getLong(1)));
-
-        cursor.close();
-
-        Log.v("TEST", "INSERT INTO QUEUE");
-        ;
 
     }
 
     @Override
     public List<ZenServerMessage> getQueued(long userId) {
-        //TODO implement
-        return Collections.emptyList();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT TYPE, ARGUMENTS, CLOCK, TIMESTAMP FROM QUEUE WHERE USER_ID=?", new String[]{String.valueOf(userId)});
+
+        cursor.moveToFirst();
+
+        List<ZenServerMessage> result = new ArrayList<>();
+
+        while (!cursor.isAfterLast()){
+            OperationType type = OperationType.values()[cursor.getInt(0)];
+            Log.v("GET QUEUE", String.valueOf(type));
+            String argsString = cursor.getString(1);
+            Log.v("GET QUEUE", String.valueOf(argsString));
+            VectorClock clock = new VectorClock(cursor.getString(2));
+            Log.v("GET QUEUE", String.valueOf(clock.jsonify()));
+            Instant timeStamp = Instant.ofEpochMilli(cursor.getLong(3));
+            Log.v("GET QUEUE", String.valueOf(timeStamp));
+
+            String[] argsSplit = argsString.substring(1, argsString.length()-1).split(",");
+
+            List<Object> args = new ArrayList<>(Arrays.asList(argsSplit));
+
+            result.add(new ZenServerMessage(type, args, clock, timeStamp));
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+        return result;
+    }
+
+    @Override
+    public void clearQueue() {
+
+        SQLiteDatabase db= this.getWritableDatabase();
+
+        db.delete("QUEUE", "", null);
     }
 
     @Override
@@ -867,15 +907,22 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         values.put("MAIL", email);
         values.put("NAME", userName);
         values.put("DEVICE", device);
+        VectorClock clock = new VectorClock(device);
+        values.put("CLOCK", clock.jsonify());
 
         db.insert("USERS", null, values);
 
-        return new User(id, email, userName, device);
+        User user = new User(email, userName, device);
+        user.setId(id);
+        return user;
 
     }
 
     @Override
-    public void removeUser(long l) {
+    public void removeUser(String email) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete("USERS", "MAIL=?", new String[]{email});
 
     }
 
@@ -896,15 +943,16 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
             String name = cursor.getString(2);
             boolean enabled = intToBool(cursor.getInt(3));
             long device = cursor.getLong(4);
+            String clock = cursor.getString(5);
 
-            Log.v("TTTTTTTTTTTTT", String.valueOf(device));
-            user = new User(id, mail, name, device);
+            user = new User(mail, name, device);
+            user.setId(id);
+            user.setClock(clock);
             user.setEnabled(enabled);
-            Log.v("UUUUUUUUUUUUU", String.valueOf(user.getDevice()));
         }
 
         cursor.close();
-        ;
+
         return user;
     }
 
@@ -948,6 +996,17 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     @Override
     public void setDevice(String s, long l) {
 
+    }
+
+    @Override
+    public void setClock(String email, VectorClock vectorClock) {
+
+
+        try (SQLiteDatabase db = this.getWritableDatabase()){
+            ContentValues values = new ContentValues();
+            values.put("CLOCK", vectorClock.jsonify());
+            db.update("USERS", values, "MAIL=?", new String[]{email});
+        }
     }
 
     @Override

@@ -461,5 +461,4 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
      */
     public abstract void reset();
 
-
 }
