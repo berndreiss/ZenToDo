@@ -17,6 +17,7 @@ import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,8 +43,6 @@ public class DataManager {
 
 
         boolean userExists = sharedData.database.getUserByEmail(email) != null;
-
-        Log.v("USEREXISTS", String.valueOf(userExists));
 
         Consumer<String> messagePrinter = message -> {
             Looper.prepare();
@@ -84,7 +83,8 @@ public class DataManager {
         //write changes to database
         Entry entry = sharedData.database.addEntry(task);
         entries.add(entry);
-        Log.v("TEST", "USER NULL: " + String.valueOf(clientStub.getUser() == null));
+        //Log.v("TEST", "USER NULL: " + String.valueOf(clientStub.getUser() == null));
+        /*
         if (clientStub != null && clientStub.getUser() != null) {
             Thread thread = new Thread(() -> {
                 clientStub.addNewEntry(
@@ -94,7 +94,7 @@ public class DataManager {
                         entry.getPosition());
             });
             thread.start();
-        }
+        }*/
 
     }
 
@@ -404,11 +404,12 @@ public class DataManager {
     //return date incremented by offset
     private static Instant incrementRecurring(char mode, Instant date, int offSet) {
 
+        ZonedDateTime zonedDateTime = date.atZone(ZoneId.systemDefault());
         return switch (mode) {
-            case 'd' -> date.plus(offSet, ChronoUnit.DAYS);
-            case 'w' -> date.plus(offSet, ChronoUnit.WEEKS);
-            case 'm' -> date.plus(offSet, ChronoUnit.MONTHS);
-            case 'y' -> date.plus(offSet, ChronoUnit.YEARS);
+            case 'd' -> zonedDateTime.plusDays(offSet).toInstant();
+            case 'w' -> zonedDateTime.plusWeeks(offSet).toInstant();
+            case 'm' -> zonedDateTime.plusMonths(offSet).toInstant();
+            case 'y' -> zonedDateTime.plusYears(offSet).toInstant();
             default -> date;
         };
 

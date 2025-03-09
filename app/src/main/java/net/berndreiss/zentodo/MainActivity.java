@@ -166,13 +166,14 @@ public class MainActivity extends AppCompatActivity {
 
         //Toast.makeText(this, sharedData.database.getToken(8L), Toast.LENGTH_LONG).show();
 
+        /*
         //initialze client stub
         try {
             DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
+*/
         //Drop is shown when app starts
         showDrop();
 

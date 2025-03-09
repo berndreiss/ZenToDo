@@ -245,7 +245,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
     }
 
     public void updateReminderDate(Entry entry, Instant value){
-        updateReminderDate(entry.getId(), value == null ? null : value.toEpochMilli());
+        updateReminderDate(entry.getId(), value == null ? null : value.getEpochSecond());
     }
 
     @Override
@@ -668,7 +668,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
      * @return
      */
     public static Instant epochToDate(long epoch){
-        return Instant.ofEpochMilli(epoch);
+        return Instant.ofEpochSecond(epoch);
     }
 
     /**
@@ -677,7 +677,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
      * @return
      */
     public static long dateToEpoch(Instant date){
-        return date.toEpochMilli();
+        return date.getEpochSecond();
     }
 
     /**
@@ -874,7 +874,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
             Log.v("GET QUEUE", String.valueOf(argsString));
             VectorClock clock = new VectorClock(cursor.getString(2));
             Log.v("GET QUEUE", String.valueOf(clock.jsonify()));
-            Instant timeStamp = Instant.ofEpochMilli(cursor.getLong(3));
+            Instant timeStamp = Instant.ofEpochSecond(cursor.getLong(3));
             Log.v("GET QUEUE", String.valueOf(timeStamp));
 
             String[] argsSplit = argsString.substring(1, argsString.length()-1).split(",");
