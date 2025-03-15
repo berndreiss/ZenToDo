@@ -16,6 +16,7 @@ import net.berndreiss.zentodo.util.ZenServerMessage;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -379,7 +380,7 @@ public class DataManager {
         //get reminder date
         Instant date = entry.getReminderDate();
 
-        Instant todayInstant = today.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant todayInstant = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant();
 
         if (date == null) {
             date = todayInstant;
