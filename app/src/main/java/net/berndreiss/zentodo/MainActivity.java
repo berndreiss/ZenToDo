@@ -520,7 +520,12 @@ public class MainActivity extends AppCompatActivity {
     public void showLists(){
 
         //TODO INTEGRATE UIOPERATIONHANDLER
-        deleteDatabase("Data.db");
+        //deleteDatabase("Data.db");
+
+
+
+
+
         //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
         listsListAdapter.reset();
 
