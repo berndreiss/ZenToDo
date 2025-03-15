@@ -685,7 +685,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
      * @param arrayList
      */
     void saveRecurring(List<Long> arrayList){
-        ByteBuffer buffer = ByteBuffer.allocate(arrayList.size()* Integer.BYTES);
+        ByteBuffer buffer = ByteBuffer.allocate(arrayList.size()* Long.BYTES);
         for (long i: arrayList)
             buffer.putLong(i);
 
