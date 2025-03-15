@@ -34,7 +34,6 @@ import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
-import android.content.Context;
 import android.view.View;
 import android.widget.DatePicker;
 
@@ -45,18 +44,19 @@ import net.berndreiss.zentodo.data.SQLiteHelper;
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.Year;
+import java.time.ZoneId;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class UITest {
-    private static Context appContext;
+    private static SharedData sharedData;
 
 
 
     @Before
     public void setup(){
 
-        appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        sharedData = new SharedData(InstrumentationRegistry.getInstrumentation().getTargetContext());
     }
 
 
@@ -82,13 +82,13 @@ public class UITest {
         for (int i = 0; i < tests.length; i++) {
             drop(tests[i]);
 
-            DropTaskListAdapter adapter = new DropTaskListAdapter(appContext);
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
 
             for (int j = 0; j < results[i].length; j++)
                 assert(adapter.entries.get(j).getTask().equals(results[i][j]));
 
         }
-        appContext.deleteDatabase(MainActivity.DATABASE_NAME);
+        sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
     }
 
     //tests the functionality of the calendar in DROP: when a date is set, tasks should disappear
@@ -118,17 +118,17 @@ public class UITest {
             onView(withId(buttons[i])).perform(click());
 
             //assert results
-            try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+            try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
                 List<Entry> entries = db.loadEntries();
 
                 if (tests[i] == null)
                     assert (entries.get(i).getReminderDate() == null);
                 else
-                    assert (entries.get(i).getReminderDate().equals(tests[i]));
+                    assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
                 assert (db.loadDropped().size() == results[i]);
             }
         }
-        appContext.deleteDatabase(MainActivity.DATABASE_NAME);
+        sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
     }
 
     //test the functionality of the calendar in FOCUS: when a date is set, tasks should disappear
@@ -182,7 +182,7 @@ public class UITest {
             onView(withId(buttons[i])).perform(click());
 
             //assert results
-            try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+            try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
                 List<Entry> entries = db.loadEntries();
 
                 if (entries.get(i).getReminderDate() == null) {
@@ -191,11 +191,11 @@ public class UITest {
                 if (tests[i] == null)
                     assert (entries.get(i).getReminderDate() == null);
                 else
-                    assert (entries.get(i).getReminderDate().equals(tests[i]));
+                    assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
                 assert (db.loadFocus().size() == results[i]);
             }
         }
-        appContext.deleteDatabase(MainActivity.DATABASE_NAME);
+        sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
     }
 
     //test calendar function for items in no list in LIST
@@ -223,7 +223,7 @@ public class UITest {
 
             //switch to LISTS and select no list
             onView(withId(R.id.toolbar_lists)).perform(click());
-            onData(hasToString(appContext.getString(R.string.noList))).inAdapterView(withId(R.id.list_view_lists)).atPosition(0).perform(click());
+            onData(hasToString(sharedData.context.getString(R.string.noList))).inAdapterView(withId(R.id.list_view_lists)).atPosition(0).perform(click());
 
             //set date
             new RecyclerActionTest(R.id.recycle_view_lists, R.id.button_menu, i);
@@ -236,19 +236,19 @@ public class UITest {
             onView(withId(buttons[i])).perform(click());
 
             //assert results
-            try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+            try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
 
                 List<Entry> entries = db.loadEntries();
 
                 if (tests[i] == null)
                     assert (entries.get(i).getReminderDate() == null);
                 else
-                    assert (entries.get(i).getReminderDate().equals(tests[i]));
+                    assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
                 assert (db.getNoList().size() == results[i][0]);
                 assert (db.loadDropped().size() == results[i][1]);
             }
         }
-        appContext.deleteDatabase(MainActivity.DATABASE_NAME);
+        sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
     }
 
     //tests the calendar function in a list in LISTS
@@ -297,18 +297,18 @@ public class UITest {
             onView(withId(buttons[i])).perform(click());
 
             //assert results
-            try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+            try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
 
                 List<Entry> entries = db.loadEntries();
                 if (tests[i] == null)
                     assert (entries.get(i).getReminderDate() == null);
                 else
-                    assert (entries.get(i).getReminderDate().equals(tests[i]));
+                    assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
                 assert (db.getLists().size() == results[i][0]);
                 assert (db.loadDropped().size() == results[i][1]);
             }
         }
-        appContext.deleteDatabase(MainActivity.DATABASE_NAME);
+        sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
     }
 
 
@@ -436,7 +436,7 @@ public class UITest {
             onView(withId(buttons[i])).perform(click());
             onView(withId(R.id.list_view_pick_doNow)).check(new RecyclerViewCountAssertionTest(results[i]));
         }
-        appContext.deleteDatabase(MainActivity.DATABASE_NAME);
+        sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
     }
 
     //assert RecyclerViewAdapter has number of items
@@ -508,6 +508,6 @@ public class UITest {
 
     @After
     public void cleanup(){
-        appContext.deleteDatabase(MainActivity.DATABASE_NAME);
+        sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
     }
 }

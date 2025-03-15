@@ -1,11 +1,9 @@
 package net.berndreiss.zentodo;
 
-import android.content.Context;
-
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.api.Entry;
+import net.berndreiss.zentodo.data.Entry;
 import net.berndreiss.zentodo.data.SQLiteHelper;
 
 import org.junit.Before;
@@ -13,6 +11,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -21,20 +20,20 @@ import java.util.Objects;
 
 
 public class DataTest {
-    private static Context appContext;
+    private static SharedData sharedData;
 
     private static final String DATABASE_NAME = "Data.db";
 
     @Before
     public void setup(){
-        appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        appContext.deleteDatabase(DATABASE_NAME);
+        sharedData = new SharedData(InstrumentationRegistry.getInstrumentation().getTargetContext());
+        sharedData.context.deleteDatabase(DATABASE_NAME);
     }
 
     @Test
     public void constructor(){
 
-        SQLiteHelper db = new SQLiteHelper(appContext);
+        SQLiteHelper db = new SQLiteHelper(sharedData.context);
 
         //assert all main data structures are empty
         assert(db.loadEntries().isEmpty());
@@ -46,12 +45,12 @@ public class DataTest {
     @Test
     public void add() {
 
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
 
             List<Entry> entries = new ArrayList<>();
-            DataManager.add(appContext, entries, "0");
-            DataManager.add(appContext, entries, "1");
-            DataManager.add(appContext, entries, "2");
+            DataManager.add(sharedData, entries, "0");
+            DataManager.add(sharedData, entries, "1");
+            DataManager.add(sharedData, entries, "2");
 
             assert(entries.size() == 3);
 
@@ -89,23 +88,23 @@ public class DataTest {
 
     @Test
     public void remove() {
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
 
             List<Entry> entries = new ArrayList<>();
-            DataManager.add(appContext, entries, "0");
-            DataManager.add(appContext, entries, "1");
-            DataManager.add(appContext, entries, "2");
+            DataManager.add(sharedData, entries, "0");
+            DataManager.add(sharedData, entries, "1");
+            DataManager.add(sharedData, entries, "2");
 
-            DataManager.editList(appContext, entries, entries.get(0), "0");
-            DataManager.editList(appContext, entries, entries.get(1), "0");
-            DataManager.editList(appContext, entries, entries.get(2), "1");
+            DataManager.editList(sharedData, entries, entries.get(0), "0");
+            DataManager.editList(sharedData, entries, entries.get(1), "0");
+            DataManager.editList(sharedData, entries, entries.get(2), "1");
 
-            DataManager.remove(appContext, entries, entries.get(0));
+            DataManager.remove(sharedData, entries, entries.get(0));
 
             assert(entries.size()==2);
-            assert(entries.get(0).getTask().equals("1"));
-            assert(entries.get(0).getPosition() == 0);
-            assert(entries.get(0).getListPosition() == 0);
+            assert(entries.getFirst().getTask().equals("1"));
+            assert(entries.getFirst().getPosition() == 0);
+            assert(entries.getFirst().getListPosition() == 0);
             assert(entries.get(1).getTask().equals("2"));
             assert(entries.get(1).getPosition() == 1);
             assert(entries.get(1).getListPosition() == 0);
@@ -131,23 +130,23 @@ public class DataTest {
     @Test
     public void lists() {
 
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
             List<Entry> entries = new ArrayList<>();
-            DataManager.add(appContext, entries, "0");
-            DataManager.editList(appContext, entries, entries.get(0), "0");
+            DataManager.add(sharedData, entries, "0");
+            DataManager.editList(sharedData, entries, entries.getFirst(), "0");
 
             //check original entry is being edited
-            assert(entries.get(0).getListPosition() == 0);
-            assert(entries.get(0).getList().equals("0"));
+            assert(entries.getFirst().getListPosition() == 0);
+            assert(entries.getFirst().getList().equals("0"));
 
-            DataManager.add(appContext, entries, "1");
-            DataManager.editList(appContext, entries, entries.get(1), "0");
+            DataManager.add(sharedData, entries, "1");
+            DataManager.editList(sharedData, entries, entries.get(1), "0");
 
-            DataManager.add(appContext, entries, "2");
-            DataManager.editList(appContext, entries, entries.get(2), "1");
+            DataManager.add(sharedData, entries, "2");
+            DataManager.editList(sharedData, entries, entries.get(2), "1");
 
-            DataManager.add(appContext, entries, "3");
-            DataManager.editList(appContext, entries, entries.get(3), "1");
+            DataManager.add(sharedData, entries, "3");
+            DataManager.editList(sharedData, entries, entries.get(3), "1");
 
             assert(db.loadDropped().isEmpty());
 
@@ -186,7 +185,7 @@ public class DataTest {
             }
 
             //check nothing changes when list is set to the same value
-            DataManager.editList(appContext, entries, entries.get(0), "0");
+            DataManager.editList(sharedData, entries, entries.get(0), "0");
 
             assert(entries.get(0).getListPosition() == 0);
             assert(entries.get(1).getListPosition() == 1);
@@ -196,8 +195,8 @@ public class DataTest {
             assert(entriesDB.get(0).getListPosition() == 0);
             assert(entriesDB.get(1).getListPosition() == 1);
 
-            DataManager.editList(appContext, entries, entries.get(0), null);
-            DataManager.editList(appContext, entries, entries.get(1), null);
+            DataManager.editList(sharedData, entries, entries.get(0), null);
+            DataManager.editList(sharedData, entries, entries.get(1), null);
 
             lists = db.getLists();
 
@@ -220,21 +219,21 @@ public class DataTest {
     //swap entries if item is moved by drag and drop
     @Test
     public void swapLists() {
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
             List<Entry> entries = new ArrayList<>();
-            DataManager.add(appContext, entries, "0");
-            DataManager.editList(appContext, entries, entries.get(0), "0");
+            DataManager.add(sharedData, entries, "0");
+            DataManager.editList(sharedData, entries, entries.get(0), "0");
 
-            DataManager.add(appContext, entries, "1");
-            DataManager.editList(appContext, entries, entries.get(1), "0");
+            DataManager.add(sharedData, entries, "1");
+            DataManager.editList(sharedData, entries, entries.get(1), "0");
 
-            DataManager.add(appContext, entries,"2");
-            DataManager.editList(appContext, entries, entries.get(2), "1");
+            DataManager.add(sharedData, entries,"2");
+            DataManager.editList(sharedData, entries, entries.get(2), "1");
 
-            DataManager.add(appContext, entries, "3");
-            DataManager.editList(appContext, entries, entries.get(3), "1");
+            DataManager.add(sharedData, entries, "3");
+            DataManager.editList(sharedData, entries, entries.get(3), "1");
 
-            DataManager.swapLists(appContext, entries, entries.get(0), entries.get(1));
+            DataManager.swapLists(sharedData, entries, entries.get(0), entries.get(1));
 
             assert(entries.get(0).getTask().equals("1"));
             assert(entries.get(0).getPosition() == 1);
@@ -262,21 +261,21 @@ public class DataTest {
     @Test
     public void swap() {
 
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
             List<Entry> entries = new ArrayList<>();
-            DataManager.add(appContext, entries, "0");
-            DataManager.editList(appContext, entries, entries.get(0), "0");
+            DataManager.add(sharedData, entries, "0");
+            DataManager.editList(sharedData, entries, entries.get(0), "0");
 
-            DataManager.add(appContext, entries, "1");
-            DataManager.editList(appContext, entries, entries.get(1), "0");
+            DataManager.add(sharedData, entries, "1");
+            DataManager.editList(sharedData, entries, entries.get(1), "0");
 
-            DataManager.add(appContext, entries,"2");
-            DataManager.editList(appContext, entries, entries.get(2), "1");
+            DataManager.add(sharedData, entries,"2");
+            DataManager.editList(sharedData, entries, entries.get(2), "1");
 
-            DataManager.add(appContext, entries, "3");
-            DataManager.editList(appContext, entries, entries.get(3), "1");
+            DataManager.add(sharedData, entries, "3");
+            DataManager.editList(sharedData, entries, entries.get(3), "1");
 
-            DataManager.swap(appContext, entries, entries.get(0), entries.get(1));
+            DataManager.swap(sharedData, entries, entries.get(0), entries.get(1));
 
             assert(entries.get(0).getTask().equals("1"));
             assert(entries.get(0).getPosition() == 0);
@@ -301,36 +300,36 @@ public class DataTest {
 
     @Test
     public void setTask() {
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
             List<Entry> entries = new ArrayList<>();
 
-            DataManager.add(appContext, entries, "0");
-            DataManager.setTask(appContext, entries.get(0), "1");
+            DataManager.add(sharedData, entries, "0");
+            DataManager.setTask(sharedData, entries.getFirst(), "1");
 
-            assert (entries.get(0).getTask().equals("1"));
+            assert (entries.getFirst().getTask().equals("1"));
 
             List<Entry> entriesDB = db.loadEntries();
 
-            assert(entriesDB.get(0).getTask().equals("1"));
+            assert(entriesDB.getFirst().getTask().equals("1"));
         }
     }
 
 
     @Test
     public void setFocus() {
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
             List<Entry> entries = new ArrayList<>();
 
-            DataManager.add(appContext, entries, "0");
-            DataManager.setFocus(appContext, entries.get(0), true);
+            DataManager.add(sharedData, entries, "0");
+            DataManager.setFocus(sharedData, entries.getFirst(), true);
 
-            assert(entries.get(0).getFocus());
-            assert(!entries.get(0).getDropped());
+            assert(entries.getFirst().getFocus());
+            assert(!entries.getFirst().getDropped());
 
             List<Entry> entriesDB = db.loadEntries();
 
-            assert(entriesDB.get(0).getFocus());
-            assert(!entriesDB.get(0).getDropped());
+            assert(entriesDB.getFirst().getFocus());
+            assert(!entriesDB.getFirst().getDropped());
 
             List<Entry> entriesFocus = db.loadFocus();
 
@@ -341,17 +340,17 @@ public class DataTest {
 
     @Test
     public void setDropped() {
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
             List<Entry> entries = new ArrayList<>();
 
-            DataManager.add(appContext, entries, "0");
-            DataManager.setDropped(appContext, entries.get(0), false);
+            DataManager.add(sharedData, entries, "0");
+            DataManager.setDropped(sharedData, entries.getFirst(), false);
 
-            assert(!entries.get(0).getDropped());
+            assert(!entries.getFirst().getDropped());
 
             List<Entry> entriesDB = db.loadEntries();
 
-            assert(!entriesDB.get(0).getDropped());
+            assert(!entriesDB.getFirst().getDropped());
 
             List<Entry> entriesFocus = db.loadDropped();
 
@@ -362,66 +361,66 @@ public class DataTest {
     @Test
     public void editReminderDate() {
 
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
             List<Entry> entries = new ArrayList<>();
 
             LocalDate date = LocalDate.now();
-            DataManager.add(appContext, entries, "0");
-            DataManager.editReminderDate(appContext, entries.get(0), date);
+            DataManager.add(sharedData, entries, "0");
+            DataManager.editReminderDate(sharedData, entries.getFirst(), date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 
-            assert (entries.get(0).getReminderDate().equals(date));
+            assert (entries.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
             assert (db.loadDropped().isEmpty());
 
             List<Entry> entriesDB = db.loadEntries();
 
-            assert(entriesDB.get(0).getReminderDate().equals(date));
+            assert(entriesDB.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
 
-            DataManager.editReminderDate(appContext, entries.get(0), null);
+            DataManager.editReminderDate(sharedData, entries.getFirst(), null);
 
-            assert (entries.get(0).getReminderDate() == null);
+            assert (entries.getFirst().getReminderDate() == null);
 
             entriesDB = db.loadEntries();
 
-            assert(entriesDB.get(0).getReminderDate() == null);
+            assert(entriesDB.getFirst().getReminderDate() == null);
         }
     }
 
     @Test
     public void editRecurrence() {
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
             List<Entry> entries = new ArrayList<>();
 
             String recurrence = "m1";
-            DataManager.add(appContext, entries, "0");
-            DataManager.editRecurrence(appContext, entries.get(0), recurrence);
+            DataManager.add(sharedData, entries, "0");
+            DataManager.editRecurrence(sharedData, entries.getFirst(), recurrence);
 
-            assert (entries.get(0).getRecurrence().equals(recurrence));
+            assert (entries.getFirst().getRecurrence().equals(recurrence));
             assert (db.loadDropped().isEmpty());
 
             List<Entry> entriesDB = db.loadEntries();
 
-            assert(entriesDB.get(0).getRecurrence().equals(recurrence));
+            assert(entriesDB.getFirst().getRecurrence().equals(recurrence));
 
-            DataManager.editRecurrence(appContext, entries.get(0), null);
+            DataManager.editRecurrence(sharedData, entries.getFirst(), null);
 
-            assert (entries.get(0).getRecurrence() == null);
+            assert (entries.getFirst().getRecurrence() == null);
 
             entriesDB = db.loadEntries();
 
-            assert(entriesDB.get(0).getRecurrence() == null);
+            assert(entriesDB.getFirst().getRecurrence() == null);
         }
     }
 
     @Test
     public void listColors() {
 
-        try(SQLiteHelper db = new SQLiteHelper(appContext)){
+        try(SQLiteHelper db = new SQLiteHelper(sharedData.context)){
             List<Entry> entries = new ArrayList<>();
-            DataManager.add(appContext, entries, "0");
-            DataManager.editList(appContext, entries, entries.get(0), "0");
-            DataManager.editListColor(appContext, "0", "BLUE");
+            DataManager.add(sharedData, entries, "0");
+            DataManager.editList(sharedData, entries, entries.getFirst(), "0");
+            DataManager.editListColor(sharedData, "0", "BLUE");
 
-            if ((!DataManager.getListColor(appContext, "0").equals("BLUE")))
+            if ((!DataManager.getListColor(sharedData, "0").equals("BLUE")))
                 throw new AssertionError();
 
             Map<String, String> colorMap = db.getListColors();
@@ -434,10 +433,10 @@ public class DataTest {
     @Test
     public void getLists(){
         List<Entry> entries = new ArrayList<>();
-        DataManager.add(appContext, entries, "0");
-        DataManager.editList(appContext, entries, entries.get(0), "0");
+        DataManager.add(sharedData, entries, "0");
+        DataManager.editList(sharedData, entries, entries.getFirst(), "0");
 
-        List<String> lists = DataManager.getLists(appContext);
+        List<String> lists = DataManager.getLists(sharedData);
 
         assert(lists.size() == 3);
 
@@ -450,16 +449,16 @@ public class DataTest {
     @Test
     public void getFocus() {
         List<Entry> entries = new ArrayList<>();
-        DataManager.add(appContext, entries, "0");
-        DataManager.add(appContext, entries, "1");
-        DataManager.add(appContext, entries, "2");
-        DataManager.add(appContext, entries, "3");
+        DataManager.add(sharedData, entries, "0");
+        DataManager.add(sharedData, entries, "1");
+        DataManager.add(sharedData, entries, "2");
+        DataManager.add(sharedData, entries, "3");
 
-        DataManager.setFocus(appContext, entries.get(0), true);
-        DataManager.editRecurrence(appContext, entries.get(1), "w2");
-        DataManager.editRecurrence(appContext, entries.get(2), "w2");
-        DataManager.addToRecurringButRemoved(appContext, entries.get(2).getId());
-        try (SQLiteHelper db = new SQLiteHelper(appContext)) {
+        DataManager.setFocus(sharedData, entries.get(0), true);
+        DataManager.editRecurrence(sharedData, entries.get(1), "w2");
+        DataManager.editRecurrence(sharedData, entries.get(2), "w2");
+        DataManager.addToRecurringButRemoved(sharedData, entries.get(2).getId());
+        try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
             //get data
             List<Entry> focused = db.loadFocus();
 
@@ -467,7 +466,7 @@ public class DataTest {
             assert(focused.get(0).getTask().equals("0"));
             assert(focused.get(1).getTask().equals("1"));
 
-            DataManager.removeFromRecurringButRemoved(appContext, entries.get(2).getId());
+            DataManager.removeFromRecurringButRemoved(sharedData, entries.get(2).getId());
             focused = db.loadFocus();
 
             assert(focused.size()==3);
@@ -479,20 +478,20 @@ public class DataTest {
     @Test
     public void getTasksToPick() {
         List<Entry> entries = new ArrayList<>();
-        DataManager.add(appContext, entries, "0");
-        DataManager.add(appContext, entries, "1");
+        DataManager.add(sharedData, entries, "0");
+        DataManager.add(sharedData, entries, "1");
 
-        List<Entry> tasksToPick = DataManager.getTasksToPick(appContext);
+        List<Entry> tasksToPick = DataManager.getTasksToPick(sharedData);
 
         assert(tasksToPick.size()==entries.size());
 
-        DataManager.editReminderDate(appContext, entries.get(0), LocalDate.now());
-        DataManager.editReminderDate(appContext, entries.get(1), LocalDate.now().plusDays(1));
+        DataManager.editReminderDate(sharedData, entries.get(0), LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        DataManager.editReminderDate(sharedData, entries.get(1), LocalDate.now().plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 
-        tasksToPick = DataManager.getTasksToPick(appContext);
+        tasksToPick = DataManager.getTasksToPick(sharedData);
 
         assert(tasksToPick.size()==1);
-        assert(tasksToPick.get(0).getTask().equals("0"));
+        assert(tasksToPick.getFirst().getTask().equals("0"));
     }
     //tests whether ArrayList<Integer> recurringButRemovedFromToday (see documentation in FocusTaskListAdapter.java, Data.java, DbHelper.java)
     //is saved/loaded correctly
@@ -500,7 +499,7 @@ public class DataTest {
     public void saveLoadRecurring(){
 
 
-        try(SQLiteHelper db = new SQLiteHelper(appContext)) {
+        try(SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
 
 
 
@@ -509,25 +508,25 @@ public class DataTest {
 
             assert (db.loadRecurring().isEmpty());
 
-            DataManager.addToRecurringButRemoved(appContext, 0);
+            DataManager.addToRecurringButRemoved(sharedData, 0);
             //add first element, save and assert results upon load
-            List<Integer> recurring = db.loadRecurring();
+            List<Long> recurring = db.loadRecurring();
             assert (recurring.size() == 1);
-            assert (recurring.get(0) == 0);
+            assert (recurring.getFirst() == 0);
 
 
-            DataManager.addToRecurringButRemoved(appContext, 1);
-            DataManager.addToRecurringButRemoved(appContext, 2);
+            DataManager.addToRecurringButRemoved(sharedData, 1);
+            DataManager.addToRecurringButRemoved(sharedData, 2);
             for (int i = 0; i < 3; i++)
                 assert (db.loadRecurring().get(i) == i);
 
             //remove second element, save and assert results upon load
-            DataManager.removeFromRecurringButRemoved(appContext, 1);
+            DataManager.removeFromRecurringButRemoved(sharedData, 1);
             assert (db.loadRecurring().get(0) == 0);
             assert (db.loadRecurring().get(1) == 2);
 
             //clean up
-            new File(appContext.getFilesDir() + "/" + filename).delete();
+            new File(sharedData.context.getFilesDir() + "/" + filename).delete();
 
         }
     }
@@ -620,23 +619,23 @@ public class DataTest {
 
 
         List<Entry> entries = new ArrayList<>();
-        DataManager.add(appContext, entries, "0");
+        DataManager.add(sharedData, entries, "0");
 
         //run tests
         for (int i = 0; i < tests.length; i++){
 
             //set reminder date
-            DataManager.editReminderDate(appContext, entries.get(0), tests[i]);
-            DataManager.editRecurrence(appContext, entries.get(0), intervals[i]);
+            DataManager.editReminderDate(sharedData, entries.getFirst(), tests[i].atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            DataManager.editRecurrence(sharedData, entries.getFirst(), intervals[i]);
 
-            DataManager.setRecurring(appContext, entries.get(0), today[i]);
+            DataManager.setRecurring(sharedData, entries.getFirst(), today[i]);
 
             //assert results
-            assert(entries.get(0).getReminderDate().equals(results[i]));
+            assert(entries.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(results[i]));
 
         }
 
-        appContext.deleteDatabase(DATABASE_NAME);
+        sharedData.context.deleteDatabase(DATABASE_NAME);
     }
 
 }
