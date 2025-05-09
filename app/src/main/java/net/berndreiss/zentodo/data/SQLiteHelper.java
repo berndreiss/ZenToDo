@@ -46,7 +46,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 /**
  * TODO DESCRIBE
  */
-public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHandler {
+public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
 
     private final Context context;
 
@@ -201,7 +201,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
     //adds new entry to TABLE_ENTRIES
     @Override
-    public Entry addNewEntry(long id, String task, Long userId, int position) {
+    public Entry addNewEntry(Long userId, long id, String task, int position) {
 
         ContentValues values = new ContentValues();
         SQLiteDatabase db = this.getWritableDatabase();
@@ -234,9 +234,9 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
 
 
     @Override
-    public void delete(long id){
+    public void delete(Long userId, long id){
 
-        Entry entry = getById(id);
+        Entry entry = getById(userId, id);
 
         if (entry == null)
             return;
@@ -244,12 +244,12 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         removeEntry(entry);
     }
 
-    public void updateReminderDate(Entry entry, Instant value){
-        updateReminderDate(entry.getId(), value == null ? null : value.getEpochSecond());
+    public void updateReminderDate(Long userId, Entry entry, Instant value){
+        updateReminderDate(userId, entry.getId(), value == null ? null : value.getEpochSecond());
     }
 
     @Override
-    public void updateReminderDate(long id, Long value){
+    public void updateReminderDate(Long userId, long id, Long value){
         ContentValues values = new ContentValues();
         values.put("REMINDER_DATE", value);
         SQLiteDatabase db = this.getWritableDatabase();
@@ -257,12 +257,12 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         ;
     }
 
-    void updateTask(Entry entry, String value){
-        updateTask(entry.getId(), value);
+    void updateTask(Long userId, Entry entry, String value){
+        updateTask(userId, entry.getId(), value);
     }
 
     @Override
-    public void updateTask(long id, String value){
+    public void updateTask(Long userId, long id, String value){
         ContentValues values = new ContentValues();
         values.put("TASK", value == null ? "" : value);
         SQLiteDatabase db = this.getWritableDatabase();
@@ -270,12 +270,12 @@ public class SQLiteHelper extends SQLiteOpenHelper implements ClientOperationHan
         ;
     }
 
-    void updateRecurrence(Entry entry, String value){
-        updateRecurrence(entry.getId(), entry.getReminderDate() == null ? null : dateToEpoch(entry.getReminderDate()), value);
+    void updateRecurrence(Long userId, Entry entry, String value){
+        updateRecurrence(userId, entry.getId(), entry.getReminderDate() == null ? null : dateToEpoch(entry.getReminderDate()), value);
     }
 
     @Override
-    public void updateRecurrence(long id, Long reminderDate, String value){
+    public void updateRecurrence(Long userId, long id, Long reminderDate, String value){
         ContentValues values = new ContentValues();
         values.put("RECURRENCE", value);
         if (reminderDate == null)

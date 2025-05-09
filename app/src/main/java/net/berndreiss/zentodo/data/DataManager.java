@@ -84,6 +84,7 @@ public class DataManager {
         //write changes to database
         Entry entry = sharedData.database.addEntry(task);
         entries.add(entry);
+        clientStub.addNewEntry(task, entries.size());
         //Log.v("TEST", "USER NULL: " + String.valueOf(clientStub.getUser() == null));
         /*
         if (clientStub != null && clientStub.getUser() != null) {
