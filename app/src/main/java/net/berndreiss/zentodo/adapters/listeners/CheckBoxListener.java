@@ -43,7 +43,7 @@ public class CheckBoxListener extends BasicListener implements View.OnClickListe
 
             adapter.notifyItemChanged(position);
         } else {
-            DataManager.remove(adapter.sharedData, adapter.entries, entry);
+            DataManager.remove(adapter.sharedData, adapter, entry);
         }
 
         adapter.notifyDataSetChanged();

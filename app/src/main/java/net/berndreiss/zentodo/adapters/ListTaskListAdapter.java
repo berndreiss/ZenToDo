@@ -39,7 +39,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
             Entry entry = entries.get(position);
 
             //remove from data
-            DataManager.remove(sharedData, entries, entry);
+            DataManager.remove(sharedData, this, entry);
 
             //notify adapter
             notifyDataSetChanged();
@@ -62,10 +62,10 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
                 //set to null if AutoComplete is empty, write back otherwise
                 if (list.trim().isEmpty())
-                    DataManager.editList(sharedData, entries, entry, null);
+                    DataManager.editList(sharedData, this, entry, null);
 
                 else
-                    DataManager.editList(sharedData, entries, entry, list);
+                    DataManager.editList(sharedData, this, entry, list);
 
                 //remove entry from adapter
                 entries.remove(position);
@@ -92,11 +92,11 @@ public class ListTaskListAdapter extends TaskListAdapter{
         //swap entries in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                DataManager.swapLists(sharedData, entries, entries.get(i),entries.get(i+1));
+                DataManager.swapLists(sharedData, this, entries.get(i),entries.get(i+1));
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                DataManager.swapLists(sharedData, entries, entries.get(i),entries.get(i-1));
+                DataManager.swapLists(sharedData, this, entries.get(i),entries.get(i-1));
             }
         }
 

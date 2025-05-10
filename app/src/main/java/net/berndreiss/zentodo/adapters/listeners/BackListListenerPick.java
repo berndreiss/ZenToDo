@@ -35,10 +35,10 @@ public class BackListListenerPick extends BackListListener{
         //set to no list if AutoComplete is empty
         if (list.trim().isEmpty() || list.isEmpty()) {
             //reset to no list
-            DataManager.editList(adapter.sharedData, adapter.entries, entry, null);
+            DataManager.editList(adapter.sharedData, adapter, entry, null);
         } else {
             //write back otherwise
-            DataManager.editList(adapter.sharedData, adapter.entries, entry, list);
+            DataManager.editList(adapter.sharedData, adapter, entry, list);
         }
 
         if (entry.getReminderDate() == null && !moveToListAdapter.entries.contains(entry)) {

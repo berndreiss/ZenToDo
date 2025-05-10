@@ -374,11 +374,11 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         //swap entries in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                DataManager.swap(sharedData, entries, entries.get(i),entries.get(i+1));
+                DataManager.swap(sharedData, this, entries.get(i),entries.get(i+1));
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                DataManager.swap(sharedData, entries, entries.get(i),entries.get(i-1));
+                DataManager.swap(sharedData, this, entries.get(i),entries.get(i-1));
             }
         }
 

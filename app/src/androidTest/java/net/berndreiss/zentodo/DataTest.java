@@ -1,7 +1,10 @@
 package net.berndreiss.zentodo;
 
+import android.app.backup.BackupDataInput;
+
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 import net.berndreiss.zentodo.data.SQLiteHelper;
@@ -20,6 +23,7 @@ import java.util.Objects;
 
 
 public class DataTest {
+
     private static SharedData sharedData;
 
     private static final String DATABASE_NAME = "Data.db";
@@ -36,8 +40,8 @@ public class DataTest {
         SQLiteHelper db = new SQLiteHelper(sharedData.context);
 
         //assert all main data structures are empty
-        assert(db.loadEntries().isEmpty());
-        assert(db.loadLists().isEmpty());
+        assert(sharedData.clientStub.loadEntries().isEmpty());
+        assert(sharedData.clientStub.loadLists().isEmpty());
 
         db.close();
     }
@@ -47,18 +51,18 @@ public class DataTest {
 
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
 
-            List<Entry> entries = new ArrayList<>();
-            DataManager.add(sharedData, entries, "0");
-            DataManager.add(sharedData, entries, "1");
-            DataManager.add(sharedData, entries, "2");
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.add(sharedData, adapter, "1");
+            DataManager.add(sharedData, adapter, "2");
 
-            assert(entries.size() == 3);
+            assert(adapter.entries.size() == 3);
 
-            assert(entries.get(0).getTask().equals("0"));
-            assert(entries.get(1).getTask().equals("1"));
-            assert(entries.get(2).getTask().equals("2"));
+            assert(adapter.entries.get(0).getTask().equals("0"));
+            assert(adapter.entries.get(1).getTask().equals("1"));
+            assert(adapter.entries.get(2).getTask().equals("2"));
 
-            Collection<? extends Entry> entriesDB = db.loadEntries();
+            Collection<? extends Entry> entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.size()==3);
 
@@ -66,7 +70,7 @@ public class DataTest {
 
             for (Entry e: entriesDB){
 
-                assert(e.getId() == entries.get(counter).getId());
+                assert(e.getId() == adapter.entries.get(counter).getId());
                 assert(e.getTask().equals(String.valueOf(counter)));
                 assert(!e.getFocus());
                 assert(e.getDropped());
@@ -90,26 +94,26 @@ public class DataTest {
     public void remove() {
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
 
-            List<Entry> entries = new ArrayList<>();
-            DataManager.add(sharedData, entries, "0");
-            DataManager.add(sharedData, entries, "1");
-            DataManager.add(sharedData, entries, "2");
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.add(sharedData, adapter, "1");
+            DataManager.add(sharedData, adapter, "2");
 
-            DataManager.editList(sharedData, entries, entries.get(0), "0");
-            DataManager.editList(sharedData, entries, entries.get(1), "0");
-            DataManager.editList(sharedData, entries, entries.get(2), "1");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(0), "0");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(1), "0");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(2), "1");
 
-            DataManager.remove(sharedData, entries, entries.get(0));
+            DataManager.remove(sharedData, adapter, adapter.entries.get(0));
 
-            assert(entries.size()==2);
-            assert(entries.getFirst().getTask().equals("1"));
-            assert(entries.getFirst().getPosition() == 0);
-            assert(entries.getFirst().getListPosition() == 0);
-            assert(entries.get(1).getTask().equals("2"));
-            assert(entries.get(1).getPosition() == 1);
-            assert(entries.get(1).getListPosition() == 0);
+            assert(adapter.entries.size()==2);
+            assert(adapter.entries.getFirst().getTask().equals("1"));
+            assert(adapter.entries.getFirst().getPosition() == 0);
+            assert(adapter.entries.getFirst().getListPosition() == 0);
+            assert(adapter.entries.get(1).getTask().equals("2"));
+            assert(adapter.entries.get(1).getPosition() == 1);
+            assert(adapter.entries.get(1).getListPosition() == 0);
 
-            Collection<? extends Entry> entriesDB = db.loadEntries();
+            Collection<? extends Entry> entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.size()==2);
 
@@ -117,7 +121,7 @@ public class DataTest {
 
             for (Entry e: entriesDB){
 
-                assert(e.getId() == entries.get(counter).getId());
+                assert(e.getId() == adapter.entries.get(counter).getId());
                 assert(e.getTask().equals(String.valueOf(counter+1)));
                 assert(e.getListPosition() == 0);
                 assert(e.getPosition() == counter);
@@ -131,26 +135,26 @@ public class DataTest {
     public void lists() {
 
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-            List<Entry> entries = new ArrayList<>();
-            DataManager.add(sharedData, entries, "0");
-            DataManager.editList(sharedData, entries, entries.getFirst(), "0");
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.editList(sharedData, adapter, adapter.entries.getFirst(), "0");
 
             //check original entry is being edited
-            assert(entries.getFirst().getListPosition() == 0);
-            assert(entries.getFirst().getList().equals("0"));
+            assert(adapter.entries.getFirst().getListPosition() == 0);
+            assert(adapter.entries.getFirst().getList().equals("0"));
 
-            DataManager.add(sharedData, entries, "1");
-            DataManager.editList(sharedData, entries, entries.get(1), "0");
+            DataManager.add(sharedData, adapter, "1");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(1), "0");
 
-            DataManager.add(sharedData, entries, "2");
-            DataManager.editList(sharedData, entries, entries.get(2), "1");
+            DataManager.add(sharedData, adapter, "2");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(2), "1");
 
-            DataManager.add(sharedData, entries, "3");
-            DataManager.editList(sharedData, entries, entries.get(3), "1");
+            DataManager.add(sharedData, adapter, "3");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(3), "1");
 
             assert(db.loadDropped().isEmpty());
 
-            List<Entry> entriesDB = db.loadEntries();
+            List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
             int counter = 0;
 
@@ -173,30 +177,30 @@ public class DataTest {
                 counter++;
             }
 
-            List<Entry> list0 = db.loadList("0");
+            List<Entry> list0 = sharedData.clientStub.loadList("0");
 
             counter = 0;
 
             assert(list0.size()==2);
 
             for (Entry e: list0){
-                assert(e.getId()==entries.get(counter).getId());
+                assert(e.getId()==adapter.entries.get(counter).getId());
                 counter++;
             }
 
             //check nothing changes when list is set to the same value
-            DataManager.editList(sharedData, entries, entries.get(0), "0");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(0), "0");
 
-            assert(entries.get(0).getListPosition() == 0);
-            assert(entries.get(1).getListPosition() == 1);
+            assert(adapter.entries.get(0).getListPosition() == 0);
+            assert(adapter.entries.get(1).getListPosition() == 1);
 
-            entriesDB = db.loadEntries();
+            entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.get(0).getListPosition() == 0);
             assert(entriesDB.get(1).getListPosition() == 1);
 
-            DataManager.editList(sharedData, entries, entries.get(0), null);
-            DataManager.editList(sharedData, entries, entries.get(1), null);
+            DataManager.editList(sharedData, adapter, adapter.entries.get(0), null);
+            DataManager.editList(sharedData, adapter, adapter.entries.get(1), null);
 
             lists = db.getLists();
 
@@ -210,7 +214,7 @@ public class DataTest {
             assert(listNone.size()==2);
 
             for (Entry e: listNone){
-                assert(e.getId()==entries.get(counter).getId());
+                assert(e.getId()==adapter.entries.get(counter).getId());
                 counter++;
             }
         }
@@ -220,31 +224,31 @@ public class DataTest {
     @Test
     public void swapLists() {
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-            List<Entry> entries = new ArrayList<>();
-            DataManager.add(sharedData, entries, "0");
-            DataManager.editList(sharedData, entries, entries.get(0), "0");
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(0), "0");
 
-            DataManager.add(sharedData, entries, "1");
-            DataManager.editList(sharedData, entries, entries.get(1), "0");
+            DataManager.add(sharedData, adapter, "1");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(1), "0");
 
-            DataManager.add(sharedData, entries,"2");
-            DataManager.editList(sharedData, entries, entries.get(2), "1");
+            DataManager.add(sharedData, adapter,"2");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(2), "1");
 
-            DataManager.add(sharedData, entries, "3");
-            DataManager.editList(sharedData, entries, entries.get(3), "1");
+            DataManager.add(sharedData, adapter, "3");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(3), "1");
 
-            DataManager.swapLists(sharedData, entries, entries.get(0), entries.get(1));
+            DataManager.swapLists(sharedData, adapter, adapter.entries.get(0), adapter.entries.get(1));
 
-            assert(entries.get(0).getTask().equals("1"));
-            assert(entries.get(0).getPosition() == 1);
-            assert(entries.get(0).getListPosition() == 0);
-            assert(entries.get(1).getTask().equals("0"));
-            assert(entries.get(1).getPosition() == 0);
-            assert(entries.get(1).getListPosition() == 1);
-            assert(entries.get(2).getListPosition() == 0);
-            assert(entries.get(3).getListPosition() == 1);
+            assert(adapter.entries.get(0).getTask().equals("1"));
+            assert(adapter.entries.get(0).getPosition() == 1);
+            assert(adapter.entries.get(0).getListPosition() == 0);
+            assert(adapter.entries.get(1).getTask().equals("0"));
+            assert(adapter.entries.get(1).getPosition() == 0);
+            assert(adapter.entries.get(1).getListPosition() == 1);
+            assert(adapter.entries.get(2).getListPosition() == 0);
+            assert(adapter.entries.get(3).getListPosition() == 1);
 
-            List<Entry> entriesDB = db.loadEntries();
+            List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.get(1).getTask().equals("1"));
             assert(entriesDB.get(1).getPosition() == 1);
@@ -262,29 +266,29 @@ public class DataTest {
     public void swap() {
 
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-            List<Entry> entries = new ArrayList<>();
-            DataManager.add(sharedData, entries, "0");
-            DataManager.editList(sharedData, entries, entries.get(0), "0");
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(0), "0");
 
-            DataManager.add(sharedData, entries, "1");
-            DataManager.editList(sharedData, entries, entries.get(1), "0");
+            DataManager.add(sharedData, adapter, "1");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(1), "0");
 
-            DataManager.add(sharedData, entries,"2");
-            DataManager.editList(sharedData, entries, entries.get(2), "1");
+            DataManager.add(sharedData, adapter,"2");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(2), "1");
 
-            DataManager.add(sharedData, entries, "3");
-            DataManager.editList(sharedData, entries, entries.get(3), "1");
+            DataManager.add(sharedData, adapter, "3");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(3), "1");
 
-            DataManager.swap(sharedData, entries, entries.get(0), entries.get(1));
+            DataManager.swap(sharedData, adapter, adapter.entries.get(0), adapter.entries.get(1));
 
-            assert(entries.get(0).getTask().equals("1"));
-            assert(entries.get(0).getPosition() == 0);
-            assert(entries.get(0).getListPosition() == 1);
-            assert(entries.get(1).getTask().equals("0"));
-            assert(entries.get(1).getPosition() == 1);
-            assert(entries.get(1).getListPosition() == 0);
+            assert(adapter.entries.get(0).getTask().equals("1"));
+            assert(adapter.entries.get(0).getPosition() == 0);
+            assert(adapter.entries.get(0).getListPosition() == 1);
+            assert(adapter.entries.get(1).getTask().equals("0"));
+            assert(adapter.entries.get(1).getPosition() == 1);
+            assert(adapter.entries.get(1).getListPosition() == 0);
 
-            List<Entry> entriesDB = db.loadEntries();
+            List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.get(0).getTask().equals("1"));
             assert(entriesDB.get(0).getListPosition() == 1);
@@ -301,14 +305,14 @@ public class DataTest {
     @Test
     public void setTask() {
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-            List<Entry> entries = new ArrayList<>();
 
-            DataManager.add(sharedData, entries, "0");
-            DataManager.setTask(sharedData, entries.getFirst(), "1");
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.setTask(sharedData, adapter.entries.getFirst(), "1");
 
-            assert (entries.getFirst().getTask().equals("1"));
+            assert (adapter.entries.getFirst().getTask().equals("1"));
 
-            List<Entry> entriesDB = db.loadEntries();
+            List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.getFirst().getTask().equals("1"));
         }
@@ -318,20 +322,20 @@ public class DataTest {
     @Test
     public void setFocus() {
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-            List<Entry> entries = new ArrayList<>();
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
 
-            DataManager.add(sharedData, entries, "0");
-            DataManager.setFocus(sharedData, entries.getFirst(), true);
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.setFocus(sharedData, adapter.entries.getFirst(), true);
 
-            assert(entries.getFirst().getFocus());
-            assert(!entries.getFirst().getDropped());
+            assert(adapter.entries.getFirst().getFocus());
+            assert(!adapter.entries.getFirst().getDropped());
 
-            List<Entry> entriesDB = db.loadEntries();
+            List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.getFirst().getFocus());
             assert(!entriesDB.getFirst().getDropped());
 
-            List<Entry> entriesFocus = db.loadFocus();
+            List<Entry> entriesFocus = sharedData.clientStub.loadFocus();
 
             assert(entriesFocus.size() == 1);
         }
@@ -341,14 +345,14 @@ public class DataTest {
     @Test
     public void setDropped() {
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-            List<Entry> entries = new ArrayList<>();
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
 
-            DataManager.add(sharedData, entries, "0");
-            DataManager.setDropped(sharedData, entries.getFirst(), false);
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.setDropped(sharedData, adapter.entries.getFirst(), false);
 
-            assert(!entries.getFirst().getDropped());
+            assert(!adapter.entries.getFirst().getDropped());
 
-            List<Entry> entriesDB = db.loadEntries();
+            List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
             assert(!entriesDB.getFirst().getDropped());
 
@@ -362,24 +366,24 @@ public class DataTest {
     public void editReminderDate() {
 
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-            List<Entry> entries = new ArrayList<>();
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
 
             LocalDate date = LocalDate.now();
-            DataManager.add(sharedData, entries, "0");
-            DataManager.editReminderDate(sharedData, entries.getFirst(), date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.editReminderDate(sharedData, adapter.entries.getFirst(), date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 
-            assert (entries.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
+            assert (adapter.entries.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
             assert (db.loadDropped().isEmpty());
 
-            List<Entry> entriesDB = db.loadEntries();
+            List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
 
-            DataManager.editReminderDate(sharedData, entries.getFirst(), null);
+            DataManager.editReminderDate(sharedData, adapter.entries.getFirst(), null);
 
-            assert (entries.getFirst().getReminderDate() == null);
+            assert (adapter.entries.getFirst().getReminderDate() == null);
 
-            entriesDB = db.loadEntries();
+            entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.getFirst().getReminderDate() == null);
         }
@@ -388,24 +392,24 @@ public class DataTest {
     @Test
     public void editRecurrence() {
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-            List<Entry> entries = new ArrayList<>();
 
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
             String recurrence = "m1";
-            DataManager.add(sharedData, entries, "0");
-            DataManager.editRecurrence(sharedData, entries.getFirst(), recurrence);
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.editRecurrence(sharedData, adapter.entries.getFirst(), recurrence);
 
-            assert (entries.getFirst().getRecurrence().equals(recurrence));
+            assert (adapter.entries.getFirst().getRecurrence().equals(recurrence));
             assert (db.loadDropped().isEmpty());
 
-            List<Entry> entriesDB = db.loadEntries();
+            List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.getFirst().getRecurrence().equals(recurrence));
 
-            DataManager.editRecurrence(sharedData, entries.getFirst(), null);
+            DataManager.editRecurrence(sharedData, adapter.entries.getFirst(), null);
 
-            assert (entries.getFirst().getRecurrence() == null);
+            assert (adapter.entries.getFirst().getRecurrence() == null);
 
-            entriesDB = db.loadEntries();
+            entriesDB = sharedData.clientStub.loadEntries();
 
             assert(entriesDB.getFirst().getRecurrence() == null);
         }
@@ -415,9 +419,9 @@ public class DataTest {
     public void listColors() {
 
         try(SQLiteHelper db = new SQLiteHelper(sharedData.context)){
-            List<Entry> entries = new ArrayList<>();
-            DataManager.add(sharedData, entries, "0");
-            DataManager.editList(sharedData, entries, entries.getFirst(), "0");
+            DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+            DataManager.add(sharedData, adapter, "0");
+            DataManager.editList(sharedData, adapter, adapter.entries.getFirst(), "0");
             DataManager.editListColor(sharedData, "0", "BLUE");
 
             if ((!DataManager.getListColor(sharedData, "0").equals("BLUE")))
@@ -432,9 +436,9 @@ public class DataTest {
 
     @Test
     public void getLists(){
-        List<Entry> entries = new ArrayList<>();
-        DataManager.add(sharedData, entries, "0");
-        DataManager.editList(sharedData, entries, entries.getFirst(), "0");
+        DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+        DataManager.add(sharedData, adapter, "0");
+        DataManager.editList(sharedData, adapter, adapter.entries.getFirst(), "0");
 
         List<String> lists = DataManager.getLists(sharedData);
 
@@ -448,26 +452,26 @@ public class DataTest {
 
     @Test
     public void getFocus() {
-        List<Entry> entries = new ArrayList<>();
-        DataManager.add(sharedData, entries, "0");
-        DataManager.add(sharedData, entries, "1");
-        DataManager.add(sharedData, entries, "2");
-        DataManager.add(sharedData, entries, "3");
+        DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+        DataManager.add(sharedData, adapter, "0");
+        DataManager.add(sharedData, adapter, "1");
+        DataManager.add(sharedData, adapter, "2");
+        DataManager.add(sharedData, adapter, "3");
 
-        DataManager.setFocus(sharedData, entries.get(0), true);
-        DataManager.editRecurrence(sharedData, entries.get(1), "w2");
-        DataManager.editRecurrence(sharedData, entries.get(2), "w2");
-        DataManager.addToRecurringButRemoved(sharedData, entries.get(2).getId());
+        DataManager.setFocus(sharedData, adapter.entries.get(0), true);
+        DataManager.editRecurrence(sharedData, adapter.entries.get(1), "w2");
+        DataManager.editRecurrence(sharedData, adapter.entries.get(2), "w2");
+        DataManager.addToRecurringButRemoved(sharedData, adapter.entries.get(2).getId());
         try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
             //get data
-            List<Entry> focused = db.loadFocus();
+            List<Entry> focused = sharedData.clientStub.loadFocus();
 
             assert(focused.size()==2);
             assert(focused.get(0).getTask().equals("0"));
             assert(focused.get(1).getTask().equals("1"));
 
-            DataManager.removeFromRecurringButRemoved(sharedData, entries.get(2).getId());
-            focused = db.loadFocus();
+            DataManager.removeFromRecurringButRemoved(sharedData, adapter.entries.get(2).getId());
+            focused = sharedData.clientStub.loadFocus();
 
             assert(focused.size()==3);
             assert(focused.get(2).getTask().equals("2"));
@@ -477,16 +481,16 @@ public class DataTest {
 
     @Test
     public void getTasksToPick() {
-        List<Entry> entries = new ArrayList<>();
-        DataManager.add(sharedData, entries, "0");
-        DataManager.add(sharedData, entries, "1");
+        DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+        DataManager.add(sharedData, adapter, "0");
+        DataManager.add(sharedData, adapter, "1");
 
         List<Entry> tasksToPick = DataManager.getTasksToPick(sharedData);
 
-        assert(tasksToPick.size()==entries.size());
+        assert(tasksToPick.size()==adapter.entries.size());
 
-        DataManager.editReminderDate(sharedData, entries.get(0), LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        DataManager.editReminderDate(sharedData, entries.get(1), LocalDate.now().plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        DataManager.editReminderDate(sharedData, adapter.entries.get(0), LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        DataManager.editReminderDate(sharedData, adapter.entries.get(1), LocalDate.now().plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 
         tasksToPick = DataManager.getTasksToPick(sharedData);
 
@@ -618,20 +622,20 @@ public class DataTest {
         };
 
 
-        List<Entry> entries = new ArrayList<>();
-        DataManager.add(sharedData, entries, "0");
+        DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+        DataManager.add(sharedData, adapter, "0");
 
         //run tests
         for (int i = 0; i < tests.length; i++){
 
             //set reminder date
-            DataManager.editReminderDate(sharedData, entries.getFirst(), tests[i].atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            DataManager.editRecurrence(sharedData, entries.getFirst(), intervals[i]);
+            DataManager.editReminderDate(sharedData, adapter.entries.getFirst(), tests[i].atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            DataManager.editRecurrence(sharedData, adapter.entries.getFirst(), intervals[i]);
 
-            DataManager.setRecurring(sharedData, entries.getFirst(), today[i]);
+            DataManager.setRecurring(sharedData, adapter.entries.getFirst(), today[i]);
 
             //assert results
-            assert(entries.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(results[i]));
+            assert(adapter.entries.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(results[i]));
 
         }
 

@@ -31,10 +31,10 @@ public class BackListListener extends BasicListener implements View.OnClickListe
         //set to no list if AutoComplete is empty
         if (list.trim().isEmpty() || list.isEmpty()) {
             //reset to no list
-            DataManager.editList(adapter.sharedData, adapter.entries, entry, null);
+            DataManager.editList(adapter.sharedData, adapter, entry, null);
         } else {
             //write back otherwise
-            DataManager.editList(adapter.sharedData, adapter.entries, entry, list);
+            DataManager.editList(adapter.sharedData, adapter, entry, list);
         }
 
         //change Color of setList Button to mark if list is set

@@ -269,7 +269,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //clear ArrayList for list, add current tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
-                listTasks.addAll(sharedData.database.loadList(list));
+                listTasks.addAll(sharedData.clientStub.loadList(list));
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if(listsTaskListAdapter==null){

@@ -1,9 +1,7 @@
 package net.berndreiss.zentodo.data;
 
-import static androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
 
 import android.annotation.SuppressLint;
-import android.net.http.SslCertificate;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -13,6 +11,8 @@ import net.berndreiss.zentodo.util.ZenServerMessage;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class UIOperationHandler implements ClientOperationHandler{
 
@@ -26,9 +26,10 @@ public class UIOperationHandler implements ClientOperationHandler{
     }
 
     @Override
-    public void updateId(long l, long l1) {
+    public void updateId(long l, long l1, long l2) {
 
     }
+
 
     @Override
     public void setTimeDelay(long l) {
@@ -46,9 +47,10 @@ public class UIOperationHandler implements ClientOperationHandler{
     }
 
     @Override
-    public void clearQueue() {
+    public void clearQueue(long l) {
 
     }
+
 
     @Override
     public String getToken(long l) {
@@ -66,9 +68,10 @@ public class UIOperationHandler implements ClientOperationHandler{
     }
 
     @Override
-    public void removeUser(String s) {
+    public void removeUser(long l) {
 
     }
+
 
     @Override
     public User getUserByEmail(String s) {
@@ -76,52 +79,96 @@ public class UIOperationHandler implements ClientOperationHandler{
     }
 
     @Override
-    public boolean userExists(String s) {
+    public boolean userExists(long l) {
         return false;
     }
 
     @Override
-    public boolean isEnabled(String s) {
+    public boolean isEnabled(long l) {
         return false;
     }
 
     @Override
-    public void enableUser(String s) {
+    public void enableUser(long l) {
 
     }
 
     @Override
-    public void setDevice(String s, long l) {
+    public void setDevice(long l, long l1) {
 
     }
 
     @Override
-    public void setClock(String s, VectorClock vectorClock) {
+    public void setClock(long l, VectorClock vectorClock) {
 
     }
+
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
-    public Entry addNewEntry(long id, String task, Long userId, int position) {
+    public Entry addNewEntry(Entry entry) {
         if (adapter == null)
             return null;
-        Entry entry = new Entry(id, task, userId, position);
         Handler handler = new Handler(Looper.getMainLooper());
 
         handler.post(() -> {
             adapter.entries.stream()
-                    .filter(e -> e.getPosition() >= position)
+                    .filter(e -> e.getPosition() >= entry.getPosition())
                     .forEach(e -> e.setPosition(e.getPosition()+1));
 
-            adapter.entries.add(position, entry);
+            adapter.entries.add(entry.getPosition(), entry);
             adapter.notifyDataSetChanged();
         });
         return entry;
     }
 
     @Override
+    public Entry addNewEntry(String s) {
+        return null;
+    }
+
+    @Override
+    public Entry addNewEntry(String s, int i) {
+        return null;
+    }
+
+    @Override
     public void delete(long l) {
 
+    }
+
+    @Override
+    public Optional<Entry> getEntry(long l) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Entry> loadEntries() {
+        return Collections.emptyList();
+    }
+    @Override
+    public List<Entry> loadFocus() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<Entry> loadDropped() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<Entry> loadList(String s) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<String> loadLists() {
+        return null;
+    }
+
+    @Override
+    public Map<String, String> getListColors() {
+        return Collections.emptyMap();
     }
 
     @Override
@@ -178,4 +225,5 @@ public class UIOperationHandler implements ClientOperationHandler{
     public boolean updateEmail(long l, String s) {
         return false;
     }
+
 }

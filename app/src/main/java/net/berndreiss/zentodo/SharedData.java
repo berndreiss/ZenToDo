@@ -10,6 +10,7 @@ public class SharedData {
 
     public final Context context;
     public SQLiteHelper database;
+    public ClientStub clientStub;
     public UIOperationHandler uiOperationHandler = new UIOperationHandler();
 
 

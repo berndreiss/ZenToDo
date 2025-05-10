@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        deleteDatabase("Data.db");
         net.berndreiss.zentodo.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -157,6 +158,13 @@ public class MainActivity extends AppCompatActivity {
 
         sharedData = new SharedData(this);
 
+        //initialze client stub
+        try {
+            DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         //layouts are initialized
         initializeDrop(sharedData);
         initializePick(sharedData);
@@ -166,14 +174,8 @@ public class MainActivity extends AppCompatActivity {
 
         //Toast.makeText(this, sharedData.database.getToken(8L), Toast.LENGTH_LONG).show();
 
-        /*
-        //initialze client stub
-        try {
-            DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-*/
+
+
         //Drop is shown when app starts
         showDrop();
 

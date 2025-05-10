@@ -39,7 +39,7 @@ public class NoListTaskListAdapter extends AllTaskListAdapter{
             if (!list.isEmpty()) {
 
                 //write back new list
-                DataManager.editList(sharedData, entries, entry, list);
+                DataManager.editList(sharedData, this, entry, list);
 
                 //remove entry from adapter
                 entries.remove(position);

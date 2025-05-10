@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 /**
  * TODO DESCRIBE
  */
-public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
+public class SQLiteHelper extends SQLiteOpenHelper implements Database {
 
     private final Context context;
 
@@ -129,7 +130,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
     }
 
-    private Entry getById(long id){
+    private Entry getById(Long userId, long id){
         SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE ID=?", new String[]{String.valueOf(id)});
@@ -156,27 +157,12 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
      * @param task
      * @return
      */
-    Entry addEntry(String task){
+    @Override
+    public Entry addNewEntry(Long userId, String task){
         SQLiteDatabase db = this.getWritableDatabase();
 
         Random random = new Random();
 
-        long id = random.nextInt();
-
-        while (true){
-            Cursor cursorId = db.rawQuery("SELECT ID FROM ENTRIES WHERE ID=" + id, null);
-
-            cursorId.moveToFirst();
-
-            if (!cursorId.isAfterLast()) {
-                id = random.nextInt();
-                cursorId.close();
-            }
-            else {
-                cursorId.close();
-                break;
-            }
-        }
         Cursor cursor = db.rawQuery("SELECT 1 FROM ENTRIES", null);
 
         cursor.moveToFirst();
@@ -196,7 +182,30 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
         }
         cursor.close();
 
-        return addNewEntry(id, task, null, maxPosition + 1);
+        return addNewEntry(userId, task, maxPosition + 1);
+    }
+    @Override
+    public Entry addNewEntry(Long userId, String task, int position){
+        SQLiteDatabase db = this.getWritableDatabase();
+        Random random = new Random();
+        long id = random.nextInt();
+
+        while (true){
+            Cursor cursorId = db.rawQuery("SELECT ID FROM ENTRIES WHERE ID=" + id, null);
+
+            cursorId.moveToFirst();
+
+            if (!cursorId.isAfterLast()) {
+                id = random.nextInt();
+                cursorId.close();
+            }
+            else {
+                cursorId.close();
+                break;
+            }
+        }
+        return addNewEntry(userId, id, task, position);
+
     }
 
     //adds new entry to TABLE_ENTRIES
@@ -216,7 +225,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
         db.execSQL("UPDATE ENTRIES SET POSITION=POSITION+1 WHERE POSITION >=?", new String[]{String.valueOf(position)});
         db.insert("ENTRIES",null,values);
 
-        return new Entry(id, task, null, position);
+        return new Entry(userId, id, task, position);
     }
 
     /**
@@ -287,8 +296,8 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
     }
 
     @Override
-    public void updateList(long id, String name, int position){
-        updateList(getById(id), name, position);
+    public void updateList(Long userId, long id, String name, int position){
+        updateList(getById(userId, id), name, position);
     }
 
     public void updateList(Entry entry, String name){
@@ -343,25 +352,25 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
         ;
     }
 
-    void updateFocus(Entry entry, boolean valueBool){
+    void updateFocus(Long userId, Entry entry, boolean valueBool){
 
-        updateFocus(entry.getId(), boolToInt(valueBool));
+        updateFocus(userId, entry.getId(), boolToInt(valueBool));
     }
 
     @Override
-    public void updateFocus(long id, int value){
+    public void updateFocus(Long userId, long id, int value){
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("UPDATE ENTRIES SET FOCUS=? WHERE ID=?;", new String[]{String.valueOf(value), String.valueOf(id)});
         ;
     }
 
-    void updateDropped(Entry entry, boolean valueBool){
-        updateDropped(entry.getId(), boolToInt(valueBool));
+    void updateDropped(Long userId, Entry entry, boolean valueBool){
+        updateDropped(userId, entry.getId(), boolToInt(valueBool));
     }
 
     @Override
-    public void updateDropped(long id, int value){
+    public void updateDropped(Long userId, long id, int value){
 
         //convert bool to int
         SQLiteDatabase db = this.getWritableDatabase();
@@ -370,7 +379,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
     }
 
     @Override
-    public void updateListColor(String list, String color){
+    public void updateListColor(Long userid, String list, String color){
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -387,20 +396,30 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
     }
 
     @Override
-    public void updateUserName(long l, String s) {
+    public void updateUserName(Long l, String s) {
 
     }
 
     @Override
-    public boolean updateEmail(long l, String s) {
+    public boolean updateEmail(Long l, String s) {
         return false;
+    }
+
+    @Override
+    public Optional<Entry> getEntry(Long aLong, long l) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Entry> getEntries(Long aLong) {
+        return Collections.emptyList();
     }
 
     /**
      * TODO DESCRIBE
      * @return
      */
-    public List<Entry> loadEntries(){
+    public List<Entry> loadEntries(Long userId){
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -418,7 +437,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
      * TODO DESCRIBE
      * @return
      */
-    public List<Entry> loadFocus(){
+    public List<Entry> loadFocus(Long userId){
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -460,7 +479,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
      * @param name
      * @return
      */
-    public List<Entry> loadList(String name){
+    public List<Entry> loadList(Long userId, String name){
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -491,7 +510,8 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
             String recurrence = cursor.getString(8);
             int position = cursor.getInt(9);
 
-            Entry entry = new Entry(id, task, null, position);
+            //TODO ADD USERID!!!
+            Entry entry = new Entry(null, id, task, position);
             entry.setFocus(focus);
             entry.setDropped(dropped);
             if (!(list==null)) {
@@ -598,9 +618,9 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
     }
 
     @Override
-    public void swapEntries(long id, int position){
+    public void swapEntries(Long userId, long id, int position){
 
-        swapEntries(getById(id), position);
+        swapEntries(getById(userId, id), position);
     }
 
     void swapEntries(Entry entry, int pos){
@@ -622,9 +642,9 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
     }
 
     @Override
-    public void swapListEntries(long id, int position){
+    public void swapListEntries(Long userId, long id, int position){
 
-        swapListEntries(getById(id), position);
+        swapListEntries(getById(userId, id), position);
     }
 
     void swapListEntries(Entry entry, int pos){
@@ -818,7 +838,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
 
 
     @Override
-    public void updateId(long entry, long id){
+    public void updateId(Long userId, long entry, long id){
 
         //TODO implement
     }
@@ -890,7 +910,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
     }
 
     @Override
-    public void clearQueue() {
+    public void clearQueue(long userId) {
 
         SQLiteDatabase db= this.getWritableDatabase();
 
@@ -914,15 +934,16 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
 
         User user = new User(email, userName, device);
         user.setId(id);
+        user.setClock(clock.jsonify());
         return user;
 
     }
 
     @Override
-    public void removeUser(String email) {
+    public void removeUser(long userId) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.delete("USERS", "MAIL=?", new String[]{email});
+        db.delete("USERS", "ID=?", new String[]{String.valueOf(userId)});
 
     }
 
@@ -957,16 +978,16 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
     }
 
     @Override
-    public boolean userExists(String email) {
+    public boolean userExists(long userId) {
         return false;
     }
 
     @Override
-    public boolean isEnabled(String email) {
+    public boolean isEnabled(long userId) {
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT ENABLED FROM USERS WHERE MAIL=?", new String[]{email});
+        Cursor cursor = db.rawQuery("SELECT ENABLED FROM USERS WHERE ID=?", new String[]{String.valueOf(userId)});
 
         cursor.moveToFirst();
 
@@ -982,30 +1003,30 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Persistence {
     }
 
     @Override
-    public void enableUser(String email) {
+    public void enableUser(long userId) {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put("ENABLED", 1);
 
-        db.update("USERS", values, "MAIL=?", new String[]{email});
+        db.update("USERS", values, "ID=?", new String[]{String.valueOf(userId)});
         ;
     }
 
     @Override
-    public void setDevice(String s, long l) {
+    public void setDevice(long userId, long id) {
 
     }
 
     @Override
-    public void setClock(String email, VectorClock vectorClock) {
+    public void setClock(long userId, VectorClock vectorClock) {
 
 
         try (SQLiteDatabase db = this.getWritableDatabase()){
             ContentValues values = new ContentValues();
             values.put("CLOCK", vectorClock.jsonify());
-            db.update("USERS", values, "MAIL=?", new String[]{email});
+            db.update("USERS", values, "ID=?", new String[]{String.valueOf(userId)});
         }
     }
 

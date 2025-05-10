@@ -80,14 +80,14 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
                 notifyItemChanged(position);
             } else {
-                DataManager.remove(sharedData, entries, entry);
+                DataManager.remove(sharedData, this, entry);
             }
 
             if (entries.isEmpty())
                 showImage();
 
-            notifyDataSetChanged();
 
+            notifyDataSetChanged();
 
         });
 
