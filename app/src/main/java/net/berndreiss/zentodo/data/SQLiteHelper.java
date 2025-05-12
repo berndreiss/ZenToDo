@@ -5,30 +5,24 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Path;
+import android.hardware.camera2.CameraExtensionSession;
+import android.provider.ContactsContract;
 import android.util.Log;
-import android.widget.Toast;
 
 import net.berndreiss.zentodo.MainActivity;
 import net.berndreiss.zentodo.OperationType;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
 import net.berndreiss.zentodo.util.VectorClock;
-import net.berndreiss.zentodo.util.ZenMessage;
 import net.berndreiss.zentodo.util.ZenServerMessage;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,9 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
-
-import jakarta.persistence.criteria.CriteriaBuilder;
+import java.util.SequencedSet;
 
 /**
  * TODO DESCRIBE
@@ -64,6 +56,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
     public void onCreate(SQLiteDatabase db){
         db.execSQL("CREATE TABLE ENTRIES ("
                 + "USER INTEGER DEFAULT NULL,"
+                + "PROFILE INTEGER NOT NULL,"
                 + "ID INTEGER NOT NULL, "
                 + "TASK TEXT NOT NULL, "
                 + "FOCUS INTEGER DEFAULT 0, "
@@ -90,7 +83,17 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
                 "NAME TEXT DEFAULT NULL, " +
                 "ENABLED INTEGER DEFAULT 0, " +
                 "DEVICE INTEGER NOT NULL, " +
+                "PROFILE INTEGER NOT NULL, " +
                 "CLOCK TEXT NOT NULL" +
+                ")";
+        db.execSQL(query);
+
+
+        query = "CREATE TABLE PROFILES (" +
+                "ID INTEGER PRIMARY KEY, " +
+                "NAME TEXT DEFAULT 'Default', " +
+                "USER INTEGER DEFAULT NULL," +
+                "FOREIGN KEY (USER) REFERENCES USERS(ID)" +
                 ")";
         db.execSQL(query);
 
@@ -130,12 +133,12 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
     }
 
-    private Entry getById(Long userId, long id){
+    private Entry getById(Long userId, long profile, long id){
         SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE ID=?", new String[]{String.valueOf(id)});
 
-        List<Entry> entries = getList(cursor);
+        List<Entry> entries = getListOfEntries(cursor);
 
         cursor.close();
 
@@ -158,10 +161,8 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
      * @return
      */
     @Override
-    public Entry addNewEntry(Long userId, String task){
+    public Entry addNewEntry(Long userId, long profile, String task){
         SQLiteDatabase db = this.getWritableDatabase();
-
-        Random random = new Random();
 
         Cursor cursor = db.rawQuery("SELECT 1 FROM ENTRIES", null);
 
@@ -182,10 +183,10 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
         }
         cursor.close();
 
-        return addNewEntry(userId, task, maxPosition + 1);
+        return addNewEntry(userId, profile, task, maxPosition + 1);
     }
     @Override
-    public Entry addNewEntry(Long userId, String task, int position){
+    public Entry addNewEntry(Long userId, long profile, String task, int position){
         SQLiteDatabase db = this.getWritableDatabase();
         Random random = new Random();
         long id = random.nextInt();
@@ -204,13 +205,15 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
                 break;
             }
         }
-        return addNewEntry(userId, id, task, position);
+        return addNewEntry(userId, profile, id, task, position);
 
     }
 
     //adds new entry to TABLE_ENTRIES
     @Override
-    public Entry addNewEntry(Long userId, long id, String task, int position) {
+    public Entry addNewEntry(Long userId, long profile, long id, String task, int position) {
+
+        System.out.println("ADDING ENTRY " + task + " WITH ID " + id + " FOR USER " + userId + " FOR PROFILE " + profile);
 
         ContentValues values = new ContentValues();
         SQLiteDatabase db = this.getWritableDatabase();
@@ -221,20 +224,24 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
             values.put("USER", userId);
         values.put("TASK",task);
         values.put("POSITION", position);
+        values.put("PROFILE", profile);
 
         db.execSQL("UPDATE ENTRIES SET POSITION=POSITION+1 WHERE POSITION >=?", new String[]{String.valueOf(position)});
         db.insert("ENTRIES",null,values);
 
-        return new Entry(userId, id, task, position);
+        return new Entry(userId, profile, id, task, position);
     }
 
     /**
      *
      * @param entry
      */
-    void removeEntry(Entry entry){
+    void removeEntry(Entry entry) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete("ENTRIES", "ID=?", new String[]{String.valueOf(entry.getId())});
+        if (entry.getUserId() == null)
+            db.delete("ENTRIES", "ID=? AND USER IS NULL AND PROFILE=?", new String[]{String.valueOf(entry.getId()), String.valueOf(entry.getProfile())});
+        else
+            db.delete("ENTRIES", "ID=? AND USER=? AND PROFILE=?", new String[]{String.valueOf(entry.getId()), String.valueOf(entry.getUserId()), String.valueOf(entry.getProfile())});
         db.execSQL("UPDATE ENTRIES SET POSITION=POSITION-1 WHERE POSITION >?", new String[]{String.valueOf(entry.getPosition())});
         if (entry.getList() != null)
             db.execSQL("UPDATE ENTRIES SET LIST_POSITION=LIST_POSITION-1 WHERE LIST=? AND LIST_POSITION>?", new String[]{entry.getList(), String.valueOf(entry.getListPosition())});
@@ -243,9 +250,9 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
 
 
     @Override
-    public void delete(Long userId, long id){
+    public void removeEntry(Long userId, long profile, long id){
 
-        Entry entry = getById(userId, id);
+        Entry entry = getById(userId, profile, id);
 
         if (entry == null)
             return;
@@ -253,12 +260,12 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
         removeEntry(entry);
     }
 
-    public void updateReminderDate(Long userId, Entry entry, Instant value){
-        updateReminderDate(userId, entry.getId(), value == null ? null : value.getEpochSecond());
+    public void updateReminderDate(Long userId, long profile, Entry entry, Instant value){
+        updateReminderDate(userId, profile, entry.getId(), value == null ? null : value.getEpochSecond());
     }
 
     @Override
-    public void updateReminderDate(Long userId, long id, Long value){
+    public void updateReminderDate(Long userId, long profile, long id, Long value){
         ContentValues values = new ContentValues();
         values.put("REMINDER_DATE", value);
         SQLiteDatabase db = this.getWritableDatabase();
@@ -266,12 +273,12 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
         ;
     }
 
-    void updateTask(Long userId, Entry entry, String value){
-        updateTask(userId, entry.getId(), value);
+    void updateTask(Long userId, long profile, Entry entry, String value){
+        updateTask(userId, profile, entry.getId(), value);
     }
 
     @Override
-    public void updateTask(Long userId, long id, String value){
+    public void updateTask(Long userId, long profile, long id, String value){
         ContentValues values = new ContentValues();
         values.put("TASK", value == null ? "" : value);
         SQLiteDatabase db = this.getWritableDatabase();
@@ -279,12 +286,12 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
         ;
     }
 
-    void updateRecurrence(Long userId, Entry entry, String value){
-        updateRecurrence(userId, entry.getId(), entry.getReminderDate() == null ? null : dateToEpoch(entry.getReminderDate()), value);
+    void updateRecurrence(Long userId, long profile, Entry entry, String value){
+        updateRecurrence(userId, profile, entry.getId(), entry.getReminderDate() == null ? null : dateToEpoch(entry.getReminderDate()), value);
     }
 
     @Override
-    public void updateRecurrence(Long userId, long id, Long reminderDate, String value){
+    public void updateRecurrence(Long userId, long profile, long id, Long reminderDate, String value){
         ContentValues values = new ContentValues();
         values.put("RECURRENCE", value);
         if (reminderDate == null)
@@ -296,8 +303,8 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
     }
 
     @Override
-    public void updateList(Long userId, long id, String name, int position){
-        updateList(getById(userId, id), name, position);
+    public void updateList(Long userId, long profile, long id, String name, int position){
+        updateList(getById(userId, profile, id), name, position);
     }
 
     public void updateList(Entry entry, String name){
@@ -352,25 +359,25 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
         ;
     }
 
-    void updateFocus(Long userId, Entry entry, boolean valueBool){
+    void updateFocus(Long userId, long profile, Entry entry, boolean valueBool){
 
-        updateFocus(userId, entry.getId(), boolToInt(valueBool));
+        updateFocus(userId, profile, entry.getId(), boolToInt(valueBool));
     }
 
     @Override
-    public void updateFocus(Long userId, long id, int value){
+    public void updateFocus(Long userId, long profile, long id, int value){
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("UPDATE ENTRIES SET FOCUS=? WHERE ID=?;", new String[]{String.valueOf(value), String.valueOf(id)});
         ;
     }
 
-    void updateDropped(Long userId, Entry entry, boolean valueBool){
-        updateDropped(userId, entry.getId(), boolToInt(valueBool));
+    void updateDropped(Long userId, long profile, Entry entry, boolean valueBool){
+        updateDropped(userId, profile,  entry.getId(), boolToInt(valueBool));
     }
 
     @Override
-    public void updateDropped(Long userId, long id, int value){
+    public void updateDropped(Long userId, long profile, long id, int value){
 
         //convert bool to int
         SQLiteDatabase db = this.getWritableDatabase();
@@ -379,7 +386,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
     }
 
     @Override
-    public void updateListColor(Long userid, String list, String color){
+    public void updateListColor(Long userid, long profile, String list, String color){
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -401,17 +408,53 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
     }
 
     @Override
-    public boolean updateEmail(Long l, String s) {
+    public boolean updateEmail(Long userId, String s) {
         return false;
     }
 
     @Override
-    public Optional<Entry> getEntry(Long aLong, long l) {
-        return Optional.empty();
+    public List<User> getUsers() {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM USERS", null);
+
+        List<User> users = getListOfUsers(cursor);
+
+        cursor.close();
+        ;
+
+        return users;
     }
 
     @Override
-    public List<Entry> getEntries(Long aLong) {
+    public List<Profile> getProfiles(Long aLong) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Optional<Entry> getEntry(Long userId, long profile, long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        System.out.println("LOOKING FOR ENTRY WITH ID " + id + " USER " + userId + " PROFILE " + profile);
+
+        Cursor cursor;
+        if (userId == null)
+            cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER IS NULL AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(profile), String.valueOf(id)});
+        else
+            cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(id)});
+        List<Entry> entries = getListOfEntries(cursor);
+
+        System.out.println("SIZE ENTRIES: " + entries.size());
+        cursor.close();
+        if (entries.size() > 1)
+            throw new RuntimeException("Multiple entries with same id found for user " + userId);
+
+        return !entries.isEmpty() ? Optional.of(entries.get(0)) : Optional.empty();
+    }
+
+    @Override
+    public List<Entry> getEntries(Long userId, long profile) {
         return Collections.emptyList();
     }
 
@@ -419,13 +462,13 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
      * TODO DESCRIBE
      * @return
      */
-    public List<Entry> loadEntries(Long userId){
+    public List<Entry> loadEntries(Long userId, long profile){
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES ORDER BY POSITION", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? ORDER BY POSITION", new String[]{String.valueOf(userId)});
 
-        List<Entry> entries = getList(cursor);
+        List<Entry> entries = getListOfEntries(cursor);
 
         cursor.close();
         ;
@@ -437,7 +480,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
      * TODO DESCRIBE
      * @return
      */
-    public List<Entry> loadFocus(Long userId){
+    public List<Entry> loadFocus(Long userId, long profile){
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -446,7 +489,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE FOCUS>0 OR (RECURRENCE IS NOT NULL AND REMINDER_DATE <= " + epoch +  ")" +
                 " ORDER BY POSITION", null);
 
-        List<Entry> entries = getList(cursor);
+        List<Entry> entries = getListOfEntries(cursor);
 
         List<Long> removed = loadRecurring();
 
@@ -466,7 +509,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE DROPPED>0 ORDER BY POSITION", null);
 
-        List<Entry> entries = getList(cursor);
+        List<Entry> entries = getListOfEntries(cursor);
 
         cursor.close();
         ;
@@ -479,13 +522,13 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
      * @param name
      * @return
      */
-    public List<Entry> loadList(Long userId, String name){
+    public List<Entry> loadList(Long userId, long profile, String name){
 
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE LIST=? ORDER BY LIST_POSITION", new  String[]{name});
 
-        List<Entry> entries = getList(cursor);
+        List<Entry> entries = getListOfEntries(cursor);
 
         cursor.close();
         ;
@@ -494,26 +537,29 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
     }
 
     //TODO COMMENT
-    private List<Entry> getList(Cursor cursor){
+    private List<Entry> getListOfEntries(Cursor cursor){
         List<Entry> entries = new ArrayList<>();
         cursor.moveToFirst();
 
         while (!cursor.isAfterLast()){
 
-            long id = cursor.getInt(1);
-            String task = cursor.getString(2);
-            boolean focus = intToBool(cursor.getInt(3));
-            boolean dropped = intToBool(cursor.getInt(4));
-            String list = cursor.getString(5);
-            Integer listPosition = cursor.getInt(6);
-            long reminderDateEpoch = cursor.getLong(7);
-            String recurrence = cursor.getString(8);
-            int position = cursor.getInt(9);
+            Long userId = cursor.getLong(0);
+            long profile = cursor.getLong(1);
+            long id = cursor.getInt(2);
+            String task = cursor.getString(3);
+            boolean focus = intToBool(cursor.getInt(4));
+            boolean dropped = intToBool(cursor.getInt(5));
+            String list = cursor.getString(6);
+            Integer listPosition = cursor.getInt(7);
+            long reminderDateEpoch = cursor.getLong(8);
+            String recurrence = cursor.getString(9);
+            int position = cursor.getInt(10);
 
             //TODO ADD USERID!!!
-            Entry entry = new Entry(null, id, task, position);
+            Entry entry = new Entry(userId, profile, id, task, position);
             entry.setFocus(focus);
             entry.setDropped(dropped);
+
             if (!(list==null)) {
                 entry.setList(list);
                 entry.setListPosition(listPosition);
@@ -539,6 +585,49 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
 
     }
 
+    private List<User> getListOfUsers(Cursor cursor){
+        List<User> users = new ArrayList<>();
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()){
+
+            long id = cursor.getInt(0);
+            String email = cursor.getString(1);
+            String userName = cursor.getString(2);
+            boolean enabled = intToBool(cursor.getInt(3));
+            int device = cursor.getInt(4);
+            long profile = cursor.getLong(5);
+
+            //TODO ADD USERID!!!
+            User user = new User(email, userName, device);
+            user.setId(id);
+            user.setEnabled(enabled);
+            user.setProfile(profile);
+            users.add(user);
+            cursor.moveToNext();
+        }
+
+        return users;
+
+    }
+    private List<Profile> getListOfProfiles(Cursor cursor){
+        List<Profile> profiles = new ArrayList<>();
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()){
+
+            long id = cursor.getLong(0);
+            String name = cursor.getString(1);
+            Profile profile = new Profile(name);
+            profile.setId(id);
+
+            profiles.add(profile);
+            cursor.moveToNext();
+        }
+
+        return profiles;
+
+    }
     /**
      * TODO DESCRIBE
      * @return
@@ -618,9 +707,9 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
     }
 
     @Override
-    public void swapEntries(Long userId, long id, int position){
+    public void swapEntries(Long userId, long profile, long id, int position){
 
-        swapEntries(getById(userId, id), position);
+        swapEntries(getById(userId,profile, id), position);
     }
 
     void swapEntries(Entry entry, int pos){
@@ -642,9 +731,9 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
     }
 
     @Override
-    public void swapListEntries(Long userId, long id, int position){
+    public void swapListEntries(Long userId, long profile, long id, int position){
 
-        swapListEntries(getById(userId, id), position);
+        swapListEntries(getById(userId, profile, id), position);
     }
 
     void swapListEntries(Entry entry, int pos){
@@ -772,7 +861,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES ORDER BY REMINDER_DATE", null);
 
-        List<Entry> entries = getList(cursor);
+        List<Entry> entries = getListOfEntries(cursor);
         cursor.close();
         ;
 
@@ -789,7 +878,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE LIST IS NULL ORDER BY POSITION", null);
 
-        List<Entry> entries = getList(cursor);
+        List<Entry> entries = getListOfEntries(cursor);
         cursor.close();
         ;
 
@@ -828,7 +917,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
                 "(REMINDER_DATE IS NOT NULL AND REMINDER_DATE<=" + epoch + ")) ORDER BY POSITION", null );
 
 
-        tasksToPick = getList(cursor);
+        tasksToPick = getListOfEntries(cursor);
 
         cursor.close();
         ;
@@ -838,7 +927,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
 
 
     @Override
-    public void updateId(Long userId, long entry, long id){
+    public void updateId(Long userId, long profile, long entry, long id){
 
         //TODO implement
     }
@@ -922,6 +1011,29 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
+
+        Random random = new Random();
+        long profileId = random.nextInt();
+
+        while (true){
+            Cursor cursorId = db.rawQuery("SELECT ID FROM PROFILES WHERE ID=" + id, null);
+
+            cursorId.moveToFirst();
+
+            if (!cursorId.isAfterLast()) {
+                id = random.nextInt();
+                cursorId.close();
+            }
+            else {
+                cursorId.close();
+                break;
+            }
+        }
+        ContentValues profileValues = new ContentValues();
+        profileValues.put("ID", profileId);
+        profileValues.put("USER", id);
+        db.insert("PROFILES", null, profileValues);
+
         ContentValues values = new ContentValues();
         values.put("ID", id);
         values.put("MAIL", email);
@@ -929,12 +1041,21 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
         values.put("DEVICE", device);
         VectorClock clock = new VectorClock(device);
         values.put("CLOCK", clock.jsonify());
+        values.put("PROFILE", profileId);
 
         db.insert("USERS", null, values);
 
         User user = new User(email, userName, device);
         user.setId(id);
         user.setClock(clock.jsonify());
+
+        Profile profile = new Profile();
+        profile.setUser(user);
+        profile.setId(profileId);
+        user.getProfiles().add(profile);
+        user.setProfile(profileId);
+
+        System.out.println("NEW USER " + id + " WITH PROFILE " + user.getProfile());
         return user;
 
     }
@@ -942,39 +1063,76 @@ public class SQLiteHelper extends SQLiteOpenHelper implements Database {
     @Override
     public void removeUser(long userId) {
         SQLiteDatabase db = this.getWritableDatabase();
-
         db.delete("USERS", "ID=?", new String[]{String.valueOf(userId)});
-
     }
 
     @Override
-    public User getUserByEmail(String email) {
+    public void removeProfile(long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        db.delete("PROFILES", "ID = ?", new String[]{String.valueOf(id)});
+    }
+
+    @Override
+    public Optional<User> getUser(long id){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM USERS WHERE ID=?", new String[]{String.valueOf(id)});
+        List<User> users = getListOfUsers(cursor);
+        cursor.close();
+        System.out.println("GETTING USER " + id);
+        System.out.println(users.size());
+        if(users.isEmpty())
+            return Optional.empty();
+
+        return Optional.of(users.get(0));
+    }
+    @Override
+    public Optional<User> getUserByEmail(String email) {
+        System.out.println("GET USER BY MAIL " + email);
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM USERS WHERE MAIL=?", new String[]{email});
 
-        User user = null;
-
-        cursor.moveToFirst();
-
-        if (!cursor.isAfterLast()){
-
-            long id = cursor.getLong(0);
-            String mail = cursor.getString(1);
-            String name = cursor.getString(2);
-            boolean enabled = intToBool(cursor.getInt(3));
-            long device = cursor.getLong(4);
-            String clock = cursor.getString(5);
-
-            user = new User(mail, name, device);
-            user.setId(id);
-            user.setClock(clock);
-            user.setEnabled(enabled);
-        }
+        List<User> users = getListOfUsers(cursor);
 
         cursor.close();
 
-        return user;
+        if (users.size() > 1)
+            throw new RuntimeException("Two users with same email exist");
+        if (users.isEmpty())
+            return Optional.empty();
+
+        System.out.println("USER " + users.get(0).getId() + " WITH PROFILE " + users.get(0).getProfile());
+        return Optional.of(users.get(0));
+
+    }
+
+    @Override
+    public Optional<Profile> getProfile(Long userId, long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM PROFILES WHERE USER=? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
+
+        System.out.println("GETTING PROFILE " + id + " FOR USER " + userId);
+        List<Profile> profiles = getListOfProfiles(cursor);
+
+        cursor.close();
+        System.out.println("SIZE " + profiles.size());
+        if (profiles.size() > 1)
+            System.out.println("Profiles with identical id for user " + userId);
+        if (profiles.isEmpty())
+            return Optional.empty();
+
+        Optional<User> user = getUser(userId);
+
+        System.out.println("EMPTY USER " + user.isEmpty());
+        if (user.isEmpty())
+            return Optional.empty();
+
+        System.out.println("HERE");
+        Profile profile = profiles.get(0);
+        profile.setUser(user.get());
+        return Optional.of(profile);
     }
 
     @Override

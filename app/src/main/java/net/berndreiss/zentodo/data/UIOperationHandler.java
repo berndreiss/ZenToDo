@@ -133,7 +133,7 @@ public class UIOperationHandler implements ClientOperationHandler{
     }
 
     @Override
-    public void delete(long l) {
+    public void removeEntry(long l) {
 
     }
 

@@ -60,6 +60,7 @@ import android.view.View;
 
 import net.berndreiss.zentodo.data.Entry;
 import net.berndreiss.zentodo.data.SQLiteHelper;
+import net.berndreiss.zentodo.data.User;
 import net.berndreiss.zentodo.databinding.ActivityMainBinding;
 import net.berndreiss.zentodo.util.ClientStub;
 
@@ -73,6 +74,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Optional;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -164,6 +167,12 @@ public class MainActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        Entry entry = sharedData.database.addNewEntry(0L, 0, "TASK");
+        System.out.println("ENTRY " + entry.getId());
+
+        Optional<Entry> entryBack = sharedData.database.getEntry(0L, 0, 0);
+
+        System.out.println("ENTRY BACK: " + entryBack.isPresent());
 
         //layouts are initialized
         initializeDrop(sharedData);

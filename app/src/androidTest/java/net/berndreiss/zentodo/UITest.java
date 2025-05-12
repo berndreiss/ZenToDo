@@ -119,7 +119,7 @@ public class UITest {
 
             //assert results
             try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-                List<Entry> entries = db.loadEntries(null);
+                List<Entry> entries = db.loadEntries(null, 0);
 
                 if (tests[i] == null)
                     assert (entries.get(i).getReminderDate() == null);
@@ -183,7 +183,7 @@ public class UITest {
 
             //assert results
             try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-                List<Entry> entries = db.loadEntries(null);
+                List<Entry> entries = db.loadEntries(null, 0);
 
                 if (entries.get(i).getReminderDate() == null) {
                     continue;
@@ -192,7 +192,7 @@ public class UITest {
                     assert (entries.get(i).getReminderDate() == null);
                 else
                     assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
-                assert (db.loadFocus(null).size() == results[i]);
+                assert (db.loadFocus(null, 0).size() == results[i]);
             }
         }
         sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
@@ -238,7 +238,7 @@ public class UITest {
             //assert results
             try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
 
-                List<Entry> entries = db.loadEntries(null);
+                List<Entry> entries = db.loadEntries(null, 0);
 
                 if (tests[i] == null)
                     assert (entries.get(i).getReminderDate() == null);
@@ -299,7 +299,7 @@ public class UITest {
             //assert results
             try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
 
-                List<Entry> entries = db.loadEntries(null);
+                List<Entry> entries = db.loadEntries(null, 0);
                 if (tests[i] == null)
                     assert (entries.get(i).getReminderDate() == null);
                 else

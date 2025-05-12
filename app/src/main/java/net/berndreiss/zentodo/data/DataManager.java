@@ -122,7 +122,7 @@ public class DataManager {
     public static void remove(SharedData sharedData, TaskListAdapter adapter, Entry entry) {
 
         Thread thread = new Thread(()->{
-            sharedData.clientStub.delete(entry.getId());
+            sharedData.clientStub.removeEntry(entry.getId());
         });
         thread.start();
         adapter.entries.remove(entry);
