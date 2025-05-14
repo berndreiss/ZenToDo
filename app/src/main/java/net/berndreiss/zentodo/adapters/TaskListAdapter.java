@@ -32,6 +32,7 @@ import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 import net.berndreiss.zentodo.data.SQLiteHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -224,7 +225,8 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
             setList(holder);
 
             //array of names of all lists in task (as singletons)
-            List<String> array = sharedData.database.getLists();
+            //List<String> array = sharedData.database.getDatabase().getEntryManager().getLists();
+            List<String> array = new ArrayList<>();//TODO REMOVE!!!
 
             //initialize adapter with all existing list options
             ArrayAdapter<String> adapter = new ArrayAdapter<>(sharedData.context, android.R.layout.simple_list_item_1, array);

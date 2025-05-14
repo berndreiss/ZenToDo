@@ -167,10 +167,10 @@ public class MainActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        Entry entry = sharedData.database.addNewEntry(0L, 0, "TASK");
+        Entry entry = sharedData.database.getDatabase().getEntryManager().addNewEntry(0L, 0, "TASK");
         System.out.println("ENTRY " + entry.getId());
 
-        Optional<Entry> entryBack = sharedData.database.getEntry(0L, 0, 0);
+        Optional<Entry> entryBack = sharedData.database.getDatabase().getEntryManager().getEntry(0L, 0, 0);
 
         System.out.println("ENTRY BACK: " + entryBack.isPresent());
 

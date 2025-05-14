@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class UIOperationHandler implements ClientOperationHandler{
+public class UIOperationHandler implements ClientOperationHandlerI{
 
     public TaskListAdapter adapter = null;
 
@@ -26,7 +26,7 @@ public class UIOperationHandler implements ClientOperationHandler{
     }
 
     @Override
-    public void updateId(long l, long l1, long l2) {
+    public void updateId(long l, long l1, long l2, long l3) {
 
     }
 
