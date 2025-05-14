@@ -159,8 +159,10 @@ public class MainActivity extends AppCompatActivity {
             showLists();//show Lists layout
         });
 
+
         sharedData = new SharedData(this);
 
+        deleteDatabase("Data.db");
         //initialze client stub
         try {
             DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");

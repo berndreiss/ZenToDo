@@ -101,24 +101,12 @@ public class UserManager implements UserManagerI{
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
-
-        Random random = new Random();
-        long profileId = random.nextInt();
-
-        while (true){
-            Cursor cursorId = db.rawQuery("SELECT ID FROM PROFILES WHERE ID=" + id, null);
-
-            cursorId.moveToFirst();
-
-            if (!cursorId.isAfterLast()) {
-                id = random.nextInt();
-                cursorId.close();
-            }
-            else {
-                cursorId.close();
-                break;
-            }
-        }
+        int profileId = 0;
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM PROFILES  WHERE ID=" + id, null);
+        if (cursor.isAfterLast())
+            profileId = cursor.getInt(0);
+        cursor.close();
+        System.out.println("ADD PROFILE " + profileId + " FOR USER " + id);
         ContentValues profileValues = new ContentValues();
         profileValues.put("ID", profileId);
         profileValues.put("USER", id);
@@ -140,10 +128,9 @@ public class UserManager implements UserManagerI{
         user.setClock(clock.jsonify());
 
         Profile profile = new Profile();
-        //profile.setUser(user);
-        profile.setId((int) profileId);
-        //user.getProfiles().add(profile);
-        user.setProfile(profileId);
+        ProfileId profileIdentifier = new ProfileId((int) profileId, user);
+        profile.setProfileId(profileIdentifier);
+        user.setProfile(profile.getId());
 
         System.out.println("NEW USER " + id + " WITH PROFILE " + user.getProfile());
         return user;
@@ -151,12 +138,12 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public Profile addProfile(Long aLong, String s) {
+    public Profile addProfile(long aLong, String s) {
         return null;
     }
 
     @Override
-    public Profile addProfile(Long aLong) {
+    public Profile addProfile(long aLong) {
         return null;
     }
 
@@ -208,7 +195,7 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public Optional<Profile> getProfile(Long userId, long id) {
+    public Optional<Profile> getProfile(long userId, long id) {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM PROFILES WHERE USER=? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
@@ -225,13 +212,11 @@ public class UserManager implements UserManagerI{
 
         Optional<User> user = getUser(userId);
 
-        System.out.println("EMPTY USER " + user.isEmpty());
         if (user.isEmpty())
             return Optional.empty();
 
-        System.out.println("HERE");
         Profile profile = profiles.get(0);
-        //profile.setUser(user.get());
+        profile.getProfileId().setUser(user.get());
         return Optional.of(profile);
     }
 
@@ -339,8 +324,22 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public List<Profile> getProfiles(Long aLong) {
-        return Collections.emptyList();
+    public List<Profile> getProfiles(long userId) {
+        SQLiteDatabase database = sqLiteHelper.getReadableDatabase();
+
+        Cursor cursorU = database.rawQuery("SELECT * FROM USERS WHERE ID = ?", new String[]{String.valueOf(userId)});
+        List<User> users = getListOfUsers(cursorU);
+        cursorU.close();
+        if (users.isEmpty())
+            return new ArrayList<>();
+
+        Cursor cursor = database.rawQuery("SELECT * FROM PROFILES WHERE USER = ?", new String[]{String.valueOf(userId)});
+        List<Profile> profiles = getListOfProfiles(cursor);
+
+        for (Profile p: profiles)
+            p.getProfileId().setUser(users.get(0));
+
+        return profiles;
     }
     private List<User> getListOfUsers(Cursor cursor){
         List<User> users = new ArrayList<>();
@@ -353,7 +352,7 @@ public class UserManager implements UserManagerI{
             String userName = cursor.getString(2);
             boolean enabled = SQLiteHelper.intToBool(cursor.getInt(3));
             int device = cursor.getInt(4);
-            long profile = cursor.getLong(5);
+            int profile = cursor.getInt(5);
 
             //TODO ADD USERID!!!
             User user = new User(email, userName, device);
@@ -376,9 +375,10 @@ public class UserManager implements UserManagerI{
             int id = cursor.getInt(0);
             String name = cursor.getString(1);
             Profile profile = new Profile();
-            profile.setId(id);
+            ProfileId profileId = new ProfileId();
+            profileId.setId(id);
+            profile.setProfileId(profileId);
             profile.setName(name);
-
             profiles.add(profile);
             cursor.moveToNext();
         }

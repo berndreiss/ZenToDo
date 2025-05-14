@@ -83,7 +83,7 @@ public class DataTest {
                 counter++;
             }
 
-            Collection<? extends  Entry> droppedList = db.loadDropped();
+            Collection<? extends  Entry> droppedList = db.getEntryManager().loadDropped();
 
             assert(droppedList.size() == 3);
         }
@@ -152,7 +152,7 @@ public class DataTest {
             DataManager.add(sharedData, adapter, "3");
             DataManager.editList(sharedData, adapter, adapter.entries.get(3), "1");
 
-            assert(db.loadDropped().isEmpty());
+            assert(db.getEntryManager().loadDropped().isEmpty());
 
             List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
@@ -166,7 +166,7 @@ public class DataTest {
                 counter++;
             }
 
-            List<String> lists = db.getLists();
+            List<String> lists = db.getEntryManager().getLists();
 
             assert(lists.size() == 2);
 
@@ -202,12 +202,12 @@ public class DataTest {
             DataManager.editList(sharedData, adapter, adapter.entries.get(0), null);
             DataManager.editList(sharedData, adapter, adapter.entries.get(1), null);
 
-            lists = db.getLists();
+            lists = db.getEntryManager().getLists();
 
             assert(lists.size()==1);
 
 
-            List<Entry> listNone = db.getNoList();
+            List<Entry> listNone = db.getEntryManager().getNoList();
 
             counter = 0;
 
@@ -356,7 +356,7 @@ public class DataTest {
 
             assert(!entriesDB.getFirst().getDropped());
 
-            List<Entry> entriesFocus = db.loadDropped();
+            List<Entry> entriesFocus = db.getEntryManager().loadDropped();
 
             assert(entriesFocus.isEmpty());
         }
@@ -373,7 +373,7 @@ public class DataTest {
             DataManager.editReminderDate(sharedData, adapter.entries.getFirst(), date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 
             assert (adapter.entries.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
-            assert (db.loadDropped().isEmpty());
+            assert (db.getEntryManager().loadDropped().isEmpty());
 
             List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
@@ -399,7 +399,7 @@ public class DataTest {
             DataManager.editRecurrence(sharedData, adapter.entries.getFirst(), recurrence);
 
             assert (adapter.entries.getFirst().getRecurrence().equals(recurrence));
-            assert (db.loadDropped().isEmpty());
+            assert (db.getEntryManager().loadDropped().isEmpty());
 
             List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
@@ -427,7 +427,7 @@ public class DataTest {
             if ((!DataManager.getListColor(sharedData, "0").equals("BLUE")))
                 throw new AssertionError();
 
-            Map<String, String> colorMap = db.getListColors();
+            Map<String, String> colorMap = db.getEntryManager().getListColors();
 
             assert(colorMap.containsKey("0"));
             assert(Objects.equals(colorMap.get("0"), "BLUE"));
@@ -510,11 +510,11 @@ public class DataTest {
             //get date of today
             String filename = LocalDate.now().toString();
 
-            assert (db.loadRecurring().isEmpty());
+            assert (db.getEntryManager().loadRecurring().isEmpty());
 
             DataManager.addToRecurringButRemoved(sharedData, 0);
             //add first element, save and assert results upon load
-            List<Long> recurring = db.loadRecurring();
+            List<Long> recurring = db.getEntryManager().loadRecurring();
             assert (recurring.size() == 1);
             assert (recurring.getFirst() == 0);
 
@@ -522,12 +522,12 @@ public class DataTest {
             DataManager.addToRecurringButRemoved(sharedData, 1);
             DataManager.addToRecurringButRemoved(sharedData, 2);
             for (int i = 0; i < 3; i++)
-                assert (db.loadRecurring().get(i) == i);
+                assert (db.getEntryManager().loadRecurring().get(i) == i);
 
             //remove second element, save and assert results upon load
             DataManager.removeFromRecurringButRemoved(sharedData, 1);
-            assert (db.loadRecurring().get(0) == 0);
-            assert (db.loadRecurring().get(1) == 2);
+            assert (db.getEntryManager().loadRecurring().get(0) == 0);
+            assert (db.getEntryManager().loadRecurring().get(1) == 2);
 
             //clean up
             new File(sharedData.context.getFilesDir() + "/" + filename).delete();

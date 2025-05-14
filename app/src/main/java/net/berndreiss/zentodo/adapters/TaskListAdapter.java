@@ -225,8 +225,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
             setList(holder);
 
             //array of names of all lists in task (as singletons)
-            //List<String> array = sharedData.database.getDatabase().getEntryManager().getLists();
-            List<String> array = new ArrayList<>();//TODO REMOVE!!!
+            List<String> array = sharedData.database.getEntryManager().getLists();
 
             //initialize adapter with all existing list options
             ArrayAdapter<String> adapter = new ArrayAdapter<>(sharedData.context, android.R.layout.simple_list_item_1, array);

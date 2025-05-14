@@ -186,7 +186,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //clear ArrayList for list, add all tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
-                listTasks.addAll(sharedData.database.getEntriesOrderedByDate());
+                listTasks.addAll(sharedData.database.getEntryManager().getEntriesOrderedByDate());
 
                 //set header text
                 header.headerText.setText(sharedData.context.getResources().getString(R.string.allTasks));
@@ -215,7 +215,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //clear ArrayList for list, add tasks without a list from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
 
-                listTasks.addAll(sharedData.database.getNoList());
+                listTasks.addAll(sharedData.database.getEntryManager().getNoList());
 
                 //set header text
                 header.headerText.setText(sharedData.context.getResources().getString(R.string.noList));

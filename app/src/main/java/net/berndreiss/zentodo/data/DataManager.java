@@ -45,10 +45,10 @@ public class DataManager {
 
     public static void initClientStub(SharedData sharedData, String email) throws InterruptedException {
 
-        sharedData.clientStub = new ClientStub(email, sharedData.database);
+        sharedData.clientStub = new ClientStub(email, sharedData.database.getDatabase());
 
 
-        boolean userExists = sharedData.database.getUserByEmail(email) != null;
+        boolean userExists = sharedData.database.getDatabase().getUserManager().getUserByEmail(email).isPresent();
 
         Consumer<String> messagePrinter = message -> {
             Looper.prepare();
@@ -323,7 +323,7 @@ public class DataManager {
         }
 
 
-        Thread thread = new Thread(() -> sharedData.database.updateList(entry, list));
+        Thread thread = new Thread(() -> sharedData.database.getEntryManager().updateList(entry, list));
         thread.start();
 
         entry.setList(list);
@@ -458,24 +458,24 @@ public class DataManager {
     public static void addToRecurringButRemoved(SharedData sharedData, long id){
 
         if (recurringButRemovedFromToday == null)
-            recurringButRemovedFromToday = sharedData.database.loadRecurring();
+            recurringButRemovedFromToday = sharedData.database.getEntryManager().loadRecurring();
         recurringButRemovedFromToday.add(id);
 
-        sharedData.database.saveRecurring(recurringButRemovedFromToday);
+        sharedData.database.getEntryManager().saveRecurring(recurringButRemovedFromToday);
 
     }
 
     //remove ids from recurringButRemovedFromToday and make a call to the database making changes permanent
     public static void removeFromRecurringButRemoved(SharedData sharedData, long id){
         if (recurringButRemovedFromToday == null)
-            recurringButRemovedFromToday = sharedData.database.loadRecurring();
+            recurringButRemovedFromToday = sharedData.database.getEntryManager().loadRecurring();
         for (int i = 0; i < recurringButRemovedFromToday.size(); i++)
             if (recurringButRemovedFromToday.get(i)==id) {
                 recurringButRemovedFromToday.remove(i);
                 break;
             }
 
-        sharedData.database.saveRecurring(recurringButRemovedFromToday);
+        sharedData.database.getEntryManager().saveRecurring(recurringButRemovedFromToday);
 
     }
 
@@ -484,6 +484,6 @@ public class DataManager {
     }
 
     public static List<Entry> getTasksToPick(SharedData sharedData) {
-        return sharedData.database.loadTasksToPick();
+        return sharedData.database.getEntryManager().loadTasksToPick();
     }
 }

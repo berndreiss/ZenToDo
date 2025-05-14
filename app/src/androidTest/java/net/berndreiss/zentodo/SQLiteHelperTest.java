@@ -18,7 +18,7 @@ public class SQLiteHelperTest extends DatabaseTestSuite{
         databaseSupplier = () -> {
             SharedData sharedData = new SharedData(InstrumentationRegistry.getInstrumentation().getTargetContext());
             sharedData.database = new SQLiteHelper(sharedData.context);
-            return sharedData.database;
+            return sharedData.database.getDatabase();
         };
     }
 }

@@ -49,6 +49,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         super(context, databaseName == null ? MainActivity.DATABASE_NAME : databaseName,null, MainActivity.DATABASE_VERSION);
         this.context = context;
         this.database = new Database(new EntryManager(this), new UserManager(this), new DatabaseOps(this));
+        Optional<User> user = database.getUserManager().getUser(0L);
+        if (user.isPresent())
+            return;
+        database.getUserManager().addUser(0, "test@test.net", "Default user", 0);
     }
 
     public SQLiteHelper(Context context){
@@ -93,9 +97,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
 
         query = "CREATE TABLE PROFILES (" +
-                "ID INTEGER PRIMARY KEY, " +
+                "ID INTEGER NOT NULL, " +
                 "NAME TEXT DEFAULT 'Default', " +
-                "USER INTEGER DEFAULT NULL," +
+                "USER INTEGER NOT NULL," +
+                "PRIMARY KEY (ID, USER)," +
                 "FOREIGN KEY (USER) REFERENCES USERS(ID)" +
                 ")";
         db.execSQL(query);
@@ -182,4 +187,13 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         return b ? 1 : 0;
     }
 
+    public EntryManager getEntryManager(){
+        return (EntryManager) database.getEntryManager();
+    }
+    public UserManager getEntryUser(){
+        return (UserManager) database.getUserManager();
+    }
+    public DatabaseOps getDatabaseOps(){
+        return (DatabaseOps) database.getDatabaseOps();
+    }
 }

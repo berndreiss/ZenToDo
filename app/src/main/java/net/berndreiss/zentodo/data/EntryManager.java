@@ -415,8 +415,8 @@ public class EntryManager implements EntryManagerI{
             long profile = cursor.getLong(1);
             long id = cursor.getInt(2);
             String task = cursor.getString(3);
-            boolean focus = intToBool(cursor.getInt(4));
-            boolean dropped = intToBool(cursor.getInt(5));
+            boolean focus = SQLiteHelper.intToBool(cursor.getInt(4));
+            boolean dropped = SQLiteHelper.intToBool(cursor.getInt(5));
             String list = cursor.getString(6);
             Integer listPosition = cursor.getInt(7);
             long reminderDateEpoch = cursor.getLong(8);
