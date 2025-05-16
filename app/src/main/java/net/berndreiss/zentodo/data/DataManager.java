@@ -323,7 +323,7 @@ public class DataManager {
         }
 
 
-        Thread thread = new Thread(() -> sharedData.database.getEntryManager().updateList(entry, list));
+        Thread thread = new Thread(() -> sharedData.database.getListManager().updateList(entry, list));
         thread.start();
 
         entry.setList(list);

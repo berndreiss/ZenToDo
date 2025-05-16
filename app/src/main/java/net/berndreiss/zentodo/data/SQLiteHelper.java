@@ -48,11 +48,17 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public SQLiteHelper(Context context, String databaseName){
         super(context, databaseName == null ? MainActivity.DATABASE_NAME : databaseName,null, MainActivity.DATABASE_VERSION);
         this.context = context;
-        this.database = new Database(new EntryManager(this), new UserManager(this), new DatabaseOps(this));
+        this.database = new Database(new EntryManager(this), new UserManager(this), new DatabaseOps(this), new ListManager(this));
         Optional<User> user = database.getUserManager().getUser(0L);
-        if (user.isPresent())
+        if (user.isPresent()) {
+            List<Profile> profiles = getUserManager().getProfiles(0);
+            if (profiles.isEmpty())
+                getUserManager().addProfile(0);
             return;
-        database.getUserManager().addUser(0, "test@test.net", "Default user", 0);
+        }
+        try {
+            database.getUserManager().addUser(0, "test@test.net", "Default user", 0);
+        } catch (DuplicateIdException | InvalidActionException _) {}
     }
 
     public SQLiteHelper(Context context){
@@ -157,7 +163,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
      * @return
      */
     public static Instant epochToDate(long epoch){
-        return Instant.ofEpochSecond(epoch);
+        return Instant.ofEpochMilli(epoch);
     }
 
     /**
@@ -166,7 +172,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
      * @return
      */
     public static long dateToEpoch(Instant date){
-        return date.getEpochSecond();
+        return date.toEpochMilli();
     }
 
     /**
@@ -190,8 +196,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public EntryManager getEntryManager(){
         return (EntryManager) database.getEntryManager();
     }
-    public UserManager getEntryUser(){
+    public UserManager getUserManager(){
         return (UserManager) database.getUserManager();
+    }
+    public ListManager getListManager(){
+        return (ListManager) database.getListManager();
     }
     public DatabaseOps getDatabaseOps(){
         return (DatabaseOps) database.getDatabaseOps();

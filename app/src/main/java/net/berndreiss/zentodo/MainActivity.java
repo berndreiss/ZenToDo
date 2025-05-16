@@ -170,11 +170,8 @@ public class MainActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
         Entry entry = sharedData.database.getDatabase().getEntryManager().addNewEntry(0L, 0, "TASK");
-        System.out.println("ENTRY " + entry.getId());
 
         Optional<Entry> entryBack = sharedData.database.getDatabase().getEntryManager().getEntry(0L, 0, 0);
-
-        System.out.println("ENTRY BACK: " + entryBack.isPresent());
 
         //layouts are initialized
         initializeDrop(sharedData);

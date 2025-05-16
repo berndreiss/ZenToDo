@@ -8,7 +8,7 @@ public class DatabaseOps implements DatabaseOpsI{
         this.sqLiteHelper = sqLiteHelper;
     }
     @Override
-    public void setTimeDelay(long l) {
+    public synchronized void setTimeDelay(long l) {
 
         //TODO implement
     }

@@ -29,7 +29,7 @@ public class UserManager implements UserManagerI{
      
 
     @Override
-    public void addToQueue(User user, ZenServerMessage message) {
+    public synchronized void addToQueue(User user, ZenServerMessage message) {
 
         Log.v("TEST", "INSERT INTO QUEUE");
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
@@ -89,7 +89,7 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public void clearQueue(long userId) {
+    public synchronized void clearQueue(long userId) {
 
         SQLiteDatabase db= sqLiteHelper.getWritableDatabase();
 
@@ -97,16 +97,19 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public User addUser(long id, String email, String userName, long device) {
+    public synchronized User addUser(long id, String email, String userName, long device) throws DuplicateIdException, InvalidActionException {
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
+        if (getUser(id).isPresent())
+            throw new DuplicateIdException("User with id already exists: id " + id);
+        if (getUserByEmail(email).isPresent())
+            throw new InvalidActionException("User with email already exists: email " + email);
         int profileId = 0;
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM PROFILES  WHERE ID=" + id, null);
         if (cursor.isAfterLast())
             profileId = cursor.getInt(0);
         cursor.close();
-        System.out.println("ADD PROFILE " + profileId + " FOR USER " + id);
         ContentValues profileValues = new ContentValues();
         profileValues.put("ID", profileId);
         profileValues.put("USER", id);
@@ -132,31 +135,33 @@ public class UserManager implements UserManagerI{
         profile.setProfileId(profileIdentifier);
         user.setProfile(profile.getId());
 
-        System.out.println("NEW USER " + id + " WITH PROFILE " + user.getProfile());
         return user;
 
     }
 
     @Override
-    public Profile addProfile(long aLong, String s) {
+    public synchronized Profile addProfile(long aLong, String s) {
         return null;
     }
 
     @Override
-    public Profile addProfile(long aLong) {
+    public synchronized Profile addProfile(long aLong) {
         return null;
     }
 
     @Override
-    public void removeUser(long userId) {
+    public synchronized void removeUser(long userId) throws InvalidActionException {
+        if (userId == 0)
+            throw new InvalidActionException("Cannot delete default user.");
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         db.delete("USERS", "ID=?", new String[]{String.valueOf(userId)});
     }
 
+
     @Override
-    public void removeProfile(long id) {
+    public synchronized void removeProfile(long userId, long id) {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
-        db.delete("PROFILES", "ID = ?", new String[]{String.valueOf(id)});
+        db.delete("PROFILES", "USER = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
     }
 
     @Override
@@ -166,8 +171,6 @@ public class UserManager implements UserManagerI{
         Cursor cursor = db.rawQuery("SELECT * FROM USERS WHERE ID=?", new String[]{String.valueOf(id)});
         List<User> users = getListOfUsers(cursor);
         cursor.close();
-        System.out.println("GETTING USER " + id);
-        System.out.println(users.size());
         if(users.isEmpty())
             return Optional.empty();
 
@@ -175,7 +178,6 @@ public class UserManager implements UserManagerI{
     }
     @Override
     public Optional<User> getUserByEmail(String email) {
-        System.out.println("GET USER BY MAIL " + email);
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM USERS WHERE MAIL=?", new String[]{email});
@@ -189,7 +191,6 @@ public class UserManager implements UserManagerI{
         if (users.isEmpty())
             return Optional.empty();
 
-        System.out.println("USER " + users.get(0).getId() + " WITH PROFILE " + users.get(0).getProfile());
         return Optional.of(users.get(0));
 
     }
@@ -200,19 +201,13 @@ public class UserManager implements UserManagerI{
 
         Cursor cursor = db.rawQuery("SELECT * FROM PROFILES WHERE USER=? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
 
-        System.out.println("GETTING PROFILE " + id + " FOR USER " + userId);
-        List<Profile> profiles = getListOfProfiles(cursor);
+        Optional<User> user = getUser(userId);
+        if (user.isEmpty())
+            return Optional.empty();
+        List<Profile> profiles = getListOfProfiles(cursor, user.get());
 
         cursor.close();
-        System.out.println("SIZE " + profiles.size());
-        if (profiles.size() > 1)
-            System.out.println("Profiles with identical id for user " + userId);
         if (profiles.isEmpty())
-            return Optional.empty();
-
-        Optional<User> user = getUser(userId);
-
-        if (user.isEmpty())
             return Optional.empty();
 
         Profile profile = profiles.get(0);
@@ -221,32 +216,7 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public boolean userExists(long userId) {
-        return false;
-    }
-
-    @Override
-    public boolean isEnabled(long userId) {
-
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
-
-        Cursor cursor = db.rawQuery("SELECT ENABLED FROM USERS WHERE ID=?", new String[]{String.valueOf(userId)});
-
-        cursor.moveToFirst();
-
-        boolean enabled = false;
-
-        if (!cursor.isAfterLast())
-            enabled = SQLiteHelper.intToBool(cursor.getInt(0));
-
-        cursor.close();
-        ;
-
-        return enabled;
-    }
-
-    @Override
-    public void enableUser(long userId) {
+    public synchronized void enableUser(long userId) {
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
@@ -258,12 +228,12 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public void setDevice(long userId, long id) {
+    public synchronized void setDevice(long userId, long id) {
 
     }
 
     @Override
-    public void setClock(long userId, VectorClock vectorClock) {
+    public synchronized void setClock(long userId, VectorClock vectorClock) {
 
 
         try (SQLiteDatabase db = sqLiteHelper.getWritableDatabase()){
@@ -288,7 +258,7 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public void setToken(long user, String token) {
+    public synchronized void setToken(long user, String token) {
 
         try (SQLiteDatabase db = sqLiteHelper.getWritableDatabase()){
             ContentValues values = new ContentValues();
@@ -299,12 +269,12 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public void updateUserName(Long l, String s) {
+    public synchronized void updateUserName(Long l, String s) {
 
     }
 
     @Override
-    public boolean updateEmail(Long userId, String s) {
+    public synchronized boolean updateEmail(Long userId, String s) {
         return false;
     }
 
@@ -334,10 +304,7 @@ public class UserManager implements UserManagerI{
             return new ArrayList<>();
 
         Cursor cursor = database.rawQuery("SELECT * FROM PROFILES WHERE USER = ?", new String[]{String.valueOf(userId)});
-        List<Profile> profiles = getListOfProfiles(cursor);
-
-        for (Profile p: profiles)
-            p.getProfileId().setUser(users.get(0));
+        List<Profile> profiles = getListOfProfiles(cursor, users.get(0));
 
         return profiles;
     }
@@ -366,7 +333,7 @@ public class UserManager implements UserManagerI{
         return users;
 
     }
-    private List<Profile> getListOfProfiles(Cursor cursor){
+    private List<Profile> getListOfProfiles(Cursor cursor, User user){
         List<Profile> profiles = new ArrayList<>();
         cursor.moveToFirst();
 
@@ -379,6 +346,7 @@ public class UserManager implements UserManagerI{
             profileId.setId(id);
             profile.setProfileId(profileId);
             profile.setName(name);
+            profile.getProfileId().setUser(user);
             profiles.add(profile);
             cursor.moveToNext();
         }
