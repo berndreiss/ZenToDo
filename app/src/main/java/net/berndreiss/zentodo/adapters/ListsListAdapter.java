@@ -24,6 +24,7 @@ import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperC
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 import net.berndreiss.zentodo.data.SQLiteHelper;
+import net.berndreiss.zentodo.data.TaskList;
 
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
@@ -42,7 +43,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private final SharedData sharedData;
     private final ListView listView;//ListView to show lists (recyclerView is disabled before choosing)
     private final RecyclerView recyclerView;//RecyclerView for showing tasks of list chosen (listView gets disabled)
-    private final List<String> lists;//Dynamically generated Array of all lists in data
+    private final List<TaskList> lists;//Dynamically generated Array of all lists in data
     private final Header header;//header of ListView. setVisibility=GONE by default and =VISIBLE when recyclerView is shown
     private String headerColor;
     private final String standardColor = "#35ff0000";
@@ -60,6 +61,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private class Header{
         LinearLayout layout;
         TextView headerText;
+        long list;
         Button colorButton;
 
         @SuppressLint("NotifyDataSetChanged")
@@ -106,13 +108,13 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                             this.layout.setBackgroundColor(Color.parseColor(color));
 
                         }
-                        DataManager.editListColor(sharedData, headerText.getText().toString(), color);
+                        DataManager.editListColor(sharedData, list, color);
                         listsTaskListAdapter.notifyDataSetChanged();
 
                     })
                     .setNegativeButton("no color", (dialog, which) -> {
                         this.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
-                        DataManager.editListColor(sharedData, headerText.getText().toString(), ListTaskListAdapter.DEFAULT_COLOR);
+                        DataManager.editListColor(sharedData, list, ListTaskListAdapter.DEFAULT_COLOR);
                         listsTaskListAdapter.notifyDataSetChanged();
 
                     })
@@ -124,7 +126,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     }
 
     public ListsListAdapter(SharedData sharedData, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton){
-        super(sharedData.context, R.layout.lists_row, DataManager.getLists(sharedData));
+        super(sharedData.context, R.layout.lists_row, DataManager.getListsAsString(sharedData));
         this.sharedData=sharedData;
         this.lists = DataManager.getLists(sharedData);
         this.listView = listView;
@@ -166,7 +168,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         }
 
         //set Button-text to list name
-        holder.button.setText(lists.get(position));
+        holder.button.setText(lists.get(position).getName());
 
         //if clicked assign ListView TaskListAdapter with tasks associated to list
         holder.button.setOnClickListener(view -> {
@@ -247,7 +249,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //set header text
                 header.headerText.setText(list);
 
-                String color = DataManager.getListColor(sharedData, list);
+                String color = lists.get(position).getColor();
                 if (color == null)
                     color = ListTaskListAdapter.DEFAULT_COLOR;
                 //set color of header to default if color is white, set it to color otherwise
@@ -259,7 +261,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 } else{
 
-                    color = DataManager.getListColor(sharedData, list);
+                    color = lists.get(position).getColor();
 
                     header.layout.setBackgroundColor(Color.parseColor(color));
 
@@ -269,7 +271,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //clear ArrayList for list, add current tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
-                listTasks.addAll(sharedData.clientStub.loadList(list));
+                listTasks.addAll(sharedData.clientStub.loadList(lists.get(position).getId()));
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if(listsTaskListAdapter==null){

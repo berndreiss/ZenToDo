@@ -31,7 +31,6 @@ public class UserManager implements UserManagerI{
     @Override
     public synchronized void addToQueue(User user, ZenServerMessage message) {
 
-        Log.v("TEST", "INSERT INTO QUEUE");
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -53,6 +52,7 @@ public class UserManager implements UserManagerI{
         values.put("CLOCK", message.clock.jsonify());
 
         db.insert("QUEUE", null, values);
+        db.close();
 
     }
 
@@ -85,6 +85,7 @@ public class UserManager implements UserManagerI{
         }
 
         cursor.close();
+        db.close();
         return result;
     }
 
@@ -94,10 +95,11 @@ public class UserManager implements UserManagerI{
         SQLiteDatabase db= sqLiteHelper.getWritableDatabase();
 
         db.delete("QUEUE", "", null);
+        db.close();
     }
 
     @Override
-    public synchronized User addUser(long id, String email, String userName, long device) throws DuplicateIdException, InvalidActionException {
+    public synchronized User addUser(long id, String email, String userName, int device) throws DuplicateIdException, InvalidActionException {
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
@@ -106,8 +108,8 @@ public class UserManager implements UserManagerI{
         if (getUserByEmail(email).isPresent())
             throw new InvalidActionException("User with email already exists: email " + email);
         int profileId = 0;
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM PROFILES  WHERE ID=" + id, null);
-        if (cursor.isAfterLast())
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM PROFILES  WHERE USER = ?", new String[]{String.valueOf(id)});
+        if (cursor.moveToFirst())
             profileId = cursor.getInt(0);
         cursor.close();
         ContentValues profileValues = new ContentValues();
@@ -134,19 +136,43 @@ public class UserManager implements UserManagerI{
         ProfileId profileIdentifier = new ProfileId((int) profileId, user);
         profile.setProfileId(profileIdentifier);
         user.setProfile(profile.getId());
+        db.close();
 
         return user;
 
     }
 
     @Override
-    public synchronized Profile addProfile(long aLong, String s) {
-        return null;
+    public synchronized Profile addProfile(long userId, String name) throws InvalidActionException {
+        Optional<User> user = getUser(userId);
+        if (user.isEmpty())
+            throw new InvalidActionException("User does not exist");
+
+        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM PROFILES WHERE USER = ?", new String[]{String.valueOf(userId)});
+        int count = 0;
+        if (cursor.moveToFirst())
+            count = cursor.getInt(0);
+        cursor.close();
+
+        ContentValues values = new ContentValues();
+        values.put("ID", count);
+        values.put("USER", userId);
+        if (name != null)
+            values.put("NAME", name);
+        db.insert("PROFILES", null, values);
+        db.close();
+        Profile profile = new Profile();
+        ProfileId profileId = new ProfileId(count, user.get());
+        profile.setProfileId(profileId);
+        profile.setName(name);
+
+        return profile;
     }
 
     @Override
-    public synchronized Profile addProfile(long aLong) {
-        return null;
+    public synchronized Profile addProfile(long userId) throws InvalidActionException {
+        return addProfile(userId, null);
     }
 
     @Override
@@ -155,6 +181,7 @@ public class UserManager implements UserManagerI{
             throw new InvalidActionException("Cannot delete default user.");
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         db.delete("USERS", "ID=?", new String[]{String.valueOf(userId)});
+        db.close();
     }
 
 
@@ -162,6 +189,7 @@ public class UserManager implements UserManagerI{
     public synchronized void removeProfile(long userId, long id) {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
         db.delete("PROFILES", "USER = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
+        db.close();
     }
 
     @Override
@@ -173,6 +201,7 @@ public class UserManager implements UserManagerI{
         cursor.close();
         if(users.isEmpty())
             return Optional.empty();
+        db.close();
 
         return Optional.of(users.get(0));
     }
@@ -191,25 +220,23 @@ public class UserManager implements UserManagerI{
         if (users.isEmpty())
             return Optional.empty();
 
+        db.close();
         return Optional.of(users.get(0));
 
     }
 
     @Override
     public Optional<Profile> getProfile(long userId, long id) {
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
-
-        Cursor cursor = db.rawQuery("SELECT * FROM PROFILES WHERE USER=? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
-
         Optional<User> user = getUser(userId);
         if (user.isEmpty())
             return Optional.empty();
+        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM PROFILES WHERE USER=? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
         List<Profile> profiles = getListOfProfiles(cursor, user.get());
-
         cursor.close();
+        db.close();
         if (profiles.isEmpty())
             return Optional.empty();
-
         Profile profile = profiles.get(0);
         profile.getProfileId().setUser(user.get());
         return Optional.of(profile);
@@ -224,18 +251,20 @@ public class UserManager implements UserManagerI{
         values.put("ENABLED", 1);
 
         db.update("USERS", values, "ID=?", new String[]{String.valueOf(userId)});
-        ;
+        db.close();
     }
 
     @Override
-    public synchronized void setDevice(long userId, long id) {
-
+    public synchronized void setDevice(long userId, int id) {
+        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("DEVICE", id);
+        db.update("USERS", values, "ID=?", new String[]{String.valueOf(userId)});
+        db.close();
     }
 
     @Override
     public synchronized void setClock(long userId, VectorClock vectorClock) {
-
-
         try (SQLiteDatabase db = sqLiteHelper.getWritableDatabase()){
             ContentValues values = new ContentValues();
             values.put("CLOCK", vectorClock.jsonify());
@@ -269,28 +298,33 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public synchronized void updateUserName(Long l, String s) {
-
+    public synchronized void updateUserName(Long userId, String name) {
+        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("NAME", name);
+        db.update("USERS", values, "ID = ?", new String[]{String.valueOf(userId)});
+        db.close();
     }
 
     @Override
-    public synchronized boolean updateEmail(Long userId, String s) {
-        return false;
+    public synchronized void updateEmail(Long userId, String mail) throws InvalidActionException {
+        if (getUserByEmail(mail).isPresent() || userId == null)
+            throw new InvalidActionException("User with mail already exists.");
+        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("MAIL", mail);
+        db.update("USERS", values, "ID = ?", new String[]{String.valueOf(userId)});
+        db.close();
     }
 
     @Override
     public List<User> getUsers() {
-
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
-
         Cursor cursor = db.rawQuery("SELECT * FROM USERS", null);
-
         List<User> users = getListOfUsers(cursor);
-
         cursor.close();
-        ;
-
-        return users;
+        db.close();
+        return users.stream().filter(u -> u.getId() != 0).toList();
     }
 
     @Override
@@ -305,7 +339,7 @@ public class UserManager implements UserManagerI{
 
         Cursor cursor = database.rawQuery("SELECT * FROM PROFILES WHERE USER = ?", new String[]{String.valueOf(userId)});
         List<Profile> profiles = getListOfProfiles(cursor, users.get(0));
-
+        database.close();
         return profiles;
     }
     private List<User> getListOfUsers(Cursor cursor){
@@ -321,11 +355,11 @@ public class UserManager implements UserManagerI{
             int device = cursor.getInt(4);
             int profile = cursor.getInt(5);
 
-            //TODO ADD USERID!!!
             User user = new User(email, userName, device);
             user.setId(id);
             user.setEnabled(enabled);
             user.setProfile(profile);
+            user.setDevice(device);
             users.add(user);
             cursor.moveToNext();
         }

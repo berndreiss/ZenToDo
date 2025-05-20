@@ -8,8 +8,10 @@ import androidx.annotation.NonNull;
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.TaskList;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  *       Extends TaskListAdapter but removes tasks when list is changed. Also removes item when
@@ -55,7 +57,9 @@ public class ListTaskListAdapter extends TaskListAdapter{
             String list = holder.autoCompleteList.getText().toString();
 
             //get name of old list
-            String oldList = entries.get(position).getList();
+            Optional<TaskList> oldTaskList = sharedData.database.getListManager().getList(entries.get(position).getList());
+
+            String oldList = oldTaskList.isEmpty() ? "" : oldTaskList.get().getName();
 
             //if old and new list differ write back data and remove item from adapter
             if (!list.equals(oldList)) {

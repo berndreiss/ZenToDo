@@ -8,8 +8,10 @@ import androidx.annotation.NonNull;
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.TaskList;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  *       Extends AllTaskListAdapter but when list is changed task is removed from adapter.

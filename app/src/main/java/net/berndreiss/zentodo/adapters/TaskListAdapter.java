@@ -31,9 +31,11 @@ import net.berndreiss.zentodo.adapters.recyclerViewHelper.ItemTouchHelperAdapter
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 import net.berndreiss.zentodo.data.SQLiteHelper;
+import net.berndreiss.zentodo.data.TaskList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  *   A custom ArrayAdapter<Entry> that creates rows with checkboxes that
@@ -233,8 +235,9 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
             //edit Text that autocompletes with already existing lists
             holder.autoCompleteList.setAdapter(adapter);
 
+            Optional<TaskList> list = sharedData.database.getListManager().getList(entries.get(position).getList());
             //set edit Text to current list
-            holder.autoCompleteList.setText(entries.get(position).getList());
+            holder.autoCompleteList.setText(list.isEmpty() ? "" : list.get().getName());
 
         });
 

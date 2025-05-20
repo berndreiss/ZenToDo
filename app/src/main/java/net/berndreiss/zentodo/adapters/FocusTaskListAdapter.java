@@ -19,11 +19,13 @@ import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.TaskList;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  *      Shows all tasks the user chose to focus on today.
@@ -47,7 +49,10 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
         if (entries.get(position).getList() != null){
 
-            String color = DataManager.getListColor(sharedData, entries.get(position).getList());
+            Optional<TaskList> list = sharedData.database.getListManager().getList(entries.get(position).getList());
+            if (list.isEmpty())
+                return;
+            String color = list.get().getColor();
 
             holder.linearLayout.setBackgroundColor(Color.parseColor(color));
 

@@ -1,6 +1,7 @@
 package net.berndreiss.zentodo;
 
 import android.app.backup.BackupDataInput;
+import android.graphics.Path;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -8,7 +9,9 @@ import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
 import net.berndreiss.zentodo.data.SQLiteHelper;
+import net.berndreiss.zentodo.data.TaskList;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 
 public class DataTest {
@@ -101,7 +105,7 @@ public class DataTest {
 
             DataManager.editList(sharedData, adapter, adapter.entries.get(0), "0");
             DataManager.editList(sharedData, adapter, adapter.entries.get(1), "0");
-            DataManager.editList(sharedData, adapter, adapter.entries.get(2), "1");
+            DataManager.editList(sharedData, adapter, adapter.entries.get(2), "0");
 
             DataManager.remove(sharedData, adapter, adapter.entries.get(0));
 
@@ -177,7 +181,9 @@ public class DataTest {
                 counter++;
             }
 
-            List<Entry> list0 = sharedData.clientStub.loadList("0");
+            Optional<TaskList> taskList = sharedData.clientStub.getListByName("0");
+            Assert.assertTrue(taskList.isPresent());
+            List<Entry> list0 = sharedData.clientStub.loadList(taskList.get().getId());
 
             counter = 0;
 
@@ -422,9 +428,9 @@ public class DataTest {
             DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
             DataManager.add(sharedData, adapter, "0");
             DataManager.editList(sharedData, adapter, adapter.entries.getFirst(), "0");
-            DataManager.editListColor(sharedData, "0", "BLUE");
+            DataManager.editListColor(sharedData, 0L, "BLUE");
 
-            if ((!DataManager.getListColor(sharedData, "0").equals("BLUE")))
+            if ((!DataManager.getListColor(sharedData, 0L).equals("BLUE")))
                 throw new AssertionError();
 
             Map<String, String> colorMap = db.getEntryManager().getListColors();
@@ -440,7 +446,7 @@ public class DataTest {
         DataManager.add(sharedData, adapter, "0");
         DataManager.editList(sharedData, adapter, adapter.entries.getFirst(), "0");
 
-        List<String> lists = DataManager.getLists(sharedData);
+        List<String> lists = DataManager.getListsAsString(sharedData);
 
         assert(lists.size() == 3);
 

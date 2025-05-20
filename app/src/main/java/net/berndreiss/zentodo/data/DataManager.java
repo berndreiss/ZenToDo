@@ -1,23 +1,14 @@
 package net.berndreiss.zentodo.data;
-import static androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
-import android.widget.ThemedSpinnerAdapter;
 import android.widget.Toast;
-
-import androidx.test.espresso.remote.EspressoRemoteMessage;
 
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.util.ClientStub;
-import net.berndreiss.zentodo.util.Status;
-import net.berndreiss.zentodo.util.ZenServerMessage;
 
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -25,12 +16,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class DataManager {
@@ -41,7 +32,7 @@ public class DataManager {
     private static List<Long> recurringButRemovedFromToday = null;
 
     /** TODO COMMENT */
-    public static Map<String, String> listColors = null;
+    public static Map<Long, String> listColors = null;
 
     public static void initClientStub(SharedData sharedData, String email) throws InterruptedException {
 
@@ -85,7 +76,6 @@ public class DataManager {
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entries
      * @param task
      */
     public static void add(SharedData sharedData, TaskListAdapter adapter, String task) {
@@ -116,7 +106,6 @@ public class DataManager {
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entries
      * @param entry
      */
     public static void remove(SharedData sharedData, TaskListAdapter adapter, Entry entry) {
@@ -139,7 +128,6 @@ public class DataManager {
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entries
      * @param entry1
      * @param entry2
      */
@@ -168,7 +156,6 @@ public class DataManager {
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entries
      * @param entry1
      * @param entry2
      */
@@ -307,12 +294,14 @@ public class DataManager {
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entries
      * @param entry
      * @param list
      */
     public static void editList(SharedData sharedData, TaskListAdapter adapter, Entry entry, String list) {
-        if (entry == null || entry.getList() != null && entry.getList().equals(list))
+        Optional<TaskList> taskList = sharedData.clientStub.getListByName(list);
+        if (taskList.isEmpty())
+            return;
+        if (entry == null || entry.getList() != null && entry.getList().equals(taskList.get().getId()))
             return;
 
         if (entry.getList() != null) {
@@ -323,10 +312,10 @@ public class DataManager {
         }
 
 
-        Thread thread = new Thread(() -> sharedData.database.getListManager().updateList(entry, list));
+        Thread thread = new Thread(() -> sharedData.database.getListManager().updateList(entry, taskList.get().getId()));
         thread.start();
 
-        entry.setList(list);
+        entry.setList(taskList.get().getId());
 
         if (entry.getDropped())
             setDropped(sharedData, entry, false);
@@ -339,8 +328,9 @@ public class DataManager {
      * @param list
      * @param color
      */
-    public static void editListColor(SharedData sharedData, String list, String color) {
+    public static void editListColor(SharedData sharedData, long list, String color) {
         if (listColors == null) {
+
             listColors = sharedData.clientStub.getListColors();
         }
 
@@ -356,7 +346,7 @@ public class DataManager {
      * @param list
      * @return
      */
-    public static String getListColor(SharedData sharedData, String list){
+    public static String getListColor(SharedData sharedData, long list){
 
         if (listColors == null){
                 listColors = sharedData.clientStub.getListColors();
@@ -375,13 +365,20 @@ public class DataManager {
      * @param sharedData
      * @return
      */
-    public static List<String> getLists(SharedData sharedData){
+    public static List<TaskList> getLists(SharedData sharedData){
 
-        List<String> lists;
 
-        lists = sharedData.clientStub.loadLists();
-        lists.add("ALL TASKS");
-        lists.add("No list");
+        List<TaskList> lists = sharedData.clientStub.loadLists();
+
+        lists.add(new TaskList(-1, "ALL TASKS", null));
+        lists.add(new TaskList(-1, "No List", null));
+
+        return lists;
+    }
+
+    public static List<String> getListsAsString(SharedData sharedData){
+
+        List<String> lists = new ArrayList<>(getLists(sharedData).stream().map(TaskList::getName).toList());
         return lists;
     }
 

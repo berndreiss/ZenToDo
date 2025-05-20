@@ -15,10 +15,12 @@ import net.berndreiss.zentodo.adapters.listeners.PickListener;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListenerPick;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.TaskList;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  *       Extends TaskListAdapter but does not remove tasks when CheckBox is clicked.

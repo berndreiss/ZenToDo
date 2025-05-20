@@ -7,6 +7,9 @@ import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.TaskList;
+
+import java.util.Optional;
 
 /**
  * TODO DESCRIBE

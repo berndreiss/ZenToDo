@@ -157,18 +157,23 @@ public class UIOperationHandler implements ClientOperationHandlerI{
     }
 
     @Override
-    public List<Entry> loadList(String s) {
+    public List<Entry> loadList(Long list) {
         return Collections.emptyList();
     }
 
     @Override
-    public List<String> loadLists() {
+    public List<TaskList> loadLists() {
         return null;
     }
 
     @Override
-    public Map<String, String> getListColors() {
+    public Map<Long, String> getListColors() {
         return Collections.emptyMap();
+    }
+
+    @Override
+    public Optional<TaskList> getListByName(String name) {
+        return Optional.empty();
     }
 
     @Override
@@ -212,7 +217,7 @@ public class UIOperationHandler implements ClientOperationHandlerI{
     }
 
     @Override
-    public void updateListColor(String s, String s1) {
+    public void updateListColor(long list, String color) {
 
     }
 

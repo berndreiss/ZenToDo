@@ -145,7 +145,7 @@ public class EntryManager implements EntryManagerI {
             db.delete("ENTRIES", "ID=? AND USER=? AND PROFILE=?", new String[]{String.valueOf(entry.getId()), String.valueOf(entry.getUserId()), String.valueOf(entry.getProfile())});
         db.execSQL("UPDATE ENTRIES SET POSITION=POSITION-1 WHERE POSITION >?", new String[]{String.valueOf(entry.getPosition())});
         if (entry.getList() != null)
-            db.execSQL("UPDATE ENTRIES SET LIST_POSITION=LIST_POSITION-1 WHERE LIST=? AND LIST_POSITION>?", new String[]{entry.getList(), String.valueOf(entry.getListPosition())});
+            db.execSQL("UPDATE ENTRIES SET LIST_POSITION=LIST_POSITION-1 WHERE LIST=? AND LIST_POSITION>?", new String[]{String.valueOf(entry.getList()), String.valueOf(entry.getListPosition())});
         ;
     }
 
@@ -342,13 +342,13 @@ public class EntryManager implements EntryManagerI {
 
         while (!cursor.isAfterLast()) {
 
-            Long userId = cursor.getLong(0);
+            long userId = cursor.getLong(0);
             long profile = cursor.getLong(1);
             long id = cursor.getInt(2);
             String task = cursor.getString(3);
             boolean focus = SQLiteHelper.intToBool(cursor.getInt(4));
             boolean dropped = SQLiteHelper.intToBool(cursor.getInt(5));
-            String list = cursor.getString(6);
+            Long list = cursor.isNull(6) ? null : cursor.getLong(6);
             Integer listPosition = cursor.getInt(7);
             long reminderDateEpoch = cursor.getLong(8);
             String recurrence = cursor.getString(9);
@@ -427,10 +427,11 @@ public class EntryManager implements EntryManagerI {
 
         while (!cursor.isAfterLast()) {
 
-            String listName = cursor.getString(0);
-            String color = cursor.getString(1);
+            long id = cursor.getLong(0);
+            String listName = cursor.getString(1);
+            String color = cursor.getString(2);
 
-            TaskList list = new TaskList(color);
+            TaskList list = new TaskList(id, listName, color);
             lists.put(listName, list);
             cursor.moveToNext();
         }

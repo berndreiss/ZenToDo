@@ -52,8 +52,12 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         Optional<User> user = database.getUserManager().getUser(0L);
         if (user.isPresent()) {
             List<Profile> profiles = getUserManager().getProfiles(0);
-            if (profiles.isEmpty())
-                getUserManager().addProfile(0);
+            if (profiles.isEmpty()) {
+                try {
+                    getUserManager().addProfile(0);
+                } catch (InvalidActionException _) {
+                }
+            }//this should never happen
             return;
         }
         try {
@@ -74,18 +78,19 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 + "TASK TEXT NOT NULL, "
                 + "FOCUS INTEGER DEFAULT 0, "
                 + "DROPPED INTEGER DEFAULT 1, "
-                + "LIST TEXT DEFAULT NULL, "
+                + "LIST INTEGER DEFAULT NULL, "
                 + "LIST_POSITION INTEGER DEFAULT NULL, "
                 + "REMINDER_DATE INTEGER DEFAULT NULL,"
                 + "RECURRENCE TEXT DEFAULT NULL,"
                 + "POSITION INTEGER NOT NULL,"
                 + "PRIMARY KEY (ID, USER),"
-                + "FOREIGN KEY (LIST) REFERENCES LISTS(NAME),"
+                + "FOREIGN KEY (LIST) REFERENCES LISTS(ID),"
                 + "FOREIGN KEY (USER) REFERENCES USERS(MAIL)"
                 + ")");
 
         String query = "CREATE TABLE LISTS (" +
-                "NAME TEXT PRIMARY KEY, " +
+                "ID INTEGER PRIMARY KEY," +
+                "NAME TEXT, " +
                 "COLOR TEXT DEFAULT '" + ListTaskListAdapter.DEFAULT_COLOR + "'" +
                 ")";
         db.execSQL(query);
@@ -104,7 +109,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
         query = "CREATE TABLE PROFILES (" +
                 "ID INTEGER NOT NULL, " +
-                "NAME TEXT DEFAULT 'Default', " +
+                "NAME TEXT DEFAULT NULL, " +
                 "USER INTEGER NOT NULL," +
                 "PRIMARY KEY (ID, USER)," +
                 "FOREIGN KEY (USER) REFERENCES USERS(ID)" +
