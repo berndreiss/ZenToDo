@@ -87,7 +87,7 @@ public class DataTest {
                 counter++;
             }
 
-            Collection<? extends  Entry> droppedList = db.getEntryManager().loadDropped();
+            Collection<? extends  Entry> droppedList = sharedData.clientStub.loadDropped();
 
             assert(droppedList.size() == 3);
         }
@@ -156,7 +156,7 @@ public class DataTest {
             DataManager.add(sharedData, adapter, "3");
             DataManager.editList(sharedData, adapter, adapter.entries.get(3), "1");
 
-            assert(db.getEntryManager().loadDropped().isEmpty());
+            assert(sharedData.clientStub.loadDropped().isEmpty());
 
             List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
@@ -362,7 +362,7 @@ public class DataTest {
 
             assert(!entriesDB.getFirst().getDropped());
 
-            List<Entry> entriesFocus = db.getEntryManager().loadDropped();
+            List<Entry> entriesFocus = sharedData.clientStub.loadDropped();
 
             assert(entriesFocus.isEmpty());
         }
@@ -379,7 +379,7 @@ public class DataTest {
             DataManager.editReminderDate(sharedData, adapter.entries.getFirst(), date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 
             assert (adapter.entries.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
-            assert (db.getEntryManager().loadDropped().isEmpty());
+            assert (sharedData.clientStub.loadDropped().isEmpty());
 
             List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 
@@ -405,7 +405,7 @@ public class DataTest {
             DataManager.editRecurrence(sharedData, adapter.entries.getFirst(), recurrence);
 
             assert (adapter.entries.getFirst().getRecurrence().equals(recurrence));
-            assert (db.getEntryManager().loadDropped().isEmpty());
+            assert (sharedData.clientStub.loadDropped().isEmpty());
 
             List<Entry> entriesDB = sharedData.clientStub.loadEntries();
 

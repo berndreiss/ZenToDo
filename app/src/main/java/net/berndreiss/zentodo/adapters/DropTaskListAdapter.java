@@ -102,7 +102,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
     public void reset(){
         //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
         entries.clear();
-        entries.addAll(sharedData.database.getEntryManager().loadDropped());
+        entries.addAll(sharedData.clientStub.loadDropped());
         notifyDataSetChanged();
 
     }

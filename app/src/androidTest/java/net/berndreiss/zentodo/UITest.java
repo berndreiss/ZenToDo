@@ -125,7 +125,7 @@ public class UITest {
                     assert (entries.get(i).getReminderDate() == null);
                 else
                     assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
-                assert (db.getEntryManager().loadDropped().size() == results[i]);
+                assert (sharedData.clientStub.loadDropped().size() == results[i]);
             }
         }
         sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
@@ -245,7 +245,7 @@ public class UITest {
                 else
                     assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
                 assert (db.getEntryManager().getNoList().size() == results[i][0]);
-                assert (db.getEntryManager().loadDropped().size() == results[i][1]);
+                assert (sharedData.clientStub.loadDropped().size() == results[i][1]);
             }
         }
         sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
@@ -305,7 +305,7 @@ public class UITest {
                 else
                     assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
                 assert (db.getEntryManager().getLists().size() == results[i][0]);
-                assert (db.getEntryManager().loadDropped().size() == results[i][1]);
+                assert (sharedData.clientStub.loadDropped().size() == results[i][1]);
             }
         }
         sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);

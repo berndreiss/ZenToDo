@@ -3,19 +3,18 @@ package net.berndreiss.zentodo.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Path;
 
-import java.security.KeyStore;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
 public class ListManager implements ListManagerI{
 
-    private SQLiteHelper sqLiteHelper;
+    private final SQLiteHelper sqLiteHelper;
 
     public ListManager(SQLiteHelper sqLiteHelper){
         this.sqLiteHelper = sqLiteHelper;
@@ -145,7 +144,9 @@ public class ListManager implements ListManagerI{
         List<Entry> entries = EntryManager.getListOfEntries(cursor);
         cursor.close();
         db.close();
-        return entries;
+        if (listId != null)
+            return entries.stream().sorted(Comparator.comparing(Entry::getListPosition)).toList();
+        return entries.stream().sorted(Comparator.comparing(Entry::getPosition)).toList();
     }
 
     @Override
@@ -226,35 +227,41 @@ public class ListManager implements ListManagerI{
         if (entry.getList() != null && !Objects.equals(entry.getList(), list)) {
             db.execSQL("UPDATE ENTRIES SET LIST_POSITION=LIST_POSITION - 1 WHERE LIST=? AND LIST_POSITION >?", new String[]{String.valueOf(entry.getList()), String.valueOf(entry.getListPosition())});
         }
+        db.close();
         entry.setList(list);
         entry.setListPosition(position);
     }
     @Override
-    public synchronized void swapListEntries(long userId, int profile, long list, long id, int position){
+    public synchronized void swapListEntries(long userId, int profile, long list, long id, int position) throws PositionOutOfBoundException {
 
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(profile)});
-        List<Entry> entries = EntryManager.getListOfEntries(cursor);
-        cursor.close();
-        if (entries.size() != 1)
+        List<Entry> listEntries = getListEntries(userId, profile, list);
+        if (position >= listEntries.size())
+            throw new PositionOutOfBoundException("List position is out of bounds.");
+        Optional<Entry> entry = listEntries.stream().filter(e -> e.getId() == id).findFirst();
+        Optional<Entry> entryOther = listEntries.stream().filter(e -> e.getListPosition() == position).findFirst();
+        if (entry.isEmpty() || entryOther.isEmpty())
             return;
-        swapListEntries(entries.get(0), position);
+
+        swapListEntries(entry.get(), entry.get().getListPosition(), entryOther.get(), position);
     }
 
-    synchronized void swapListEntries(Entry entry, int pos){
+    synchronized void swapListEntries(Entry entry, int posOld, Entry entryOther, int pos){
 
+        List<Entry> listOld = getListEntries(entry.getUserId(), entry.getProfile(), entry.getList());
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
         ContentValues values1 = new ContentValues();
-        values1.put("LIST_POSITION", String.valueOf(entry.getPosition()));
-        db.update("ENTRIES", values1, "LIST=? AND LIST_POSITION=?", new String[]{String.valueOf(entry.getList()), String.valueOf(pos)});
+        values1.put("LIST_POSITION", posOld);
+        db.update("ENTRIES", values1, "LIST = ? AND ID = ?",
+                new String[]{String.valueOf(entry.getList()), String.valueOf(entryOther.getId())});
 
         ContentValues values0 = new ContentValues();
-        values0.put("LIST_POSITION", String.valueOf(pos));
-        db.update("ENTRIES", values0, "ID=?", new String[]{String.valueOf(entry.getId())});
+        values0.put("LIST_POSITION", pos);
+        db.update("ENTRIES", values0, "LIST = ? AND ID = ?",
+                new String[]{String.valueOf(entry.getList()), String.valueOf(entry.getId())});
 
-        //clean up
-        ;
+        db.close();
+        List<Entry> listNew = getListEntries(entry.getUserId(), entry.getProfile(), entry.getList());
 
     }
     @Override
@@ -271,7 +278,7 @@ public class ListManager implements ListManagerI{
             db.insert("LISTS", null, values);
         }
 
-        ;
+        db.close();
     }
     public static List<TaskList> getListOfTaskList(Cursor cursor){
 

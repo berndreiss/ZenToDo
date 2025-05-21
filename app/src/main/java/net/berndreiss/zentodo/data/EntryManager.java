@@ -33,7 +33,7 @@ public class EntryManager implements EntryManagerI {
         this.sqLiteHelper = sqLiteHelper;
     }
 
-    private Entry getById(Long userId, long profile, long id) {
+    private Entry getById(Long userId, int profile, long id) {
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE ID=?", new String[]{String.valueOf(id)});
@@ -53,7 +53,7 @@ public class EntryManager implements EntryManagerI {
      * @return
      */
     @Override
-    public synchronized Entry addNewEntry(long userId, long profile, String task) {
+    public synchronized Entry addNewEntry(long userId, int profile, String task) {
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT 1 FROM ENTRIES", null);
@@ -83,18 +83,23 @@ public class EntryManager implements EntryManagerI {
     }
 
     @Override
-    public synchronized Entry addNewEntry(long userId, long profile, String task, int position) throws PositionOutOfBoundException {
+    public synchronized Entry addNewEntry(long userId, int profile, String task, int position) throws PositionOutOfBoundException {
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         Random random = new Random();
         long id = random.nextInt();
+        while (id == 0)
+            id = random.nextInt();
 
         while (true) {
-            Cursor cursorId = db.rawQuery("SELECT ID FROM ENTRIES WHERE ID=" + id, null);
+            Cursor cursorId = db.rawQuery("SELECT ID FROM ENTRIES WHERE ID= ? AND USER = ? AND PROFILE = ?",
+                    new String[]{String.valueOf(id), String.valueOf(userId), String.valueOf(profile)});
 
             cursorId.moveToFirst();
 
             if (!cursorId.isAfterLast()) {
-                id = random.nextInt();
+                do {
+                    id = random.nextInt();
+                } while (id == 0);
                 cursorId.close();
             } else {
                 cursorId.close();
@@ -104,7 +109,7 @@ public class EntryManager implements EntryManagerI {
         Entry entry = null;
         try {
             entry = addNewEntry(userId, profile, id, task, position);
-        } catch (DuplicateIdException _) {
+        } catch (DuplicateIdException | InvalidActionException _) {
         }
         return entry;
 
@@ -112,7 +117,9 @@ public class EntryManager implements EntryManagerI {
 
     //adds new entry to TABLE_ENTRIES
     @Override
-    public synchronized Entry addNewEntry(long userId, long profile, long id, String task, int position) throws DuplicateIdException, PositionOutOfBoundException {
+    public synchronized Entry addNewEntry(long userId, int profile, long id, String task, int position) throws DuplicateIdException, PositionOutOfBoundException, InvalidActionException {
+        if (id == 0)
+            throw new InvalidActionException("Id of entry must not be null.");
         List<Entry> entries = getEntries(userId, profile);
         if (entries.size() < position)
             throw new PositionOutOfBoundException("Position is out of bound: position" + position);
@@ -151,7 +158,7 @@ public class EntryManager implements EntryManagerI {
 
 
     @Override
-    public synchronized void removeEntry(long userId, long profile, long id) {
+    public synchronized void removeEntry(long userId, int profile, long id) {
 
         Entry entry = getById(userId, profile, id);
 
@@ -161,12 +168,12 @@ public class EntryManager implements EntryManagerI {
         removeEntry(entry);
     }
 
-    public synchronized void updateReminderDate(long userId, long profile, Entry entry, Instant value) {
+    public synchronized void updateReminderDate(long userId, int profile, Entry entry, Instant value) {
         updateReminderDate(userId, profile, entry.getId(), value);
     }
 
     @Override
-    public synchronized void updateReminderDate(long userId, long profile, long id, Instant instant) {
+    public synchronized void updateReminderDate(long userId, int profile, long id, Instant instant) {
         ContentValues values = new ContentValues();
         values.put("REMINDER_DATE", instant.toEpochMilli());
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
@@ -174,12 +181,12 @@ public class EntryManager implements EntryManagerI {
         ;
     }
 
-    synchronized void updateTask(long userId, long profile, Entry entry, String value) {
+    synchronized void updateTask(long userId, int profile, Entry entry, String value) {
         updateTask(userId, profile, entry.getId(), value);
     }
 
     @Override
-    public synchronized void updateTask(long userId, long profile, long id, String value) {
+    public synchronized void updateTask(long userId, int profile, long id, String value) {
         ContentValues values = new ContentValues();
         values.put("TASK", value == null ? "" : value);
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
@@ -187,11 +194,11 @@ public class EntryManager implements EntryManagerI {
         ;
     }
 
-    void updateRecurrence(Long userId, long profile, Entry entry, String value) {
+    void updateRecurrence(Long userId, int profile, Entry entry, String value) {
         updateRecurrence(userId, profile, entry.getId(), entry.getReminderDate(), value);
     }
 
-    public synchronized void updateRecurrence(long userId, long profile, long id, Instant reminderDate, String value) {
+    public synchronized void updateRecurrence(long userId, int profile, long id, Instant reminderDate, String value) {
         ContentValues values = new ContentValues();
         values.put("RECURRENCE", value);
         if (reminderDate == null)
@@ -203,31 +210,31 @@ public class EntryManager implements EntryManagerI {
     }
 
     @Override
-    public synchronized void updateRecurrence(long userId, long profile, long id, String value) {
+    public synchronized void updateRecurrence(long userId, int profile, long id, String value) {
 
         updateRecurrence(userId, profile, id, null, value);
     }
 
 
-    void updateFocus(long userId, long profile, Entry entry, boolean valueBool) {
+    void updateFocus(long userId, int profile, Entry entry, boolean valueBool) {
 
         updateFocus(userId, profile, entry.getId(), valueBool);
     }
 
     @Override
-    public synchronized void updateFocus(long userId, long profile, long id, boolean value) {
+    public synchronized void updateFocus(long userId, int profile, long id, boolean value) {
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         db.execSQL("UPDATE ENTRIES SET FOCUS=?, DROPPED = ? WHERE ID=?;", new String[]{String.valueOf(value ? 1 : 0), String.valueOf(0), String.valueOf(id)});
         ;
     }
 
-    void updateDropped(Long userId, long profile, Entry entry, boolean valueBool) {
+    void updateDropped(Long userId, int profile, Entry entry, boolean valueBool) {
         updateDropped(userId, profile, entry.getId(), valueBool);
     }
 
     @Override
-    public synchronized void updateDropped(long userId, long profile, long id, boolean value) {
+    public synchronized void updateDropped(long userId, int profile, long id, boolean value) {
 
         //convert bool to int
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
@@ -237,7 +244,7 @@ public class EntryManager implements EntryManagerI {
 
 
     @Override
-    public Optional<Entry> getEntry(long userId, long profile, long id) {
+    public Optional<Entry> getEntry(long userId, int profile, long id) {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(id)});
@@ -251,7 +258,7 @@ public class EntryManager implements EntryManagerI {
     }
 
     @Override
-    public List<Entry> getEntries(long userId, long profile) {
+    public List<Entry> getEntries(long userId, int profile) {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ?", new String[]{String.valueOf(userId), String.valueOf(profile)});
         List<Entry> entries = getListOfEntries(cursor);
@@ -264,7 +271,7 @@ public class EntryManager implements EntryManagerI {
      *
      * @return
      */
-    public List<Entry> loadEntries(long userId, long profile) {
+    public List<Entry> loadEntries(long userId, int profile) {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? ORDER BY POSITION", new String[]{String.valueOf(userId)});
         List<Entry> entries = getListOfEntries(cursor);
@@ -277,7 +284,7 @@ public class EntryManager implements EntryManagerI {
      *
      * @return
      */
-    public List<Entry> loadFocus(long userId, long profile) {
+    public List<Entry> loadFocus(long userId, int profile) {
 
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
@@ -301,11 +308,13 @@ public class EntryManager implements EntryManagerI {
      *
      * @return
      */
-    public List<Entry> loadDropped() {
+    @Override
+    public List<Entry> loadDropped(long userID, int profile) {
 
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE DROPPED>0 ORDER BY POSITION", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ? AND DROPPED>0 ORDER BY POSITION",
+                new String[]{String.valueOf(userID), String.valueOf(profile)});
 
         List<Entry> entries = getListOfEntries(cursor);
 
@@ -321,7 +330,7 @@ public class EntryManager implements EntryManagerI {
      * @param name
      * @return
      */
-    public List<Entry> loadList(Long userId, long profile, String name) {
+    public List<Entry> loadList(Long userId, int profile, String name) {
 
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
@@ -343,7 +352,7 @@ public class EntryManager implements EntryManagerI {
         while (!cursor.isAfterLast()) {
 
             long userId = cursor.getLong(0);
-            long profile = cursor.getLong(1);
+            int profile = cursor.getInt(1);
             long id = cursor.getInt(2);
             String task = cursor.getString(3);
             boolean focus = SQLiteHelper.intToBool(cursor.getInt(4));
@@ -468,7 +477,7 @@ public class EntryManager implements EntryManagerI {
     }
 
     @Override
-    public synchronized void swapEntries(long userId, long profile, long id, int position) throws PositionOutOfBoundException {
+    public synchronized void swapEntries(long userId, int profile, long id, int position) throws PositionOutOfBoundException {
 
         swapEntries(getById(userId, profile, id), position);
     }
@@ -484,11 +493,13 @@ public class EntryManager implements EntryManagerI {
 
         ContentValues values1 = new ContentValues();
         values1.put("POSITION", String.valueOf(entry.getPosition()));
-        db.update("ENTRIES", values1, "POSITION=?", new String[]{String.valueOf(pos)});
+        db.update("ENTRIES", values1, "USER = ? AND PROFILE = ? AND POSITION=?",
+                new String[]{String.valueOf(entry.getUserId()), String.valueOf(entry.getProfile()), String.valueOf(pos)});
 
         ContentValues values0 = new ContentValues();
         values0.put("POSITION", String.valueOf(pos));
-        db.update("ENTRIES", values0, "ID=?", new String[]{String.valueOf(entry.getId())});
+        db.update("ENTRIES", values0, "USER = ? AND PROFILE = ? AND ID=?",
+                new String[]{String.valueOf(entry.getUserId()), String.valueOf(entry.getProfile()), String.valueOf(entry.getId())});
 
         //clean up
         ;
@@ -638,7 +649,7 @@ public class EntryManager implements EntryManagerI {
     }
 
     @Override
-    public synchronized void updateId(long userId, long profile, long entry, long id) throws DuplicateIdException {
+    public synchronized void updateId(long userId, int profile, long entry, long id) throws DuplicateIdException {
 
         if (getEntry(userId, profile, id).isPresent())
             throw new DuplicateIdException("New id for entry already exists: id " + id);

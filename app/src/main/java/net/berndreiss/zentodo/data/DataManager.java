@@ -36,10 +36,7 @@ public class DataManager {
 
     public static void initClientStub(SharedData sharedData, String email) throws InterruptedException {
 
-        sharedData.clientStub = new ClientStub(email, sharedData.database.getDatabase());
-
-
-        boolean userExists = sharedData.database.getDatabase().getUserManager().getUserByEmail(email).isPresent();
+        sharedData.clientStub = new ClientStub( sharedData.database.getDatabase());
 
         Consumer<String> messagePrinter = message -> {
             Looper.prepare();
@@ -54,7 +51,7 @@ public class DataManager {
             e.printStackTrace();
         });
         Thread thread = new Thread(() -> {
-            sharedData.clientStub.init(() -> "Test123!?");
+            sharedData.clientStub.init("test@test.net", null, () -> "Test1234!?");
         });
 
         thread.start();
@@ -135,7 +132,11 @@ public class DataManager {
         Thread thread = new Thread(() -> {
 
             //swap position in Database
-            sharedData.clientStub.swapEntries(entry1.getId(), entry2.getPosition());
+            try {
+                sharedData.clientStub.swapEntries(entry1.getId(), entry2.getPosition());
+            } catch (PositionOutOfBoundException e) {
+                throw new RuntimeException(e);
+            }
         });
         thread.start();
 
@@ -163,7 +164,11 @@ public class DataManager {
 
         Thread thread = new Thread(() -> {
             //swap position in Database
-           sharedData.clientStub.swapListEntries(entry1.getId(), entry2.getListPosition());
+            try {
+                sharedData.clientStub.swapListEntries(entry1.getList(), entry1.getId(), entry2.getListPosition());
+            } catch (PositionOutOfBoundException e) {
+                throw new RuntimeException(e);
+            }
         });
         thread.start();
 
@@ -224,7 +229,7 @@ public class DataManager {
             return;
 
         Thread thread = new Thread(() -> {
-            sharedData.clientStub.updateFocus(entry.getId(),  focus ? 1 : 0);
+            sharedData.clientStub.updateFocus(entry.getId(),  focus);
         });
 
         thread.start();
@@ -246,7 +251,7 @@ public class DataManager {
         if (entry == null || entry.getDropped() == dropped)
             return;
 
-        Thread thread = new Thread(() -> sharedData.clientStub.updateDropped(entry.getId(), dropped ? 1 : 0));
+        Thread thread = new Thread(() -> sharedData.clientStub.updateDropped(entry.getId(), dropped));
         thread.start();
         entry.setDropped(dropped);
     }
@@ -261,7 +266,7 @@ public class DataManager {
         if (entry == null || entry.getReminderDate() != null && entry.getReminderDate().equals(date))
             return;
 
-        Thread thread = new Thread(() -> sharedData.clientStub.updateReminderDate(entry.getId(), date.toEpochMilli()));
+        Thread thread = new Thread(() -> sharedData.clientStub.updateReminderDate(entry.getId(), date));
         thread.start();
 
         if (entry.getDropped() && entry.getReminderDate() != date)
@@ -429,7 +434,7 @@ public class DataManager {
 
         //write reminder date to Database
         Instant finalDate = date;
-        Thread thread = new Thread(() -> sharedData.clientStub.updateReminderDate(entry.getId(), finalDate.toEpochMilli()));
+        Thread thread = new Thread(() -> sharedData.clientStub.updateReminderDate(entry.getId(), finalDate));
         thread.start();
 
     }

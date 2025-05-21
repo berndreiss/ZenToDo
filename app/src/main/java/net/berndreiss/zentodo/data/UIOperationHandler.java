@@ -9,6 +9,9 @@ import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.util.VectorClock;
 import net.berndreiss.zentodo.util.ZenServerMessage;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -182,7 +185,7 @@ public class UIOperationHandler implements ClientOperationHandlerI{
     }
 
     @Override
-    public void swapListEntries(long l, int i) {
+    public void swapListEntries(long l, long l1, int i) throws PositionOutOfBoundException {
 
     }
 
@@ -192,22 +195,22 @@ public class UIOperationHandler implements ClientOperationHandlerI{
     }
 
     @Override
-    public void updateFocus(long l, int i) {
+    public void updateFocus(long l, boolean b) {
 
     }
 
     @Override
-    public void updateDropped(long l, int i) {
+    public void updateDropped(long l, boolean b) {
 
     }
 
     @Override
-    public void updateList(long l, String s, int i) {
+    public void updateList(long l, Long aLong) {
 
     }
 
     @Override
-    public void updateReminderDate(long l, Long aLong) {
+    public void updateReminderDate(long l, Instant instant) {
 
     }
 
@@ -222,13 +225,12 @@ public class UIOperationHandler implements ClientOperationHandlerI{
     }
 
     @Override
-    public void updateUserName(long l, String s) {
+    public void updateUserName(String s) {
 
     }
 
     @Override
-    public boolean updateEmail(long l, String s) {
-        return false;
-    }
+    public void updateEmail(String s) throws InvalidActionException, IOException, URISyntaxException {
 
+    }
 }
