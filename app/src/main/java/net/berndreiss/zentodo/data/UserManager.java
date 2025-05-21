@@ -3,6 +3,7 @@ package net.berndreiss.zentodo.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import net.berndreiss.zentodo.OperationType;
@@ -73,7 +74,7 @@ public class UserManager implements UserManagerI{
             Log.v("GET QUEUE", String.valueOf(argsString));
             VectorClock clock = new VectorClock(cursor.getString(2));
             Log.v("GET QUEUE", String.valueOf(clock.jsonify()));
-            Instant timeStamp = Instant.ofEpochSecond(cursor.getLong(3));
+            Instant timeStamp = Instant.ofEpochMilli(cursor.getLong(3));
             Log.v("GET QUEUE", String.valueOf(timeStamp));
 
             String[] argsSplit = argsString.substring(1, argsString.length()-1).split(",");
@@ -108,10 +109,6 @@ public class UserManager implements UserManagerI{
         if (getUserByEmail(email).isPresent())
             throw new InvalidActionException("User with email already exists: email " + email);
         int profileId = 0;
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM PROFILES  WHERE USER = ?", new String[]{String.valueOf(id)});
-        if (cursor.moveToFirst())
-            profileId = cursor.getInt(0);
-        cursor.close();
         ContentValues profileValues = new ContentValues();
         profileValues.put("ID", profileId);
         profileValues.put("USER", id);
@@ -133,13 +130,11 @@ public class UserManager implements UserManagerI{
         user.setClock(clock.jsonify());
 
         Profile profile = new Profile();
-        ProfileId profileIdentifier = new ProfileId((int) profileId, user);
+        ProfileId profileIdentifier = new ProfileId(profileId, user);
         profile.setProfileId(profileIdentifier);
         user.setProfile(profile.getId());
         db.close();
-
         return user;
-
     }
 
     @Override
@@ -181,14 +176,24 @@ public class UserManager implements UserManagerI{
             throw new InvalidActionException("Cannot delete default user.");
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         db.delete("USERS", "ID=?", new String[]{String.valueOf(userId)});
+        db.delete("PROFILES", "USER=?", new String[]{String.valueOf(userId)});
+        db.delete("ENTRIES", "USER = ?", new String[]{String.valueOf(userId)});
         db.close();
     }
 
 
     @Override
-    public synchronized void removeProfile(long userId, long id) {
+    public synchronized void removeProfile(long userId, int id) throws InvalidActionException{
+        if (userId == 0 && id == 0)
+            throw new InvalidActionException("Cannot remove default profile of default user.");
+        if (getProfiles(userId).size() == 1)
+            throw new InvalidActionException("Cannot remove last profile of user.");
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        db.delete("ENTRIES", "USER = ? AND PROFILE = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
         db.delete("PROFILES", "USER = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
+        db.delete("PROFILE_LIST", "USER = ? AND PROFILE = ?", new String[]{
+                String.valueOf(userId), String.valueOf(id)
+        });
         db.close();
     }
 
@@ -354,12 +359,14 @@ public class UserManager implements UserManagerI{
             boolean enabled = SQLiteHelper.intToBool(cursor.getInt(3));
             int device = cursor.getInt(4);
             int profile = cursor.getInt(5);
+            String clock = cursor.getString(6);
 
             User user = new User(email, userName, device);
             user.setId(id);
             user.setEnabled(enabled);
             user.setProfile(profile);
             user.setDevice(device);
+            user.setClock(clock);
             users.add(user);
             cursor.moveToNext();
         }

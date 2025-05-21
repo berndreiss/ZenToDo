@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
         sharedData = new SharedData(this);
 
-        deleteDatabase("Data.db");
+        //deleteDatabase("Data.db");
         //initialze client stub
         try {
             DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");

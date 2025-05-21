@@ -90,7 +90,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
         String query = "CREATE TABLE LISTS (" +
                 "ID INTEGER PRIMARY KEY," +
-                "NAME TEXT, " +
+                "NAME TEXT NOT NULL, " +
                 "COLOR TEXT DEFAULT '" + ListTaskListAdapter.DEFAULT_COLOR + "'" +
                 ")";
         db.execSQL(query);
@@ -113,6 +113,17 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 "USER INTEGER NOT NULL," +
                 "PRIMARY KEY (ID, USER)," +
                 "FOREIGN KEY (USER) REFERENCES USERS(ID)" +
+                ")";
+        db.execSQL(query);
+
+        query = "CREATE TABLE PROFILE_LIST (" +
+                "USER INTEGER NOT NULL," +
+                "PROFILE INTEGER NOT NULL, " +
+                "LIST INTEGER NOT NULL, " +
+                "PRIMARY KEY (USER, PROFILE, LIST)," +
+                "FOREIGN KEY (USER) REFERENCES USERS(ID)," +
+                "FOREIGN KEY (PROFILE) REFERENCES PROFILES(ID)," +
+                "FOREIGN KEY (LIST) REFERENCES LISTS(ID)" +
                 ")";
         db.execSQL(query);
 
