@@ -215,7 +215,7 @@ public class UIOperationHandler implements ClientOperationHandlerI{
     }
 
     @Override
-    public void updateRecurrence(long l, Long aLong, String s) {
+    public void updateRecurrence(long l, String s) {
 
     }
 

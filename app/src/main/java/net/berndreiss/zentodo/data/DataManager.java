@@ -285,7 +285,7 @@ public class DataManager {
         if (entry == null || entry.getRecurrence() != null && entry.getRecurrence().equals(recurrence))
             return;
 
-        Thread thread = new Thread(() -> sharedData.clientStub.updateRecurrence(entry.getId(), entry.getReminderDate() == null ? null : entry.getReminderDate().toEpochMilli(), recurrence));
+        Thread thread = new Thread(() -> sharedData.clientStub.updateRecurrence(entry.getId(), recurrence));
         thread.start();
 
         entry.setRecurrence(recurrence);
