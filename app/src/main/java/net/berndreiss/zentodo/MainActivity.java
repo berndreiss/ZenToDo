@@ -51,18 +51,13 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.test.espresso.remote.EspressoRemoteMessage;
 
 import android.text.InputFilter;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import net.berndreiss.zentodo.data.Entry;
-import net.berndreiss.zentodo.data.SQLiteHelper;
-import net.berndreiss.zentodo.data.User;
 import net.berndreiss.zentodo.databinding.ActivityMainBinding;
-import net.berndreiss.zentodo.util.ClientStub;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -73,9 +68,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.util.Optional;
 
 public class MainActivity extends AppCompatActivity {
 
