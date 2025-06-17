@@ -61,7 +61,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             return;
         }
         try {
-            database.getUserManager().addUser(0, "test@test.net", "Default user", 0);
+            database.getUserManager().addUser(0, "test@adf03ruasflkjeoijdfmnasdfdkljshfsl.net", "Default user", 0);
         } catch (DuplicateIdException | InvalidActionException _) {}
     }
 

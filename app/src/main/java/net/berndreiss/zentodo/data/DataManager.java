@@ -43,15 +43,15 @@ public class DataManager {
             new Handler(Looper.getMainLooper()).post(()-> Toast.makeText(sharedData.context, message, Toast.LENGTH_LONG).show());
         };
 
-        sharedData.clientStub.setMessagePrinter(messagePrinter);
+        //sharedData.clientStub.setMessagePrinter(messagePrinter);
+        sharedData.clientStub.setMessagePrinter(System.out::println);
         sharedData.clientStub.addOperationHandler(sharedData.uiOperationHandler);
-        ClientStub.SERVER = "10.0.0.6:8080/";
         sharedData.clientStub.setExceptionHandler(e -> {
             System.out.println(e.getMessage());
             e.printStackTrace();
         });
         Thread thread = new Thread(() -> {
-            sharedData.clientStub.init("test@test.net", null, () -> "Test1234!?");
+            sharedData.clientStub.init("bd_reiss@yahoo.de", null, () -> "Test1234!?");
         });
 
         thread.start();

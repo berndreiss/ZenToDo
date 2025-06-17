@@ -31,7 +31,7 @@ package net.berndreiss.zentodo;
 *   adapter although all are derived from TaskListAdapter. I.e. the layout FOCUS is handled by
 *   FocusTaskListAdapter.
 *
-*   If you got any questions/suggestions feel free to email me: bd_reiss@yahoo.de
+*   If you got any questions/suggestions feel free to email me: bd_reiss@gmx.at
  */
 
 import android.annotation.SuppressLint;
@@ -162,16 +162,15 @@ public class MainActivity extends AppCompatActivity {
 
         sharedData = new SharedData(this);
 
-        //deleteDatabase("Data.db");
         //initialze client stub
         try {
             DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        Entry entry = sharedData.database.getDatabase().getEntryManager().addNewEntry(0L, 0, "TASK");
+        //Entry entry = sharedData.database.getDatabase().getEntryManager().addNewEntry(0L, 0, "TASK");
 
-        Optional<Entry> entryBack = sharedData.database.getDatabase().getEntryManager().getEntry(0L, 0, 0);
+        //Optional<Entry> entryBack = sharedData.database.getDatabase().getEntryManager().getEntry(0L, 0, 0);
 
         //layouts are initialized
         initializeDrop(sharedData);
