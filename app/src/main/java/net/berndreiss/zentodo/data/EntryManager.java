@@ -658,5 +658,24 @@ public class EntryManager implements EntryManagerI {
         values.put("ID", id);
         db.update("ENTRIES", values, "USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(entry)});
     }
+
+    @Override
+    public void postEntry(Entry entry) {
+
+        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("ID", entry.getId());
+        values.put("USER", entry.getUserId());
+        values.put("PROFILE", entry.getProfile());
+        values.put("TASK", entry.getTask());
+        values.put("POSITION", entry.getPosition());
+        values.put("FOCUS", SQLiteHelper.boolToInt(entry.getFocus()));
+        values.put("DROPPED", SQLiteHelper.boolToInt(entry.getDropped()));
+        values.put("LIST", entry.getList());
+        values.put("LIST_POSITION", entry.getListPosition());
+        values.put("REMINDER_DATE", entry.getReminderDate().toEpochMilli());
+        values.put("RECURRENCE", entry.getRecurrence());
+        db.insert("ENTRIES", "", values);
+    }
 }
 
