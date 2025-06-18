@@ -112,17 +112,8 @@ public class UIOperationHandler implements ClientOperationHandlerI{
     public Entry addNewEntry(Entry entry) {
         if (adapter == null)
             return null;
-        Handler handler = new Handler(Looper.getMainLooper());
-
-        handler.post(() -> {
-            adapter.entries.stream()
-                    .filter(e -> e.getPosition() >= entry.getPosition())
-                    .forEach(e -> e.setPosition(e.getPosition()+1));
-
-            adapter.entries.add(entry.getPosition(), entry);
-            adapter.notifyDataSetChanged();
-        });
-        return entry;
+        adapter.reset();
+        return null;
     }
 
     @Override
@@ -138,28 +129,9 @@ public class UIOperationHandler implements ClientOperationHandlerI{
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void removeEntry(long id) {
-
         if (adapter == null)
-            return;
-        Handler handler = new Handler(Looper.getMainLooper());
-
-        handler.post(() -> {
-            Optional<Entry> entry = adapter.entries.stream().filter(e -> e.getId() == id).findFirst();
-            if (entry.isEmpty())
-                return;
-            adapter.entries.stream()
-                    .filter(e -> e.getPosition() > entry.get().getPosition())
-                    .forEach(e -> e.setPosition(e.getPosition()-1));
-
-            adapter.entries.stream()
-                    .filter(e -> e.getList() != null)
-                    .filter(e -> e.getList().equals(e.getList()))
-                    .filter(e -> e.getListPosition() > entry.get().getListPosition())
-                    .forEach(e -> e.setListPosition(e.getListPosition()-1));
-
-            adapter.entries.remove(entry.get().getPosition());
-            adapter.notifyDataSetChanged();
-        });
+            return ;
+        adapter.reset();
     }
 
     @Override
