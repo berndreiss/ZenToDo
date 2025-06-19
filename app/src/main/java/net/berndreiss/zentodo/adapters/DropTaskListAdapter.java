@@ -2,7 +2,6 @@ package net.berndreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
-import android.content.Context;
 
 import androidx.annotation.NonNull;
 
@@ -10,13 +9,10 @@ import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Entry;
-import net.berndreiss.zentodo.data.SQLiteHelper;
-import net.berndreiss.zentodo.data.TaskList;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Optional;
 
 /**
  *       TaskListAdapter that removes tasks from RecyclerView if task is being sent to Focus or

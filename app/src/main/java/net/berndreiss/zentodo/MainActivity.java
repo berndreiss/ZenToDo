@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-       //deleteDatabase("Data.db");
+        deleteDatabase("Data.db");
         net.berndreiss.zentodo.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -161,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        System.out.println("USER: " + sharedData.clientStub.user.getId());
         //Entry entry = sharedData.database.getDatabase().getEntryManager().addNewEntry(0L, 0, "TASK");
 
         //Optional<Entry> entryBack = sharedData.database.getDatabase().getEntryManager().getEntry(0L, 0, 0);

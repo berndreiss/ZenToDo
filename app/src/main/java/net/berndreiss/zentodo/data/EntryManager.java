@@ -136,7 +136,8 @@ public class EntryManager implements EntryManagerI {
         values.put("PROFILE", profile);
 
         db.execSQL("UPDATE ENTRIES SET POSITION=POSITION+1 WHERE POSITION >=?", new String[]{String.valueOf(position)});
-        db.insert("ENTRIES", null, values);
+        long result = db.insert("ENTRIES", null, values);
+
 
         return new Entry(userId, profile, id, task, position);
     }
@@ -319,7 +320,6 @@ public class EntryManager implements EntryManagerI {
         List<Entry> entries = getListOfEntries(cursor);
 
         cursor.close();
-        ;
 
         return entries;
     }
@@ -353,7 +353,7 @@ public class EntryManager implements EntryManagerI {
 
             long userId = cursor.getLong(0);
             int profile = cursor.getInt(1);
-            long id = cursor.getInt(2);
+            long id = cursor.getLong(2);
             String task = cursor.getString(3);
             boolean focus = SQLiteHelper.intToBool(cursor.getInt(4));
             boolean dropped = SQLiteHelper.intToBool(cursor.getInt(5));
@@ -664,6 +664,7 @@ public class EntryManager implements EntryManagerI {
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
+        System.out.println("POST " + entry.getId());
         values.put("ID", entry.getId());
         values.put("USER", entry.getUserId());
         values.put("PROFILE", entry.getProfile());
@@ -673,7 +674,7 @@ public class EntryManager implements EntryManagerI {
         values.put("DROPPED", SQLiteHelper.boolToInt(entry.getDropped()));
         values.put("LIST", entry.getList());
         values.put("LIST_POSITION", entry.getListPosition());
-        values.put("REMINDER_DATE", entry.getReminderDate().toEpochMilli());
+        values.put("REMINDER_DATE", entry.getReminderDate() == null ? null : entry.getReminderDate().toEpochMilli());
         values.put("RECURRENCE", entry.getRecurrence());
         db.insert("ENTRIES", "", values);
     }
