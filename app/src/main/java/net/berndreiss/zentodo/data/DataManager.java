@@ -10,6 +10,8 @@ import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.util.ClientStub;
 
+import java.io.IOException;
+import java.net.ConnectException;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -46,12 +48,12 @@ public class DataManager {
         //sharedData.clientStub.setMessagePrinter(messagePrinter);
         sharedData.clientStub.setMessagePrinter(System.out::println);
         sharedData.clientStub.addOperationHandler(sharedData.uiOperationHandler);
-        sharedData.clientStub.setExceptionHandler(e -> {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        });
         Thread thread = new Thread(() -> {
-            sharedData.clientStub.init("bd_reiss@yahoo.de", null, () -> "Test1234!?");
+            try {
+                sharedData.clientStub.init("bd_reiss@yahoo.de", null, () -> "Test1234!?");
+            } catch (IOException | DuplicateUserIdException | InvalidUserActionException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         thread.start();
@@ -79,7 +81,12 @@ public class DataManager {
 
         //write changes to database
         Thread thread = new Thread(() -> {
-            Entry entry = sharedData.clientStub.addNewEntry(task);
+            Entry entry = null;
+            try {
+                entry = sharedData.clientStub.addNewEntry(task);
+            } catch (ConnectException e) {
+                throw new RuntimeException(e);
+            }
             adapter.entries.add(entry);
             ((Activity) sharedData.context).runOnUiThread(() ->adapter.notifyDataSetChanged());
         });
@@ -108,7 +115,11 @@ public class DataManager {
     public static void remove(SharedData sharedData, TaskListAdapter adapter, Entry entry) {
 
         Thread thread = new Thread(()->{
-            sharedData.clientStub.removeEntry(entry.getId());
+            try {
+                sharedData.clientStub.removeEntry(entry.getId());
+            } catch (ConnectException e) {
+                throw new RuntimeException(e);
+            }
         });
         thread.start();
         adapter.entries.remove(entry);
@@ -134,7 +145,7 @@ public class DataManager {
             //swap position in Database
             try {
                 sharedData.clientStub.swapEntries(entry1.getId(), entry2.getPosition());
-            } catch (PositionOutOfBoundException e) {
+            } catch (PositionOutOfBoundException | ConnectException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -166,7 +177,7 @@ public class DataManager {
             //swap position in Database
             try {
                 sharedData.clientStub.swapListEntries(entry1.getList(), entry1.getId(), entry2.getListPosition());
-            } catch (PositionOutOfBoundException e) {
+            } catch (PositionOutOfBoundException | ConnectException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -212,7 +223,11 @@ public class DataManager {
             return;
 
         Thread thread = new Thread(()-> {
-            sharedData.clientStub.updateTask(entry.getId(), newTask);
+            try {
+                sharedData.clientStub.updateTask(entry.getId(), newTask);
+            } catch (ConnectException e) {
+                throw new RuntimeException(e);
+            }
         });
         thread.start();
         entry.setTask(newTask);
@@ -229,7 +244,11 @@ public class DataManager {
             return;
 
         Thread thread = new Thread(() -> {
-            sharedData.clientStub.updateFocus(entry.getId(),  focus);
+            try {
+                sharedData.clientStub.updateFocus(entry.getId(),  focus);
+            } catch (ConnectException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         thread.start();
@@ -251,7 +270,13 @@ public class DataManager {
         if (entry == null || entry.getDropped() == dropped)
             return;
 
-        Thread thread = new Thread(() -> sharedData.clientStub.updateDropped(entry.getId(), dropped));
+        Thread thread = new Thread(() -> {
+            try {
+                sharedData.clientStub.updateDropped(entry.getId(), dropped);
+            } catch (ConnectException e) {
+                throw new RuntimeException(e);
+            }
+        });
         thread.start();
         entry.setDropped(dropped);
     }
@@ -266,7 +291,13 @@ public class DataManager {
         if (entry == null || entry.getReminderDate() != null && entry.getReminderDate().equals(date))
             return;
 
-        Thread thread = new Thread(() -> sharedData.clientStub.updateReminderDate(entry.getId(), date));
+        Thread thread = new Thread(() -> {
+            try {
+                sharedData.clientStub.updateReminderDate(entry.getId(), date);
+            } catch (ConnectException e) {
+                throw new RuntimeException(e);
+            }
+        });
         thread.start();
 
         if (entry.getDropped() && entry.getReminderDate() != date)
@@ -285,7 +316,13 @@ public class DataManager {
         if (entry == null || entry.getRecurrence() != null && entry.getRecurrence().equals(recurrence))
             return;
 
-        Thread thread = new Thread(() -> sharedData.clientStub.updateRecurrence(entry.getId(), recurrence));
+        Thread thread = new Thread(() -> {
+            try {
+                sharedData.clientStub.updateRecurrence(entry.getId(), recurrence);
+            } catch (ConnectException e) {
+                throw new RuntimeException(e);
+            }
+        });
         thread.start();
 
         entry.setRecurrence(recurrence);
@@ -341,7 +378,13 @@ public class DataManager {
 
         listColors.put(list, color);
 
-        Thread thread = new Thread(() -> sharedData.clientStub.updateListColor(list, color));
+        Thread thread = new Thread(() -> {
+            try {
+                sharedData.clientStub.updateListColor(list, color);
+            } catch (ConnectException e) {
+                throw new RuntimeException(e);
+            }
+        });
         thread.start();
     }
 
@@ -434,7 +477,13 @@ public class DataManager {
 
         //write reminder date to Database
         Instant finalDate = date;
-        Thread thread = new Thread(() -> sharedData.clientStub.updateReminderDate(entry.getId(), finalDate));
+        Thread thread = new Thread(() -> {
+            try {
+                sharedData.clientStub.updateReminderDate(entry.getId(), finalDate);
+            } catch (ConnectException e) {
+                throw new RuntimeException(e);
+            }
+        });
         thread.start();
 
     }

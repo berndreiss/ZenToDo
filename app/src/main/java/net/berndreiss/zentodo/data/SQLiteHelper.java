@@ -100,7 +100,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 "MAIL TEXT NOT NULL, " +
                 "NAME TEXT DEFAULT NULL, " +
                 "ENABLED INTEGER DEFAULT 0, " +
-                "DEVICE INTEGER NOT NULL, " +
+                "DEVICE INTEGER, " +
                 "PROFILE INTEGER NOT NULL, " +
                 "CLOCK TEXT NOT NULL" +
                 ")";

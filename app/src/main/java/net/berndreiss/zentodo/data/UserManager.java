@@ -100,14 +100,14 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public synchronized User addUser(long id, String email, String userName, int device) throws DuplicateIdException, InvalidActionException {
+    public synchronized User addUser(long id, String email, String userName, Integer device) throws DuplicateUserIdException, InvalidUserActionException {
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
         if (getUser(id).isPresent())
-            throw new DuplicateIdException("User with id already exists: id " + id);
+            throw new DuplicateUserIdException("User with id already exists: id " + id);
         if (getUserByEmail(email).isPresent())
-            throw new InvalidActionException("User with email already exists: email " + email);
+            throw new InvalidUserActionException("User with email already exists: email " + email);
         int profileId = 0;
         ContentValues profileValues = new ContentValues();
         profileValues.put("ID", profileId);
@@ -118,7 +118,10 @@ public class UserManager implements UserManagerI{
         values.put("ID", id);
         values.put("MAIL", email);
         values.put("NAME", userName);
-        values.put("DEVICE", device);
+        if (device == null)
+            values.put("DEVICE", "NULL");
+        else
+            values.put("DEVICE", device);
         VectorClock clock = new VectorClock(device);
         values.put("CLOCK", clock.jsonify());
         values.put("PROFILE", profileId);
@@ -138,10 +141,10 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public synchronized Profile addProfile(long userId, String name) throws InvalidActionException {
+    public synchronized Profile addProfile(long userId, String name) throws InvalidUserActionException {
         Optional<User> user = getUser(userId);
         if (user.isEmpty())
-            throw new InvalidActionException("User does not exist");
+            throw new InvalidUserActionException("User does not exist");
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM PROFILES WHERE USER = ?", new String[]{String.valueOf(userId)});
@@ -166,14 +169,14 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public synchronized Profile addProfile(long userId) throws InvalidActionException {
+    public synchronized Profile addProfile(long userId) throws InvalidUserActionException {
         return addProfile(userId, null);
     }
 
     @Override
-    public synchronized void removeUser(long userId) throws InvalidActionException {
+    public synchronized void removeUser(long userId) throws InvalidUserActionException {
         if (userId == 0)
-            throw new InvalidActionException("Cannot delete default user.");
+            throw new InvalidUserActionException("Cannot delete default user.");
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         db.delete("USERS", "ID=?", new String[]{String.valueOf(userId)});
         db.delete("PROFILES", "USER=?", new String[]{String.valueOf(userId)});
@@ -183,11 +186,11 @@ public class UserManager implements UserManagerI{
 
 
     @Override
-    public synchronized void removeProfile(long userId, int id) throws InvalidActionException{
+    public synchronized void removeProfile(long userId, int id) throws InvalidUserActionException{
         if (userId == 0 && id == 0)
-            throw new InvalidActionException("Cannot remove default profile of default user.");
+            throw new InvalidUserActionException("Cannot remove default profile of default user.");
         if (getProfiles(userId).size() == 1)
-            throw new InvalidActionException("Cannot remove last profile of user.");
+            throw new InvalidUserActionException("Cannot remove last profile of user.");
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
         db.delete("ENTRIES", "USER = ? AND PROFILE = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
         db.delete("PROFILES", "USER = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
@@ -312,9 +315,9 @@ public class UserManager implements UserManagerI{
     }
 
     @Override
-    public synchronized void updateEmail(Long userId, String mail) throws InvalidActionException {
+    public synchronized void updateEmail(Long userId, String mail) throws InvalidUserActionException {
         if (getUserByEmail(mail).isPresent() || userId == null)
-            throw new InvalidActionException("User with mail already exists.");
+            throw new InvalidUserActionException("User with mail already exists.");
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("MAIL", mail);
