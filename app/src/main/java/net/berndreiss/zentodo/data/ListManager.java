@@ -10,7 +10,6 @@ import net.berndreiss.zentodo.exceptions.PositionOutOfBoundException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -66,7 +65,7 @@ public class ListManager implements ListManagerI{
         ContentValues contentValues = new ContentValues();
         contentValues.put("LIST", (Long) null);
         contentValues.put("LIST_POSITION", (Integer) null);
-        db.update("ENTRIES", contentValues, "USER = ? AND PROFILE = ? AND LIST = ?", new String[]{
+        db.update("TASKS", contentValues, "USER = ? AND PROFILE = ? AND LIST = ?", new String[]{
                 String.valueOf(user), String.valueOf(profile), String.valueOf(list)
         });
         db.close();
@@ -81,15 +80,15 @@ public class ListManager implements ListManagerI{
         ContentValues values = new ContentValues();
         values.put("LIST", (Long) null);
         values.put("LIST_POSITION", (Long) null);
-        db.update("ENTRIES", values, "LIST = ?", new String[]{String.valueOf(id)});
+        db.update("TASKS", values, "LIST = ?", new String[]{String.valueOf(id)});
         db.close();
     }
 
     @Override
     public synchronized void updateList(long userId, int profile, long id, Long listId){
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(id)});
-        List<Entry> entries = EntryManager.getListOfEntries(cursor);
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(id)});
+        List<Task> entries = TaskManager.getListOfTasks(cursor);
         cursor.close();
         if (entries.size() != 1)
             return;
@@ -114,7 +113,7 @@ public class ListManager implements ListManagerI{
         values = new ContentValues();
         values.put("LIST", newId);
         db.update("PROFILE_LIST", values, "LIST = ?", new String[]{String.valueOf(list)});
-        db.update("ENTRIES", values, "LIST = ?", new String[]{String.valueOf(list)});
+        db.update("TASKS", values, "LIST = ?", new String[]{String.valueOf(list)});
 
         db.close();
         return existingId;
@@ -134,22 +133,22 @@ public class ListManager implements ListManagerI{
     }
 
     @Override
-    public List<Entry> getListEntries(long user, int profile, Long listId) {
+    public List<Task> getListEntries(long user, int profile, Long listId) {
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
         Cursor cursor;
         if (listId == null)
-            cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ? AND LIST IS NULL",
+            cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ? AND LIST IS NULL",
                     new String[]{String.valueOf(user), String.valueOf(profile)});
         else
-            cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ? AND LIST = ?",
+            cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ? AND LIST = ?",
                     new String[]{String.valueOf(user), String.valueOf(profile), String.valueOf(listId)});
-        List<Entry> entries = EntryManager.getListOfEntries(cursor);
+        List<Task> entries = TaskManager.getListOfTasks(cursor);
         cursor.close();
         db.close();
         if (listId != null)
-            return entries.stream().sorted(Comparator.comparing(Entry::getListPosition)).toList();
-        return entries.stream().sorted(Comparator.comparing(Entry::getPosition)).toList();
+            return entries.stream().sorted(Comparator.comparing(Task::getListPosition)).toList();
+        return entries.stream().sorted(Comparator.comparing(Task::getPosition)).toList();
     }
 
     @Override
@@ -201,9 +200,9 @@ public class ListManager implements ListManagerI{
         return list;
     }
 
-    public synchronized void updateList(Entry entry, Long list){
+    public synchronized void updateList(Task task, Long list){
 
-        if (entry == null)
+        if (task == null)
             return;
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
@@ -211,11 +210,11 @@ public class ListManager implements ListManagerI{
 
         Integer position = null;
         if (list != null) {
-            Cursor cursor = db.rawQuery("SELECT 1 FROM ENTRIES WHERE LIST=?", new String[]{String.valueOf(list)});
+            Cursor cursor = db.rawQuery("SELECT 1 FROM TASKS WHERE LIST=?", new String[]{String.valueOf(list)});
             cursor.moveToFirst();
             if (!cursor.isAfterLast()) {
                 cursor.close();
-                cursor = db.rawQuery("SELECT MAX(LIST_POSITION) FROM ENTRIES WHERE LIST=?", new String[]{String.valueOf(list)});
+                cursor = db.rawQuery("SELECT MAX(LIST_POSITION) FROM TASKS WHERE LIST=?", new String[]{String.valueOf(list)});
                 cursor.moveToFirst();
                 if (!cursor.isAfterLast())
                     position = cursor.getInt(0) + 1;
@@ -225,46 +224,46 @@ public class ListManager implements ListManagerI{
 
         values.put("LIST", list);
         values.put("LIST_POSITION", position);
-        db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(entry.getId())});
+        db.update("TASKS", values, "ID=?", new String[]{String.valueOf(task.getId())});
 
-        if (entry.getList() != null && !Objects.equals(entry.getList(), list)) {
-            db.execSQL("UPDATE ENTRIES SET LIST_POSITION=LIST_POSITION - 1 WHERE LIST=? AND LIST_POSITION >?", new String[]{String.valueOf(entry.getList()), String.valueOf(entry.getListPosition())});
+        if (task.getList() != null && !Objects.equals(task.getList(), list)) {
+            db.execSQL("UPDATE TASKS SET LIST_POSITION=LIST_POSITION - 1 WHERE LIST=? AND LIST_POSITION >?", new String[]{String.valueOf(task.getList()), String.valueOf(task.getListPosition())});
         }
         db.close();
-        entry.setList(list);
-        entry.setListPosition(position);
+        task.setList(list);
+        task.setListPosition(position);
     }
     @Override
     public synchronized void swapListEntries(long userId, int profile, long list, long id, int position) throws PositionOutOfBoundException {
 
-        List<Entry> listEntries = getListEntries(userId, profile, list);
+        List<Task> listEntries = getListEntries(userId, profile, list);
         if (position >= listEntries.size())
             throw new PositionOutOfBoundException("List position is out of bounds.");
-        Optional<Entry> entry = listEntries.stream().filter(e -> e.getId() == id).findFirst();
-        Optional<Entry> entryOther = listEntries.stream().filter(e -> e.getListPosition() == position).findFirst();
-        if (entry.isEmpty() || entryOther.isEmpty())
+        Optional<Task> task = listEntries.stream().filter(e -> e.getId() == id).findFirst();
+        Optional<Task> taskOther = listEntries.stream().filter(e -> e.getListPosition() == position).findFirst();
+        if (task.isEmpty() || taskOther.isEmpty())
             return;
 
-        swapListEntries(entry.get(), entry.get().getListPosition(), entryOther.get(), position);
+        swapListEntries(task.get(), task.get().getListPosition(), taskOther.get(), position);
     }
 
-    synchronized void swapListEntries(Entry entry, int posOld, Entry entryOther, int pos){
+    synchronized void swapListEntries(Task task, int posOld, Task taskOther, int pos){
 
-        List<Entry> listOld = getListEntries(entry.getUserId(), entry.getProfile(), entry.getList());
+        List<Task> listOld = getListEntries(task.getUserId(), task.getProfile(), task.getList());
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
         ContentValues values1 = new ContentValues();
         values1.put("LIST_POSITION", posOld);
-        db.update("ENTRIES", values1, "LIST = ? AND ID = ?",
-                new String[]{String.valueOf(entry.getList()), String.valueOf(entryOther.getId())});
+        db.update("TASKS", values1, "LIST = ? AND ID = ?",
+                new String[]{String.valueOf(task.getList()), String.valueOf(taskOther.getId())});
 
         ContentValues values0 = new ContentValues();
         values0.put("LIST_POSITION", pos);
-        db.update("ENTRIES", values0, "LIST = ? AND ID = ?",
-                new String[]{String.valueOf(entry.getList()), String.valueOf(entry.getId())});
+        db.update("TASKS", values0, "LIST = ? AND ID = ?",
+                new String[]{String.valueOf(task.getList()), String.valueOf(task.getId())});
 
         db.close();
-        List<Entry> listNew = getListEntries(entry.getUserId(), entry.getProfile(), entry.getList());
+        List<Task> listNew = getListEntries(task.getUserId(), task.getProfile(), task.getList());
 
     }
     @Override

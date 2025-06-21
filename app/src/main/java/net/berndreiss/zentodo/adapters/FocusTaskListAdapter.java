@@ -18,7 +18,7 @@ import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.TaskList;
 
 import java.time.Instant;
@@ -47,9 +47,9 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
         super.onBindViewHolder(holder, position);
 
-        if (entries.get(position).getList() != null){
+        if (tasks.get(position).getList() != null){
 
-            Optional<TaskList> list = sharedData.database.getListManager().getList(entries.get(position).getList());
+            Optional<TaskList> list = sharedData.database.getListManager().getList(tasks.get(position).getList());
             if (list.isEmpty())
                 return;
             String color = list.get().getColor();
@@ -64,31 +64,31 @@ public class FocusTaskListAdapter extends TaskListAdapter {
         //set Listener for checkbox: basically if checked the item is removed, additionally motivating picture of Panda is shown when all tasks are completed
         holder.checkBox.setOnClickListener(view -> {
 
-            //current entry
-            Entry entry = entries.get(position);
+            //current task
+            Task task = tasks.get(position);
 
             //see if item is recurring
-            boolean recurring = entry.getRecurrence()!=null;
+            boolean recurring = task.getRecurrence()!=null;
 
             //if recurring do not remove but set new reminder date, otherwise remove from data
             if (recurring) {
-                //calculate new reminder date and write to data and entries
-                DataManager.setRecurring(sharedData, entry, LocalDate.now());
+                //calculate new reminder date and write to data and tasks
+                DataManager.setRecurring(sharedData, task, LocalDate.now());
 
-                //reset focus in data and entries
-                DataManager.setFocus(sharedData, entry,false);
+                //reset focus in data and tasks
+                DataManager.setFocus(sharedData, task,false);
 
-                //reset dropped in data and entries
-                DataManager.setDropped(sharedData, entry,false);
+                //reset dropped in data and tasks
+                DataManager.setDropped(sharedData, task,false);
 
-                entries.remove(position);
+                tasks.remove(position);
 
                 notifyItemChanged(position);
             } else {
-                DataManager.remove(sharedData, this, entry);
+                DataManager.remove(sharedData, this, task);
             }
 
-            if (entries.isEmpty())
+            if (tasks.isEmpty())
                 showImage();
 
 
@@ -101,20 +101,20 @@ public class FocusTaskListAdapter extends TaskListAdapter {
         //set Listener for the Focus Button in the menu, item is removed from adapter upon click
         holder.focus.setOnClickListener(view12 -> {
 
-            //get entry
-            Entry entry = entries.get(position);
+            //get task
+            Task task = tasks.get(position);
 
-            if (entry.getRecurrence() != null)
-                DataManager.addToRecurringButRemoved(sharedData, entry.getId());
+            if (task.getRecurrence() != null)
+                DataManager.addToRecurringButRemoved(sharedData, task.getId());
 
-            if (entry.getReminderDate() == null)
-                DataManager.editReminderDate(sharedData, entry, Instant.now());
+            if (task.getReminderDate() == null)
+                DataManager.editReminderDate(sharedData, task, Instant.now());
 
             //write back change to data
-            DataManager.setFocus(sharedData, entry, false);
+            DataManager.setFocus(sharedData, task, false);
 
             //remove from adapter
-            entries.remove(position);
+            tasks.remove(position);
 
             //notify adapter
             notifyDataSetChanged();
@@ -123,7 +123,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
         //return DatePickerDialog that writes back to data and removes item from adapter
         holder.setDate.setOnClickListener(new SetDateListener(this,holder,position){
             @Override
-            public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, ViewHolder holder, int position){
+            public DatePickerDialog getDatePickerDialog(Task task, int taskDay, int taskMonth, int taskYear, ViewHolder holder, int position){
                 DatePickerDialog datePickerDialog;
 
                 datePickerDialog= new DatePickerDialog(sharedData.context, (view, year, month, day) -> {
@@ -133,31 +133,31 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                     Instant dateInstant = date.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
                     //write back to data
-                    DataManager.editReminderDate(sharedData, entry, dateInstant);
+                    DataManager.editReminderDate(sharedData, task, dateInstant);
 
                     //only remove task from FOCUS, if date is in the future (a scenario where one
                     //might change the date to the past is recurring tasks -> in this scenario
                     //the task should remain in FOCUS)
                     if (date.isAfter(LocalDate.now())) {
                         //also set focus to false in data
-                        DataManager.setFocus(sharedData, entry, false);
+                        DataManager.setFocus(sharedData, task, false);
 
                         //remove from adapter
-                        entries.remove(position);
+                        tasks.remove(position);
 
                         //notify adapter
                         notifyDataSetChanged();
                     }
 
-                }, entryYear, entryMonth, entryDay);
+                }, taskYear, taskMonth, taskDay);
 
                 datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,sharedData.context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
                     //set date when task is due to 0
-                    DataManager.editReminderDate(sharedData, entry,null);
+                    DataManager.editReminderDate(sharedData, task,null);
 
                     //change color of reminder date Button marking if Date is set
-                    markSet(holder,entry);
+                    markSet(holder,task);
 
                     //notify adapter
                     notifyItemChanged(position);
@@ -202,8 +202,8 @@ public class FocusTaskListAdapter extends TaskListAdapter {
     @Override
     public void reset(){
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
-        entries.clear();
-        entries.addAll(DataManager.getFocus(sharedData));
+        tasks.clear();
+        tasks.addAll(DataManager.getFocus(sharedData));
         notifyDataSetChanged();
 
     }

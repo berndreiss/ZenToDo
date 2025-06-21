@@ -18,7 +18,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -28,28 +27,28 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
-public class EntryManager implements EntryManagerI {
+public class TaskManager implements TaskManagerI {
 
 
     private SQLiteHelper sqLiteHelper;
 
-    public EntryManager(SQLiteHelper sqLiteHelper) {
+    public TaskManager(SQLiteHelper sqLiteHelper) {
         this.sqLiteHelper = sqLiteHelper;
     }
 
-    private Entry getById(Long userId, int profile, long id) {
+    private Task getById(Long userId, int profile, long id) {
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE ID=?", new String[]{String.valueOf(id)});
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE ID=?", new String[]{String.valueOf(id)});
 
-        List<Entry> entries = getListOfEntries(cursor);
+        List<Task> tasks = getListOfTasks(cursor);
 
         cursor.close();
 
-        if (entries.isEmpty())
+        if (tasks.isEmpty())
             return null;
 
-        return entries.get(0);
+        return tasks.get(0);
     }
 
     /**
@@ -57,10 +56,10 @@ public class EntryManager implements EntryManagerI {
      * @return
      */
     @Override
-    public synchronized Entry addNewEntry(long userId, int profile, String task) {
+    public synchronized Task addNewTask(long userId, int profile, String task) {
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT 1 FROM ENTRIES", null);
+        Cursor cursor = db.rawQuery("SELECT 1 FROM TASKS", null);
 
         cursor.moveToFirst();
 
@@ -69,7 +68,7 @@ public class EntryManager implements EntryManagerI {
 
             cursor.close();
 
-            cursor = db.rawQuery("SELECT MAX(POSITION) FROM ENTRIES", null);
+            cursor = db.rawQuery("SELECT MAX(POSITION) FROM TASKS", null);
 
             cursor.moveToFirst();
 
@@ -79,15 +78,15 @@ public class EntryManager implements EntryManagerI {
         }
         cursor.close();
 
-        Entry entry = null;
+        Task Task = null;
         try {
-            entry = addNewEntry(userId, profile, task, maxPosition + 1);
+            Task = addNewTask(userId, profile, task, maxPosition + 1);
         } catch (PositionOutOfBoundException _) {}
-        return entry;
+        return Task;
     }
 
     @Override
-    public synchronized Entry addNewEntry(long userId, int profile, String task, int position) throws PositionOutOfBoundException {
+    public synchronized Task addNewTask(long userId, int profile, String task, int position) throws PositionOutOfBoundException {
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         Random random = new Random();
         long id = random.nextInt();
@@ -95,7 +94,7 @@ public class EntryManager implements EntryManagerI {
             id = random.nextInt();
 
         while (true) {
-            Cursor cursorId = db.rawQuery("SELECT ID FROM ENTRIES WHERE ID= ? AND USER = ? AND PROFILE = ?",
+            Cursor cursorId = db.rawQuery("SELECT ID FROM TASKS WHERE ID= ? AND USER = ? AND PROFILE = ?",
                     new String[]{String.valueOf(id), String.valueOf(userId), String.valueOf(profile)});
 
             cursorId.moveToFirst();
@@ -110,25 +109,25 @@ public class EntryManager implements EntryManagerI {
                 break;
             }
         }
-        Entry entry = null;
+        Task Task = null;
         try {
-            entry = addNewEntry(userId, profile, id, task, position);
+            Task = addNewTask(userId, profile, id, task, position);
         } catch (DuplicateIdException | InvalidActionException _) {
         }
-        return entry;
+        return Task;
 
     }
 
-    //adds new entry to TABLE_ENTRIES
+    //adds new Task to TASKS
     @Override
-    public synchronized Entry addNewEntry(long userId, int profile, long id, String task, int position) throws DuplicateIdException, PositionOutOfBoundException, InvalidActionException {
+    public synchronized Task addNewTask(long userId, int profile, long id, String task, int position) throws DuplicateIdException, PositionOutOfBoundException, InvalidActionException {
         if (id == 0)
-            throw new InvalidActionException("Id of entry must not be null.");
-        List<Entry> entries = getEntries(userId, profile);
+            throw new InvalidActionException("Id of Task must not be null.");
+        List<Task> entries = getTasks(userId, profile);
         if (entries.size() < position)
             throw new PositionOutOfBoundException("Position is out of bound: position" + position);
-        if (entries.stream().map(Entry::getId).toList().contains(id))
-            throw new DuplicateIdException("Entry with id already exists: id " + id);
+        if (entries.stream().map(Task::getId).toList().contains(id))
+            throw new DuplicateIdException("Task with id already exists: id " + id);
 
         ContentValues values = new ContentValues();
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
@@ -139,42 +138,42 @@ public class EntryManager implements EntryManagerI {
         values.put("POSITION", position);
         values.put("PROFILE", profile);
 
-        db.execSQL("UPDATE ENTRIES SET POSITION=POSITION+1 WHERE POSITION >=?", new String[]{String.valueOf(position)});
-        long result = db.insert("ENTRIES", null, values);
+        db.execSQL("UPDATE TASKS SET POSITION=POSITION+1 WHERE POSITION >=?", new String[]{String.valueOf(position)});
+        long result = db.insert("TASKS", null, values);
 
 
-        return new Entry(userId, profile, id, task, position);
+        return new Task(userId, profile, id, task, position);
     }
 
     /**
-     * @param entry
+     * @param Task
      */
-    synchronized void removeEntry(Entry entry) {
+    synchronized void removeTask(Task Task) {
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
-        if (entry.getUserId() == null)
-            db.delete("ENTRIES", "ID=? AND USER IS NULL AND PROFILE=?", new String[]{String.valueOf(entry.getId()), String.valueOf(entry.getProfile())});
+        if (Task.getUserId() == null)
+            db.delete("TASKS", "ID=? AND USER IS NULL AND PROFILE=?", new String[]{String.valueOf(Task.getId()), String.valueOf(Task.getProfile())});
         else
-            db.delete("ENTRIES", "ID=? AND USER=? AND PROFILE=?", new String[]{String.valueOf(entry.getId()), String.valueOf(entry.getUserId()), String.valueOf(entry.getProfile())});
-        db.execSQL("UPDATE ENTRIES SET POSITION=POSITION-1 WHERE POSITION >?", new String[]{String.valueOf(entry.getPosition())});
-        if (entry.getList() != null)
-            db.execSQL("UPDATE ENTRIES SET LIST_POSITION=LIST_POSITION-1 WHERE LIST=? AND LIST_POSITION>?", new String[]{String.valueOf(entry.getList()), String.valueOf(entry.getListPosition())});
+            db.delete("TASKS", "ID=? AND USER=? AND PROFILE=?", new String[]{String.valueOf(Task.getId()), String.valueOf(Task.getUserId()), String.valueOf(Task.getProfile())});
+        db.execSQL("UPDATE TASKS SET POSITION=POSITION-1 WHERE POSITION >?", new String[]{String.valueOf(Task.getPosition())});
+        if (Task.getList() != null)
+            db.execSQL("UPDATE TASKS SET LIST_POSITION=LIST_POSITION-1 WHERE LIST=? AND LIST_POSITION>?", new String[]{String.valueOf(Task.getList()), String.valueOf(Task.getListPosition())});
         ;
     }
 
 
     @Override
-    public synchronized void removeEntry(long userId, int profile, long id) {
+    public synchronized void removeTask(long userId, int profile, long id) {
 
-        Entry entry = getById(userId, profile, id);
+        Task Task = getById(userId, profile, id);
 
-        if (entry == null)
+        if (Task == null)
             return;
 
-        removeEntry(entry);
+        removeTask(Task);
     }
 
-    public synchronized void updateReminderDate(long userId, int profile, Entry entry, Instant value) {
-        updateReminderDate(userId, profile, entry.getId(), value);
+    public synchronized void updateReminderDate(long userId, int profile, Task Task, Instant value) {
+        updateReminderDate(userId, profile, Task.getId(), value);
     }
 
     @Override
@@ -182,12 +181,12 @@ public class EntryManager implements EntryManagerI {
         ContentValues values = new ContentValues();
         values.put("REMINDER_DATE", instant.toEpochMilli());
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
-        db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
+        db.update("TASKS", values, "ID=?", new String[]{String.valueOf(id)});
         ;
     }
 
-    synchronized void updateTask(long userId, int profile, Entry entry, String value) {
-        updateTask(userId, profile, entry.getId(), value);
+    synchronized void updateTask(long userId, int profile, Task Task, String value) {
+        updateTask(userId, profile, Task.getId(), value);
     }
 
     @Override
@@ -195,12 +194,12 @@ public class EntryManager implements EntryManagerI {
         ContentValues values = new ContentValues();
         values.put("TASK", value == null ? "" : value);
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
-        db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
+        db.update("TASKS", values, "ID=?", new String[]{String.valueOf(id)});
         ;
     }
 
-    void updateRecurrence(Long userId, int profile, Entry entry, String value) {
-        updateRecurrence(userId, profile, entry.getId(), entry.getReminderDate(), value);
+    void updateRecurrence(Long userId, int profile, Task Task, String value) {
+        updateRecurrence(userId, profile, Task.getId(), Task.getReminderDate(), value);
     }
 
     public synchronized void updateRecurrence(long userId, int profile, long id, Instant reminderDate, String value) {
@@ -209,7 +208,7 @@ public class EntryManager implements EntryManagerI {
         if (reminderDate == null)
             values.put("REMINDER_DATE", SQLiteHelper.dateToEpoch(Instant.now()));
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
-        db.update("ENTRIES", values, "ID=?", new String[]{String.valueOf(id)});
+        db.update("TASKS", values, "ID=?", new String[]{String.valueOf(id)});
         ;
 
     }
@@ -221,21 +220,21 @@ public class EntryManager implements EntryManagerI {
     }
 
 
-    void updateFocus(long userId, int profile, Entry entry, boolean valueBool) {
+    void updateFocus(long userId, int profile, Task Task, boolean valueBool) {
 
-        updateFocus(userId, profile, entry.getId(), valueBool);
+        updateFocus(userId, profile, Task.getId(), valueBool);
     }
 
     @Override
     public synchronized void updateFocus(long userId, int profile, long id, boolean value) {
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
-        db.execSQL("UPDATE ENTRIES SET FOCUS=?, DROPPED = ? WHERE ID=?;", new String[]{String.valueOf(value ? 1 : 0), String.valueOf(0), String.valueOf(id)});
+        db.execSQL("UPDATE TASKS SET FOCUS=?, DROPPED = ? WHERE ID=?;", new String[]{String.valueOf(value ? 1 : 0), String.valueOf(0), String.valueOf(id)});
         ;
     }
 
-    void updateDropped(Long userId, int profile, Entry entry, boolean valueBool) {
-        updateDropped(userId, profile, entry.getId(), valueBool);
+    void updateDropped(Long userId, int profile, Task Task, boolean valueBool) {
+        updateDropped(userId, profile, Task.getId(), valueBool);
     }
 
     @Override
@@ -243,17 +242,17 @@ public class EntryManager implements EntryManagerI {
 
         //convert bool to int
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
-        db.execSQL("UPDATE ENTRIES SET DROPPED=? WHERE ID=?;", new String[]{String.valueOf(value ? 1 : 0), String.valueOf(id)});
+        db.execSQL("UPDATE TASKS SET DROPPED=? WHERE ID=?;", new String[]{String.valueOf(value ? 1 : 0), String.valueOf(id)});
         ;
     }
 
 
     @Override
-    public Optional<Entry> getEntry(long userId, int profile, long id) {
+    public Optional<Task> getTask(long userId, int profile, long id) {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(id)});
-        List<Entry> entries = getListOfEntries(cursor);
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(id)});
+        List<Task> entries = getListOfTasks(cursor);
 
         cursor.close();
         if (entries.size() > 1)
@@ -263,12 +262,12 @@ public class EntryManager implements EntryManagerI {
     }
 
     @Override
-    public List<Entry> getEntries(long userId, int profile) {
+    public List<Task> getTasks(long userId, int profile) {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ?", new String[]{String.valueOf(userId), String.valueOf(profile)});
-        List<Entry> entries = getListOfEntries(cursor);
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ?", new String[]{String.valueOf(userId), String.valueOf(profile)});
+        List<Task> entries = getListOfTasks(cursor);
         cursor.close();
-        return entries.stream().sorted(Comparator.comparing(Entry::getPosition)).toList();
+        return entries.stream().sorted(Comparator.comparing(Task::getPosition)).toList();
     }
 
     /**
@@ -276,10 +275,10 @@ public class EntryManager implements EntryManagerI {
      *
      * @return
      */
-    public List<Entry> loadEntries(long userId, int profile) {
+    public List<Task> loadEntries(long userId, int profile) {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? ORDER BY POSITION", new String[]{String.valueOf(userId)});
-        List<Entry> entries = getListOfEntries(cursor);
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? ORDER BY POSITION", new String[]{String.valueOf(userId)});
+        List<Task> entries = getListOfTasks(cursor);
         cursor.close();
         return entries;
     }
@@ -289,16 +288,16 @@ public class EntryManager implements EntryManagerI {
      *
      * @return
      */
-    public List<Entry> loadFocus(long userId, int profile) {
+    public List<Task> loadFocus(long userId, int profile) {
 
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
         long epoch = SQLiteHelper.dateToEpoch(Instant.now());
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE FOCUS>0 OR (RECURRENCE IS NOT NULL AND REMINDER_DATE <= " + epoch + ")" +
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE FOCUS>0 OR (RECURRENCE IS NOT NULL AND REMINDER_DATE <= " + epoch + ")" +
                 " ORDER BY POSITION", null);
 
-        List<Entry> entries = getListOfEntries(cursor);
+        List<Task> entries = getListOfTasks(cursor);
 
         List<Long> removed = loadRecurring();
 
@@ -314,14 +313,14 @@ public class EntryManager implements EntryManagerI {
      * @return
      */
     @Override
-    public List<Entry> loadDropped(long userID, int profile) {
+    public List<Task> loadDropped(long userID, int profile) {
 
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE USER = ? AND PROFILE = ? AND DROPPED>0 ORDER BY POSITION",
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ? AND DROPPED>0 ORDER BY POSITION",
                 new String[]{String.valueOf(userID), String.valueOf(profile)});
 
-        List<Entry> entries = getListOfEntries(cursor);
+        List<Task> entries = getListOfTasks(cursor);
 
         cursor.close();
 
@@ -334,13 +333,13 @@ public class EntryManager implements EntryManagerI {
      * @param name
      * @return
      */
-    public List<Entry> loadList(Long userId, int profile, String name) {
+    public List<Task> loadList(Long userId, int profile, String name) {
 
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE LIST=? ORDER BY LIST_POSITION", new String[]{name});
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE LIST=? ORDER BY LIST_POSITION", new String[]{name});
 
-        List<Entry> entries = getListOfEntries(cursor);
+        List<Task> entries = getListOfTasks(cursor);
 
         cursor.close();
         ;
@@ -349,8 +348,8 @@ public class EntryManager implements EntryManagerI {
     }
 
     //TODO COMMENT
-    public static List<Entry> getListOfEntries(Cursor cursor) {
-        List<Entry> entries = new ArrayList<>();
+    public static List<Task> getListOfTasks(Cursor cursor) {
+        List<Task> entries = new ArrayList<>();
         cursor.moveToFirst();
 
         while (!cursor.isAfterLast()) {
@@ -368,13 +367,13 @@ public class EntryManager implements EntryManagerI {
             int position = cursor.getInt(10);
 
             //TODO ADD USERID!!!
-            Entry entry = new Entry(userId, profile, id, task, position);
-            entry.setFocus(focus);
-            entry.setDropped(dropped);
+            Task Task = new Task(userId, profile, id, task, position);
+            Task.setFocus(focus);
+            Task.setDropped(dropped);
 
             if (!(list == null)) {
-                entry.setList(list);
-                entry.setListPosition(listPosition);
+                Task.setList(list);
+                Task.setListPosition(listPosition);
             }
 
 
@@ -382,14 +381,14 @@ public class EntryManager implements EntryManagerI {
                 Instant reminderDate = SQLiteHelper.epochToDate(reminderDateEpoch);
 
                 if (reminderDate != null)
-                    entry.setReminderDate(reminderDate);
+                    Task.setReminderDate(reminderDate);
             } else
-                entry.setReminderDate(null);
+                Task.setReminderDate(null);
 
             if (!(recurrence == null))
-                entry.setRecurrence(recurrence);
+                Task.setRecurrence(recurrence);
 
-            entries.add(entry);
+            entries.add(Task);
             cursor.moveToNext();
         }
 
@@ -407,7 +406,7 @@ public class EntryManager implements EntryManagerI {
 
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT DISTINCT LIST FROM ENTRIES WHERE LIST IS NOT NULL ORDER BY LIST", null);
+        Cursor cursor = db.rawQuery("SELECT DISTINCT LIST FROM TASKS WHERE LIST IS NOT NULL ORDER BY LIST", null);
 
         cursor.moveToFirst();
 
@@ -481,29 +480,29 @@ public class EntryManager implements EntryManagerI {
     }
 
     @Override
-    public synchronized void swapEntries(long userId, int profile, long id, int position) throws PositionOutOfBoundException {
+    public synchronized void swapTasks(long userId, int profile, long id, int position) throws PositionOutOfBoundException {
 
-        swapEntries(getById(userId, profile, id), position);
+        swapTasks(getById(userId, profile, id), position);
     }
 
-    synchronized void swapEntries(Entry entry, int pos) throws PositionOutOfBoundException {
-        if (entry == null)
+    synchronized void swapTasks(Task Task, int pos) throws PositionOutOfBoundException {
+        if (Task == null)
             return;
-        List<Entry> entries = getEntries(entry.getUserId(), entry.getProfile());
+        List<Task> entries = getTasks(Task.getUserId(), Task.getProfile());
         if (entries.size() <= pos)
             throw new PositionOutOfBoundException("Position is out of bound: position" + pos);
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
 
         ContentValues values1 = new ContentValues();
-        values1.put("POSITION", String.valueOf(entry.getPosition()));
-        db.update("ENTRIES", values1, "USER = ? AND PROFILE = ? AND POSITION=?",
-                new String[]{String.valueOf(entry.getUserId()), String.valueOf(entry.getProfile()), String.valueOf(pos)});
+        values1.put("POSITION", String.valueOf(Task.getPosition()));
+        db.update("TASKS", values1, "USER = ? AND PROFILE = ? AND POSITION=?",
+                new String[]{String.valueOf(Task.getUserId()), String.valueOf(Task.getProfile()), String.valueOf(pos)});
 
         ContentValues values0 = new ContentValues();
         values0.put("POSITION", String.valueOf(pos));
-        db.update("ENTRIES", values0, "USER = ? AND PROFILE = ? AND ID=?",
-                new String[]{String.valueOf(entry.getUserId()), String.valueOf(entry.getProfile()), String.valueOf(entry.getId())});
+        db.update("TASKS", values0, "USER = ? AND PROFILE = ? AND ID=?",
+                new String[]{String.valueOf(Task.getUserId()), String.valueOf(Task.getProfile()), String.valueOf(Task.getId())});
 
         //clean up
         ;
@@ -580,13 +579,13 @@ public class EntryManager implements EntryManagerI {
      *
      * @return
      */
-    public List<Entry> getEntriesOrderedByDate() {
+    public List<Task> getEntriesOrderedByDate() {
 
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES ORDER BY REMINDER_DATE", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS ORDER BY REMINDER_DATE", null);
 
-        List<Entry> entries = getListOfEntries(cursor);
+        List<Task> entries = getListOfTasks(cursor);
         cursor.close();
         ;
 
@@ -599,12 +598,12 @@ public class EntryManager implements EntryManagerI {
      *
      * @return
      */
-    public List<Entry> getNoList() {
+    public List<Task> getNoList() {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE LIST IS NULL ORDER BY POSITION", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE LIST IS NULL ORDER BY POSITION", null);
 
-        List<Entry> entries = getListOfEntries(cursor);
+        List<Task> entries = getListOfTasks(cursor);
         cursor.close();
         ;
 
@@ -616,9 +615,9 @@ public class EntryManager implements EntryManagerI {
      *
      * @return
      */
-    public List<Entry> loadTasksToPick() {
+    public List<Task> loadTasksToPick() {
 
-        List<Entry> tasksToPick;
+        List<Task> tasksToPick;
 
         long epoch = SQLiteHelper.dateToEpoch(Instant.now());
 
@@ -639,12 +638,12 @@ public class EntryManager implements EntryManagerI {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
 
 
-        Cursor cursor = db.rawQuery("SELECT * FROM ENTRIES WHERE RECURRENCE IS NULL AND (FOCUS>0 OR " +
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE RECURRENCE IS NULL AND (FOCUS>0 OR " +
                 "(REMINDER_DATE IS NULL AND (DROPPED>0 OR LIST=NULL)) OR " +
                 "(REMINDER_DATE IS NOT NULL AND REMINDER_DATE<=" + epoch + ")) ORDER BY POSITION", null);
 
 
-        tasksToPick = getListOfEntries(cursor);
+        tasksToPick = getListOfTasks(cursor);
 
         cursor.close();
         ;
@@ -653,34 +652,34 @@ public class EntryManager implements EntryManagerI {
     }
 
     @Override
-    public synchronized void updateId(long userId, int profile, long entry, long id) throws DuplicateIdException {
+    public synchronized void updateId(long userId, int profile, long Task, long id) throws DuplicateIdException {
 
-        if (getEntry(userId, profile, id).isPresent())
-            throw new DuplicateIdException("New id for entry already exists: id " + id);
+        if (getTask(userId, profile, id).isPresent())
+            throw new DuplicateIdException("New id for Task already exists: id " + id);
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("ID", id);
-        db.update("ENTRIES", values, "USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(entry)});
+        db.update("TASKS", values, "USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(Task)});
     }
 
     @Override
-    public void postEntry(Entry entry) {
+    public void postTask(Task Task) {
 
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        System.out.println("POST " + entry.getId());
-        values.put("ID", entry.getId());
-        values.put("USER", entry.getUserId());
-        values.put("PROFILE", entry.getProfile());
-        values.put("TASK", entry.getTask());
-        values.put("POSITION", entry.getPosition());
-        values.put("FOCUS", SQLiteHelper.boolToInt(entry.getFocus()));
-        values.put("DROPPED", SQLiteHelper.boolToInt(entry.getDropped()));
-        values.put("LIST", entry.getList());
-        values.put("LIST_POSITION", entry.getListPosition());
-        values.put("REMINDER_DATE", entry.getReminderDate() == null ? null : entry.getReminderDate().toEpochMilli());
-        values.put("RECURRENCE", entry.getRecurrence());
-        db.insert("ENTRIES", "", values);
+        System.out.println("POST " + Task.getId());
+        values.put("ID", Task.getId());
+        values.put("USER", Task.getUserId());
+        values.put("PROFILE", Task.getProfile());
+        values.put("TASK", Task.getTask());
+        values.put("POSITION", Task.getPosition());
+        values.put("FOCUS", SQLiteHelper.boolToInt(Task.getFocus()));
+        values.put("DROPPED", SQLiteHelper.boolToInt(Task.getDropped()));
+        values.put("LIST", Task.getList());
+        values.put("LIST_POSITION", Task.getListPosition());
+        values.put("REMINDER_DATE", Task.getReminderDate() == null ? null : Task.getReminderDate().toEpochMilli());
+        values.put("RECURRENCE", Task.getRecurrence());
+        db.insert("TASKS", "", values);
     }
 }
 

@@ -3,7 +3,7 @@ package net.berndreiss.zentodo.adapters.listeners;
 import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 
 /**
  *
@@ -24,9 +24,9 @@ public class RecurrenceListener extends BasicListener implements View.OnClickLis
         adapter.setRecurrence(holder);
 
 
-        //get entry to set spinner on current recurrence
-        Entry entry = adapter.entries.get(position);
-        String rec = entry.getRecurrence();
+        //get task to set spinner on current recurrence
+        Task task = adapter.tasks.get(position);
+        String rec = task.getRecurrence();
 
         if (rec == null) {
             holder.spinnerRecurrence.setSelection(0);

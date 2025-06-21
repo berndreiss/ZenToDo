@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.TaskList;
 
 import java.util.List;
@@ -19,8 +19,8 @@ import java.util.Optional;
  */
 public class NoListTaskListAdapter extends AllTaskListAdapter{
 
-    NoListTaskListAdapter(SharedData sharedData, List<Entry> entries){
-        super(sharedData, entries);
+    NoListTaskListAdapter(SharedData sharedData, List<Task> tasks){
+        super(sharedData, tasks);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -32,7 +32,7 @@ public class NoListTaskListAdapter extends AllTaskListAdapter{
         holder.backList.setOnClickListener(v -> {
 
             //get id of task
-            Entry entry = entries.get(position);
+            Task task = tasks.get(position);
 
             //get name of new list
             String list = holder.autoCompleteList.getText().toString();
@@ -41,10 +41,10 @@ public class NoListTaskListAdapter extends AllTaskListAdapter{
             if (!list.isEmpty()) {
 
                 //write back new list
-                DataManager.editList(sharedData, this, entry, list);
+                DataManager.editList(sharedData, this, task, list);
 
-                //remove entry from adapter
-                entries.remove(position);
+                //remove task from adapter
+                tasks.remove(position);
 
                 //notify adapter
                 notifyDataSetChanged();

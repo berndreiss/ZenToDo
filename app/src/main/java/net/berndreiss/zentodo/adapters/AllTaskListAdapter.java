@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 
 import java.util.List;
 
@@ -18,8 +18,8 @@ import java.util.List;
  */
 public class AllTaskListAdapter extends TaskListAdapter{
 
-    AllTaskListAdapter(SharedData sharedData, List<Entry> entries){
-        super(sharedData, entries);
+    AllTaskListAdapter(SharedData sharedData, List<Task> tasks){
+        super(sharedData, tasks);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -30,11 +30,11 @@ public class AllTaskListAdapter extends TaskListAdapter{
         //set CheckBoxListener that ignores if task is recurring
         holder.checkBox.setOnClickListener(view -> {
 
-            //get entry
-            Entry entry = entries.get(position);
+            //get task
+            Task task = tasks.get(position);
 
             //remove from data
-            DataManager.remove(sharedData, this, entry);
+            DataManager.remove(sharedData, this, task);
 
             //notify adapter
             notifyDataSetChanged();

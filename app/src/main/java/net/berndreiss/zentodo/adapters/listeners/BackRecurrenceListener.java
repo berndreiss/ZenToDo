@@ -7,10 +7,9 @@ import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
 import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 
 import java.time.Instant;
-import java.time.LocalDate;
 
 /**
  *
@@ -28,7 +27,7 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
     public void onClick(View v){
 
         //get id for manipulation in data
-        Entry entry = adapter.entries.get(position); //get id
+        Task task = adapter.tasks.get(position); //get id
 
         //number of repeats
         String interval = holder.editTextRecurrence.getText().toString();
@@ -45,7 +44,7 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
 
         //if editText was empty or value=0 then recurrence is set to null, otherwise number and interval are written back
         if (intervalInt == 0){
-            DataManager.editRecurrence(adapter.sharedData, entry, null);
+            DataManager.editRecurrence(adapter.sharedData, task, null);
         }
         else{
             //String that will be written back
@@ -58,11 +57,11 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
             recurrence += interval;
 
             //write back
-            DataManager.editRecurrence(adapter.sharedData, entry,recurrence);
+            DataManager.editRecurrence(adapter.sharedData, task,recurrence);
 
             if (adapter instanceof DropTaskListAdapter || adapter instanceof PickTaskListAdapter) {
-                DataManager.editReminderDate(adapter.sharedData, entry, Instant.now());
-                adapter.entries.remove(position);
+                DataManager.editReminderDate(adapter.sharedData, task, Instant.now());
+                adapter.tasks.remove(position);
                 adapter.notifyDataSetChanged();
                 if (adapter instanceof PickTaskListAdapter)
                     ((PickTaskListAdapter) adapter).itemCountChanged();
@@ -70,7 +69,7 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
             }
             else {
                 //change color of recurrence Button to mark if recurrence is set
-                adapter.markSet(holder, adapter.entries.get(position));
+                adapter.markSet(holder, adapter.tasks.get(position));
             }
         }
 

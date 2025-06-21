@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.TaskList;
 
 import java.util.List;
@@ -22,8 +22,8 @@ import java.util.Optional;
 
 public class ListTaskListAdapter extends TaskListAdapter{
 
-    public ListTaskListAdapter(SharedData sharedData, List<Entry> entries){
-        super(sharedData, entries);
+    public ListTaskListAdapter(SharedData sharedData, List<Task> tasks){
+        super(sharedData, tasks);
     }
 
     /** TODO DESCRIBE */
@@ -37,11 +37,11 @@ public class ListTaskListAdapter extends TaskListAdapter{
         //set CheckBoxListener that ignores if task is recurring
         holder.checkBox.setOnClickListener(view -> {
 
-            //get entry
-            Entry entry = entries.get(position);
+            //get task
+            Task task = tasks.get(position);
 
             //remove from data
-            DataManager.remove(sharedData, this, entry);
+            DataManager.remove(sharedData, this, task);
 
             //notify adapter
             notifyDataSetChanged();
@@ -51,13 +51,13 @@ public class ListTaskListAdapter extends TaskListAdapter{
         holder.backList.setOnClickListener(view161 -> {
 
             //get id of task
-            Entry entry = entries.get(position);
+            Task task = tasks.get(position);
 
             //get name of new list
             String list = holder.autoCompleteList.getText().toString();
 
             //get name of old list
-            Optional<TaskList> oldTaskList = sharedData.database.getListManager().getList(entries.get(position).getList());
+            Optional<TaskList> oldTaskList = sharedData.database.getListManager().getList(tasks.get(position).getList());
 
             String oldList = oldTaskList.isEmpty() ? "" : oldTaskList.get().getName();
 
@@ -66,13 +66,13 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
                 //set to null if AutoComplete is empty, write back otherwise
                 if (list.trim().isEmpty())
-                    DataManager.editList(sharedData, this, entry, null);
+                    DataManager.editList(sharedData, this, task, null);
 
                 else
-                    DataManager.editList(sharedData, this, entry, list);
+                    DataManager.editList(sharedData, this, task, list);
 
-                //remove entry from adapter
-                entries.remove(position);
+                //remove task from adapter
+                tasks.remove(position);
 
                 //notify adapter
                 notifyDataSetChanged();
@@ -93,14 +93,14 @@ public class ListTaskListAdapter extends TaskListAdapter{
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
 
-        //swap entries in data distinguishing between item being moved up or down
+        //swap tasks in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                DataManager.swapLists(sharedData, this, entries.get(i),entries.get(i+1));
+                DataManager.swapLists(sharedData, this, tasks.get(i),tasks.get(i+1));
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                DataManager.swapLists(sharedData, this, entries.get(i),entries.get(i-1));
+                DataManager.swapLists(sharedData, this, tasks.get(i),tasks.get(i-1));
             }
         }
 

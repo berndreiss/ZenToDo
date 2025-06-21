@@ -7,7 +7,7 @@ import android.view.View;
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -30,23 +30,23 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
     @Override
     public void onClick(View v){
 
-        //Get entry
-        Entry entry = adapter.entries.get(position);
+        //Get task
+        Task task = adapter.tasks.get(position);
 
 
         //variables for setting picker
-        int entryDay;
-        int entryMonth;
-        int entryYear;
+        int taskDay;
+        int taskMonth;
+        int taskYear;
 
 
         Calendar c = Calendar.getInstance();
-        entryYear = c.get(Calendar.YEAR);
-        entryMonth = c.get(Calendar.MONTH);
-        entryDay = c.get(Calendar.DAY_OF_MONTH);
+        taskYear = c.get(Calendar.YEAR);
+        taskMonth = c.get(Calendar.MONTH);
+        taskDay = c.get(Calendar.DAY_OF_MONTH);
 
         //create DatePickerDialog and set listener
-        DatePickerDialog datePickerDialog = getDatePickerDialog(entry, entryDay,entryMonth,entryYear,holder,position);
+        DatePickerDialog datePickerDialog = getDatePickerDialog(task, taskDay,taskMonth,taskYear,holder,position);
 
         //show the dialog
         datePickerDialog.show();
@@ -64,7 +64,7 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
      * @return
      */
     //return DatePickerDialog
-    public DatePickerDialog getDatePickerDialog(Entry entry, int entryDay, int entryMonth, int entryYear, TaskListAdapter.ViewHolder holder, int position){
+    public DatePickerDialog getDatePickerDialog(Task task, int taskDay, int taskMonth, int taskYear, TaskListAdapter.ViewHolder holder, int position){
 
         //DatePickerDialog to be returned
         DatePickerDialog datePickerDialog;
@@ -80,10 +80,10 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
             Instant dateInstant = date.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
             //Write back data
-            DataManager.editReminderDate(adapter.sharedData, entry, dateInstant);
+            DataManager.editReminderDate(adapter.sharedData, task, dateInstant);
 
             //change color of reminder date Button marking if Date is set
-            adapter.markSet(holder,entry);
+            adapter.markSet(holder,task);
 
             //notify adapter
             adapter.notifyItemChanged(position);
@@ -91,15 +91,15 @@ public class SetDateListener extends BasicListener implements View.OnClickListen
             //return to original row layout
             adapter.setOriginal(holder);
 
-        }, entryYear, entryMonth, entryDay);
+        }, taskYear, taskMonth, taskDay);
 
         datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.sharedData.context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
             //set date when task is due to null
-            DataManager.editReminderDate(adapter.sharedData, entry,null);
+            DataManager.editReminderDate(adapter.sharedData, task,null);
 
             //change color of reminder date Button marking if Date is set
-            adapter.markSet(holder,entry);
+            adapter.markSet(holder,task);
 
             //notify adapter
             adapter.notifyItemChanged(position);

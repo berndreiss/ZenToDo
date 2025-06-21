@@ -54,7 +54,7 @@ public class DataManager {
         Thread thread = new Thread(() -> {
             try {
                 sharedData.clientStub.init("bd_reiss@yahoo.de", null, () -> "Test1234!?");
-            } catch (IOException | DuplicateUserIdException | InvalidUserActionException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -84,13 +84,9 @@ public class DataManager {
 
         //write changes to database
         Thread thread = new Thread(() -> {
-            Entry entry = null;
-            try {
-                entry = sharedData.clientStub.addNewEntry(task);
-            } catch (ConnectException e) {
-                throw new RuntimeException(e);
-            }
-            adapter.entries.add(entry);
+            Task Task = null;
+            Task = sharedData.clientStub.addNewTask(task);
+            adapter.tasks.add(Task);
             ((Activity) sharedData.context).runOnUiThread(() ->adapter.notifyDataSetChanged());
         });
         thread.start();
@@ -99,11 +95,11 @@ public class DataManager {
         /*
         if (clientStub != null && clientStub.getUser() != null) {
             Thread thread = new Thread(() -> {
-                clientStub.addNewEntry(
-                        entry.getId(),
-                        entry.getTask(),
+                clientStub.addNewTask(
+                        Task.getId(),
+                        Task.getTask(),
                         clientStub.getUser().getId(),
-                        entry.getPosition());
+                        Task.getPosition());
             });
             thread.start();
         }*/
@@ -113,25 +109,21 @@ public class DataManager {
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entry
+     * @param Task
      */
-    public static void remove(SharedData sharedData, TaskListAdapter adapter, Entry entry) {
+    public static void remove(SharedData sharedData, TaskListAdapter adapter, Task Task) {
 
         Thread thread = new Thread(()->{
-            try {
-                sharedData.clientStub.removeEntry(entry.getId());
-            } catch (ConnectException e) {
-                throw new RuntimeException(e);
-            }
+                sharedData.clientStub.removeTask(Task.getId());
         });
         thread.start();
-        adapter.entries.remove(entry);
-        for (Entry e: adapter.entries) {
-            if (e.getPosition() > entry.getPosition())
+        adapter.tasks.remove(Task);
+        for (Task e: adapter.tasks) {
+            if (e.getPosition() > Task.getPosition())
                 e.setPosition(e.getPosition() - 1);
-            if (e.getList() != null && entry.getList() != null &&
-                    e.getList().equals(entry.getList()) &&
-                    e.getListPosition() > entry.getListPosition())
+            if (e.getList() != null && Task.getList() != null &&
+                    e.getList().equals(Task.getList()) &&
+                    e.getListPosition() > Task.getListPosition())
                 e.setListPosition(e.getListPosition() - 1);
         }
     }
@@ -139,73 +131,73 @@ public class DataManager {
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entry1
-     * @param entry2
+     * @param Task1
+     * @param Task2
      */
-    public static void swap(SharedData sharedData, TaskListAdapter adapter, Entry entry1, Entry entry2) {
+    public static void swap(SharedData sharedData, TaskListAdapter adapter, Task Task1, Task Task2) {
         Thread thread = new Thread(() -> {
 
             //swap position in Database
             try {
-                sharedData.clientStub.swapEntries(entry1.getId(), entry2.getPosition());
-            } catch (PositionOutOfBoundException | ConnectException e) {
+                sharedData.clientStub.swapTasks(Task1.getId(), Task2.getPosition());
+            } catch (PositionOutOfBoundException e) {
                 throw new RuntimeException(e);
             }
         });
         thread.start();
 
         //get positions of items
-        int pos1 = getPosition(adapter.entries, entry1.getId());
-        int pos2 = getPosition(adapter.entries, entry2.getId());
+        int pos1 = getPosition(adapter.tasks, Task1.getId());
+        int pos2 = getPosition(adapter.tasks, Task2.getId());
 
-        //swap items in entries
-        Collections.swap(adapter.entries, pos1, pos2);
+        //swap items in tasks
+        Collections.swap(adapter.tasks, pos1, pos2);
 
-        //swap position in both Entries
-        int posTemp = entry1.getPosition();
-        entry1.setPosition(entry2.getPosition());
-        entry2.setPosition(posTemp);
+        //swap position in both tasks
+        int posTemp = Task1.getPosition();
+        Task1.setPosition(Task2.getPosition());
+        Task2.setPosition(posTemp);
 
     }
 
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entry1
-     * @param entry2
+     * @param Task1
+     * @param Task2
      */
-    public static void swapLists(SharedData sharedData, TaskListAdapter adapter, Entry entry1, Entry entry2) {
+    public static void swapLists(SharedData sharedData, TaskListAdapter adapter, Task Task1, Task Task2) {
 
         Thread thread = new Thread(() -> {
             //swap position in Database
             try {
-                sharedData.clientStub.swapListEntries(entry1.getList(), entry1.getId(), entry2.getListPosition());
-            } catch (PositionOutOfBoundException | ConnectException e) {
+                sharedData.clientStub.swapListEntries(Task1.getList(), Task1.getId(), Task2.getListPosition());
+            } catch (PositionOutOfBoundException e) {
                 throw new RuntimeException(e);
             }
         });
         thread.start();
 
         //get positions of items
-        int pos1 = getPosition(adapter.entries, entry1.getId());
-        int pos2 = getPosition(adapter.entries, entry2.getId());
+        int pos1 = getPosition(adapter.tasks, Task1.getId());
+        int pos2 = getPosition(adapter.tasks, Task2.getId());
 
-        //swap items in entries
-        Collections.swap(adapter.entries, pos1, pos2);
+        //swap items in tasks
+        Collections.swap(adapter.tasks, pos1, pos2);
 
-        //swap position in both Entries
-        int posTemp = entry1.getListPosition();
-        entry1.setListPosition(entry2.getListPosition());
-        entry2.setListPosition(posTemp);
+        //swap position in both tasks
+        int posTemp = Task1.getListPosition();
+        Task1.setListPosition(Task2.getListPosition());
+        Task2.setListPosition(posTemp);
     }
 
-    //Get position of entry by id, returns -1 if id not found
-    private static int getPosition(List<Entry> entries, long id) {
+    //Get position of Task by id, returns -1 if id not found
+    private static int getPosition(List<Task> tasks, long id) {
 
-        //loop through entries and return position if id matches
-        for (int i = 0; i < entries.size(); i++) {
+        //loop through tasks and return position if id matches
+        for (int i = 0; i < tasks.size(); i++) {
 
-            if (entries.get(i).getId() == id) {
+            if (tasks.get(i).getId() == id) {
                 return i;
 
             }
@@ -218,152 +210,132 @@ public class DataManager {
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entry
+     * @param Task
      * @param newTask
      */
-    public static void setTask(SharedData sharedData, Entry entry, String newTask) {
-        if (entry==null || entry.getTask().equals(newTask))
+    public static void setTask(SharedData sharedData, Task Task, String newTask) {
+        if (Task==null || Task.getTask().equals(newTask))
             return;
 
         Thread thread = new Thread(()-> {
-            try {
-                sharedData.clientStub.updateTask(entry.getId(), newTask);
-            } catch (ConnectException e) {
-                throw new RuntimeException(e);
-            }
+                sharedData.clientStub.updateTask(Task.getId(), newTask);
         });
         thread.start();
-        entry.setTask(newTask);
+        Task.setTask(newTask);
     }
 
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entry
+     * @param Task
      * @param focus
      */
-    public static void setFocus(SharedData sharedData, Entry entry, Boolean focus) {
-        if (entry==null || entry.getFocus() == focus)
+    public static void setFocus(SharedData sharedData, Task Task, Boolean focus) {
+        if (Task==null || Task.getFocus() == focus)
             return;
 
         Thread thread = new Thread(() -> {
-            try {
-                sharedData.clientStub.updateFocus(entry.getId(),  focus);
-            } catch (ConnectException e) {
-                throw new RuntimeException(e);
-            }
+                sharedData.clientStub.updateFocus(Task.getId(),  focus);
         });
 
         thread.start();
 
-        entry.setFocus(focus);
+        Task.setFocus(focus);
 
-        if (entry.getDropped())
-            setDropped(sharedData, entry, false);
+        if (Task.getDropped())
+            setDropped(sharedData, Task, false);
 
     }
 
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entry
+     * @param Task
      * @param dropped
      */
-    public static void setDropped(SharedData sharedData, Entry entry, Boolean dropped) {
-        if (entry == null || entry.getDropped() == dropped)
+    public static void setDropped(SharedData sharedData, Task Task, Boolean dropped) {
+        if (Task == null || Task.getDropped() == dropped)
             return;
 
         Thread thread = new Thread(() -> {
-            try {
-                sharedData.clientStub.updateDropped(entry.getId(), dropped);
-            } catch (ConnectException e) {
-                throw new RuntimeException(e);
-            }
+                sharedData.clientStub.updateDropped(Task.getId(), dropped);
         });
         thread.start();
-        entry.setDropped(dropped);
+        Task.setDropped(dropped);
     }
 
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entry
+     * @param Task
      * @param date
      */
-    public static void editReminderDate(SharedData sharedData, Entry entry, Instant date) {
-        if (entry == null || entry.getReminderDate() != null && entry.getReminderDate().equals(date))
+    public static void editReminderDate(SharedData sharedData, Task Task, Instant date) {
+        if (Task == null || Task.getReminderDate() != null && Task.getReminderDate().equals(date))
             return;
 
         Thread thread = new Thread(() -> {
-            try {
-                sharedData.clientStub.updateReminderDate(entry.getId(), date);
-            } catch (ConnectException e) {
-                throw new RuntimeException(e);
-            }
+                sharedData.clientStub.updateReminderDate(Task.getId(), date);
         });
         thread.start();
 
-        if (entry.getDropped() && entry.getReminderDate() != date)
-            setDropped(sharedData, entry, false);
+        if (Task.getDropped() && Task.getReminderDate() != date)
+            setDropped(sharedData, Task, false);
 
-        entry.setReminderDate(date);
+        Task.setReminderDate(date);
     }
 
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entry
+     * @param Task
      * @param recurrence
      */
-    public static void editRecurrence(SharedData sharedData, Entry entry, String recurrence) {
-        if (entry == null || entry.getRecurrence() != null && entry.getRecurrence().equals(recurrence))
+    public static void editRecurrence(SharedData sharedData, Task Task, String recurrence) {
+        if (Task == null || Task.getRecurrence() != null && Task.getRecurrence().equals(recurrence))
             return;
 
         Thread thread = new Thread(() -> {
-            try {
-                sharedData.clientStub.updateRecurrence(entry.getId(), recurrence);
-            } catch (ConnectException e) {
-                throw new RuntimeException(e);
-            }
+                sharedData.clientStub.updateRecurrence(Task.getId(), recurrence);
         });
         thread.start();
 
-        entry.setRecurrence(recurrence);
-        if (entry.getReminderDate() == null)
-            entry.setReminderDate(Instant.now());
+        Task.setRecurrence(recurrence);
+        if (Task.getReminderDate() == null)
+            Task.setReminderDate(Instant.now());
 
-        if (entry.getDropped() && recurrence != null)
-            setDropped(sharedData, entry, false);
+        if (Task.getDropped() && recurrence != null)
+            setDropped(sharedData, Task, false);
     }
 
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entry
+     * @param Task
      * @param list
      */
-    public static void editList(SharedData sharedData, TaskListAdapter adapter, Entry entry, String list) {
+    public static void editList(SharedData sharedData, TaskListAdapter adapter, Task Task, String list) {
         Optional<TaskList> taskList = sharedData.clientStub.getListByName(list);
         if (taskList.isEmpty())
             return;
-        if (entry == null || entry.getList() != null && entry.getList().equals(taskList.get().getId()))
+        if (Task == null || Task.getList() != null && Task.getList().equals(taskList.get().getId()))
             return;
 
-        if (entry.getList() != null) {
-            for (Entry e : adapter.entries) {
-                if (entry.getList().equals(e.getList()) && e.getListPosition() > entry.getListPosition())
+        if (Task.getList() != null) {
+            for (Task e : adapter.tasks) {
+                if (Task.getList().equals(e.getList()) && e.getListPosition() > Task.getListPosition())
                     e.setListPosition(e.getListPosition()-1);
             }
         }
 
 
-        Thread thread = new Thread(() -> sharedData.database.getListManager().updateList(entry, taskList.get().getId()));
+        Thread thread = new Thread(() -> sharedData.database.getListManager().updateList(Task, taskList.get().getId()));
         thread.start();
 
-        entry.setList(taskList.get().getId());
+        Task.setList(taskList.get().getId());
 
-        if (entry.getDropped())
-            setDropped(sharedData, entry, false);
+        if (Task.getDropped())
+            setDropped(sharedData, Task, false);
 
     }
 
@@ -382,11 +354,7 @@ public class DataManager {
         listColors.put(list, color);
 
         Thread thread = new Thread(() -> {
-            try {
                 sharedData.clientStub.updateListColor(list, color);
-            } catch (ConnectException e) {
-                throw new RuntimeException(e);
-            }
         });
         thread.start();
     }
@@ -407,7 +375,7 @@ public class DataManager {
         return color == null ? ListTaskListAdapter.DEFAULT_COLOR : color;
     }
 
-    public static List<Entry> getDropped(SharedData sharedData) {
+    public static List<Task> getDropped(SharedData sharedData) {
         return sharedData.clientStub.loadDropped();
     }
 
@@ -436,13 +404,13 @@ public class DataManager {
     /**
      * TODO DESCRIBE
      * @param sharedData
-     * @param entry
+     * @param Task
      * @param today
      */
-    public static void setRecurring(SharedData sharedData, Entry entry, LocalDate today) {
+    public static void setRecurring(SharedData sharedData, Task Task, LocalDate today) {
 
         //get recurrence as <['d'/'w'/'m'/'y']['0'-'9']['0'-'9']['0'-'9']...> (i.e. "d15" means the task repeats every 15 days)
-        String recurrence = entry.getRecurrence();
+        String recurrence = Task.getRecurrence();
 
         //get first character representing the mode of repetition (days, weeks,...)
         char mode = recurrence.charAt(0);
@@ -459,7 +427,7 @@ public class DataManager {
         int offSet = Integer.parseInt(offSetStr.toString());
 
         //get reminder date
-        Instant date = entry.getReminderDate();
+        Instant date = Task.getReminderDate();
 
         Instant todayInstant = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant();
 
@@ -475,17 +443,13 @@ public class DataManager {
             date = incrementRecurring(mode, date, offSet);
         }
 
-        //write reminder date to entries
-        entry.setReminderDate(date);
+        //write reminder date to tasks
+        Task.setReminderDate(date);
 
         //write reminder date to Database
         Instant finalDate = date;
         Thread thread = new Thread(() -> {
-            try {
-                sharedData.clientStub.updateReminderDate(entry.getId(), finalDate);
-            } catch (ConnectException e) {
-                throw new RuntimeException(e);
-            }
+                sharedData.clientStub.updateReminderDate(Task.getId(), finalDate);
         });
         thread.start();
 
@@ -512,32 +476,32 @@ public class DataManager {
     public static void addToRecurringButRemoved(SharedData sharedData, long id){
 
         if (recurringButRemovedFromToday == null)
-            recurringButRemovedFromToday = sharedData.database.getEntryManager().loadRecurring();
+            recurringButRemovedFromToday = sharedData.database.getTaskManager().loadRecurring();
         recurringButRemovedFromToday.add(id);
 
-        sharedData.database.getEntryManager().saveRecurring(recurringButRemovedFromToday);
+        sharedData.database.getTaskManager().saveRecurring(recurringButRemovedFromToday);
 
     }
 
     //remove ids from recurringButRemovedFromToday and make a call to the database making changes permanent
     public static void removeFromRecurringButRemoved(SharedData sharedData, long id){
         if (recurringButRemovedFromToday == null)
-            recurringButRemovedFromToday = sharedData.database.getEntryManager().loadRecurring();
+            recurringButRemovedFromToday = sharedData.database.getTaskManager().loadRecurring();
         for (int i = 0; i < recurringButRemovedFromToday.size(); i++)
             if (recurringButRemovedFromToday.get(i)==id) {
                 recurringButRemovedFromToday.remove(i);
                 break;
             }
 
-        sharedData.database.getEntryManager().saveRecurring(recurringButRemovedFromToday);
+        sharedData.database.getTaskManager().saveRecurring(recurringButRemovedFromToday);
 
     }
 
-    public static List<Entry> getFocus(SharedData sharedData) {
+    public static List<Task> getFocus(SharedData sharedData) {
         return sharedData.clientStub.loadFocus();
     }
 
-    public static List<Entry> getTasksToPick(SharedData sharedData) {
-        return sharedData.database.getEntryManager().loadTasksToPick();
+    public static List<Task> getTasksToPick(SharedData sharedData) {
+        return sharedData.database.getTaskManager().loadTasksToPick();
     }
 }

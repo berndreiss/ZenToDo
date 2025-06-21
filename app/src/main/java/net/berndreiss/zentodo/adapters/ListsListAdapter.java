@@ -22,7 +22,7 @@ import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.SQLiteHelper;
 import net.berndreiss.zentodo.data.TaskList;
 
@@ -47,7 +47,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private final Header header;//header of ListView. setVisibility=GONE by default and =VISIBLE when recyclerView is shown
     private String headerColor;
     private final String standardColor = "#35ff0000";
-    private final List<Entry> listTasks = new ArrayList<>();//ArrayList that serves as a container for tasks that are in the list that has been chosen
+    private final List<Task> listTasks = new ArrayList<>();//ArrayList that serves as a container for tasks that are in the list that has been chosen
 
     ListTaskListAdapter listsTaskListAdapter;//adapter for items in lists (items can be moved and get removed when list of task is changed)
     AllTaskListAdapter allTasksAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed)
@@ -188,7 +188,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //clear ArrayList for list, add all tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
-                listTasks.addAll(sharedData.database.getEntryManager().getEntriesOrderedByDate());
+                listTasks.addAll(sharedData.database.getTaskManager().getEntriesOrderedByDate());
 
                 //set header text
                 header.headerText.setText(sharedData.context.getResources().getString(R.string.allTasks));
@@ -217,7 +217,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //clear ArrayList for list, add tasks without a list from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
 
-                listTasks.addAll(sharedData.database.getEntryManager().getNoList());
+                listTasks.addAll(sharedData.database.getTaskManager().getNoList());
 
                 //set header text
                 header.headerText.setText(sharedData.context.getResources().getString(R.string.noList));

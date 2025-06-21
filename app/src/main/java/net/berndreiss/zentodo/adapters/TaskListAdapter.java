@@ -29,7 +29,7 @@ import net.berndreiss.zentodo.adapters.listeners.RecurrenceListener;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.ItemTouchHelperAdapter;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.SQLiteHelper;
 import net.berndreiss.zentodo.data.TaskList;
 
@@ -38,12 +38,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- *   A custom ArrayAdapter<Entry> that creates rows with checkboxes that
+ *   A custom ArrayAdapter<Task> that creates rows with checkboxes that
  *   when checked remove the associated task.
  * <p>
  *   The row can have different views. It initially starts with a default view, that shows the task and the checkbox to remove it.
  *   There is also a menu button that opens an alternative row view. In this view different Buttons are shown through which certain
- *   information of the task can be changed (for data fields associated with a task see Entry.java).
+ *   information of the task can be changed (for data fields associated with a task see Task.java).
  * <p>
  *   original view --(menu Button)--> alternative view --(focus Button)--> default view
  *                                                     --(edit Button)--> edit task view --(back Button)--> original view
@@ -61,11 +61,11 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public LinearLayout linearLayout;//"normal" row layout that shows checkbox and task
-        protected CheckBox checkBox;//Checkbox to remove entry
+        protected CheckBox checkBox;//Checkbox to remove task
         public TextView task;//Description of the task
         public Button menu;//activates alternative layout with menu elements
 
-        private final LinearLayout linearLayoutAlt;//"alternative" layout with menu for modifying entries
+        private final LinearLayout linearLayoutAlt;//"alternative" layout with menu for modifying tasks
         public Button focus;//Adds task to todays tasks
         public Button delete;//Adds task to todays tasks
         public Button edit;//edits the task
@@ -130,15 +130,15 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
     }
 
     /** TODO COMMENT */
-    public List<Entry> entries;//ArrayList that holds task shown in RecyclerView
+    public List<Task> tasks;//ArrayList that holds task shown in RecyclerView
 
     /** TODO COMMENT */
     public SharedData sharedData;
 
     /** TODO COMMENT */
-    public TaskListAdapter(SharedData sharedData, List<Entry> entries){
+    public TaskListAdapter(SharedData sharedData, List<Task> tasks){
         this.sharedData = sharedData;
-        this.entries = entries;
+        this.tasks = tasks;
     }
 
     @NonNull
@@ -155,7 +155,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
 
         //set TextView to task
-        holder.task.setText(entries.get(position).getTask());
+        holder.task.setText(tasks.get(position).getTask());
 
         //set up checkbox of the task
         holder.checkBox.setChecked(false);
@@ -164,7 +164,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         //establish routine to remove task when checkbox is clicked
         holder.checkBox.setOnClickListener(new CheckBoxListener(this,holder, position));
 
-        //Creating adapter for spinner with entries days/weeks/months/years
+        //Creating adapter for spinner with tasks days/weeks/months/years
         /* Adapter has to be declared here so that the dropdown element of the spinner is not shown in the background */
         /* I do not understand why, but this fixed it */
         ArrayAdapter<CharSequence> adapterSpinner = ArrayAdapter.createFromResource(sharedData.context, R.array.time_interval, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
@@ -175,7 +175,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
 
 
         //sets buttons that have edited data that has been set to a different color
-        markSet(holder,this.entries.get(position));
+        markSet(holder,this.tasks.get(position));
 
         //set Listener for showing menu of task
         holder.menu.setOnClickListener(view -> {
@@ -183,7 +183,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
             setAlt(holder);
         });
 
-        //setting Entry.focus to true/false, which means the task is/is not listed in focus mode
+        //setting Task.focus to true/false, which means the task is/is not listed in focus mode
         holder.focus.setOnClickListener(new FocusListener(this,holder,position));
 
         //onClickListener for Button to change the task name
@@ -227,7 +227,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
             setList(holder);
 
             //array of names of all lists in task (as singletons)
-            List<String> array = sharedData.database.getEntryManager().getLists();
+            List<String> array = sharedData.database.getTaskManager().getLists();
 
             //initialize adapter with all existing list options
             ArrayAdapter<String> adapter = new ArrayAdapter<>(sharedData.context, android.R.layout.simple_list_item_1, array);
@@ -235,7 +235,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
             //edit Text that autocompletes with already existing lists
             holder.autoCompleteList.setAdapter(adapter);
 
-            Optional<TaskList> list = sharedData.database.getListManager().getList(entries.get(position).getList());
+            Optional<TaskList> list = sharedData.database.getListManager().getList(tasks.get(position).getList());
             //set edit Text to current list
             holder.autoCompleteList.setText(list.isEmpty() ? "" : list.get().getName());
 
@@ -265,7 +265,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
     // Returns the total count of items in the list
     @Override
     public int getItemCount() {
-        return entries.size();
+        return tasks.size();
     }
 
 
@@ -375,14 +375,14 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
 
-        //swap entries in data distinguishing between item being moved up or down
+        //swap tasks in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                DataManager.swap(sharedData, this, entries.get(i),entries.get(i+1));
+                DataManager.swap(sharedData, this, tasks.get(i),tasks.get(i+1));
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                DataManager.swap(sharedData, this, entries.get(i),entries.get(i-1));
+                DataManager.swap(sharedData, this, tasks.get(i),tasks.get(i-1));
             }
         }
 
@@ -425,10 +425,10 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
      */
     //marks Buttons that have been set in a different color
     @SuppressLint("UseCompatLoadingForDrawables")
-    public void markSet(TaskListAdapter.ViewHolder holder, Entry entry){
+    public void markSet(TaskListAdapter.ViewHolder holder, Task task){
 
         //Set date button to alternative color if !=0, original color otherwise
-        if (entry.getReminderDate()!=null){
+        if (task.getReminderDate()!=null){
 
             holder.setDate.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
 
@@ -437,20 +437,20 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         }
 
         //Set recurrence button to alternative color if !isEmpty(), original color otherwise
-        if (entry.getRecurrence()!=null){
+        if (task.getRecurrence()!=null){
             holder.recurrence.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
         }else{
             holder.recurrence.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
         }
 
         //Set list button to alternative color if !isEmpty(), original color otherwise
-        if (entry.getList()!=null){
+        if (task.getList()!=null){
             holder.setList.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
         }else{
             holder.setList.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
         }
 
-        if (entry.getFocus()){
+        if (task.getFocus()){
             holder.focus.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
 
 

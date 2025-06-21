@@ -4,7 +4,7 @@ import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 
 /**
  *
@@ -21,16 +21,16 @@ public class FocusListener extends BasicListener implements View.OnClickListener
 
     @Override
     public void onClick(View v){
-        //get current entry
-        Entry entry = adapter.entries.get(position);
+        //get current task
+        Task task = adapter.tasks.get(position);
 
-        boolean focused = entry.getFocus();
+        boolean focused = task.getFocus();
 
-        //change state of focus in entry
-        DataManager.setFocus(adapter.sharedData, entry, !focused);
+        //change state of focus in task
+        DataManager.setFocus(adapter.sharedData, task, !focused);
 
         //change color of Focus Button marking whether task is focused or not
-        adapter.markSet(holder,entry);
+        adapter.markSet(holder,task);
 
         //notify the adapter
         adapter.notifyItemChanged(position);

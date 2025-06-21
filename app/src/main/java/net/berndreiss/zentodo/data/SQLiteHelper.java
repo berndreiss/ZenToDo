@@ -25,7 +25,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public SQLiteHelper(Context context, String databaseName){
         super(context, databaseName == null ? MainActivity.DATABASE_NAME : databaseName,null, MainActivity.DATABASE_VERSION);
         this.context = context;
-        this.database = new Database(new EntryManager(this), new UserManager(this), new DatabaseOps(this), new ListManager(this));
+        this.database = new Database(new TaskManager(this), new UserManager(this), new DatabaseOps(this), new ListManager(this));
         Optional<User> user = database.getUserManager().getUser(0L);
         if (user.isPresent()) {
             List<Profile> profiles = getUserManager().getProfiles(0);
@@ -46,9 +46,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         this(context, null);
     }
 
-    //Create TABLE_ENTRIES for entries TABLE_LISTS for lists onCreate
+    //Create TABLE_TASKS for tasks TABLE_LISTS for lists onCreate
     public void onCreate(SQLiteDatabase db){
-        db.execSQL("CREATE TABLE ENTRIES ("
+        db.execSQL("CREATE TABLE TASKS ("
                 + "USER INTEGER DEFAULT NULL,"
                 + "PROFILE INTEGER NOT NULL,"
                 + "ID INTEGER NOT NULL, "
@@ -120,15 +120,15 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 ")";
         db.execSQL(query);
 
-        query = "CREATE INDEX IDX_FOCUS ON ENTRIES(FOCUS)";
+        query = "CREATE INDEX IDX_FOCUS ON TASKS(FOCUS)";
         db.execSQL(query);
-        query = "CREATE INDEX IDX_DROPPED ON ENTRIES(DROPPED)";
+        query = "CREATE INDEX IDX_DROPPED ON TASKS(DROPPED)";
         db.execSQL(query);
-        query = "CREATE INDEX IDX_LIST ON ENTRIES(LIST, LIST_POSITION)";
+        query = "CREATE INDEX IDX_LIST ON TASKS(LIST, LIST_POSITION)";
         db.execSQL(query);
-        query = "CREATE INDEX IDX_REMINDER_DATE ON ENTRIES(REMINDER_DATE)";
+        query = "CREATE INDEX IDX_REMINDER_DATE ON TASKS(REMINDER_DATE)";
         db.execSQL(query);
-        query = "CREATE INDEX IDX_POSITION ON ENTRIES(POSITION)";
+        query = "CREATE INDEX IDX_POSITION ON TASKS(POSITION)";
         db.execSQL(query);
 
 
@@ -186,8 +186,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         return b ? 1 : 0;
     }
 
-    public EntryManager getEntryManager(){
-        return (EntryManager) database.getEntryManager();
+    public TaskManager getTaskManager(){
+        return (TaskManager) database.getTaskManager();
     }
     public UserManager getUserManager(){
         return (UserManager) database.getUserManager();

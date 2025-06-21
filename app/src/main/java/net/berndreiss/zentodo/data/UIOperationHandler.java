@@ -27,7 +27,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     public UIOperationHandler(){};
 
     @Override
-    public void post(List<Entry> list) {
+    public void post(List<Task> list) {
 
     }
 
@@ -112,79 +112,79 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
-    public Entry addNewEntry(Entry entry) {
+    public Task addNewTask(Task Task) {
         if (adapter == null)
             return null;
         Handler handler = new Handler(Looper.getMainLooper());
 
         handler.post(() -> {
-            adapter.entries.stream()
-                    .filter(e -> e.getPosition() >= entry.getPosition())
+            adapter.tasks.stream()
+                    .filter(e -> e.getPosition() >= Task.getPosition())
                     .forEach(e -> e.setPosition(e.getPosition()+1));
 
-            adapter.entries.add(entry.getPosition(), entry);
+            adapter.tasks.add(Task.getPosition(), Task);
             adapter.notifyDataSetChanged();
         });
-        return entry;
+        return Task;
     }
 
     @Override
-    public Entry addNewEntry(String s) {
+    public Task addNewTask(String s) {
         return null;
     }
 
     @Override
-    public Entry addNewEntry(String s, int i) {
+    public Task addNewTask(String s, int i) {
         return null;
     }
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
-    public void removeEntry(long id) {
+    public void removeTask(long id) {
         if (adapter == null)
             return;
         Handler handler = new Handler(Looper.getMainLooper());
 
         handler.post(() -> {
-            Optional<Entry> entry = adapter.entries.stream().filter(e -> e.getId() == id).findFirst();
-            if (entry.isEmpty())
+            Optional<Task> Task = adapter.tasks.stream().filter(e -> e.getId() == id).findFirst();
+            if (Task.isEmpty())
                 return;
-            adapter.entries.stream()
-                    .filter(e -> e.getPosition() > entry.get().getPosition())
+            adapter.tasks.stream()
+                    .filter(e -> e.getPosition() > Task.get().getPosition())
                     .forEach(e -> e.setPosition(e.getPosition()-1));
 
-            adapter.entries.stream()
+            adapter.tasks.stream()
                     .filter(e -> e.getList() != null)
                     .filter(e -> e.getList().equals(e.getList()))
-                    .filter(e -> e.getListPosition() > entry.get().getListPosition())
+                    .filter(e -> e.getListPosition() > Task.get().getListPosition())
                     .forEach(e -> e.setListPosition(e.getListPosition()-1));
 
-            adapter.entries.remove(entry.get().getPosition());
+            adapter.tasks.remove(Task.get().getPosition());
             adapter.notifyDataSetChanged();
         });
     }
 
     @Override
-    public Optional<Entry> getEntry(long l) {
+    public Optional<Task> getTask(long l) {
         return Optional.empty();
     }
 
     @Override
-    public List<Entry> loadEntries() {
+    public List<Task> loadTasks() {
         return Collections.emptyList();
     }
     @Override
-    public List<Entry> loadFocus() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<Entry> loadDropped() {
+    public List<Task> loadFocus() {
         return Collections.emptyList();
     }
 
     @Override
-    public List<Entry> loadList(Long list) {
+    public List<Task> loadDropped() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<Task> loadList(Long list) {
         return Collections.emptyList();
     }
 
@@ -204,7 +204,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     }
 
     @Override
-    public void swapEntries(long l, int i) {
+    public void swapTasks(long l, int i) {
 
     }
 

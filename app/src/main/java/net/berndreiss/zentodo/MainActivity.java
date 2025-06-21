@@ -14,7 +14,7 @@ package net.berndreiss.zentodo;
 *
 *   -Lists: shows all the lists and containing tasks assigned to it.
 *
-*   These layouts consist of RecyclerViews. Each item in these RecyclerViews represents a task (dataManipulation.Entry).
+*   These layouts consist of RecyclerViews. Each item in these RecyclerViews represents a task (dataManipulation.Task).
 *   It shows the description of the task, a checkbox and a menu button. The checkbox removes a task.
 *
 *   The menu consist of the following buttons:
@@ -56,7 +56,7 @@ import android.text.InputFilter;
 import android.view.MotionEvent;
 import android.view.View;
 
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.databinding.ActivityMainBinding;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //deleteDatabase("Data.db");
+        deleteDatabase("Data.db");
         net.berndreiss.zentodo.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -162,9 +162,9 @@ public class MainActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
         System.out.println("USER: " + sharedData.clientStub.user.getId());
-        //Entry entry = sharedData.database.getDatabase().getEntryManager().addNewEntry(0L, 0, "TASK");
+        //Task task = sharedData.database.getDatabase().getTaskManager().addNewTask(0L, 0, "TASK");
 
-        //Optional<Entry> entryBack = sharedData.database.getDatabase().getEntryManager().getEntry(0L, 0, 0);
+        //Optional<Task> taskBack = sharedData.database.getDatabase().getTaskManager().getTask(0L, 0, 0);
 
         //layouts are initialized
         initializeDrop(sharedData);
@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick).getLayoutParams();
-                params.height = (int) (getResources().getDimension(R.dimen.row_height) * pickAdapter.entries.size());
+                params.height = (int) (getResources().getDimension(R.dimen.row_height) * pickAdapter.tasks.size());
                 findViewById(R.id.list_view_pick).setLayoutParams(params);
             }
         };
@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doNow).getLayoutParams();
-                params.height = (int) (getResources().getDimension(R.dimen.row_height) * doNowAdapter.entries.size());
+                params.height = (int) (getResources().getDimension(R.dimen.row_height) * doNowAdapter.tasks.size());
                 findViewById(R.id.list_view_pick_doNow).setLayoutParams(params);
             }
         };
@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doLater).getLayoutParams();
-                params.height = (int) (getResources().getDimension(R.dimen.row_height) * doLaterAdapter.entries.size());
+                params.height = (int) (getResources().getDimension(R.dimen.row_height) * doLaterAdapter.tasks.size());
                 findViewById(R.id.list_view_pick_doLater).setLayoutParams(params);
             }
         };
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_list).getLayoutParams();
-                params.height = (int) (getResources().getDimension(R.dimen.row_height) * moveToListAdapter.entries.size());
+                params.height = (int) (getResources().getDimension(R.dimen.row_height) * moveToListAdapter.tasks.size());
                 findViewById(R.id.list_view_pick_list).setLayoutParams(params);
             }
         };
@@ -242,24 +242,24 @@ public class MainActivity extends AppCompatActivity {
         pickButton.setOnClickListener(view -> {
 
             //Continue if all tasks have been categorized, show hint otherwise
-            if (!pickAdapter.entries.isEmpty()){
+            if (!pickAdapter.tasks.isEmpty()){
                 Helper.showPickHelper(this);
             }
             else {
 
                 //if checked reset dropped and focus attributes of all task in tasksToDoNow
-                for (Entry e : doNowAdapter.entries) {
-                    DataManager.setFocus(sharedData, e, true);
-                    DataManager.setDropped(sharedData, e, false);
+                for (Task t : doNowAdapter.tasks) {
+                    DataManager.setFocus(sharedData, t, true);
+                    DataManager.setDropped(sharedData, t, false);
                 }
 
                 //set focus to false for all tasks in tasksToDoLater
-                for (Entry e : doLaterAdapter.entries)
-                        DataManager.setFocus(sharedData, e, false);
+                for (Task t : doLaterAdapter.tasks)
+                        DataManager.setFocus(sharedData, t, false);
 
                 //set focus to false for all tasks in tasksToMoveToList
-                for (Entry e : moveToListAdapter.entries)
-                        DataManager.setFocus(sharedData, e, false);
+                for (Task t : moveToListAdapter.tasks)
+                        DataManager.setFocus(sharedData, t, false);
 
                 //show Focus layout
                 showFocus();

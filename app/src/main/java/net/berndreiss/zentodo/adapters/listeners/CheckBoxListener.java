@@ -5,7 +5,7 @@ import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 
 import java.time.LocalDate;
 
@@ -25,25 +25,25 @@ public class CheckBoxListener extends BasicListener implements View.OnClickListe
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onClick(View v){
-        //current entry
-        Entry entry = adapter.entries.get(position);
+        //current task
+        Task task = adapter.tasks.get(position);
 
         //see if item is recurring
-        boolean recurring = entry.getRecurrence()!=null;
+        boolean recurring = task.getRecurrence()!=null;
 
         //if recurring do not remove but set new reminder date, otherwise remove from data
         if (recurring) {
-            //calculate new reminder date and write to data and entries
-            DataManager.setRecurring(adapter.sharedData, entry, LocalDate.now());
+            //calculate new reminder date and write to data and tasks
+            DataManager.setRecurring(adapter.sharedData, task, LocalDate.now());
 
-            //reset focus in data and entries
-            DataManager.setFocus(adapter.sharedData, entry, false);
+            //reset focus in data and tasks
+            DataManager.setFocus(adapter.sharedData, task, false);
 
-            adapter.entries.remove(position);
+            adapter.tasks.remove(position);
 
             adapter.notifyItemChanged(position);
         } else {
-            DataManager.remove(adapter.sharedData, adapter, entry);
+            DataManager.remove(adapter.sharedData, adapter, task);
         }
 
         adapter.notifyDataSetChanged();

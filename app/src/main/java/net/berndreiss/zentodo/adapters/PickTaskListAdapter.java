@@ -14,7 +14,7 @@ import net.berndreiss.zentodo.adapters.listeners.BackListListenerPick;
 import net.berndreiss.zentodo.adapters.listeners.PickListener;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListenerPick;
 import net.berndreiss.zentodo.data.DataManager;
-import net.berndreiss.zentodo.data.Entry;
+import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.TaskList;
 
 import java.time.Instant;
@@ -81,35 +81,35 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
         //on checkBox tick
         holder.checkBox.setOnClickListener(v ->{
 
-            //get current entry
-            Entry entry = entries.get(position);
+            //get current task
+            Task task = tasks.get(position);
 
-            //if the entry is in DO NOW, remove it and check in which adapter it should go:
+            //if the task is in DO NOW, remove it and check in which adapter it should go:
             // (1) -> has a date and date is > today -> doLaterAdapter
             // (2) -> has no date, but a list -> moveToListAdapter
             // (3) -> else move back to pickAdapter
 
             //if it is not in DO NOW -> move it to doNowAdapter
-            if (doNowAdapter.entries.contains(entry)){
-                doNowAdapter.entries.remove(entry);
+            if (doNowAdapter.tasks.contains(task)){
+                doNowAdapter.tasks.remove(task);
                 doNowAdapter.notifyDataSetChanged();
                 doNowAdapter.itemCountChanged();
 
                 //(1)
-                if (entry.getReminderDate() != null && entry.getReminderDate().isAfter(Instant.now())){
-                    doLaterAdapter.entries.add(entry);
+                if (task.getReminderDate() != null && task.getReminderDate().isAfter(Instant.now())){
+                    doLaterAdapter.tasks.add(task);
                     doLaterAdapter.notifyDataSetChanged();
                     doLaterAdapter.itemCountChanged();
                 } else
                 //(2)
-                if (entry.getReminderDate() == null && entry.getList() != null){
-                    moveToListAdapter.entries.add(entry);
+                if (task.getReminderDate() == null && task.getList() != null){
+                    moveToListAdapter.tasks.add(task);
                     moveToListAdapter.notifyDataSetChanged();
                     moveToListAdapter.itemCountChanged();
                 }
                 //(3)
                 else{
-                    pickAdapter.entries.add(entry);
+                    pickAdapter.tasks.add(task);
                     pickAdapter.notifyDataSetChanged();
                     pickAdapter.itemCountChanged();
                 }
@@ -119,11 +119,11 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
             }
             //move item to doNowAdapter
             else{
-                doNowAdapter.entries.add(entry);
+                doNowAdapter.tasks.add(task);
                 doNowAdapter.notifyDataSetChanged();
                 doNowAdapter.itemCountChanged();
 
-                entries.remove(entry);
+                tasks.remove(task);
                 notifyDataSetChanged();
                 itemCountChanged();
             }
@@ -134,11 +134,11 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
         holder.focus.setOnClickListener(c -> {});
 
         holder.delete.setOnClickListener(v ->{
-            //get current entry
-            Entry entry = entries.get(position);
+            //get current task
+            Task task = tasks.get(position);
 
-            //remove entry from data
-            DataManager.remove(sharedData, this, entry);
+            //remove task from data
+            DataManager.remove(sharedData, this, task);
 
             itemCountChanged();
 
@@ -151,9 +151,9 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
         holder.setDate.setOnClickListener(new SetDateListenerPick(this, holder, position, pickAdapter, doLaterAdapter, moveToListAdapter));
         holder.backList.setOnClickListener(new BackListListenerPick(this,holder,position, pickAdapter, moveToListAdapter));
 
-        if (entries.get(position).getList() != null){
+        if (tasks.get(position).getList() != null){
 
-            String color = DataManager.getListColor(sharedData, entries.get(position).getList());
+            String color = DataManager.getListColor(sharedData, tasks.get(position).getList());
             //color = color.substring(2,8);
 
             holder.linearLayout.setBackgroundColor(Color.parseColor( color));
@@ -170,8 +170,8 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
 
         //clear ArrayList for Pick, add current tasks from data and notify adapter (in case they have been altered in another layout)
-        entries.clear();
-        entries.addAll(DataManager.getTasksToPick(sharedData));
+        tasks.clear();
+        tasks.addAll(DataManager.getTasksToPick(sharedData));
 
         //Reset and Update Adapters to reflect changes
         //Also update itemCountChanged, so that RecyclerViews get resized properly
@@ -179,15 +179,15 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
         pickAdapter.notifyDataSetChanged();
         pickAdapter.itemCountChanged();
 
-        doNowAdapter.entries.clear();
+        doNowAdapter.tasks.clear();
         doNowAdapter.notifyDataSetChanged();
         doNowAdapter.itemCountChanged();
 
-        doLaterAdapter.entries.clear();
+        doLaterAdapter.tasks.clear();
         doLaterAdapter.notifyDataSetChanged();
         doLaterAdapter.itemCountChanged();
 
-        moveToListAdapter.entries.clear();
+        moveToListAdapter.tasks.clear();
         moveToListAdapter.notifyDataSetChanged();
         moveToListAdapter.itemCountChanged();
 
