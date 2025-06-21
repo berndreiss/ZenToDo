@@ -6,6 +6,9 @@ import android.os.Looper;
 import android.os.Handler;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
+import net.berndreiss.zentodo.exceptions.InvalidActionException;
+import net.berndreiss.zentodo.exceptions.PositionOutOfBoundException;
+import net.berndreiss.zentodo.operations.ClientOperationHandlerI;
 import net.berndreiss.zentodo.util.VectorClock;
 import net.berndreiss.zentodo.util.ZenServerMessage;
 
@@ -17,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class UIOperationHandler implements ClientOperationHandlerI{
+public class UIOperationHandler implements ClientOperationHandlerI {
 
     public TaskListAdapter adapter = null;
 

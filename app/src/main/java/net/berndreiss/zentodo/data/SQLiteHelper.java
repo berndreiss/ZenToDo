@@ -1,40 +1,17 @@
 package net.berndreiss.zentodo.data;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Path;
-import android.hardware.camera2.CameraExtensionSession;
-import android.provider.ContactsContract;
-import android.util.Log;
 
 import net.berndreiss.zentodo.MainActivity;
-import net.berndreiss.zentodo.OperationType;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
-import net.berndreiss.zentodo.util.VectorClock;
-import net.berndreiss.zentodo.util.ZenServerMessage;
+import net.berndreiss.zentodo.exceptions.DuplicateIdException;
+import net.berndreiss.zentodo.exceptions.InvalidActionException;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
-import java.util.SequencedSet;
 
 /**
  * TODO DESCRIBE

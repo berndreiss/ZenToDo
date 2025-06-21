@@ -8,6 +8,9 @@ import android.widget.Toast;
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
+import net.berndreiss.zentodo.exceptions.DuplicateUserIdException;
+import net.berndreiss.zentodo.exceptions.InvalidUserActionException;
+import net.berndreiss.zentodo.exceptions.PositionOutOfBoundException;
 import net.berndreiss.zentodo.util.ClientStub;
 
 import java.io.IOException;
