@@ -50,21 +50,20 @@ import java.util.Optional;
  *                                                     --(back Button)--> original view
  *
  */
-
 public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ViewHolder> implements ItemTouchHelperAdapter {
 
     /**
-     * TODO DESCRIBE
+     * Custom view holder for displaying a task.
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public LinearLayout linearLayout;//"normal" row layout that shows checkbox and task
-        protected CheckBox checkBox;//Checkbox to remove task
-        public TextView task;//Description of the task
+        protected CheckBox checkBox;//checkbox to remove task
+        public TextView task;//description of the task
         public Button menu;//activates alternative layout with menu elements
 
         private final LinearLayout linearLayoutAlt;//"alternative" layout with menu for modifying tasks
-        public Button focus;//Adds task to todays tasks
-        public Button delete;//Adds task to todays tasks
+        public Button focus;//adds task to tasks in FOCUS
+        public Button delete;//deletes a task
         public Button edit;//edits the task
         public Button setDate;//sets the date the task is due
         public Button recurrence;//sets the frequency with which the task repeats
@@ -88,11 +87,10 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         public Button backList;//return to original layout and save
 
         /**
-         * TODO DECRIBE
-         * @param view
+         * Initialize the view
+         * @param view the view
          */
         public ViewHolder(View view){
-
             super(view);
 
             linearLayout = view.findViewById(R.id.linear_layout);
@@ -126,13 +124,17 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         }
     }
 
-    /** TODO COMMENT */
+    /** The list of tasks in the adapter */
     public List<Task> tasks;//ArrayList that holds task shown in RecyclerView
 
-    /** TODO COMMENT */
+    /** The object holding data shared across the application */
     public SharedData sharedData;
 
-    /** TODO COMMENT */
+    /**
+     * Instantiate a new instance of a task list adapter.
+     * @param sharedData the shared data object
+     * @param tasks a list of tasks to add to the adapter
+     */
     public TaskListAdapter(SharedData sharedData, List<Task> tasks){
         this.sharedData = sharedData;
         this.tasks = tasks;
@@ -142,9 +144,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-
         View view = inflater.inflate(R.layout.row, parent, false);
-
         return new ViewHolder(view);
     }
 
@@ -170,12 +170,11 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         //setting default row layout visible and active and all others to invisible and invalid
         setOriginal(holder);
 
-
         //sets buttons that have edited data that has been set to a different color
         markSet(holder,this.tasks.get(position));
 
         //set Listener for showing menu of task
-        holder.menu.setOnClickListener(view -> {
+        holder.menu.setOnClickListener(_ -> {
             //setting alternative row layout visible and active, everything else disabled
             setAlt(holder);
         });
@@ -184,14 +183,12 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         holder.focus.setOnClickListener(new FocusListener(this,holder,position));
 
         //onClickListener for Button to change the task name
-        holder.edit.setOnClickListener(v -> {
-
+        holder.edit.setOnClickListener(_ -> {
             //setting edit row visible and active, everything else disabled
             setEdit(holder);
 
             //setting editText to task
             holder.editText.setText(holder.task.getText());
-
         });
 
         //Listener to write back changes
@@ -204,7 +201,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         holder.recurrence.setOnClickListener(new RecurrenceListener(this,holder,position));
 
         //reset all fields in recurrence row view to default
-        holder.clearRecurrence.setOnClickListener(view -> {
+        holder.clearRecurrence.setOnClickListener(_ -> {
 
             //reset spinner to days
             holder.spinnerRecurrence.setSelection(0);
@@ -214,17 +211,16 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
 
         });
 
-
         //set Listener for returning from Recurrence Editing layout and writing back changes
         holder.backRecurrence.setOnClickListener(new BackRecurrenceListener(this, holder, position));
 
         //Listener for Button to change list task is assigned to
-        holder.setList.setOnClickListener(view16 -> {
+        holder.setList.setOnClickListener(_ -> {
             //set list row view
             setList(holder);
 
             //array of names of all lists in task (as singletons)
-            List<String> array = sharedData.database.getTaskManager().getLists();
+            List<String> array = DataManager.getListsAsString(sharedData);
 
             //initialize adapter with all existing list options
             ArrayAdapter<String> adapter = new ArrayAdapter<>(sharedData.context, android.R.layout.simple_list_item_1, array);
@@ -235,11 +231,10 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
             Optional<TaskList> list = sharedData.database.getListManager().getList(tasks.get(position).getList());
             //set edit Text to current list
             holder.autoCompleteList.setText(list.isEmpty() ? "" : list.get().getName());
-
         });
 
         //clear edit Text when editing list
-        holder.clearList.setOnClickListener(view -> {
+        holder.clearList.setOnClickListener(_ -> {
             //set edit Text to empty
             holder.autoCompleteList.setText("");
         });
@@ -248,29 +243,21 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         holder.backList.setOnClickListener(new BackListListener(this,holder,position));
 
         //Listener to return to default layout
-        holder.back.setOnClickListener(v -> {
+        holder.back.setOnClickListener(_ -> {
             //setting original row visible and active, everything else disabled
             setOriginal(holder);
-
         });
-
-
-
     }
 
-
-    // Returns the total count of items in the list
     @Override
     public int getItemCount() {
         return tasks.size();
     }
 
-
     /**
-     * TODO DESCRIBE
-     * @param holder
+     * Setting original row view -> the task is shown.
+     * @param holder the holder for the task view
      */
-    //Setting original row view
     public void setOriginal(TaskListAdapter.ViewHolder holder){
         //Set original row view to visible and active
         holder.linearLayout.setAlpha(1);
@@ -295,10 +282,9 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
     }
 
     /**
-     * TODO DESCRIBE
-     * @param holder
+     * Set the alternative row layout -> the edit view is shown.
+     * @param holder the holder for the task view
      */
-    //Setting alternative row view coming from original
     public void setAlt(TaskListAdapter.ViewHolder holder){
         //Set alternative row view to visible and active
         holder.linearLayoutAlt.bringToFront();
@@ -308,16 +294,13 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         //Set original row view to invisible and inactive
         holder.linearLayout.setAlpha(0);
         disable(holder.linearLayout);
-
     }
 
     /**
-     * TODO DESCRIBE
-     * @param holder
+     * Setting edit row view coming from alternative view
+     * @param holder the holder for the task view
      */
-    //Setting edit row view coming from alternative view
     public void setEdit(TaskListAdapter.ViewHolder holder){
-
         //Set edit row view to visible and active
         holder.linearLayoutEdit.bringToFront();
         holder.linearLayoutEdit.setAlpha(1);
@@ -326,14 +309,12 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         //Set alternative row view to invisible and inactive
         holder.linearLayoutAlt.setAlpha(0);
         disable(holder.linearLayoutAlt);
-
     }
 
     /**
-     * TODO DESCRIBE
-     * @param holder
+     * Setting recurrence row view coming from alternative view
+     * @param holder the holder for the task view
      */
-    //Setting recurrence row view coming from alternative view
     public void setRecurrence(TaskListAdapter.ViewHolder holder){
         //Set recurrence row view to visible and active
         holder.linearLayoutRecurrence.bringToFront();
@@ -346,10 +327,9 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
     }
 
     /**
-     * TODO DESCRIBE
-     * @param holder
+     * Setting list row view coming from alternative view
+     * @param holder the holder for the task view
      */
-    //Setting list row view coming from alternative view
     public void setList(TaskListAdapter.ViewHolder holder){
         //Set list row view to visible and active
         holder.linearLayoutList.bringToFront();
@@ -363,12 +343,9 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
     }
 
     /**
-     * TODO DESCRIBE
-     * @param fromPosition
-     * @param toPosition
+     * write item movement to data and notify adapter: tasks can be dragged and dropped.
+     * Upon drop notifyDataSetChanged is invoked -> see recyclerViewHelper.CustomItemTouchHelperCallback
      */
-    //write item movement to data and notify adapter: tasks can be dragged and dropped.
-    // Upon drop notifyDataSetChanged is invoked -> see recyclerViewHelper.CustomItemTouchHelperCallback
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
 
@@ -382,84 +359,66 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
                 DataManager.swap(sharedData, tasks.get(i),tasks.get(i-1));
             }
         }
-
         //notify the adapter
         notifyItemMoved(fromPosition,toPosition);
-
     }
 
     /**
-     * TODO DESCRIBE
-     * @param layout
+     * Disables view and first generation children
+     * @param layout the layout to disable
      */
-    //Disables view and first generation children
     public void disable(LinearLayout layout){
         for (int i = 0; i < layout.getChildCount(); i++) {
             View child = layout.getChildAt(i);
             child.setEnabled(false);
-
         }
-
     }
 
     /**
-     * TODO DESCRIBE
-     * @param layout
+     * Enables view and first generation children
+     * @param layout the layout to enable
      */
-    //Enables view and first generation children
     public void enable(LinearLayout layout){
         for (int i = 0; i < layout.getChildCount(); i++) {
             View child = layout.getChildAt(i);
             child.setEnabled(true);
         }
-
     }
 
     /**
+     * Marks Buttons that have been set in a different color.
      * TODO DESCRIBE
-     * @param holder
-     * @param entry
+     * @param holder the holder for the task view
+     * @param task the task
      */
-    //marks Buttons that have been set in a different color
     @SuppressLint("UseCompatLoadingForDrawables")
     public void markSet(TaskListAdapter.ViewHolder holder, Task task){
-
         //Set date button to alternative color if !=0, original color otherwise
-        if (task.getReminderDate()!=null){
-
+        if (task.getReminderDate()!=null)
             holder.setDate.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
-
-        }else{
+        else
             holder.setDate.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
-        }
 
         //Set recurrence button to alternative color if !isEmpty(), original color otherwise
-        if (task.getRecurrence()!=null){
+        if (task.getRecurrence()!=null)
             holder.recurrence.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
-        }else{
+        else
             holder.recurrence.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
-        }
 
         //Set list button to alternative color if !isEmpty(), original color otherwise
-        if (task.getList()!=null){
+        if (task.getList()!=null)
             holder.setList.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
-        }else{
+        else
             holder.setList.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
-        }
 
-        if (task.getFocus()){
+        if (task.getFocus())
             holder.focus.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt_edited));
-
-
-        } else{
+        else
             holder.focus.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
-        }
-
     }
 
     /**
-     * TODO DESCRIBE
+     * Reset the adapter.
      */
     public abstract void reset();
-
 }

@@ -14,9 +14,9 @@ public class DatabaseOps implements DatabaseOpsI{
     public DatabaseOps(ZenSQLiteHelper zenSqLiteHelper){
         this.zenSqLiteHelper = zenSqLiteHelper;
     }
+
     @Override
     public synchronized void setTimeDelay(long l) {
-
         //TODO implement
     }
 }

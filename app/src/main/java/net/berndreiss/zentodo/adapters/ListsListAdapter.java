@@ -24,6 +24,7 @@ import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperC
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.TaskList;
+import net.berndreiss.zentodo.data.User;
 
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
@@ -187,7 +188,8 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 //clear ArrayList for list, add all tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
-                listTasks.addAll(sharedData.database.getTaskManager().getEntriesOrderedByDate());
+                User user = sharedData.clientStub.getUser();
+                listTasks.addAll(sharedData.database.getTaskManager().getEntriesOrderedByDate(user.getId(), user.getProfile()));
 
                 //set header text
                 header.headerText.setText(sharedData.context.getResources().getString(R.string.allTasks));
@@ -216,7 +218,8 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //clear ArrayList for list, add tasks without a list from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
 
-                listTasks.addAll(sharedData.database.getTaskManager().getNoList());
+                User user = sharedData.clientStub.getUser();
+                listTasks.addAll(sharedData.database.getTaskManager().getNoList(user.getId(), user.getProfile()));
 
                 //set header text
                 header.headerText.setText(sharedData.context.getResources().getString(R.string.noList));

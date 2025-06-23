@@ -39,6 +39,7 @@ import android.widget.DatePicker;
 
 import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
 import net.berndreiss.zentodo.data.Task;
+import net.berndreiss.zentodo.data.User;
 import net.berndreiss.zentodo.data.ZenSQLiteHelper;
 
 import java.time.LocalDate;
@@ -238,7 +239,8 @@ public class UITests {
                     assert (tasks.get(i).getReminderDate() == null);
                 else
                     assert (tasks.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
-                assert (db.getTaskManager().getNoList().size() == results[i][0]);
+                User user = sharedData.clientStub.user;
+                assert (db.getTaskManager().getNoList(user.getId(), user.getProfile()).size() == results[i][0]);
                 assert (sharedData.clientStub.loadDropped().size() == results[i][1]);
             }
         }
@@ -298,7 +300,7 @@ public class UITests {
                     assert (tasks.get(i).getReminderDate() == null);
                 else
                     assert (tasks.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
-                assert (db.getTaskManager().getLists().size() == results[i][0]);
+                assert (sharedData.clientStub.getLists().size() == results[i][0]);
                 assert (sharedData.clientStub.loadDropped().size() == results[i][1]);
             }
         }

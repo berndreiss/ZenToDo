@@ -235,7 +235,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @Override
     public void updateList(long l, Long aLong) {
-
+        sharedData.adapter.reset();
     }
 
     @Override
@@ -261,5 +261,15 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     @Override
     public void updateEmail(String s) {
 
+    }
+
+    @Override
+    public List<TaskList> getLists() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public TaskList addNewList(String s, String s1) {
+        return null;
     }
 }

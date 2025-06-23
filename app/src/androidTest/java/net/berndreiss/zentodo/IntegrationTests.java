@@ -7,8 +7,11 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
+import net.berndreiss.zentodo.data.User;
 import net.berndreiss.zentodo.data.ZenSQLiteHelper;
 import net.berndreiss.zentodo.data.TaskList;
+import net.berndreiss.zentodo.exceptions.DuplicateIdException;
+import net.berndreiss.zentodo.exceptions.InvalidActionException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,7 +43,6 @@ public class IntegrationTests {
 
     @Test
     public void constructor() {
-
         ZenSQLiteHelper db = new ZenSQLiteHelper(sharedData.context);
 
         //assert all main data structures are empty
@@ -93,10 +95,10 @@ public class IntegrationTests {
 
 
     @Test
-    public void remove() {
+    public void remove() throws InvalidActionException, InterruptedException, DuplicateIdException {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
         sharedData.adapter = adapter;
-        //TaskList newList = sharedData.clientStub.
+        TaskList newList = sharedData.clientStub.addNewList("0", null);
         DataManager.add(sharedData, "0");
         DataManager.add(sharedData, "1");
         DataManager.add(sharedData, "2");
@@ -106,6 +108,7 @@ public class IntegrationTests {
         DataManager.editList(sharedData, adapter.tasks.get(2), "0");
 
         DataManager.remove(sharedData, adapter.tasks.get(0));
+        Thread.sleep(500);//wait for changes to take effect as remove is not synchronous
 
         assert (adapter.tasks.size() == 2);
         assert (adapter.tasks.getFirst().getTask().equals("1"));
@@ -168,7 +171,7 @@ public class IntegrationTests {
                 counter++;
             }
 
-            List<String> lists = db.getTaskManager().getLists();
+            List<String> lists = DataManager.getListsAsString(sharedData);
 
             assert (lists.size() == 2);
 
@@ -206,12 +209,12 @@ public class IntegrationTests {
             DataManager.editList(sharedData, adapter.tasks.get(0), null);
             DataManager.editList(sharedData, adapter.tasks.get(1), null);
 
-            lists = db.getTaskManager().getLists();
+            lists = DataManager.getListsAsString(sharedData);
 
             assert (lists.size() == 1);
 
-
-            List<Task> listNone = db.getTaskManager().getNoList();
+            User user = sharedData.clientStub.user;
+            List<Task> listNone = db.getTaskManager().getNoList(user.getId(), user.getProfile());
 
             counter = 0;
 
@@ -424,7 +427,7 @@ public class IntegrationTests {
             if ((!DataManager.getListColor(sharedData, 0L).equals("BLUE")))
                 throw new AssertionError();
 
-            Map<String, String> colorMap = db.getTaskManager().getListColors();
+            Map<Long, String> colorMap = sharedData.clientStub.getListColors();
 
             assert (colorMap.containsKey("0"));
             assert (Objects.equals(colorMap.get("0"), "BLUE"));
