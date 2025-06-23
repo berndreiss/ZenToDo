@@ -50,7 +50,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
             if (!list.trim().isEmpty()) {
 
                 //write back
-                DataManager.editList(sharedData, this, task, list);
+                DataManager.editList(sharedData, task, list);
                 tasks.remove(position);
                 notifyDataSetChanged();
 
@@ -89,7 +89,7 @@ public class DropTaskListAdapter extends TaskListAdapter{
      * TODO DESCRIBE
      */
     public void add(String task){
-        DataManager.add(sharedData, this, task);
+        DataManager.add(sharedData, task);
 
     }
 

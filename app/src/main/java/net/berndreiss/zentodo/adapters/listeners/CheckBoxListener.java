@@ -27,27 +27,18 @@ public class CheckBoxListener extends BasicListener implements View.OnClickListe
     public void onClick(View v){
         //current task
         Task task = adapter.tasks.get(position);
-
         //see if item is recurring
         boolean recurring = task.getRecurrence()!=null;
-
         //if recurring do not remove but set new reminder date, otherwise remove from data
         if (recurring) {
             //calculate new reminder date and write to data and tasks
-            DataManager.setRecurring(adapter.sharedData, task, LocalDate.now());
-
+            DataManager.setRecurring(adapter.sharedData, task);
             //reset focus in data and tasks
             DataManager.setFocus(adapter.sharedData, task, false);
-
             adapter.tasks.remove(position);
-
             adapter.notifyItemChanged(position);
         } else {
-            DataManager.remove(adapter.sharedData, adapter, task);
+            DataManager.remove(adapter.sharedData, task);
         }
-
-        adapter.notifyDataSetChanged();
-
     }
-
 }

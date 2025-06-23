@@ -27,28 +27,41 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
+/**
+ * Implementation of the TaskManagerI interface using SQLite and the ZenSQLiteHelper.
+ */
 public class TaskManager implements TaskManagerI {
 
 
-    private SQLiteHelper sqLiteHelper;
+    private final ZenSQLiteHelper zenSqLiteHelper;
 
-    public TaskManager(SQLiteHelper sqLiteHelper) {
-        this.sqLiteHelper = sqLiteHelper;
+    /**
+     * Crate new instance of TaskManager.
+     * @param zenSqLiteHelper the helper for interacting with the database
+     */
+    public TaskManager(ZenSQLiteHelper zenSqLiteHelper) {
+        this.zenSqLiteHelper = zenSqLiteHelper;
     }
 
-    private Task getById(Long userId, int profile, long id) {
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
-
-        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE ID=?", new String[]{String.valueOf(id)});
-
+    /**
+     * Get the task by id.
+     * @param user the user id
+     * @param profile the profile id
+     * @param task the task id
+     * @return the task
+     */
+    private Optional<Task> getById(long user, int profile, long task) {
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER=? AND PROFILE=? AND ID=?", new String[]{
+                String.valueOf(user),
+                String.valueOf(profile),
+                String.valueOf(task)
+        });
         List<Task> tasks = getListOfTasks(cursor);
-
         cursor.close();
-
         if (tasks.isEmpty())
-            return null;
-
-        return tasks.get(0);
+            return Optional.empty();
+        return Optional.of(tasks.getFirst());
     }
 
     /**
@@ -57,7 +70,7 @@ public class TaskManager implements TaskManagerI {
      */
     @Override
     public synchronized Task addNewTask(long userId, int profile, String task) {
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT 1 FROM TASKS", null);
 
@@ -87,7 +100,7 @@ public class TaskManager implements TaskManagerI {
 
     @Override
     public synchronized Task addNewTask(long userId, int profile, String task, int position) throws PositionOutOfBoundException {
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         Random random = new Random();
         long id = random.nextInt();
         while (id == 0)
@@ -130,7 +143,7 @@ public class TaskManager implements TaskManagerI {
             throw new DuplicateIdException("Task with id already exists: id " + id);
 
         ContentValues values = new ContentValues();
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
 
         values.put("ID", id);
         values.put("USER", userId);
@@ -149,7 +162,7 @@ public class TaskManager implements TaskManagerI {
      * @param Task
      */
     synchronized void removeTask(Task Task) {
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         if (Task.getUserId() == null)
             db.delete("TASKS", "ID=? AND USER IS NULL AND PROFILE=?", new String[]{String.valueOf(Task.getId()), String.valueOf(Task.getProfile())});
         else
@@ -163,13 +176,10 @@ public class TaskManager implements TaskManagerI {
 
     @Override
     public synchronized void removeTask(long userId, int profile, long id) {
-
-        Task Task = getById(userId, profile, id);
-
-        if (Task == null)
+        Optional<Task> task = getById(userId, profile, id);
+        if (task.isEmpty())
             return;
-
-        removeTask(Task);
+        removeTask(task.get());
     }
 
     public synchronized void updateReminderDate(long userId, int profile, Task Task, Instant value) {
@@ -178,9 +188,11 @@ public class TaskManager implements TaskManagerI {
 
     @Override
     public synchronized void updateReminderDate(long userId, int profile, long id, Instant instant) {
+        if (instant == null)
+            return;
         ContentValues values = new ContentValues();
         values.put("REMINDER_DATE", instant.toEpochMilli());
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         db.update("TASKS", values, "ID=?", new String[]{String.valueOf(id)});
         ;
     }
@@ -193,7 +205,7 @@ public class TaskManager implements TaskManagerI {
     public synchronized void updateTask(long userId, int profile, long id, String value) {
         ContentValues values = new ContentValues();
         values.put("TASK", value == null ? "" : value);
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         db.update("TASKS", values, "ID=?", new String[]{String.valueOf(id)});
         ;
     }
@@ -206,8 +218,8 @@ public class TaskManager implements TaskManagerI {
         ContentValues values = new ContentValues();
         values.put("RECURRENCE", value);
         if (reminderDate == null)
-            values.put("REMINDER_DATE", SQLiteHelper.dateToEpoch(Instant.now()));
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+            values.put("REMINDER_DATE", ZenSQLiteHelper.dateToEpoch(Instant.now()));
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         db.update("TASKS", values, "ID=?", new String[]{String.valueOf(id)});
         ;
 
@@ -228,7 +240,7 @@ public class TaskManager implements TaskManagerI {
     @Override
     public synchronized void updateFocus(long userId, int profile, long id, boolean value) {
 
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         db.execSQL("UPDATE TASKS SET FOCUS=?, DROPPED = ? WHERE ID=?;", new String[]{String.valueOf(value ? 1 : 0), String.valueOf(0), String.valueOf(id)});
         ;
     }
@@ -241,7 +253,7 @@ public class TaskManager implements TaskManagerI {
     public synchronized void updateDropped(long userId, int profile, long id, boolean value) {
 
         //convert bool to int
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         db.execSQL("UPDATE TASKS SET DROPPED=? WHERE ID=?;", new String[]{String.valueOf(value ? 1 : 0), String.valueOf(id)});
         ;
     }
@@ -249,7 +261,7 @@ public class TaskManager implements TaskManagerI {
 
     @Override
     public Optional<Task> getTask(long userId, int profile, long id) {
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(id)});
         List<Task> entries = getListOfTasks(cursor);
@@ -263,7 +275,7 @@ public class TaskManager implements TaskManagerI {
 
     @Override
     public List<Task> getTasks(long userId, int profile) {
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ?", new String[]{String.valueOf(userId), String.valueOf(profile)});
         List<Task> entries = getListOfTasks(cursor);
         cursor.close();
@@ -276,7 +288,7 @@ public class TaskManager implements TaskManagerI {
      * @return
      */
     public List<Task> loadEntries(long userId, int profile) {
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? ORDER BY POSITION", new String[]{String.valueOf(userId)});
         List<Task> entries = getListOfTasks(cursor);
         cursor.close();
@@ -290,9 +302,9 @@ public class TaskManager implements TaskManagerI {
      */
     public List<Task> loadFocus(long userId, int profile) {
 
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
 
-        long epoch = SQLiteHelper.dateToEpoch(Instant.now());
+        long epoch = ZenSQLiteHelper.dateToEpoch(Instant.now());
 
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE FOCUS>0 OR (RECURRENCE IS NOT NULL AND REMINDER_DATE <= " + epoch + ")" +
                 " ORDER BY POSITION", null);
@@ -315,7 +327,7 @@ public class TaskManager implements TaskManagerI {
     @Override
     public List<Task> loadDropped(long userID, int profile) {
 
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ? AND DROPPED>0 ORDER BY POSITION",
                 new String[]{String.valueOf(userID), String.valueOf(profile)});
@@ -335,7 +347,7 @@ public class TaskManager implements TaskManagerI {
      */
     public List<Task> loadList(Long userId, int profile, String name) {
 
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE LIST=? ORDER BY LIST_POSITION", new String[]{name});
 
@@ -358,8 +370,8 @@ public class TaskManager implements TaskManagerI {
             int profile = cursor.getInt(1);
             long id = cursor.getLong(2);
             String task = cursor.getString(3);
-            boolean focus = SQLiteHelper.intToBool(cursor.getInt(4));
-            boolean dropped = SQLiteHelper.intToBool(cursor.getInt(5));
+            boolean focus = ZenSQLiteHelper.intToBool(cursor.getInt(4));
+            boolean dropped = ZenSQLiteHelper.intToBool(cursor.getInt(5));
             Long list = cursor.isNull(6) ? null : cursor.getLong(6);
             Integer listPosition = cursor.getInt(7);
             long reminderDateEpoch = cursor.getLong(8);
@@ -378,7 +390,7 @@ public class TaskManager implements TaskManagerI {
 
 
             if (reminderDateEpoch != 0) {
-                Instant reminderDate = SQLiteHelper.epochToDate(reminderDateEpoch);
+                Instant reminderDate = ZenSQLiteHelper.epochToDate(reminderDateEpoch);
 
                 if (reminderDate != null)
                     Task.setReminderDate(reminderDate);
@@ -404,7 +416,7 @@ public class TaskManager implements TaskManagerI {
      */
     public List<String> getLists() {
 
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT DISTINCT LIST FROM TASKS WHERE LIST IS NOT NULL ORDER BY LIST", null);
 
@@ -431,7 +443,7 @@ public class TaskManager implements TaskManagerI {
     public Map<String, TaskList> loadLists() {
         Map<String, TaskList> lists = new Hashtable<>();
 
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM LISTS", null);
 
@@ -460,7 +472,7 @@ public class TaskManager implements TaskManagerI {
      * @return
      */
     public Map<String, String> getListColors() {
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT NAME, COLOR FROM LISTS", null);
 
@@ -481,8 +493,10 @@ public class TaskManager implements TaskManagerI {
 
     @Override
     public synchronized void swapTasks(long userId, int profile, long id, int position) throws PositionOutOfBoundException {
-
-        swapTasks(getById(userId, profile, id), position);
+        Optional<Task> task = getById(userId, profile, id);
+        if (task.isEmpty())
+            return;
+        swapTasks(task.get(), position);
     }
 
     synchronized void swapTasks(Task Task, int pos) throws PositionOutOfBoundException {
@@ -492,7 +506,7 @@ public class TaskManager implements TaskManagerI {
         if (entries.size() <= pos)
             throw new PositionOutOfBoundException("Position is out of bound: position" + pos);
 
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
 
         ContentValues values1 = new ContentValues();
         values1.put("POSITION", String.valueOf(Task.getPosition()));
@@ -519,7 +533,7 @@ public class TaskManager implements TaskManagerI {
             buffer.putLong(i);
 
         try {
-            Files.write(Paths.get(sqLiteHelper.getContext().getFilesDir() + "/" + LocalDate.now()), buffer.array());
+            Files.write(Paths.get(zenSqLiteHelper.getContext().getFilesDir() + "/" + LocalDate.now()), buffer.array());
         } catch (IOException ignored) {
         }
 
@@ -532,7 +546,7 @@ public class TaskManager implements TaskManagerI {
      */
     public List<Long> loadRecurring() {
 
-        Context context = sqLiteHelper.getContext();
+        Context context = zenSqLiteHelper.getContext();
         //get all file names in files directory
         String[] fileNames = context.getFilesDir().list();
 
@@ -581,7 +595,7 @@ public class TaskManager implements TaskManagerI {
      */
     public List<Task> getEntriesOrderedByDate() {
 
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS ORDER BY REMINDER_DATE", null);
 
@@ -599,7 +613,7 @@ public class TaskManager implements TaskManagerI {
      * @return
      */
     public List<Task> getNoList() {
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE LIST IS NULL ORDER BY POSITION", null);
 
@@ -619,7 +633,7 @@ public class TaskManager implements TaskManagerI {
 
         List<Task> tasksToPick;
 
-        long epoch = SQLiteHelper.dateToEpoch(Instant.now());
+        long epoch = ZenSQLiteHelper.dateToEpoch(Instant.now());
 
         /*
          *  for all entries:
@@ -635,7 +649,7 @@ public class TaskManager implements TaskManagerI {
          *  3. else check if reminder date <= today, if yes -> add
          */
 
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
 
 
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE RECURRENCE IS NULL AND (FOCUS>0 OR " +
@@ -656,7 +670,7 @@ public class TaskManager implements TaskManagerI {
 
         if (getTask(userId, profile, id).isPresent())
             throw new DuplicateIdException("New id for Task already exists: id " + id);
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("ID", id);
         db.update("TASKS", values, "USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(Task)});
@@ -665,7 +679,7 @@ public class TaskManager implements TaskManagerI {
     @Override
     public void postTask(Task Task) {
 
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         System.out.println("POST " + Task.getId());
         values.put("ID", Task.getId());
@@ -673,8 +687,8 @@ public class TaskManager implements TaskManagerI {
         values.put("PROFILE", Task.getProfile());
         values.put("TASK", Task.getTask());
         values.put("POSITION", Task.getPosition());
-        values.put("FOCUS", SQLiteHelper.boolToInt(Task.getFocus()));
-        values.put("DROPPED", SQLiteHelper.boolToInt(Task.getDropped()));
+        values.put("FOCUS", ZenSQLiteHelper.boolToInt(Task.getFocus()));
+        values.put("DROPPED", ZenSQLiteHelper.boolToInt(Task.getDropped()));
         values.put("LIST", Task.getList());
         values.put("LIST_POSITION", Task.getListPosition());
         values.put("REMINDER_DATE", Task.getReminderDate() == null ? null : Task.getReminderDate().toEpochMilli());

@@ -14,18 +14,26 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * TODO DESCRIBE
+ * A helper for interaction with the SQLite database.
+ * Defines the database schema and database updates.
  */
-public class SQLiteHelper extends SQLiteOpenHelper {
+public class ZenSQLiteHelper extends SQLiteOpenHelper {
 
+    /** The context of the application */
     private final Context context;
 
+    /** The database  */
     private final Database database;
 
-    public SQLiteHelper(Context context, String databaseName){
+    /**
+     * Get a new SQLite helper
+     * @param context the application context
+     * @param databaseName the file name for the database
+     */
+    public ZenSQLiteHelper(Context context, String databaseName){
         super(context, databaseName == null ? MainActivity.DATABASE_NAME : databaseName,null, MainActivity.DATABASE_VERSION);
         this.context = context;
-        this.database = new Database(new TaskManager(this), new UserManager(this), new DatabaseOps(this), new ListManager(this));
+        this.database = new Database(new TaskManager(this), new UserManager(this), new ListManager(this), new DatabaseOps(this));
         Optional<User> user = database.getUserManager().getUser(0L);
         if (user.isPresent()) {
             List<Profile> profiles = getUserManager().getProfiles(0);
@@ -33,6 +41,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 try {
                     getUserManager().addProfile(0);
                 } catch (InvalidActionException _) {
+                    //TODO add logging
                 }
             }//this should never happen
             return;
@@ -42,11 +51,19 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         } catch (DuplicateIdException | InvalidActionException _) {}
     }
 
-    public SQLiteHelper(Context context){
+    /**
+     * Get a new SQLite helper with the default database file name defined in MainActivity.java.
+     * @param context the application context
+     */
+    public ZenSQLiteHelper(Context context){
         this(context, null);
     }
 
-    //Create TABLE_TASKS for tasks TABLE_LISTS for lists onCreate
+
+    /**
+     * Create the relevant tables for the database.
+     * @param db the database
+     */
     public void onCreate(SQLiteDatabase db){
         db.execSQL("CREATE TABLE TASKS ("
                 + "USER INTEGER DEFAULT NULL,"
@@ -130,71 +147,81 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.execSQL(query);
         query = "CREATE INDEX IDX_POSITION ON TASKS(POSITION)";
         db.execSQL(query);
-
-
         //TODO ADD METADATA TABLE WITH VERSION AND TIMEDELAY
-        //TODO ADD QUEUE TABLE FOR CHANGES
     }
-
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
+        //TODO implement version control
     }
 
-    public Database getDatabase(){
-        return database;
-    }
+    public Database getDatabase(){return database;}
 
-    public Context getContext() {
-        return  context;
-    }
-
-
+    public Context getContext() {return  context;}
 
     /**
-     * TODO DESCRIBE
-     * @param epoch
-     * @return
+     * Convert an epoch to an Instant.
+     * @param epoch the epoch to convert
+     * @return the instant
      */
     public static Instant epochToDate(long epoch){
         return Instant.ofEpochMilli(epoch);
     }
 
     /**
-     * TODO DESCRIBE
-     * @param date
-     * @return
+     * Convert a date (Instant) to an epoch.
+     * @param date the date to convert
+     * @return the epoch
      */
     public static long dateToEpoch(Instant date){
         return date.toEpochMilli();
     }
 
     /**
-     * TODO DESRIBE
-     * @param i
-     * @return
+     * Convert an integer to a boolean.
+     * @param i the integer to convert
+     * @return the boolean
      */
     public static boolean intToBool(int i){
         return i!=0;
     }
 
     /**
-     * TODO DESCRIBE
-     * @param b
-     * @return
+     * Convert a boolean to an integer.
+     * @param b the boolean to convert
+     * @return the integer
      */
     public static int boolToInt(boolean b){
         return b ? 1 : 0;
     }
 
+    /**
+     * Get the TaskManagerI casted as TaskManager.
+     * @return the SQLite task manager
+     */
     public TaskManager getTaskManager(){
         return (TaskManager) database.getTaskManager();
     }
+
+    /**
+     * Get the UserManagerI casted as UserManager.
+     * @return the SQLite user manager
+     */
     public UserManager getUserManager(){
         return (UserManager) database.getUserManager();
     }
+
+    /**
+     * Get the ListManagerI casted as ListManager.
+     * @return the SQLite list manager
+     */
     public ListManager getListManager(){
         return (ListManager) database.getListManager();
     }
+
+    /**
+     * Get the DatabaseOpsI casted as DatabaseOps.
+     * @return the SQLite database operations class instance
+     */
     public DatabaseOps getDatabaseOps(){
         return (DatabaseOps) database.getDatabaseOps();
     }

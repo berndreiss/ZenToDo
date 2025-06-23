@@ -138,7 +138,7 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
             Task task = tasks.get(position);
 
             //remove task from data
-            DataManager.remove(sharedData, this, task);
+            DataManager.remove(sharedData, task);
 
             itemCountChanged();
 

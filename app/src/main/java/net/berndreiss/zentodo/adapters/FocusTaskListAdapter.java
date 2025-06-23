@@ -73,7 +73,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             //if recurring do not remove but set new reminder date, otherwise remove from data
             if (recurring) {
                 //calculate new reminder date and write to data and tasks
-                DataManager.setRecurring(sharedData, task, LocalDate.now());
+                DataManager.setRecurring(sharedData, task);
 
                 //reset focus in data and tasks
                 DataManager.setFocus(sharedData, task,false);
@@ -85,7 +85,7 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
                 notifyItemChanged(position);
             } else {
-                DataManager.remove(sharedData, this, task);
+                DataManager.remove(sharedData, task);
             }
 
             if (tasks.isEmpty())

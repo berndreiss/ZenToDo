@@ -23,7 +23,6 @@ import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
-import net.berndreiss.zentodo.data.SQLiteHelper;
 import net.berndreiss.zentodo.data.TaskList;
 
 import com.flask.colorpicker.ColorPickerView;

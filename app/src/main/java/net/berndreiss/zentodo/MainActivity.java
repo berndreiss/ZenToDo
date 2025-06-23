@@ -1,39 +1,5 @@
 package net.berndreiss.zentodo;
 
-/*
-*   A simple To-Do-List.
-*
-*   The idea is, that you drop tasks you need to do, so you don't have to think about them anymore.
-*   When you want to make your to-do-list for the day, you pick out of all the task that have been
-*   dropped. In this step you decide, which tasks you want to do now. For all the tasks you don't
-*   want to get done right away, you can set a reminder date or add them to a list.
-*
-*   Basically the app has the following structure implemented in different layouts:
-*
-*   -DROP -> PICK -> FOCUS
-*
-*   -Lists: shows all the lists and containing tasks assigned to it.
-*
-*   These layouts consist of RecyclerViews. Each item in these RecyclerViews represents a task (dataManipulation.Task).
-*   It shows the description of the task, a checkbox and a menu button. The checkbox removes a task.
-*
-*   The menu consist of the following buttons:
-*       moveToFocus -> adds task to RecyclerView in FOCUS
-*       editTask -> option to edit description of the task
-*       setReminderDate -> set a reminder date for the task
-*       setRecurrence -> option to make task repeatable
-*       editList -> assign task to a list
-*
-*   These are the basic functionalities for the buttons and the checkbox. They may vary from
-*   layout to layout. A precise description of these functions can be found in adapters.
-*
-*   The adapters handle the functionality of the buttons. Each layouts RecyclerView has its own
-*   adapter although all are derived from TaskListAdapter. I.e. the layout FOCUS is handled by
-*   FocusTaskListAdapter.
-*
-*   If you got any questions/suggestions feel free to email me: bd_reiss@gmx.at
- */
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
@@ -70,6 +36,30 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 
+/**
+ *   A simple To-Do-List.
+ *   The idea is, that you drop tasks you need to do, so you don't have to think about them anymore.
+ *   When you want to make your to-do-list for the day, you pick out of all the task that have been
+ *   dropped. In this step you decide, which tasks you want to do now. For all the tasks you don't
+ *   want to get done right away, you can set a reminder date or add them to a list.
+ *   Basically the app has the following structure implemented in different layouts:
+ *     -DROP -> PICK -> FOCUS
+ *     -Lists: shows all the lists and containing tasks assigned to it.
+ *   These layouts consist of RecyclerViews. Each item in these RecyclerViews represents a task (dataManipulation.Task).
+ *   It shows the description of the task, a checkbox and a menu button. The checkbox removes a task.
+ *   The menu consist of the following buttons:
+ *       moveToFocus -> adds task to RecyclerView in FOCUS
+ *       editTask -> option to edit description of the task
+ *       setReminderDate -> set a reminder date for the task
+ *       setRecurrence -> option to make task repeatable
+ *       editList -> assign task to a list
+ *   These are the basic functionalities for the buttons and the checkbox. They may vary from
+ *   layout to layout. A precise description of these functions can be found in adapters.
+ *   The adapters handle the functionality of the buttons. Each layouts RecyclerView has its own
+ *   adapter although all are derived from TaskListAdapter. I.e. the layout FOCUS is handled by
+ *   FocusTaskListAdapter.
+ *   If you got any questions/suggestions feel free to email me: bd_reiss@gmx.at
+ */
 public class MainActivity extends AppCompatActivity {
 
     public static final String DATABASE_NAME = "Data.db";
@@ -99,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
     TaskListAdapter focusAdapter;
     ListsListAdapter listsListAdapter;
 
+    //Object for data shared across the whole application
     private SharedData sharedData;
 
     @Override
@@ -111,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        deleteDatabase("Data.db");
         net.berndreiss.zentodo.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -120,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
         pick = findViewById(R.id.layout_pick);
         focus = findViewById(R.id.layout_focus);
         lists = findViewById(R.id.layout_lists);
-
         toolbarDrop = findViewById(R.id.toolbar_drop);
         toolbarPick = findViewById(R.id.toolbar_pick);
         toolbarFocus = findViewById(R.id.toolbar_focus);
@@ -133,38 +122,31 @@ public class MainActivity extends AppCompatActivity {
         fab.setVisibility(View.GONE);
 
         //OnClickListeners for buttons in toolbar which show according layout onClick
-        toolbarPick.setOnClickListener(view -> {
+        toolbarPick.setOnClickListener(_ -> {
             closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
             showPick();//show Pick layout
         });
 
-        toolbarDrop.setOnClickListener(view -> {
+        toolbarDrop.setOnClickListener(_ -> {
             showDrop();//show Drop layout
         });
 
-        toolbarFocus.setOnClickListener(view -> {
+        toolbarFocus.setOnClickListener(_ -> {
             closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
             showFocus();//show Focus layout
         });
 
-        toolbarLists.setOnClickListener(view -> {
+        toolbarLists.setOnClickListener(_ -> {
             closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
             showLists();//show Lists layout
         });
 
-
         sharedData = new SharedData(this);
 
-        //initialze client stub
+        //initialize client stub
         try {
             DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println("USER: " + sharedData.clientStub.user.getId());
-        //Task task = sharedData.database.getDatabase().getTaskManager().addNewTask(0L, 0, "TASK");
-
-        //Optional<Task> taskBack = sharedData.database.getDatabase().getTaskManager().getTask(0L, 0, 0);
+        } catch (InterruptedException _) {}
 
         //layouts are initialized
         initializeDrop(sharedData);
@@ -172,18 +154,13 @@ public class MainActivity extends AppCompatActivity {
         initializeFocus(sharedData);
         initializeLists(sharedData);
 
-
-        //Toast.makeText(this, sharedData.database.getToken(8L), Toast.LENGTH_LONG).show();
-
-
-
         //Drop is shown when app starts
         showDrop();
-
     }
 
     /**
-     * TODO DESCRIBE
+     * Initialize the PICK view.
+     * @param sharedData the shared data object
      */
     @SuppressLint("ClickableViewAccessibility")
     public void initializePick(SharedData sharedData) {
@@ -226,7 +203,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-
         //Set up ItemTouchHelper to move tasks around and connect View to each other
         initializeRecyclerView(findViewById(R.id.list_view_pick), pickAdapter);
         initializeRecyclerView(findViewById(R.id.list_view_pick_doNow), doNowAdapter);
@@ -239,20 +215,17 @@ public class MainActivity extends AppCompatActivity {
         pickButton.setTextColor(ContextCompat.getColor(this,R.color.color_primary));
 
         //if pressed remove tasks from Drop and add to Focus
-        pickButton.setOnClickListener(view -> {
-
+        pickButton.setOnClickListener(_ -> {
             //Continue if all tasks have been categorized, show hint otherwise
             if (!pickAdapter.tasks.isEmpty()){
                 Helper.showPickHelper(this);
             }
             else {
-
                 //if checked reset dropped and focus attributes of all task in tasksToDoNow
                 for (Task t : doNowAdapter.tasks) {
                     DataManager.setFocus(sharedData, t, true);
                     DataManager.setDropped(sharedData, t, false);
                 }
-
                 //set focus to false for all tasks in tasksToDoLater
                 for (Task t : doLaterAdapter.tasks)
                         DataManager.setFocus(sharedData, t, false);
@@ -260,36 +233,30 @@ public class MainActivity extends AppCompatActivity {
                 //set focus to false for all tasks in tasksToMoveToList
                 for (Task t : moveToListAdapter.tasks)
                         DataManager.setFocus(sharedData, t, false);
-
                 //show Focus layout
                 showFocus();
             }
         });
-
     }
 
     /**
-     * TODO DESCRIBE
+     * Show the pick view.
      */
     @SuppressLint("NotifyDataSetChanged")
     public void showPick(){
-
-        sharedData.uiOperationHandler.adapter = pickAdapter;
+        //Set the adapter
+        sharedData.adapter = pickAdapter;
         //Reset and Update Adapters to reflect changes
         //Also update itemCountChanged, so that RecyclerViews get resized properly
         pickAdapter.reset();
-
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
-
         //set fab to show help according to layout
         fab.setOnClickListener(Helper.getPickListener(this));
-
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(focus);
         disableLayout(lists);
-
         //set color of Pick-Button in toolbar to chosen, set all other Buttons to toolbar default
         toolbarPick.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary_accent));
         toolbarPick.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
@@ -306,100 +273,76 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
-
     }
 
     /**
-     * TODO DESCRIBE
+     * Initialize the DROP view.
      */
     @SuppressLint("ClickableViewAccessibility")
     public void initializeDrop(SharedData sharedData){
-
         //initialize adapter for ListView that shows tasks dropped
         dropAdapter = new DropTaskListAdapter(sharedData);
-
         //assign ListView
         RecyclerView listView = findViewById(R.id.list_view_drop);
-
         //show fab when anything is being touched in listViews
         listView.setOnTouchListener(new ShowFab());
-
         //show fab when anything is being touched in layout
         drop.setOnTouchListener(new ShowFab());
-
         //set adapter
         listView.setAdapter(dropAdapter);
-
         //set layoutManager
         listView.setLayoutManager(new LinearLayoutManager(this));
-
         //allows items to be moved and reordered in RecyclerView
         ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(dropAdapter);
-
         //create ItemTouchHelper and assign to RecyclerView
         ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
         iTouchHelper.attachToRecyclerView(listView);
-
         //assign EditText to add new tasks
         final EditText editText = findViewById(R.id.edit_text_drop);
-
         editText.setFilters(new InputFilter[] {new InputFilter.LengthFilter(getResources().getInteger(R.integer.task_max_char))});
-
         //button to drop task in EditText
         Button buttonDrop = findViewById(R.id.button_drop);
-
         //set Button BackgroundColor to toolbar default color
         buttonDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
-
         //set listener for drop button
-        dropListener(editText, buttonDrop);
+        setDropListener(editText, buttonDrop);
     }
 
     /**
-     * TODO DESCRIBE
-     * @param editText
-     * @param buttonDrop
+     * Set a listener for dropping tasks.
+     * @param editText the text field for adding tasks
+     * @param buttonDrop the DROP button
      */
-    public void dropListener(EditText editText, Button buttonDrop){
-
+    public void setDropListener(EditText editText, Button buttonDrop){
         //OnClickListener that adds task in EditText to Data
         buttonDrop.setOnClickListener(view -> {
             //get task from EditText
             String task = editText.getText().toString();
             //reset EditText
             editText.setText("");
-
             //add task to Data if it is not empty
             if (!task.trim().isEmpty())
                 dropAdapter.add(task);
-
         });
-
-
     }
 
     /**
-     * TODO DESCRIBE
+     * Show the DROP view.
      */
     @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
-
-        sharedData.uiOperationHandler.adapter = dropAdapter;
-
+        //Set the adapter
+        sharedData.adapter = dropAdapter;
         //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
         dropAdapter.reset();
-
         //enable all components of Drop layout (setVisibility = VISIBLE)
         enableLayout(drop);
-
         //set fab to show help according to layout
         fab.setOnClickListener(Helper.getDropListener(this));
-
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(pick);
         disableLayout(focus);
         disableLayout(lists);
-
         //set background color of Drop to chosen, all others to toolbar default
         toolbarDrop.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary_accent));
         toolbarDrop.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
@@ -419,57 +362,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * TODO DESCRIBE
+     * Initialize the FOCUS view.
      */
     @SuppressLint("ClickableViewAccessibility")
     public void initializeFocus(SharedData sharedData){
-
         //initialize the adapter for the ListView to show the tasks to focus on
         focusAdapter = new FocusTaskListAdapter(sharedData);
-
         //assign RecyclerView
         RecyclerView listView = findViewById(R.id.list_view_focus);
-
         //show fab when anything is being touched in listView
         listView.setOnTouchListener(new ShowFab());
-
         //show fab when anything is being touched in layout
         focus.setOnTouchListener(new ShowFab());
-
         //set adapter for Recyclerview
         listView.setAdapter(focusAdapter);
         listView.setLayoutManager(new LinearLayoutManager(this));
-
         //allows items to be moved and reordered in RecyclerView
         ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(focusAdapter);
-
         //create ItemTouchHelper and assign to RecyclerView
         ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
         iTouchHelper.attachToRecyclerView(listView);
-
     }
 
     /**
-     * TODO DESCRIBE
+     * Show the FOCUS view.
      */
     @SuppressLint("NotifyDataSetChanged")
     public void showFocus(){
-
-        sharedData.uiOperationHandler.adapter = focusAdapter;
+        //Set the adapter
+        sharedData.adapter = focusAdapter;
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
         focusAdapter.reset();
-
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);
-
         //set fab to show help according to layout
         fab.setOnClickListener(Helper.getFocusListener(this));
-
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(lists);
         disableLayout(pick);
-
         //set background color of Focus to chosen, all others to toolbar default
         toolbarFocus.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary_accent));
         toolbarFocus.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
@@ -486,63 +417,43 @@ public class MainActivity extends AppCompatActivity {
         toolbarLists.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
         toolbarLists.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
-
     }
 
     /**
-     * TODO DESCRIBE
+     * Initialize the LISTS view.
      */
     @SuppressLint("ClickableViewAccessibility")
     public void initializeLists(SharedData sharedData) {
-
         //initialize ListView to show lists available
         ListView listView = findViewById(R.id.list_view_lists);
         RecyclerView recyclerView = findViewById(R.id.recycle_view_lists);
-
         //show fab when anything is being touched in listView
         listView.setOnTouchListener(new ShowFab());
-
         //show fab when anything is being touched in layout
         recyclerView.setOnTouchListener(new ShowFab());
-
         //Items that show the list your currently in as a header and the button for choosing a color
         LinearLayout headerLayout = findViewById(R.id.header);
         TextView headerTextView = findViewById(R.id.text_view_lists_header);
         Button headerButton = findViewById(R.id.button_header);
-
         listsListAdapter = new ListsListAdapter(sharedData, listView, recyclerView, headerLayout, headerTextView, headerButton);
-
         //set adapter
         listView.setAdapter(listsListAdapter);
-
     }
 
     /**
-     * TODO DESCRIBE
+     * Show the LISTS view.
      */
     public void showLists(){
-
-        //TODO INTEGRATE UIOPERATIONHANDLER
-        //deleteDatabase("Data.db");
-
-
-
-
-
         //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
         listsListAdapter.reset();
-
         //enable all components in the Lists layout (setVisibility = VISIBLE)
         enableLayout(lists);
-
         //set fab to show help according to layout
         fab.setOnClickListener(Helper.getListListener(this));
-
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(pick);
         disableLayout(focus);
-
         //set color of Lists-Button in toolbar to chosen, set all other Buttons to toolbar default
         toolbarLists.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary_accent));
         toolbarLists.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
@@ -574,27 +485,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * TODO DESCRIBE
-     * @param layout
+     * Set Visibility of all first generation children of layout to VISIBLE and bring layout to front.
+     * @param layout the layout to enable.
      */
-    //set Visibility of all first generation children of layout to VISIBLE and bring layout to front
     public void enableLayout(LinearLayout layout){
-
         for (int i = 0; i < layout.getChildCount(); i++) {
             View child = layout.getChildAt(i);
             child.setVisibility(View.VISIBLE);
         }
         layout.bringToFront();
-
     }
 
     /**
-     * TODO DESCRIBE
-     * @param layout
+     * Set Visibility of all first generation children of layout to GONE.
+     * @param layout the layout to disable
      */
-    //set Visibility of all first generation children of layout to GONE
     public void disableLayout(LinearLayout layout){
-
         for (int i = 0; i < layout.getChildCount(); i++) {
             View child = layout.getChildAt(i);
             child.setVisibility(View.GONE);
@@ -604,18 +510,11 @@ public class MainActivity extends AppCompatActivity {
     //closes the keyboard, code from: https://www.geeksforgeeks.org/how-to-programmatically-hide-android-soft-keyboard/
     private void closeKeyboard()
     {
-        // this will give us the view
-        // which is currently focus
-        // in this layout
+        // this will give us the view which is currently focus in this layout
         View view = this.getCurrentFocus();
-
-        // if nothing is currently
-        // focus then this will protect
-        // the app from crash
+        // if nothing is currently focused then this will protect the app from crashing
         if (view != null) {
-
-            // now assign the system
-            // service to InputMethodManager
+            // now assign the system service to InputMethodManager
             InputMethodManager manager
                     = (InputMethodManager)
                     getSystemService(
@@ -629,7 +528,6 @@ public class MainActivity extends AppCompatActivity {
     //custom onTouchListener that hides fab until View is touched upon. If view is being touched
     //show fab for 3 seconds
     private class ShowFab implements View.OnTouchListener {
-
         @SuppressLint("ClickableViewAccessibility")
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -637,38 +535,28 @@ public class MainActivity extends AppCompatActivity {
             fab.postDelayed(() -> fab.setVisibility(View.GONE), 3000);
             return false;
         }
-
     }
 
     //initialize RecyclerView with according adapter
     @SuppressLint("ClickableViewAccessibility")
     private void initializeRecyclerView(RecyclerView view, PickTaskListAdapter adapter){
-
         //show fab when view is being touched
         view.setOnTouchListener(new ShowFab());
-
         //set adapter
         view.setAdapter(adapter);
-
         //set layoutManager
         view.setLayoutManager(new LinearLayoutManager(this));
-
         view.setNestedScrollingEnabled(false);
-
         //allows items to be moved and reordered in RecyclerView
         ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(adapter);
-
         //create ItemTouchHelper and assign to RecyclerView
         ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
         iTouchHelper.attachToRecyclerView(view);
-
         //sets references to other adapters in adapter
         adapter.setPickAdapter(pickAdapter);
         adapter.setDoNowAdapter(doNowAdapter);
         adapter.setDoLaterAdapter(doLaterAdapter);
         adapter.setMoveToListAdapter(moveToListAdapter);
-
-
     }
 
 }

@@ -1,11 +1,18 @@
 package net.berndreiss.zentodo.data;
 
+/**
+ * Implementation of the DatabaseOpsI interface using SQLite and the ZenSQLiteHelper.
+ */
 public class DatabaseOps implements DatabaseOpsI{
 
-    private SQLiteHelper sqLiteHelper;
+    private final ZenSQLiteHelper zenSqLiteHelper;
 
-    public DatabaseOps(SQLiteHelper sqLiteHelper){
-        this.sqLiteHelper = sqLiteHelper;
+    /**
+     * Crate new instance of DatabaseOps.
+     * @param zenSqLiteHelper the helper for interacting with the database
+     */
+    public DatabaseOps(ZenSQLiteHelper zenSqLiteHelper){
+        this.zenSqLiteHelper = zenSqLiteHelper;
     }
     @Override
     public synchronized void setTimeDelay(long l) {

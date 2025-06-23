@@ -16,72 +16,58 @@ import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
 
 /**
- * TODO DESCRIBE
+ * Implements methods for showing help to the user.
  */
 public class Helper{
 
-
-    private static class HelpListener implements View.OnClickListener {
-        private final Context context;
-        private final String text;
-
-        HelpListener(Context context, String text) {
-            this.context = context;
-            this.text = text;
-        }
-
+    /**
+     * Get a new listener for showing a help dialog.
+     * @param context the context of the application
+     * @param text the text to show
+     */
+    private record HelpListener(Context context, String text) implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             showDialog();
-
         }
 
-
+        /**
+         * Show a helping dialog.
+         */
         private void showDialog() {
             Dialog dialog = new Dialog(context);
-
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-            dialog.setOnDismissListener(dialogInterface -> {
-
+            dialog.setOnDismissListener(_ -> {
             });
-
             ScrollView scrollView = new ScrollView(context);
             TextView textView = new TextView(context);
-
             scrollView.addView(textView);
-
             textView.setTextColor(Color.parseColor("#000000"));
-
             textView.setText(HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY, s -> {
-
                         @SuppressLint("DiscouragedApi") int id = context.getResources().getIdentifier(s, "drawable", context.getPackageName());
                         Drawable drawable = ContextCompat.getDrawable(context, id);
                         assert drawable != null;
                         drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
                         return drawable;
                     }
-                    , (b, s, editable, xmlReader) -> {
+                    , (_, _, _, _) -> {
                     }));
-
             textView.setPadding(50, 50, 50, 50);
-
             textView.setTextSize(15);
-
             dialog.addContentView(scrollView, new RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT));
             dialog.show();
-            textView.setOnClickListener(vw -> dialog.dismiss());
+            textView.setOnClickListener(_ -> dialog.dismiss());
         }
     }
 
     /**
-     * TODO DESCRIBE
-     * @param context
-     * @return
+     * The help listener for the PICK view.
+     * @param context the context of the application
+     * @return the helper
      */
-    public static HelpListener getPickListener(Context context){
+    static HelpListener getPickListener(Context context){
         String help = "<p><b>PICK MODE</b></p>" +
                 "<p>All tasks you dropped and that are due today are shown here." +
 
@@ -109,11 +95,11 @@ public class Helper{
     }
 
     /**
-     * TODO DESCRIBE
-     * @param context
-     * @return
+     * Get a help listener for the FOCUS view.
+     * @param context the context of the application
+     * @return the help listener
      */
-    public static HelpListener getFocusListener(Context context){
+    static HelpListener getFocusListener(Context context){
         String help = "<p><b>FOCUS MODE</b></p>" +
                 "<p>All tasks you picked are shown here.</p>" +
 
@@ -139,11 +125,11 @@ public class Helper{
     }
 
     /**
-     * TODO DESCRIBE
-     * @param context
-     * @return
+     * Get a help listener for the DROP view.
+     * @param context the context of the application
+     * @return the help listener
      */
-    public static HelpListener getDropListener(Context context){
+     static HelpListener getDropListener(Context context){
         String help = "<p><b>DROP MODE</b></p>" +
                 "<p>You can drop todos here and pick them later.</p>" +
 
@@ -170,11 +156,11 @@ public class Helper{
     }
 
     /**
-     * TODO DESCRIBE
-     * @param context
-     * @return
+     * Get a help listener for the LISTS view.
+     * @param context the context of the application
+     * @return a help listener
      */
-    public static HelpListener getListListener(Context context) {
+    static HelpListener getListListener(Context context) {
         String help = "<p><b>LISTS MODE</b></p>" +
                 "<p>If you would like to <b>create a list</b> go to the menu of a task and assign a list. It will then be created and shown here.</p>" +
                 "<p>When you remove the last task in a list the <b>list will be deleted</b> too.</p>" +
@@ -187,9 +173,8 @@ public class Helper{
     }
 
     /**
-     * TODO DESCRIBE
-     * @param context
-     * @return
+     * Show the helper dialog for the PICK view.
+     * @param context the context of the application
      */
     public static void showPickHelper(Context context){
         String help = "<p><b>Please categorize all tasks first.</b></p> " +

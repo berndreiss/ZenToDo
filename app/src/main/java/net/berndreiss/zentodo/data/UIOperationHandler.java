@@ -1,30 +1,36 @@
 package net.berndreiss.zentodo.data;
 
-
 import android.annotation.SuppressLint;
 import android.os.Looper;
 import android.os.Handler;
 
-import net.berndreiss.zentodo.adapters.TaskListAdapter;
-import net.berndreiss.zentodo.exceptions.InvalidActionException;
-import net.berndreiss.zentodo.exceptions.PositionOutOfBoundException;
+import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.operations.ClientOperationHandlerI;
 import net.berndreiss.zentodo.util.VectorClock;
 import net.berndreiss.zentodo.util.ZenServerMessage;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import org.jetbrains.annotations.NotNull;
+
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Implementation of the DataManagerI interface using SQLite and the ZenSQLiteHelper.
+ */
 public class UIOperationHandler implements ClientOperationHandlerI {
 
-    public TaskListAdapter adapter = null;
+    public SharedData sharedData;
 
-    public UIOperationHandler(){};
+    /**
+     * Create a new instance of the ui operation handler.
+     * @param sharedData the data shared across the app
+     */
+    public UIOperationHandler(@NotNull SharedData sharedData){
+        this.sharedData = sharedData;
+    }
 
     @Override
     public void post(List<Task> list) {
@@ -59,8 +65,8 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
 
     @Override
-    public String getToken(long l) {
-        return "";
+    public Optional<String> getToken(long l) {
+        return Optional.empty();
     }
 
     @Override
@@ -80,8 +86,8 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
 
     @Override
-    public User getUserByEmail(String s) {
-        return null;
+    public Optional<User> getUserByEmail(String s) {
+        return Optional.empty();
     }
 
     @Override
@@ -112,20 +118,19 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
-    public Task addNewTask(Task Task) {
-        if (adapter == null)
-            return null;
+    public void addNewTask(Task Task) {
+        if (sharedData.adapter == null)
+            return;
         Handler handler = new Handler(Looper.getMainLooper());
 
         handler.post(() -> {
-            adapter.tasks.stream()
+            sharedData.adapter.tasks.stream()
                     .filter(e -> e.getPosition() >= Task.getPosition())
                     .forEach(e -> e.setPosition(e.getPosition()+1));
 
-            adapter.tasks.add(Task.getPosition(), Task);
-            adapter.notifyDataSetChanged();
+            sharedData.adapter.tasks.add(Task.getPosition(), Task);
+            sharedData.adapter.notifyDataSetChanged();
         });
-        return Task;
     }
 
     @Override
@@ -141,26 +146,26 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void removeTask(long id) {
-        if (adapter == null)
+        if (sharedData.adapter == null)
             return;
         Handler handler = new Handler(Looper.getMainLooper());
 
         handler.post(() -> {
-            Optional<Task> Task = adapter.tasks.stream().filter(e -> e.getId() == id).findFirst();
+            Optional<Task> Task = sharedData.adapter.tasks.stream().filter(e -> e.getId() == id).findFirst();
             if (Task.isEmpty())
                 return;
-            adapter.tasks.stream()
-                    .filter(e -> e.getPosition() > Task.get().getPosition())
-                    .forEach(e -> e.setPosition(e.getPosition()-1));
+            sharedData.adapter.tasks.stream()
+                    .filter(t -> t.getPosition() > Task.get().getPosition())
+                    .forEach(t -> t.setPosition(t.getPosition()-1));
 
-            adapter.tasks.stream()
-                    .filter(e -> e.getList() != null)
-                    .filter(e -> e.getList().equals(e.getList()))
-                    .filter(e -> e.getListPosition() > Task.get().getListPosition())
-                    .forEach(e -> e.setListPosition(e.getListPosition()-1));
+            sharedData.adapter.tasks.stream()
+                    .filter(t -> t.getList() != null)
+                    .filter(t -> t.getList().equals(t.getList()))
+                    .filter(t -> t.getListPosition() > Task.get().getListPosition())
+                    .forEach(t -> t.setListPosition(t.getListPosition()-1));
 
-            adapter.tasks.remove(Task.get().getPosition());
-            adapter.notifyDataSetChanged();
+            sharedData.adapter.tasks.remove(Task.get().getPosition());
+            sharedData.adapter.notifyDataSetChanged();
         });
     }
 
@@ -209,7 +214,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     }
 
     @Override
-    public void swapListEntries(long l, long l1, int i) throws PositionOutOfBoundException {
+    public void swapListEntries(long l, long l1, int i) {
 
     }
 
@@ -254,7 +259,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     }
 
     @Override
-    public void updateEmail(String s) throws InvalidActionException, IOException, URISyntaxException {
+    public void updateEmail(String s) {
 
     }
 }

@@ -1,7 +1,6 @@
 package net.berndreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,10 +29,8 @@ import net.berndreiss.zentodo.adapters.listeners.SetDateListener;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.ItemTouchHelperAdapter;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
-import net.berndreiss.zentodo.data.SQLiteHelper;
 import net.berndreiss.zentodo.data.TaskList;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -378,11 +375,11 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         //swap tasks in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                DataManager.swap(sharedData, this, tasks.get(i),tasks.get(i+1));
+                DataManager.swap(sharedData, tasks.get(i),tasks.get(i+1));
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                DataManager.swap(sharedData, this, tasks.get(i),tasks.get(i-1));
+                DataManager.swap(sharedData, tasks.get(i),tasks.get(i-1));
             }
         }
 

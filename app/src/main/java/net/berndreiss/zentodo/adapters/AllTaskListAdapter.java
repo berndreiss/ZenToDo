@@ -34,7 +34,7 @@ public class AllTaskListAdapter extends TaskListAdapter{
             Task task = tasks.get(position);
 
             //remove from data
-            DataManager.remove(sharedData, this, task);
+            DataManager.remove(sharedData, task);
 
             //notify adapter
             notifyDataSetChanged();

@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import net.berndreiss.zentodo.exceptions.DuplicateIdException;
 import net.berndreiss.zentodo.exceptions.InvalidActionException;
 import net.berndreiss.zentodo.exceptions.PositionOutOfBoundException;
 
@@ -14,12 +15,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
+/**
+ * Implementation of the ListManagerI interface using SQLite and the ZenSQLiteHelper.
+ */
 public class ListManager implements ListManagerI{
 
-    private final SQLiteHelper sqLiteHelper;
+    private final ZenSQLiteHelper zenSqLiteHelper;
 
-    public ListManager(SQLiteHelper sqLiteHelper){
-        this.sqLiteHelper = sqLiteHelper;
+    /**
+     * Crate new instance of ListManager.
+     * @param zenSqLiteHelper the helper for interacting with the database
+     */
+    public ListManager(ZenSQLiteHelper zenSqLiteHelper){
+        this.zenSqLiteHelper = zenSqLiteHelper;
     }
 
     @Override
@@ -28,7 +36,7 @@ public class ListManager implements ListManagerI{
             return null;
         if (name == null)
             throw new InvalidActionException("List name must not be null.");
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("ID", id);
         values.put("NAME", name);
@@ -46,7 +54,7 @@ public class ListManager implements ListManagerI{
         List<TaskList> lists = getListsForUser(user, profile);
         if (lists.stream().anyMatch(l -> l.getName().equals(list.get().getName())))
             throw new InvalidActionException("List with same name already exists for the user.");
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("USER", user);
         values.put("PROFILE", profile);
@@ -58,7 +66,7 @@ public class ListManager implements ListManagerI{
     @Override
     public synchronized void removeUserProfileFromList(long user, int profile, long list) {
 
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
 
         db.delete("PROFILE_LIST", "USER = ? AND PROFILE = ? AND LIST = ?",
                 new String[]{String.valueOf(user), String.valueOf(profile), String.valueOf(list)});
@@ -74,7 +82,7 @@ public class ListManager implements ListManagerI{
     @Override
     public synchronized void removeList(long id) {
 
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         db.delete("LISTS", "ID = ?", new String[]{String.valueOf(id)});
         db.delete("PROFILE_LIST", "LIST = ?", new String[]{String.valueOf(id)});
         ContentValues values = new ContentValues();
@@ -86,7 +94,7 @@ public class ListManager implements ListManagerI{
 
     @Override
     public synchronized void updateList(long userId, int profile, long id, Long listId){
-        SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(id)});
         List<Task> entries = TaskManager.getListOfTasks(cursor);
         cursor.close();
@@ -96,15 +104,12 @@ public class ListManager implements ListManagerI{
     }
 
     @Override
-    public synchronized Long updateId(long list, long newId) {
-        Long existingId = null;
+    public synchronized void updateId(long list, long newId) throws DuplicateIdException {
         Optional<TaskList> existingList = getList(newId);
-        if (existingList.isPresent()){
-            existingId = getUniqueUserId();
-            updateId(newId, existingId);
-        }
+        if (existingList.isPresent())
+            throw new DuplicateIdException("List id already exists: id + " + newId);
 
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put("ID", newId);
@@ -114,16 +119,14 @@ public class ListManager implements ListManagerI{
         values.put("LIST", newId);
         db.update("PROFILE_LIST", values, "LIST = ?", new String[]{String.valueOf(list)});
         db.update("TASKS", values, "LIST = ?", new String[]{String.valueOf(list)});
-
         db.close();
-        return existingId;
     }
 
     @Override
     public synchronized void updateListName(long list, String name) throws InvalidActionException {
         if (name == null)
             throw new InvalidActionException("Name must not be null.");
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put("NAME", name);
@@ -134,7 +137,7 @@ public class ListManager implements ListManagerI{
 
     @Override
     public List<Task> getListEntries(long user, int profile, Long listId) {
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
 
         Cursor cursor;
         if (listId == null)
@@ -153,7 +156,7 @@ public class ListManager implements ListManagerI{
 
     @Override
     public Optional<TaskList> getList(long id) {
-        SQLiteDatabase database = sqLiteHelper.getReadableDatabase();
+        SQLiteDatabase database = zenSqLiteHelper.getReadableDatabase();
         Cursor cursor = database.rawQuery("SELECT * FROM LISTS WHERE ID = ?", new String[]{String.valueOf(id)});
         List<TaskList> lists = getListOfTaskList(cursor);
         cursor.close();
@@ -165,7 +168,7 @@ public class ListManager implements ListManagerI{
 
     @Override
     public Optional<TaskList> getListByName(long user, int profile, String name) {
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM LISTS JOIN PROFILE_LIST ON ID = LIST WHERE USER = ? AND PROFILE = ? AND NAME = ?",
                 new String[]{String.valueOf(user), String.valueOf(profile), String.valueOf(name)});
@@ -179,7 +182,7 @@ public class ListManager implements ListManagerI{
 
     @Override
     public List<TaskList> getListsForUser(long user, int profile) {
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM LISTS JOIN PROFILE_LIST ON LIST = ID WHERE USER = ? AND PROFILE = ?",
                 new String[]{String.valueOf(user), String.valueOf(profile)});
@@ -191,7 +194,7 @@ public class ListManager implements ListManagerI{
 
     @Override
     public List<TaskList> getLists() {
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM LISTS", null);
         List<TaskList> list = getListOfTaskList(cursor);
         cursor.close();
@@ -205,7 +208,7 @@ public class ListManager implements ListManagerI{
         if (task == null)
             return;
 
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
         Integer position = null;
@@ -250,7 +253,7 @@ public class ListManager implements ListManagerI{
     synchronized void swapListEntries(Task task, int posOld, Task taskOther, int pos){
 
         List<Task> listOld = getListEntries(task.getUserId(), task.getProfile(), task.getList());
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
 
         ContentValues values1 = new ContentValues();
         values1.put("LIST_POSITION", posOld);
@@ -269,7 +272,7 @@ public class ListManager implements ListManagerI{
     @Override
     public synchronized void updateListColor(long list, String color){
 
-        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put("COLOR", color);

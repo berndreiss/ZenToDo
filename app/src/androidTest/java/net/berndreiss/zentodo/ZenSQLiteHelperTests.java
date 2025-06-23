@@ -2,14 +2,12 @@ package net.berndreiss.zentodo;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import net.berndreiss.zentodo.data.Database;
-import net.berndreiss.zentodo.data.SQLiteHelper;
+import net.berndreiss.zentodo.data.ZenSQLiteHelper;
 import net.berndreiss.zentodo.tests.DatabaseTestSuite;
 
 import org.junit.BeforeClass;
-import org.junit.Test;
 
-public class SQLiteHelperTest extends DatabaseTestSuite{
+public class ZenSQLiteHelperTests extends DatabaseTestSuite{
 
     private static final String DATABASE_NAME = "Data.db";
 
@@ -17,7 +15,7 @@ public class SQLiteHelperTest extends DatabaseTestSuite{
     public static void run(){
         databaseSupplier = () -> {
             SharedData sharedData = new SharedData(InstrumentationRegistry.getInstrumentation().getTargetContext());
-            sharedData.database = new SQLiteHelper(sharedData.context);
+            sharedData.database = new ZenSQLiteHelper(sharedData.context);
             return sharedData.database.getDatabase();
         };
     }

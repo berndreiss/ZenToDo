@@ -38,8 +38,8 @@ import android.view.View;
 import android.widget.DatePicker;
 
 import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
-import net.berndreiss.zentodo.data.Entry;
-import net.berndreiss.zentodo.data.SQLiteHelper;
+import net.berndreiss.zentodo.data.Task;
+import net.berndreiss.zentodo.data.ZenSQLiteHelper;
 
 import java.time.LocalDate;
 import java.time.MonthDay;
@@ -48,23 +48,17 @@ import java.time.ZoneId;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
-public class UITest {
+public class UITests {
     private static SharedData sharedData;
-
-
 
     @Before
     public void setup(){
-
         sharedData = new SharedData(InstrumentationRegistry.getInstrumentation().getTargetContext());
     }
-
-
 
     @Rule
     public ActivityScenarioRule<MainActivity> activityScenarioRule
             = new ActivityScenarioRule<>(MainActivity.class);
-
 
     //Tests if dropping tasks functions properly
     @Test
@@ -73,7 +67,7 @@ public class UITest {
         //test data
         String[] tests = {"","0","1","Test","'","'Test","T'e'st","Test'"};
 
-        //expected results in data.entries
+        //expected results in data.tasks
         String[][] results = {{},{"0"},{"0","1"},{"0","1","Test"},{"0","1","Test","'"},
                                 {"0","1","Test","'","'Test"},
                                 {"0","1","Test","'","'Test","T'e'st"},
@@ -85,7 +79,7 @@ public class UITest {
             DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
 
             for (int j = 0; j < results[i].length; j++)
-                assert(adapter.entries.get(j).getTask().equals(results[i][j]));
+                assert(adapter.tasks.get(j).getTask().equals(results[i][j]));
 
         }
         sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
@@ -101,7 +95,7 @@ public class UITest {
         //test data
         LocalDate[] tests = {LocalDate.now(),null};
 
-        //expected sizes of data.entries
+        //expected sizes of data.tasks
         int[] results = {0,1};
 
         //button1 == OK, button2 == No Date
@@ -118,13 +112,13 @@ public class UITest {
             onView(withId(buttons[i])).perform(click());
 
             //assert results
-            try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-                List<Entry> entries = db.getEntryManager().loadEntries(0, 0);
+            try (ZenSQLiteHelper db = new ZenSQLiteHelper(sharedData.context)) {
+                List<Task> tasks = db.getTaskManager().loadEntries(0, 0);
 
                 if (tests[i] == null)
-                    assert (entries.get(i).getReminderDate() == null);
+                    assert (tasks.get(i).getReminderDate() == null);
                 else
-                    assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
+                    assert (tasks.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
                 assert (sharedData.clientStub.loadDropped().size() == results[i]);
             }
         }
@@ -182,17 +176,17 @@ public class UITest {
             onView(withId(buttons[i])).perform(click());
 
             //assert results
-            try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
-                List<Entry> entries = db.getEntryManager().loadEntries(0, 0);
+            try (ZenSQLiteHelper db = new ZenSQLiteHelper(sharedData.context)) {
+                List<Task> tasks = db.getTaskManager().loadEntries(0, 0);
 
-                if (entries.get(i).getReminderDate() == null) {
+                if (tasks.get(i).getReminderDate() == null) {
                     continue;
                 }
                 if (tests[i] == null)
-                    assert (entries.get(i).getReminderDate() == null);
+                    assert (tasks.get(i).getReminderDate() == null);
                 else
-                    assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
-                assert (db.getEntryManager().loadFocus(0, 0).size() == results[i]);
+                    assert (tasks.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
+                assert (db.getTaskManager().loadFocus(0, 0).size() == results[i]);
             }
         }
         sharedData.context.deleteDatabase(MainActivity.DATABASE_NAME);
@@ -236,15 +230,15 @@ public class UITest {
             onView(withId(buttons[i])).perform(click());
 
             //assert results
-            try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
+            try (ZenSQLiteHelper db = new ZenSQLiteHelper(sharedData.context)) {
 
-                List<Entry> entries = db.getEntryManager().loadEntries(0, 0);
+                List<Task> tasks = db.getTaskManager().loadEntries(0, 0);
 
                 if (tests[i] == null)
-                    assert (entries.get(i).getReminderDate() == null);
+                    assert (tasks.get(i).getReminderDate() == null);
                 else
-                    assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
-                assert (db.getEntryManager().getNoList().size() == results[i][0]);
+                    assert (tasks.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
+                assert (db.getTaskManager().getNoList().size() == results[i][0]);
                 assert (sharedData.clientStub.loadDropped().size() == results[i][1]);
             }
         }
@@ -297,14 +291,14 @@ public class UITest {
             onView(withId(buttons[i])).perform(click());
 
             //assert results
-            try (SQLiteHelper db = new SQLiteHelper(sharedData.context)) {
+            try (ZenSQLiteHelper db = new ZenSQLiteHelper(sharedData.context)) {
 
-                List<Entry> entries = db.getEntryManager().loadEntries(0, 0);
+                List<Task> tasks = db.getTaskManager().loadEntries(0, 0);
                 if (tests[i] == null)
-                    assert (entries.get(i).getReminderDate() == null);
+                    assert (tasks.get(i).getReminderDate() == null);
                 else
-                    assert (entries.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
-                assert (db.getEntryManager().getLists().size() == results[i][0]);
+                    assert (tasks.get(i).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(tests[i]));
+                assert (db.getTaskManager().getLists().size() == results[i][0]);
                 assert (sharedData.clientStub.loadDropped().size() == results[i][1]);
             }
         }

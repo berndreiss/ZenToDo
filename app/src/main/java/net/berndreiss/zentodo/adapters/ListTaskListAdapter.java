@@ -24,6 +24,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
     public ListTaskListAdapter(SharedData sharedData, List<Task> tasks){
         super(sharedData, tasks);
+        sharedData.adapter = this;
     }
 
     /** TODO DESCRIBE */
@@ -41,7 +42,7 @@ public class ListTaskListAdapter extends TaskListAdapter{
             Task task = tasks.get(position);
 
             //remove from data
-            DataManager.remove(sharedData, this, task);
+            DataManager.remove(sharedData, task);
 
             //notify adapter
             notifyDataSetChanged();
@@ -66,10 +67,10 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
                 //set to null if AutoComplete is empty, write back otherwise
                 if (list.trim().isEmpty())
-                    DataManager.editList(sharedData, this, task, null);
+                    DataManager.editList(sharedData, task, null);
 
                 else
-                    DataManager.editList(sharedData, this, task, list);
+                    DataManager.editList(sharedData, task, list);
 
                 //remove task from adapter
                 tasks.remove(position);
@@ -96,11 +97,11 @@ public class ListTaskListAdapter extends TaskListAdapter{
         //swap tasks in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                DataManager.swapLists(sharedData, this, tasks.get(i),tasks.get(i+1));
+                DataManager.swapLists(sharedData, tasks.get(i),tasks.get(i+1));
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                DataManager.swapLists(sharedData, this, tasks.get(i),tasks.get(i-1));
+                DataManager.swapLists(sharedData, tasks.get(i),tasks.get(i-1));
             }
         }
 
