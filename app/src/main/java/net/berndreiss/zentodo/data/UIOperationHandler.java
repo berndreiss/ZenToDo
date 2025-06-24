@@ -4,11 +4,8 @@ import android.annotation.SuppressLint;
 import android.os.Looper;
 import android.os.Handler;
 
+import net.berndreiss.zentodo.Mode;
 import net.berndreiss.zentodo.SharedData;
-import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
-import net.berndreiss.zentodo.adapters.FocusTaskListAdapter;
-import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
-import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.operations.ClientOperationHandlerI;
 import net.berndreiss.zentodo.util.VectorClock;
@@ -18,8 +15,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -44,9 +43,6 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @Override
     public void updateId(long user, int profile, long task, long newId) {
-        if (sharedData.adapter == null)
-            return;
-        sharedData.adapter.tasks.stream().filter(t -> t.getId() == task).forEach(t -> t.setId(newId));
     }
 
     @Override
@@ -125,173 +121,192 @@ public class UIOperationHandler implements ClientOperationHandlerI {
         //IGNORED
     }
 
+    //WE ASSUME THE TASK HAS BEEN NEWLY ADDED
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void addNewTask(Task task) {
-        if (sharedData.adapter == null)
-            return;
-        //Dropped tasks are not to be added to focus adapters
-        if (sharedData.adapter instanceof FocusTaskListAdapter)
-            return;
-        if (sharedData.adapter instanceof ListTaskListAdapter && task.getList() != null){
-            Optional<TaskList> list = sharedData.clientStub.getListByName(((ListTaskListAdapter) sharedData.adapter).taskList);
-            if (list.isEmpty())
-                //TODO I think this is undefined behaviour
-                return;
-            if (task.getList() != list.get().getId())
+        final TaskListAdapter adapter;
+        switch (sharedData.mode){
+            case LIST_NO:  adapter = sharedData.noListAdapter; break;
+            case LIST_ALL:  adapter = sharedData.allTasksAdapter; break;
+            case DROP: adapter = sharedData.dropAdapter; break;
+            case PICK: adapter = sharedData.pickAdapter; break;
+            default:
                 return;
         }
         Handler handler = new Handler(Looper.getMainLooper());
-        final TaskListAdapter adapter;
-        if (sharedData.adapter instanceof PickTaskListAdapter)
-            adapter = ((PickTaskListAdapter) sharedData.adapter).pickAdapter;
-        else
-            adapter = sharedData.adapter;
         handler.post(() -> {
-            adapter.tasks.stream()
-                    .filter(e -> e.getPosition() >= task.getPosition())
-                    .forEach(e -> e.setPosition(e.getPosition() + 1));
-
-            adapter.tasks.add(task.getPosition(), task);
+            adapter.tasks.add(task);
             adapter.notifyDataSetChanged();
+            if (sharedData.mode == Mode.PICK)
+                sharedData.pickAdapter.update();
         });
     }
 
     @Override
     public Task addNewTask(String s) {
-        if (sharedData.adapter == null)
-            return null;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+        //IGNORED
         return null;
     }
 
     @Override
     public Task addNewTask(String s, int i) {
-        if (sharedData.adapter == null)
-            return null;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+        //IGNORED
         return null;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void removeTask(long id) {
-        if (sharedData.adapter == null)
-            return;
+        switch (sharedData.mode){
+            case LIST_NO:  removeFromAdapter(sharedData.noListAdapter, id); break;
+            case LIST_ALL:  removeFromAdapter(sharedData.allTasksAdapter, id); break;
+            case DROP: removeFromAdapter(sharedData.dropAdapter, id); break;
+            case PICK: {
+                removeFromAdapter(sharedData.pickAdapter, id);
+                removeFromAdapter(sharedData.doNowAdapter, id);
+                removeFromAdapter(sharedData.doLaterAdapter, id);
+                removeFromAdapter(sharedData.moveToListAdapter, id);
+            }
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void removeFromAdapter(TaskListAdapter adapter, long id){
         Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+        handler.post(() -> {
+            Optional<Task> task = adapter.tasks.stream().filter(t -> t.getId() == id).findFirst();
+            if (task.isEmpty())
+                return;
+            adapter.tasks.removeIf(t -> t.getId() == id);
+            adapter.tasks.forEach(t -> {
+                if (t.getPosition() > task.get().getPosition())
+                    t.setPosition(t.getPosition()-1);
+                if (t.getList() != null && Objects.equals(t.getList(), task.get().getList()) && t.getListPosition() > task.get().getListPosition())
+                    t.setListPosition(t.getListPosition()-1);
+            });
+            adapter.notifyDataSetChanged();
+        });
     }
 
     @Override
     public Optional<Task> getTask(long l) {
+        //IGNORED
         return Optional.empty();
     }
 
     @Override
     public List<Task> loadTasks() {
+        //IGNORED
         return Collections.emptyList();
     }
     @Override
     public List<Task> loadFocus() {
+        //IGNORED
         return Collections.emptyList();
     }
 
     @Override
     public List<Task> loadDropped() {
+        //IGNORED
         return Collections.emptyList();
     }
 
     @Override
     public List<Task> loadList(Long list) {
+        //IGNORED
         return Collections.emptyList();
     }
 
     @Override
     public List<TaskList> loadLists() {
+        //IGNORED
         return null;
     }
 
     @Override
     public Map<Long, String> getListColors() {
+        //IGNORED
         return Collections.emptyMap();
     }
 
     @Override
     public Optional<TaskList> getListByName(String name) {
+        //IGNORED
         return Optional.empty();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void swapTasks(long task, int position) {
-        if (sharedData.adapter == null)
-            return;
+        switch (sharedData.mode){
+            case DROP: swapInAdapter(sharedData.dropAdapter, task, position); break;
+            case FOCUS: swapInAdapter(sharedData.focusAdapter, task, position); break;
+            case PICK: {
+                swapInAdapter(sharedData.pickAdapter, task, position);
+                swapInAdapter(sharedData.doNowAdapter, task, position);
+                swapInAdapter(sharedData.doLaterAdapter, task, position);
+                swapInAdapter(sharedData.moveToListAdapter, task, position);
+            }
+        }
+    }
+    @SuppressLint("NotifyDataSetChanged")
+    private void swapInAdapter(TaskListAdapter adapter, long task, int position){
         Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+        handler.post(() ->{
+            Optional<Task> task1 = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+            Optional<Task> task2 = adapter.tasks.stream().filter(t -> t.getPosition() == position).findFirst();
+            Optional<Task> updatedTask1 = Optional.empty();
+            Optional<Task> updatedTask2 = Optional.empty();
+            if (task1.isPresent())
+                updatedTask1 = sharedData.clientStub.getTask(task);
+            if (task2.isPresent())
+                updatedTask2 = sharedData.clientStub.getTask(task2.get().getId());
+            if (task1.isPresent() && updatedTask1.isPresent()) {
+                adapter.tasks.remove(task1.get());
+                adapter.tasks.add(updatedTask1.get());
+            }
+            if (task2.isPresent() && updatedTask2.isPresent()) {
+                adapter.tasks.remove(task2.get());
+                adapter.tasks.add(updatedTask2.get());
+            }
+            adapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+            if (!sharedData.itemIsInMotion)
+                adapter.notifyDataSetChanged();
+        });
     }
 
     @Override
-    public void swapListEntries(long l, long l1, int i) {
-        if (sharedData.adapter == null)
-            return;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+    public void swapListEntries(long list, long task, int position) {
     }
 
     @Override
-    public void updateTask(long l, String s) {
-        if (sharedData.adapter == null)
-            return;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+    public void updateTask(long task, String value) {
     }
 
     @Override
-    public void updateFocus(long l, boolean b) {
-        if (sharedData.adapter == null)
-            return;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+    public void updateFocus(long task, boolean value) {
     }
 
     @Override
-    public void updateDropped(long l, boolean b) {
-        if (sharedData.adapter == null)
-            return;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+    public void updateDropped(long task, boolean value) {
     }
 
     @Override
-    public void updateList(long l, Long aLong) {
-        if (sharedData.adapter == null)
-            return;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+    public void updateList(long task, Long list) {
     }
 
     @Override
-    public void updateReminderDate(long l, Instant instant) {
-        if (sharedData.adapter == null)
-            return;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+    public void updateReminderDate(long task, Instant value) {
     }
 
     @Override
-    public void updateRecurrence(long l, String s) {
-        if (sharedData.adapter == null)
-            return;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+    public void updateRecurrence(long task, String value) {
     }
 
     @Override
     public void updateListColor(long list, String color) {
-        if (sharedData.adapter == null)
-            return;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> sharedData.adapter.reset());
+        //TODO implement
     }
 
     @Override
@@ -306,6 +321,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @Override
     public List<TaskList> getLists() {
+        //IGNORED
         return Collections.emptyList();
     }
 

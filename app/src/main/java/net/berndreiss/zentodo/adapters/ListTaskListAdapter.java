@@ -5,6 +5,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import net.berndreiss.zentodo.Mode;
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
@@ -24,7 +25,8 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
     public ListTaskListAdapter(SharedData sharedData, String taskList, List<Task> tasks){
         super(sharedData, tasks);
-        sharedData.adapter = this;
+        sharedData.mode = Mode.LIST;
+        sharedData.listAdapter = this;
         this.taskList = taskList;
     }
 

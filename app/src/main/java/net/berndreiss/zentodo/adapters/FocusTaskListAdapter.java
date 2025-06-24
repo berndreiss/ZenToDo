@@ -53,9 +53,8 @@ public class FocusTaskListAdapter extends TaskListAdapter {
             if (list.isEmpty())
                 return;
             String color = list.get().getColor();
-
-            holder.linearLayout.setBackgroundColor(Color.parseColor(color));
-
+            if (color != null)
+                holder.linearLayout.setBackgroundColor(Color.parseColor(color));
         } else{
             holder.linearLayout.setBackgroundColor(ContextCompat.getColor(sharedData.context,R.color.color_primary));
 

@@ -18,9 +18,11 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import net.berndreiss.zentodo.Mode;
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
+import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomListItemTouchHelperCallback;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.TaskList;
@@ -30,6 +32,7 @@ import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -49,9 +52,6 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private final String standardColor = "#35ff0000";
     private final List<Task> listTasks = new ArrayList<>();//ArrayList that serves as a container for tasks that are in the list that has been chosen
 
-    ListTaskListAdapter listsTaskListAdapter;//adapter for items in lists (items can be moved and get removed when list of task is changed)
-    AllTaskListAdapter allTasksAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed)
-    NoListTaskListAdapter noListAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed) TODO implement own adapter for removing items when list is changed
 
     private static class ViewHolder{
         private Button button;//Button to choose list
@@ -109,13 +109,13 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                         }
                         DataManager.editListColor(sharedData, list, color);
-                        listsTaskListAdapter.notifyDataSetChanged();
+                        sharedData.listsTaskListAdapter.notifyDataSetChanged();
 
                     })
                     .setNegativeButton("no color", (dialog, which) -> {
                         this.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
                         DataManager.editListColor(sharedData, list, ListTaskListAdapter.DEFAULT_COLOR);
-                        listsTaskListAdapter.notifyDataSetChanged();
+                        sharedData.listsTaskListAdapter.notifyDataSetChanged();
 
                     })
                     .build()
@@ -171,7 +171,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         holder.button.setText(lists.get(position).getName());
 
         //if clicked assign ListView TaskListAdapter with tasks associated to list
-        holder.button.setOnClickListener(view -> {
+        holder.button.setOnClickListener(_ -> {
 
             //set header with list name visible
             header.layout.setVisibility(View.VISIBLE);
@@ -186,6 +186,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             //fill ListView with all tasks or according list
             if (holder.button.getText().equals(sharedData.context.getResources().getString(R.string.allTasks))){
 
+                sharedData.mode = Mode.LIST_ALL;
                 //clear ArrayList for list, add all tasks from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
                 User user = sharedData.clientStub.getUser();
@@ -201,20 +202,21 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 header.colorButton.setVisibility(View.GONE);
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
-                if (allTasksAdapter == null) {
+                if (sharedData.allTasksAdapter == null) {
 
                     //initialize and set adapter
-                    allTasksAdapter = new AllTaskListAdapter(sharedData, listTasks);
-                    recyclerView.setAdapter(allTasksAdapter);//set adapter
+                    sharedData.allTasksAdapter = new AllTaskListAdapter(sharedData, listTasks);
+                    recyclerView.setAdapter(sharedData.allTasksAdapter);//set adapter
 
                 } else{
 
-                    allTasksAdapter.notifyDataSetChanged();
+                    sharedData.allTasksAdapter.notifyDataSetChanged();
 
                 }
 
             } else if (holder.button.getText().equals(sharedData.context.getResources().getString(R.string.noList))) {
 
+                sharedData.mode = Mode.LIST_NO;
                 //clear ArrayList for list, add tasks without a list from data and notify adapter (in case they have been altered in another layout)
                 listTasks.clear();
 
@@ -231,15 +233,15 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 header.colorButton.setVisibility(View.GONE);
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
-                if (noListAdapter == null) {
+                if (sharedData.noListAdapter == null) {
 
                     //initialize and set adapter
-                    noListAdapter = new NoListTaskListAdapter(sharedData, listTasks);
-                    recyclerView.setAdapter(noListAdapter);
+                    sharedData.noListAdapter = new NoListTaskListAdapter(sharedData, listTasks);
+                    recyclerView.setAdapter(sharedData.noListAdapter);
 
                 }else{
 
-                    noListAdapter.notifyDataSetChanged();
+                    sharedData.noListAdapter.notifyDataSetChanged();
 
                 }
 
@@ -276,13 +278,13 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 listTasks.addAll(sharedData.clientStub.loadList(lists.get(position).getId()));
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
-                if(listsTaskListAdapter==null){
+                if(sharedData.listsTaskListAdapter==null){
                     //initialize and set adapter
-                    listsTaskListAdapter = new ListTaskListAdapter(sharedData, list, listTasks);
-                    recyclerView.setAdapter(listsTaskListAdapter);
+                    sharedData.listsTaskListAdapter = new ListTaskListAdapter(sharedData, list, listTasks);
+                    recyclerView.setAdapter(sharedData.listsTaskListAdapter);
 
                     //allows items to be moved and reordered in RecyclerView
-                    ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(listsTaskListAdapter);
+                    ItemTouchHelper.Callback callback = new CustomListItemTouchHelperCallback(sharedData.listsTaskListAdapter, recyclerView);
 
                     //create ItemTouchHelper and assign to RecyclerView
                     ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
@@ -290,7 +292,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
                 }
                 else{
-                    listsTaskListAdapter.notifyDataSetChanged();
+                    sharedData.listsTaskListAdapter.notifyDataSetChanged();
                 }
 
 
@@ -323,7 +325,8 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         lists.clear();
         lists.addAll(DataManager.getLists(sharedData));
         notifyDataSetChanged();
-
+        super.clear();
+        super.addAll(lists.stream().map(TaskList::getName).toList());
+        super.notifyDataSetChanged();
     }
-
 }

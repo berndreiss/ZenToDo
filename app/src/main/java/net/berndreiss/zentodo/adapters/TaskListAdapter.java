@@ -31,6 +31,7 @@ import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.TaskList;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,6 +86,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
         public AutoCompleteTextView autoCompleteList;//AutoComplete to set new list
         public Button clearList;//clears AutoComplete
         public Button backList;//return to original layout and save
+
 
         /**
          * Initialize the view
@@ -349,6 +351,7 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
 
+        sharedData.itemIsInMotion = true;
         //swap tasks in data distinguishing between item being moved up or down
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
@@ -421,4 +424,5 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
      * Reset the adapter.
      */
     public abstract void reset();
+
 }

@@ -139,7 +139,9 @@ public class ListManager implements ListManagerI{
     }
 
     @Override
-    public Optional<TaskList> getList(long id) {
+    public Optional<TaskList> getList(Long id) {
+        if (id == null)
+            return Optional.empty();
         SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM LISTS WHERE ID = ?", new String[]{String.valueOf(id)});
         List<TaskList> lists = getListOfTaskList(cursor);
@@ -164,7 +166,7 @@ public class ListManager implements ListManagerI{
     @Override
     public List<TaskList> getListsForUser(long user, int profile) {
         SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM LISTS JOIN PROFILE_LIST ON LIST = ID WHERE USER = ? AND PROFILE = ?",
+        Cursor cursor = db.rawQuery("SELECT * FROM LISTS JOIN PROFILE_LIST ON LIST = LISTS.ID WHERE USER = ? AND PROFILE = ?",
                 new String[]{String.valueOf(user), String.valueOf(profile)});
         List<TaskList> list = getListOfTaskList(cursor);
         cursor.close();

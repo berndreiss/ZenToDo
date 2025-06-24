@@ -79,16 +79,6 @@ public class MainActivity extends AppCompatActivity {
     //floating action button on the bottom right corner
     private FloatingActionButton fab;
 
-    //The adapters fill the RecyclerViews of layouts above and are all derived from TaskListAdapter
-    //for more information on the implementation see the according java files in adapters
-    PickTaskListAdapter pickAdapter;
-    PickTaskListAdapter doNowAdapter;
-    PickTaskListAdapter doLaterAdapter;
-    PickTaskListAdapter moveToListAdapter;
-    DropTaskListAdapter dropAdapter;
-    TaskListAdapter focusAdapter;
-    ListsListAdapter listsListAdapter;
-
     //Object for data shared across the whole application
     private SharedData sharedData;
 
@@ -147,7 +137,10 @@ public class MainActivity extends AppCompatActivity {
         //initialize client stub
         try {
             DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
-        } catch (InterruptedException _) {}
+        } catch (InterruptedException e) {
+            //TODO logging
+            System.out.println(e.getMessage());
+        }
 
         //layouts are initialized
         initializeDrop(sharedData);
@@ -167,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
     public void initializePick(SharedData sharedData) {
 
         //initialize adapter for RecyclerView with all tasks that have been dropped, have been in Focus or are due today
-        pickAdapter = new PickTaskListAdapter(sharedData, false){
+        sharedData.pickAdapter = new PickTaskListAdapter(sharedData, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick).getLayoutParams();
@@ -177,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         //initialize empty adapters for the other RecyclerViews
-        doNowAdapter = new PickTaskListAdapter(sharedData, true){
+        sharedData.doNowAdapter = new PickTaskListAdapter(sharedData, true){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doNow).getLayoutParams();
@@ -186,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        doLaterAdapter = new PickTaskListAdapter(sharedData, false){
+        sharedData.doLaterAdapter = new PickTaskListAdapter(sharedData, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_doLater).getLayoutParams();
@@ -195,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        moveToListAdapter = new PickTaskListAdapter(sharedData, false){
+        sharedData.moveToListAdapter = new PickTaskListAdapter(sharedData, false){
             @Override
             public void itemCountChanged(){
                 ViewGroup.LayoutParams params = findViewById(R.id.list_view_pick_list).getLayoutParams();
@@ -205,10 +198,10 @@ public class MainActivity extends AppCompatActivity {
         };
 
         //Set up ItemTouchHelper to move tasks around and connect View to each other
-        initializeRecyclerView(findViewById(R.id.list_view_pick), pickAdapter);
-        initializeRecyclerView(findViewById(R.id.list_view_pick_doNow), doNowAdapter);
-        initializeRecyclerView(findViewById(R.id.list_view_pick_doLater), doLaterAdapter);
-        initializeRecyclerView(findViewById(R.id.list_view_pick_list), moveToListAdapter);
+        initializeRecyclerView(findViewById(R.id.list_view_pick), sharedData.pickAdapter);
+        initializeRecyclerView(findViewById(R.id.list_view_pick_doNow), sharedData.doNowAdapter);
+        initializeRecyclerView(findViewById(R.id.list_view_pick_doLater), sharedData.doLaterAdapter);
+        initializeRecyclerView(findViewById(R.id.list_view_pick_list), sharedData.moveToListAdapter);
 
         //button to pick tasks that have been checked
         Button pickButton = findViewById(R.id.button_pick);
@@ -218,21 +211,21 @@ public class MainActivity extends AppCompatActivity {
         //if pressed remove tasks from Drop and add to Focus
         pickButton.setOnClickListener(_ -> {
             //Continue if all tasks have been categorized, show hint otherwise
-            if (!pickAdapter.tasks.isEmpty()){
+            if (!sharedData.pickAdapter.tasks.isEmpty()){
                 Helper.showPickHelper(this);
             }
             else {
                 //if checked reset dropped and focus attributes of all task in tasksToDoNow
-                for (Task t : doNowAdapter.tasks) {
+                for (Task t : sharedData.doNowAdapter.tasks) {
                     DataManager.setFocus(sharedData, t, true);
                     DataManager.setDropped(sharedData, t, false);
                 }
                 //set focus to false for all tasks in tasksToDoLater
-                for (Task t : doLaterAdapter.tasks)
+                for (Task t : sharedData.doLaterAdapter.tasks)
                         DataManager.setFocus(sharedData, t, false);
 
                 //set focus to false for all tasks in tasksToMoveToList
-                for (Task t : moveToListAdapter.tasks)
+                for (Task t : sharedData.moveToListAdapter.tasks)
                         DataManager.setFocus(sharedData, t, false);
                 //show Focus layout
                 showFocus();
@@ -245,11 +238,11 @@ public class MainActivity extends AppCompatActivity {
      */
     @SuppressLint("NotifyDataSetChanged")
     public void showPick(){
-        //Set the adapter
-        sharedData.adapter = pickAdapter;
+        //Set the mode
+        sharedData.mode = Mode.PICK;
         //Reset and Update Adapters to reflect changes
         //Also update itemCountChanged, so that RecyclerViews get resized properly
-        pickAdapter.reset();
+        sharedData.pickAdapter.reset();
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
         //set fab to show help according to layout
@@ -282,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     public void initializeDrop(SharedData sharedData){
         //initialize adapter for ListView that shows tasks dropped
-        dropAdapter = new DropTaskListAdapter(sharedData);
+        sharedData.dropAdapter = new DropTaskListAdapter(sharedData);
         //assign ListView
         RecyclerView listView = findViewById(R.id.list_view_drop);
         //show fab when anything is being touched in listViews
@@ -290,11 +283,11 @@ public class MainActivity extends AppCompatActivity {
         //show fab when anything is being touched in layout
         drop.setOnTouchListener(new ShowFab());
         //set adapter
-        listView.setAdapter(dropAdapter);
+        listView.setAdapter(sharedData.dropAdapter);
         //set layoutManager
         listView.setLayoutManager(new LinearLayoutManager(this));
         //allows items to be moved and reordered in RecyclerView
-        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(dropAdapter);
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(sharedData.dropAdapter, listView);
         //create ItemTouchHelper and assign to RecyclerView
         ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
         iTouchHelper.attachToRecyclerView(listView);
@@ -323,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
             editText.setText("");
             //add task to Data if it is not empty
             if (!task.trim().isEmpty())
-                dropAdapter.add(task);
+                sharedData.dropAdapter.add(task);
         });
     }
 
@@ -332,10 +325,10 @@ public class MainActivity extends AppCompatActivity {
      */
     @SuppressLint("NotifyDataSetChanged")
     public void showDrop(){
-        //Set the adapter
-        sharedData.adapter = dropAdapter;
+        //Set the mode
+        sharedData.mode = Mode.DROP;
         //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
-        dropAdapter.reset();
+        sharedData.dropAdapter.reset();
         //enable all components of Drop layout (setVisibility = VISIBLE)
         enableLayout(drop);
         //set fab to show help according to layout
@@ -368,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     public void initializeFocus(SharedData sharedData){
         //initialize the adapter for the ListView to show the tasks to focus on
-        focusAdapter = new FocusTaskListAdapter(sharedData);
+        sharedData.focusAdapter = new FocusTaskListAdapter(sharedData);
         //assign RecyclerView
         RecyclerView listView = findViewById(R.id.list_view_focus);
         //show fab when anything is being touched in listView
@@ -376,10 +369,10 @@ public class MainActivity extends AppCompatActivity {
         //show fab when anything is being touched in layout
         focus.setOnTouchListener(new ShowFab());
         //set adapter for Recyclerview
-        listView.setAdapter(focusAdapter);
+        listView.setAdapter(sharedData.focusAdapter);
         listView.setLayoutManager(new LinearLayoutManager(this));
         //allows items to be moved and reordered in RecyclerView
-        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(focusAdapter);
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(sharedData.focusAdapter, listView);
         //create ItemTouchHelper and assign to RecyclerView
         ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
         iTouchHelper.attachToRecyclerView(listView);
@@ -390,10 +383,10 @@ public class MainActivity extends AppCompatActivity {
      */
     @SuppressLint("NotifyDataSetChanged")
     public void showFocus(){
-        //Set the adapter
-        sharedData.adapter = focusAdapter;
+        //Set the mode
+        sharedData.mode = Mode.FOCUS;
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
-        focusAdapter.reset();
+        sharedData.focusAdapter.reset();
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);
         //set fab to show help according to layout
@@ -436,17 +429,19 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout headerLayout = findViewById(R.id.header);
         TextView headerTextView = findViewById(R.id.text_view_lists_header);
         Button headerButton = findViewById(R.id.button_header);
-        listsListAdapter = new ListsListAdapter(sharedData, listView, recyclerView, headerLayout, headerTextView, headerButton);
+        sharedData.listsListAdapter = new ListsListAdapter(sharedData, listView, recyclerView, headerLayout, headerTextView, headerButton);
         //set adapter
-        listView.setAdapter(listsListAdapter);
+        listView.setAdapter(sharedData.listsListAdapter);
     }
 
     /**
      * Show the LISTS view.
      */
     public void showLists(){
+        //set the mode
+        sharedData.mode = Mode.LIST_OF_LISTS;
         //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
-        listsListAdapter.reset();
+        sharedData.listsListAdapter.reset();
         //enable all components in the Lists layout (setVisibility = VISIBLE)
         enableLayout(lists);
         //set fab to show help according to layout
@@ -549,15 +544,16 @@ public class MainActivity extends AppCompatActivity {
         view.setLayoutManager(new LinearLayoutManager(this));
         view.setNestedScrollingEnabled(false);
         //allows items to be moved and reordered in RecyclerView
-        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(adapter);
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(adapter, view);
         //create ItemTouchHelper and assign to RecyclerView
         ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
         iTouchHelper.attachToRecyclerView(view);
+        //TODO we may be able to simplify this
         //sets references to other adapters in adapter
-        adapter.setPickAdapter(pickAdapter);
-        adapter.setDoNowAdapter(doNowAdapter);
-        adapter.setDoLaterAdapter(doLaterAdapter);
-        adapter.setMoveToListAdapter(moveToListAdapter);
+        adapter.setPickAdapter(sharedData.pickAdapter);
+        adapter.setDoNowAdapter(sharedData.doNowAdapter);
+        adapter.setDoLaterAdapter(sharedData.doLaterAdapter);
+        adapter.setMoveToListAdapter(sharedData.moveToListAdapter);
     }
 
 }

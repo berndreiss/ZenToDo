@@ -150,12 +150,17 @@ public class TaskManager implements TaskManagerI {
      * @param task task to remove
      */
     synchronized void removeTask(Task task) {
+        //TODO DECREMENT POSITION DOES NOT WORK
         SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         if (task.getUserId() == null)
             db.delete("TASKS", "ID=? AND USER IS NULL AND PROFILE=?", new String[]{String.valueOf(task.getId()), String.valueOf(task.getProfile())});
         else
             db.delete("TASKS", "ID=? AND USER=? AND PROFILE=?", new String[]{String.valueOf(task.getId()), String.valueOf(task.getUserId()), String.valueOf(task.getProfile())});
-        db.execSQL("UPDATE TASKS SET POSITION=POSITION-1 WHERE POSITION >?", new String[]{String.valueOf(task.getPosition())});
+        db.execSQL("UPDATE TASKS SET POSITION=POSITION-1 WHERE USER=? AND PROFILE=? AND POSITION >?", new String[]{
+                String.valueOf(task.getUserId()),
+                String.valueOf(task.getProfile()),
+                String.valueOf(task.getPosition())
+        });
         if (task.getList() != null)
             db.execSQL("UPDATE TASKS SET LIST_POSITION=LIST_POSITION-1 WHERE LIST=? AND LIST_POSITION>?", new String[]{String.valueOf(task.getList()), String.valueOf(task.getListPosition())});
     }

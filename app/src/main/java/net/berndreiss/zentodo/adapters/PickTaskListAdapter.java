@@ -193,6 +193,18 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    public void update(){
+        pickAdapter.notifyDataSetChanged();
+        pickAdapter.itemCountChanged();
+        doNowAdapter.notifyDataSetChanged();
+        doNowAdapter.itemCountChanged();
+        doLaterAdapter.notifyDataSetChanged();
+        doLaterAdapter.itemCountChanged();
+        moveToListAdapter.notifyDataSetChanged();
+        moveToListAdapter.itemCountChanged();
+    }
+
     @Override
     public void itemCountChanged(){}
 

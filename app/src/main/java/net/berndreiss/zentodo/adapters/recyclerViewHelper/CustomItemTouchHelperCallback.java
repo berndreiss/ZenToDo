@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
+import net.berndreiss.zentodo.data.Task;
+
+import java.util.Comparator;
 
 /**
  * TODO DESCRIBE
@@ -15,10 +18,12 @@ import net.berndreiss.zentodo.adapters.TaskListAdapter;
 public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
 
-    private final TaskListAdapter adapter;
+    protected final TaskListAdapter adapter;
+    protected final RecyclerView recyclerView;
 
-    public CustomItemTouchHelperCallback(TaskListAdapter adapter) {
+    public CustomItemTouchHelperCallback(TaskListAdapter adapter, RecyclerView recyclerView) {
         this.adapter = adapter;
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -48,11 +53,14 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
-    public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState){
+    public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
         super.onSelectedChanged(viewHolder, actionState);
-        if (actionState==ItemTouchHelper.ACTION_STATE_IDLE){
-            adapter.notifyDataSetChanged();
+        if (actionState == ItemTouchHelper.ACTION_STATE_IDLE) {
+            recyclerView.post(() -> {
+                adapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+                adapter.notifyDataSetChanged();
+            });
         }
-
+        adapter.sharedData.itemIsInMotion = false;
     }
 }

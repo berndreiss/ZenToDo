@@ -6,6 +6,8 @@ import android.widget.Toast;
 
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
+import net.berndreiss.zentodo.exceptions.DuplicateIdException;
+import net.berndreiss.zentodo.exceptions.InvalidActionException;
 import net.berndreiss.zentodo.exceptions.PositionOutOfBoundException;
 import net.berndreiss.zentodo.util.ClientStub;
 
@@ -17,6 +19,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +65,10 @@ public class DataManager {
             try {
                 //TODO get password properly
                 sharedData.clientStub.init(email, null, () -> "Test1234!?");
-            } catch (IOException _) {}
+            } catch (IOException e) {
+                //TODO logging
+                System.out.println(e.getMessage());
+            }
         });
         thread.start();
         thread.join();
@@ -257,15 +264,18 @@ public class DataManager {
     public static void editList(SharedData sharedData, Task task, String list) {
         //TODO this needs to be reworked and go through the client stub
         Optional<TaskList> taskList = sharedData.clientStub.getListByName(list);
-        if (taskList.isEmpty())
-            return;
+        if (taskList.isEmpty()) {
+            try {
+                taskList = Optional.of(sharedData.clientStub.addNewList(list, null));
+            } catch (InvalidActionException | DuplicateIdException _) {}
+            if (taskList.isEmpty())
+                return;
+        }
         if (task == null || task.getList() != null && task.getList().equals(taskList.get().getId()))
             return;
-        if (task.getList() != null)
-            for (Task e : sharedData.adapter.tasks)
-                if (task.getList().equals(e.getList()) && e.getListPosition() > task.getListPosition())
-                    e.setListPosition(e.getListPosition()-1);
-        Thread thread = new Thread(() -> sharedData.database.getListManager().updateList(task, taskList.get().getId()));
+
+        final TaskList finalList = taskList.get();
+        Thread thread = new Thread(() -> sharedData.database.getListManager().updateList(task, finalList.getId()));
         thread.start();
         try {
             thread.join();
@@ -326,6 +336,7 @@ public class DataManager {
      */
     public static List<TaskList> getLists(SharedData sharedData){
         List<TaskList> lists = sharedData.clientStub.loadLists();
+        lists.sort(Comparator.comparing(taskList -> taskList.getName().toLowerCase()));
         lists.add(new TaskList(-1, "ALL TASKS", null));
         lists.add(new TaskList(-1, "No List", null));
         return lists;
