@@ -6,6 +6,7 @@ import android.widget.Toast;
 
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
+import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.exceptions.DuplicateIdException;
 import net.berndreiss.zentodo.exceptions.InvalidActionException;
 import net.berndreiss.zentodo.exceptions.PositionOutOfBoundException;
@@ -264,18 +265,42 @@ public class DataManager {
     public static void editList(SharedData sharedData, Task task, String list) {
         //TODO this needs to be reworked and go through the client stub
         Optional<TaskList> taskList = sharedData.clientStub.getListByName(list);
+        List<TaskList> listContainer = new ArrayList<>();
         if (taskList.isEmpty()) {
-            try {
-                taskList = Optional.of(sharedData.clientStub.addNewList(list, null));
-            } catch (InvalidActionException | DuplicateIdException _) {}
-            if (taskList.isEmpty())
+            Thread thread = new Thread(() -> {
+                try {
+                    listContainer.add(sharedData.clientStub.addNewList(list, null));
+                } catch (InvalidActionException e) {
+                    //TODO logging
+                    System.out.println(e.getMessage());
+                } catch (DuplicateIdException e){
+                    //TODO logging
+                    System.out.println(e.getMessage());
+                }
+            });
+            thread.start();
+            try{
+                thread.join();
+            } catch (InterruptedException e){
+                //TODO logging
+                System.out.println(e.getMessage());
+            }
+            if (listContainer.isEmpty() || listContainer.getFirst() == null)
                 return;
+            taskList = Optional.of(listContainer.getFirst());
         }
         if (task == null || task.getList() != null && task.getList().equals(taskList.get().getId()))
             return;
 
         final TaskList finalList = taskList.get();
-        Thread thread = new Thread(() -> sharedData.database.getListManager().updateList(task, finalList.getId()));
+        Thread thread = new Thread(() -> {
+            try {
+                sharedData.clientStub.updateList(task.getId(), finalList.getId());
+            } catch (InvalidActionException e){
+                //TODO logging
+                throw new RuntimeException(e);
+            }
+        });
         thread.start();
         try {
             thread.join();

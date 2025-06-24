@@ -60,7 +60,7 @@ public class IntegrationTests {
     public void add() throws InterruptedException {
 
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
         DataManager.add(sharedData, "0");
         DataManager.add(sharedData, "1");
         DataManager.add(sharedData, "2");
@@ -102,7 +102,7 @@ public class IntegrationTests {
     @Test
     public void remove() throws InvalidActionException, InterruptedException, DuplicateIdException {
         TaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
         sharedData.clientStub.addNewList("0", null);
         DataManager.add(sharedData, "0");
         DataManager.add(sharedData, "1");
@@ -137,7 +137,7 @@ public class IntegrationTests {
         try (ZenSQLiteHelper db = new ZenSQLiteHelper(sharedData.context)) {
             DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
             PickTaskListAdapter pickAdapter = new PickTaskListAdapter(sharedData, false);
-            sharedData.adapter = pickAdapter;
+            sharedData.mode = Mode.PICK;
             TaskList list0 = sharedData.clientStub.addNewList("0", null);
             TaskList list1 = sharedData.clientStub.addNewList("1", null);
             DataManager.add(sharedData, "0");
@@ -238,7 +238,7 @@ public class IntegrationTests {
     @Test
     public void swapLists() {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
         DataManager.add(sharedData, "0");
         DataManager.editList(sharedData, adapter.tasks.get(0), "0");
 
@@ -280,7 +280,7 @@ public class IntegrationTests {
     public void swap() {
 
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
         DataManager.add(sharedData, "0");
         DataManager.editList(sharedData, adapter.tasks.get(0), "0");
 
@@ -318,7 +318,7 @@ public class IntegrationTests {
     @Test
     public void setTask() {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
         DataManager.add(sharedData, "0");
         DataManager.setTask(sharedData, adapter.tasks.getFirst(), "1");
 
@@ -333,7 +333,7 @@ public class IntegrationTests {
     @Test
     public void setFocus() {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
 
         DataManager.add(sharedData, "0");
         DataManager.setFocus(sharedData, adapter.tasks.getFirst(), true);
@@ -355,7 +355,7 @@ public class IntegrationTests {
     @Test
     public void setDropped() {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
 
         DataManager.add(sharedData, "0");
         DataManager.setDropped(sharedData, adapter.tasks.getFirst(), false);
@@ -375,7 +375,7 @@ public class IntegrationTests {
     public void editReminderDate() {
 
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
 
         LocalDate date = LocalDate.now();
         DataManager.add(sharedData, "0");
@@ -400,7 +400,7 @@ public class IntegrationTests {
     @Test
     public void editRecurrence() {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
         String recurrence = "m1";
         DataManager.add(sharedData, "0");
         DataManager.editRecurrence(sharedData, adapter.tasks.getFirst(), recurrence);
@@ -426,7 +426,7 @@ public class IntegrationTests {
 
         try (ZenSQLiteHelper db = new ZenSQLiteHelper(sharedData.context)) {
             DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-            sharedData.adapter = adapter;
+            sharedData.mode = Mode.DROP;
             DataManager.add(sharedData, "0");
             DataManager.editList(sharedData, adapter.tasks.getFirst(), "0");
             DataManager.editListColor(sharedData, 0L, "BLUE");
@@ -444,7 +444,7 @@ public class IntegrationTests {
     @Test
     public void getLists() {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
         DataManager.add(sharedData, "0");
         DataManager.editList(sharedData, adapter.tasks.getFirst(), "0");
 
@@ -461,7 +461,7 @@ public class IntegrationTests {
     @Test
     public void getFocus() {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
         DataManager.add(sharedData, "0");
         DataManager.add(sharedData, "1");
         DataManager.add(sharedData, "2");
@@ -491,7 +491,7 @@ public class IntegrationTests {
     @Test
     public void getTasksToPick() {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
         DataManager.add(sharedData, "0");
         DataManager.add(sharedData, "1");
 
@@ -627,7 +627,7 @@ public class IntegrationTests {
 
 
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-        sharedData.adapter = adapter;
+        sharedData.mode = Mode.DROP;
         DataManager.add(sharedData, "0");
 
         //run tests

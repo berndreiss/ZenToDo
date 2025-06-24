@@ -278,6 +278,35 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @Override
     public void swapListEntries(long list, long task, int position) {
+        if (Objects.requireNonNull(sharedData.mode) == Mode.LIST)
+            swapListEntriesForAdapter(sharedData.listAdapter, list, task, position);
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void swapListEntriesForAdapter(TaskListAdapter adapter, long list, long task, int position){
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() ->{
+            Optional<Task> task1 = adapter.tasks.stream().filter(t -> t.getList() == list).filter(t -> t.getId() == task).findFirst();
+            Optional<Task> task2 = adapter.tasks.stream().filter(t -> t.getList() == list).filter(t -> t.getListPosition() == position).findFirst();
+            Optional<Task> updatedTask1 = Optional.empty();
+            Optional<Task> updatedTask2 = Optional.empty();
+            if (task1.isPresent())
+                updatedTask1 = sharedData.clientStub.getTask(task);
+            if (task2.isPresent())
+                updatedTask2 = sharedData.clientStub.getTask(task2.get().getId());
+            if (task1.isPresent() && updatedTask1.isPresent()) {
+                adapter.tasks.remove(task1.get());
+                adapter.tasks.add(updatedTask1.get());
+            }
+            if (task2.isPresent() && updatedTask2.isPresent()) {
+                adapter.tasks.remove(task2.get());
+                adapter.tasks.add(updatedTask2.get());
+            }
+            adapter.tasks.sort(Comparator.comparingInt(Task::getListPosition));
+            if (!sharedData.itemIsInMotion)
+                adapter.notifyDataSetChanged();
+        });
+
     }
 
     @Override
@@ -292,8 +321,52 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     public void updateDropped(long task, boolean value) {
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void updateList(long task, Long list) {
+        //TODO update color too
+        switch (sharedData.mode){
+            case DROP: updateListForAdapter(sharedData.dropAdapter, task, list); break;
+            case PICK: {
+                updateListForAdapter(sharedData.pickAdapter, task, list);
+                updateListForAdapter(sharedData.doNowAdapter, task, list);
+                updateListForAdapter(sharedData.doLaterAdapter, task, list);
+                updateListForAdapter(sharedData.moveToListAdapter, task, list);
+                break;
+            }
+            case FOCUS: updateListForAdapter(sharedData.focusAdapter, task, list); break;
+            case LIST:
+            {
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> {
+                    Optional<Task> taskFound = sharedData.listAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+                    if (taskFound.isEmpty())
+                        return;
+                    Optional<Task> newTask = sharedData.clientStub.getTask(task);
+                    if (newTask.isEmpty())
+                        return;
+                    sharedData.listAdapter.tasks.remove(taskFound.get());
+                    sharedData.listAdapter.tasks.add(newTask.get());
+                    sharedData.listAdapter.notifyDataSetChanged();
+                });
+            }
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void updateListForAdapter(TaskListAdapter adapter, long taskId, Long list){
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() -> {
+            Optional<Task> task = adapter.tasks.stream().filter(t -> t.getId() == taskId).findFirst();
+            if (task.isEmpty())
+                return;
+            Optional<Task> newTask = sharedData.clientStub.getTask(taskId);
+            if (newTask.isEmpty())
+                return;
+            adapter.tasks.remove(task.get());
+            adapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+            adapter.notifyDataSetChanged();
+        });
     }
 
     @Override

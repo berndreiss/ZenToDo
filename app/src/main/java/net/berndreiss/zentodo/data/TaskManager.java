@@ -84,11 +84,11 @@ public class TaskManager implements TaskManagerI {
         }
         cursor.close();
 
-        Task Task = null;
+        Task newTask = null;
         try {
-            Task = addNewTask(userId, profile, task, maxPosition + 1);
+            newTask = addNewTask(userId, profile, task, maxPosition + 1);
         } catch (PositionOutOfBoundException _) {}
-        return Task;
+        return newTask;
     }
 
     @Override

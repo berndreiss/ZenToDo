@@ -86,14 +86,18 @@ public class ListManager implements ListManagerI{
     }
 
     @Override
-    public synchronized void updateList(long userId, int profile, long id, Long listId){
+    public synchronized void updateList(long userId, int profile, long task, Long listId) throws InvalidActionException{
         SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(profile), String.valueOf(id)});
-        List<Task> entries = TaskManager.getListOfTasks(cursor);
+        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER = ? AND PROFILE = ? AND ID = ?", new String[]{
+                String.valueOf(userId),
+                String.valueOf(profile),
+                String.valueOf(task)
+        });
+        List<Task> tasks = TaskManager.getListOfTasks(cursor);
         cursor.close();
-        if (entries.size() != 1)
+        if (tasks.size() != 1)
             return;
-        updateList(entries.getFirst(), listId);
+        updateList(tasks.getFirst(), listId);
     }
 
     @Override
@@ -182,9 +186,11 @@ public class ListManager implements ListManagerI{
         return list;
     }
 
-    public synchronized void updateList(Task task, Long list){
+    public synchronized void updateList(Task task, Long list) throws InvalidActionException {
         if (task == null)
             return;
+        if (list != null && getListsForUser(task.getUserId(), task.getProfile()).stream().noneMatch(tl -> tl.getId() == list))
+            throw new InvalidActionException("User profile has no list with this id.");
         SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         Integer position = null;
@@ -198,40 +204,55 @@ public class ListManager implements ListManagerI{
                 if (!cursor.isAfterLast())
                     position = cursor.getInt(0) + 1;
             }
+            else
+                position = 0;
             cursor.close();
         }
         values.put("LIST", list);
         values.put("LIST_POSITION", position);
-        db.update("TASKS", values, "ID=?", new String[]{String.valueOf(task.getId())});
+        db.update("TASKS", values, "USER=? AND PROFILE=? AND ID=?", new String[]{
+                String.valueOf(task.getUserId()),
+                String.valueOf(task.getProfile()),
+                String.valueOf(task.getId())
+        });
+        if (list == null)
+            return;
         if (task.getList() != null && !Objects.equals(task.getList(), list)) {
             db.execSQL("UPDATE TASKS SET LIST_POSITION=LIST_POSITION - 1 WHERE LIST=? AND LIST_POSITION >?", new String[]{String.valueOf(task.getList()), String.valueOf(task.getListPosition())});
         }
-        task.setList(list);
-        task.setListPosition(position);
     }
     @Override
-    public synchronized void swapListEntries(long userId, int profile, long list, long id, int position) throws PositionOutOfBoundException {
+    public synchronized void swapListEntries(long userId, int profile, long task, long list, int position) throws PositionOutOfBoundException {
         List<Task> listEntries = getListEntries(userId, profile, list);
         if (position >= listEntries.size())
-            throw new PositionOutOfBoundException("List position is out of bounds.");
-        Optional<Task> task = listEntries.stream().filter(e -> e.getId() == id).findFirst();
+            throw new PositionOutOfBoundException("List position is out of bounds: position " + position + ", size: " + listEntries.size());
+        Optional<Task> taskFound = listEntries.stream().filter(e -> e.getId() == task).findFirst();
         Optional<Task> taskOther = listEntries.stream().filter(e -> e.getListPosition() == position).findFirst();
-        if (task.isEmpty() || taskOther.isEmpty())
+        if (taskFound.isEmpty() || taskOther.isEmpty())
             return;
-        swapListEntries(task.get(), task.get().getListPosition(), taskOther.get(), position);
+        swapListEntries(taskFound.get(), taskFound.get().getListPosition(), taskOther.get(), position);
     }
 
     synchronized void swapListEntries(Task task, int posOld, Task taskOther, int pos){
-        List<Task> listOld = getListEntries(task.getUserId(), task.getProfile(), task.getList());
         SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
         ContentValues values1 = new ContentValues();
         values1.put("LIST_POSITION", posOld);
-        db.update("TASKS", values1, "LIST = ? AND ID = ?",
-                new String[]{String.valueOf(task.getList()), String.valueOf(taskOther.getId())});
+        db.update("TASKS", values1, "LIST=? AND USER=? AND PROFILE=? AND ID=?",
+                new String[]{
+                        String.valueOf(task.getList()),
+                        String.valueOf(task.getUserId()),
+                        String.valueOf(task.getProfile()),
+                        String.valueOf(taskOther.getId())
+        });
         ContentValues values0 = new ContentValues();
         values0.put("LIST_POSITION", pos);
-        db.update("TASKS", values0, "LIST = ? AND ID = ?",
-                new String[]{String.valueOf(task.getList()), String.valueOf(task.getId())});
+        db.update("TASKS", values0, "LIST=? AND USER=? AND PROFILE=? AND ID = ?",
+                new String[]{
+                        String.valueOf(task.getList()),
+                        String.valueOf(task.getUserId()),
+                        String.valueOf(task.getProfile()),
+                        String.valueOf(task.getId())
+        });
     }
     @Override
     public synchronized void updateListColor(long list, String color){
