@@ -39,10 +39,10 @@ import java.util.Optional;
 
 public class PickTaskListAdapter extends TaskListAdapter implements PickListener {
 
-    private PickTaskListAdapter pickAdapter;
-    private PickTaskListAdapter doNowAdapter;
-    private PickTaskListAdapter doLaterAdapter;
-    private PickTaskListAdapter moveToListAdapter;
+    public PickTaskListAdapter pickAdapter;
+    public PickTaskListAdapter doNowAdapter;
+    public PickTaskListAdapter doLaterAdapter;
+    public PickTaskListAdapter moveToListAdapter;
     private final boolean checkboxTicked;//Tasks that are in the doNowAdapter are ticked
 
     public PickTaskListAdapter(SharedData sharedData, boolean checkboxTicked){

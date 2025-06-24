@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 
 import java.util.List;
 import java.util.Map;
@@ -122,16 +121,6 @@ public class DataManager {
             //TODO add logging
             throw new RuntimeException(e);
         }
-        //TODO move to UI
-        //get positions of items
-        int pos1 = getPosition(sharedData.adapter.tasks, task1.getId());
-        int pos2 = getPosition(sharedData.adapter.tasks, task2.getId());
-        //swap items in tasks
-        Collections.swap(sharedData.adapter.tasks, pos1, pos2);
-        //swap position in both tasks
-        int posTemp = task1.getPosition();
-        task1.setPosition(task2.getPosition());
-        task2.setPosition(posTemp);
     }
 
     /**
@@ -156,32 +145,7 @@ public class DataManager {
             //TODO add logging
             throw new RuntimeException(e);
         }
-        //TODO move to UI
-        //get positions of items
-        int pos1 = getPosition(sharedData.adapter.tasks, task1.getId());
-        int pos2 = getPosition(sharedData.adapter.tasks, task2.getId());
-        //swap items in tasks
-        Collections.swap(sharedData.adapter.tasks, pos1, pos2);
-        //swap position in both tasks
-        int posTemp = task1.getListPosition();
-        task1.setListPosition(task2.getListPosition());
-        task2.setListPosition(posTemp);
     }
-
-    /**
-     * Get position of Task by id, returns -1 if id not found
-     * @param tasks list of tasks
-     * @param task the task id
-     * @return the position of the task, if it exists, -1 otherwise
-     */
-    private static int getPosition(List<Task> tasks, long task) {
-        //loop through tasks and return position if id matches
-        for (int i = 0; i < tasks.size(); i++)
-            if (tasks.get(i).getId() == task)
-                return i;
-        return -1;
-    }
-
 
     /**
      * Set the literal task.
@@ -200,8 +164,6 @@ public class DataManager {
             //TODO add logging
             throw new RuntimeException(e);
         }
-        //TODO move to UI
-        task.setTask(newTask);
     }
 
     /**
@@ -221,8 +183,6 @@ public class DataManager {
             //TODO add logging
             throw new RuntimeException(e);
         }
-        //TODO move to UI
-        task.setFocus(focus);
         if (task.getDropped())
             setDropped(sharedData, task, false);
     }
@@ -244,8 +204,6 @@ public class DataManager {
             //TODO add logging
             throw new RuntimeException(e);
         }
-        //TODO move to UI
-        task.setDropped(dropped);
     }
 
     /**
@@ -265,10 +223,8 @@ public class DataManager {
             //TODO add logging
             throw new RuntimeException(e);
         }
-        if (task.getDropped() && task.getReminderDate() != date)
+        if (task.getDropped())
             setDropped(sharedData, task, false);
-        //TODO MOVE TO UI
-        task.setReminderDate(date);
     }
 
     /**
@@ -288,10 +244,6 @@ public class DataManager {
             //TODO add logging
             throw new RuntimeException(e);
         }
-        //TODO move to ui
-        task.setRecurrence(recurrence);
-        if (task.getReminderDate() == null)
-            task.setReminderDate(Instant.now());
         if (task.getDropped() && recurrence != null)
             setDropped(sharedData, task, false);
     }
@@ -321,8 +273,6 @@ public class DataManager {
             //TODO add logging
             throw new RuntimeException(e);
         }
-        //TODO how move this to UI
-        task.setList(taskList.get().getId());
         if (task.getDropped())
             setDropped(sharedData, task, false);
     }

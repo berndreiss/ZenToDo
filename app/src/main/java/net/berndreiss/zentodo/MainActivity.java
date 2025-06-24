@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
             showLists();//show Lists layout
         });
 
+        deleteDatabase(MainActivity.DATABASE_NAME);
         sharedData = new SharedData(this);
 
         //initialize client stub
@@ -315,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setDropListener(EditText editText, Button buttonDrop){
         //OnClickListener that adds task in EditText to Data
-        buttonDrop.setOnClickListener(view -> {
+        buttonDrop.setOnClickListener(_ -> {
             //get task from EditText
             String task = editText.getText().toString();
             //reset EditText

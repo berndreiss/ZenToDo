@@ -13,6 +13,7 @@ import net.berndreiss.zentodo.data.Task;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 
 /**
  *       TaskListAdapter that removes tasks from RecyclerView if task is being sent to Focus or
@@ -90,7 +91,6 @@ public class DropTaskListAdapter extends TaskListAdapter{
      */
     public void add(String task){
         DataManager.add(sharedData, task);
-
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -98,9 +98,8 @@ public class DropTaskListAdapter extends TaskListAdapter{
     public void reset(){
         //clear ArrayList for Drop, add current tasks from data and notify adapter (in case they have been altered in another layout)
         tasks.clear();
+        List<Task> dropped = sharedData.clientStub.loadDropped();
         tasks.addAll(sharedData.clientStub.loadDropped());
         notifyDataSetChanged();
-
     }
-
 }

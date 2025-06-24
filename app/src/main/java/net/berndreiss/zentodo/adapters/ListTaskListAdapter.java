@@ -22,13 +22,15 @@ import java.util.Optional;
 
 public class ListTaskListAdapter extends TaskListAdapter{
 
-    public ListTaskListAdapter(SharedData sharedData, List<Task> tasks){
+    public ListTaskListAdapter(SharedData sharedData, String taskList, List<Task> tasks){
         super(sharedData, tasks);
         sharedData.adapter = this;
+        this.taskList = taskList;
     }
 
     /** TODO DESCRIBE */
     public static String DEFAULT_COLOR = "#00ffffff";
+    public String taskList;
 
     @SuppressLint("NotifyDataSetChanged")
     @Override

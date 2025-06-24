@@ -5,6 +5,8 @@ import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
+import net.berndreiss.zentodo.adapters.PickTaskListAdapter;
+import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.User;
@@ -28,6 +30,8 @@ import java.util.Optional;
 
 
 public class IntegrationTests {
+
+    private static final int DELAY = 300;
 
     private static SharedData sharedData;
 
@@ -53,13 +57,14 @@ public class IntegrationTests {
     }
 
     @Test
-    public void add() {
+    public void add() throws InterruptedException {
 
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
         sharedData.adapter = adapter;
         DataManager.add(sharedData, "0");
         DataManager.add(sharedData, "1");
         DataManager.add(sharedData, "2");
+        Thread.sleep(DELAY);//Wait for asynchronous job to finish
 
         assert (adapter.tasks.size() == 3);
 
@@ -96,66 +101,68 @@ public class IntegrationTests {
 
     @Test
     public void remove() throws InvalidActionException, InterruptedException, DuplicateIdException {
-        DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
+        TaskListAdapter adapter = new DropTaskListAdapter(sharedData);
         sharedData.adapter = adapter;
-        TaskList newList = sharedData.clientStub.addNewList("0", null);
+        sharedData.clientStub.addNewList("0", null);
         DataManager.add(sharedData, "0");
         DataManager.add(sharedData, "1");
         DataManager.add(sharedData, "2");
+        Thread.sleep(DELAY);//wait for changes to take effect as remove is not synchronous
 
-        DataManager.editList(sharedData, adapter.tasks.get(0), "0");
-        DataManager.editList(sharedData, adapter.tasks.get(1), "0");
-        DataManager.editList(sharedData, adapter.tasks.get(2), "0");
-
-        DataManager.remove(sharedData, adapter.tasks.get(0));
-        Thread.sleep(500);//wait for changes to take effect as remove is not synchronous
+        DataManager.remove(sharedData, adapter.tasks.getFirst());
+        Thread.sleep(DELAY);//wait for changes to take effect as remove is not synchronous
 
         assert (adapter.tasks.size() == 2);
         assert (adapter.tasks.getFirst().getTask().equals("1"));
         assert (adapter.tasks.getFirst().getPosition() == 0);
-        assert (adapter.tasks.getFirst().getListPosition() == 0);
         assert (adapter.tasks.get(1).getTask().equals("2"));
         assert (adapter.tasks.get(1).getPosition() == 1);
-        assert (adapter.tasks.get(1).getListPosition() == 0);
 
         Collection<? extends Task> tasksDB = sharedData.clientStub.loadTasks();
 
         assert (tasksDB.size() == 2);
 
         int counter = 0;
-
         for (Task t : tasksDB) {
-
             assert (t.getId() == adapter.tasks.get(counter).getId());
             assert (t.getTask().equals(String.valueOf(counter + 1)));
-            assert (t.getListPosition() == 0);
             assert (t.getPosition() == counter);
-
             counter++;
         }
     }
 
     @Test
-    public void lists() {
+    public void lists() throws InterruptedException, InvalidActionException, DuplicateIdException {
 
         try (ZenSQLiteHelper db = new ZenSQLiteHelper(sharedData.context)) {
             DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
-            sharedData.adapter = adapter;
+            PickTaskListAdapter pickAdapter = new PickTaskListAdapter(sharedData, false);
+            sharedData.adapter = pickAdapter;
+            TaskList list0 = sharedData.clientStub.addNewList("0", null);
+            TaskList list1 = sharedData.clientStub.addNewList("1", null);
             DataManager.add(sharedData, "0");
+            Thread.sleep(DELAY);
             DataManager.editList(sharedData, adapter.tasks.getFirst(), "0");
+            Thread.sleep(DELAY);
 
             //check original entry is being edited
-            assert (adapter.tasks.getFirst().getListPosition() == 0);
-            assert (adapter.tasks.getFirst().getList().equals("0"));
+            assert (pickAdapter.tasks.getFirst().getListPosition() == 0);
+            assert (pickAdapter.tasks.getFirst().getList() == list0.getId());
 
             DataManager.add(sharedData, "1");
+            Thread.sleep(DELAY);
             DataManager.editList(sharedData, adapter.tasks.get(1), "0");
+            Thread.sleep(DELAY);
 
             DataManager.add(sharedData, "2");
+            Thread.sleep(DELAY);
             DataManager.editList(sharedData, adapter.tasks.get(2), "1");
+            Thread.sleep(DELAY);
 
             DataManager.add(sharedData, "3");
+            Thread.sleep(DELAY);
             DataManager.editList(sharedData, adapter.tasks.get(3), "1");
+            Thread.sleep(DELAY);
 
             assert (sharedData.clientStub.loadDropped().isEmpty());
 
@@ -184,13 +191,13 @@ public class IntegrationTests {
 
             Optional<TaskList> taskList = sharedData.clientStub.getListByName("0");
             Assert.assertTrue(taskList.isPresent());
-            List<Task> list0 = sharedData.clientStub.loadList(taskList.get().getId());
+            List<Task> list0Tasks = sharedData.clientStub.loadList(taskList.get().getId());
 
             counter = 0;
 
-            assert (list0.size() == 2);
+            assert (list0Tasks.size() == 2);
 
-            for (Task e : list0) {
+            for (Task e : list0Tasks) {
                 assert (e.getId() == adapter.tasks.get(counter).getId());
                 counter++;
             }

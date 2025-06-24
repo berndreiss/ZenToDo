@@ -278,7 +278,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if(listsTaskListAdapter==null){
                     //initialize and set adapter
-                    listsTaskListAdapter = new ListTaskListAdapter(sharedData, listTasks);
+                    listsTaskListAdapter = new ListTaskListAdapter(sharedData, list, listTasks);
                     recyclerView.setAdapter(listsTaskListAdapter);
 
                     //allows items to be moved and reordered in RecyclerView
