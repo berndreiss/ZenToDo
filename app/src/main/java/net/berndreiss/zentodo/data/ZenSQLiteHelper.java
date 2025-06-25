@@ -66,7 +66,7 @@ public class ZenSQLiteHelper extends SQLiteOpenHelper {
      */
     public void onCreate(SQLiteDatabase db){
         db.execSQL("CREATE TABLE TASKS ("
-                + "USER INTEGER DEFAULT NULL,"
+                + "USER INTEGER NOT NULL,"
                 + "PROFILE INTEGER NOT NULL,"
                 + "ID INTEGER NOT NULL, "
                 + "TASK TEXT NOT NULL, "
@@ -116,7 +116,7 @@ public class ZenSQLiteHelper extends SQLiteOpenHelper {
                 "LIST INTEGER NOT NULL, " +
                 "PRIMARY KEY (USER, PROFILE, LIST)," +
                 "FOREIGN KEY (USER) REFERENCES USERS(ID)," +
-                "FOREIGN KEY (PROFILE) REFERENCES PROFILES(ID)," +
+                "FOREIGN KEY (USER, PROFILE) REFERENCES PROFILES(USER, ID)," +
                 "FOREIGN KEY (LIST) REFERENCES LISTS(ID)" +
                 ")";
         db.execSQL(query);

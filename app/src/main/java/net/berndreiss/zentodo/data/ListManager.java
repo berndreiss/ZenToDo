@@ -97,7 +97,7 @@ public class ListManager implements ListManagerI{
         cursor.close();
         if (tasks.size() != 1)
             return;
-        updateList(tasks.getFirst(), listId);
+        updateList(tasks.get(0), listId);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class ListManager implements ListManagerI{
         cursor.close();
         if (lists.size() != 1)
             return Optional.empty();
-        return Optional.of(lists.getFirst());
+        return Optional.of(lists.get(0));
     }
 
     @Override
@@ -164,7 +164,7 @@ public class ListManager implements ListManagerI{
         cursor.close();
         if (list.size() != 1)
             return Optional.empty();
-        return Optional.of(list.getFirst());
+        return Optional.of(list.get(0));
     }
 
     @Override

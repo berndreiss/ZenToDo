@@ -39,7 +39,7 @@ public class UserManager implements UserManagerI{
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         if (!message.arguments.isEmpty()) {
-            sb.append(message.arguments.getFirst().toString());
+            sb.append(message.arguments.get(0).toString());
             message.arguments.stream().skip(1).forEach(o -> sb.append(",").append(o.toString()));
         }
         sb.append("}");
@@ -181,7 +181,7 @@ public class UserManager implements UserManagerI{
         cursor.close();
         if(users.isEmpty())
             return Optional.empty();
-        return Optional.of(users.getFirst());
+        return Optional.of(users.get(0));
     }
     @Override
     public Optional<User> getUserByEmail(String email) {
@@ -193,7 +193,7 @@ public class UserManager implements UserManagerI{
             throw new RuntimeException("Two users with same email exist");
         if (users.isEmpty())
             return Optional.empty();
-        return Optional.of(users.getFirst());
+        return Optional.of(users.get(0));
     }
 
     @Override
@@ -207,7 +207,7 @@ public class UserManager implements UserManagerI{
         cursor.close();
         if (profiles.isEmpty())
             return Optional.empty();
-        Profile profile = profiles.getFirst();
+        Profile profile = profiles.get(0);
         profile.getProfileId().setUser(user.get());
         return Optional.of(profile);
     }
@@ -293,7 +293,7 @@ public class UserManager implements UserManagerI{
         if (users.isEmpty())
             return new ArrayList<>();
         Cursor cursor = database.rawQuery("SELECT * FROM PROFILES WHERE USER = ?", new String[]{String.valueOf(userId)});
-        return getListOfProfiles(cursor, users.getFirst());
+        return getListOfProfiles(cursor, users.get(0));
     }
 
     /**

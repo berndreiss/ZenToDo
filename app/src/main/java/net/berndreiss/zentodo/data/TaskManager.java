@@ -58,7 +58,7 @@ public class TaskManager implements TaskManagerI {
         cursor.close();
         if (tasks.isEmpty())
             return Optional.empty();
-        return Optional.of(tasks.getFirst());
+        return Optional.of(tasks.get(0));
     }
 
     @Override
@@ -246,7 +246,7 @@ public class TaskManager implements TaskManagerI {
         cursor.close();
         if (entries.size() > 1)
             throw new RuntimeException("Multiple entries with same id found for user " + user);
-        return !entries.isEmpty() ? Optional.of(entries.getFirst()) : Optional.empty();
+        return !entries.isEmpty() ? Optional.of(entries.get(0)) : Optional.empty();
     }
 
     @Override

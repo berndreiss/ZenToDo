@@ -131,12 +131,14 @@ public class MainActivity extends AppCompatActivity {
             showLists();//show Lists layout
         });
 
-        deleteDatabase(MainActivity.DATABASE_NAME);
+        //deleteDatabase(MainActivity.DATABASE_NAME);
         sharedData = new SharedData(this);
 
         //initialize client stub
+
         try {
-            DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
+            //DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
+            DataManager.initClientStub(sharedData, null);
         } catch (InterruptedException e) {
             //TODO logging
             System.out.println(e.getMessage());

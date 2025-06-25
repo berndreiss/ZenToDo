@@ -6,7 +6,6 @@ import android.widget.Toast;
 
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.ListTaskListAdapter;
-import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.exceptions.DuplicateIdException;
 import net.berndreiss.zentodo.exceptions.InvalidActionException;
 import net.berndreiss.zentodo.exceptions.PositionOutOfBoundException;
@@ -20,7 +19,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +59,8 @@ public class DataManager {
         //The uiOperationHandler handles the interaction with the views
         sharedData.clientStub.addOperationHandler(sharedData.uiOperationHandler);
         //Start the client stub in a new thread since Android does not allow network interactions on
+        if (email == null)
+            return;
         //the main thread
         Thread thread = new Thread(() -> {
             try {
@@ -285,9 +285,9 @@ public class DataManager {
                 //TODO logging
                 System.out.println(e.getMessage());
             }
-            if (listContainer.isEmpty() || listContainer.getFirst() == null)
+            if (listContainer.isEmpty() || listContainer.get(0) == null)
                 return;
-            taskList = Optional.of(listContainer.getFirst());
+            taskList = Optional.of(listContainer.get(0));
         }
         if (task == null || task.getList() != null && task.getList().equals(taskList.get().getId()))
             return;

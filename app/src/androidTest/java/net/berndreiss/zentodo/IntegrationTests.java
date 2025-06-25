@@ -109,12 +109,12 @@ public class IntegrationTests {
         DataManager.add(sharedData, "2");
         Thread.sleep(DELAY);//wait for changes to take effect as remove is not synchronous
 
-        DataManager.remove(sharedData, adapter.tasks.getFirst());
+        DataManager.remove(sharedData, adapter.tasks.get(0));
         Thread.sleep(DELAY);//wait for changes to take effect as remove is not synchronous
 
         assert (adapter.tasks.size() == 2);
-        assert (adapter.tasks.getFirst().getTask().equals("1"));
-        assert (adapter.tasks.getFirst().getPosition() == 0);
+        assert (adapter.tasks.get(0).getTask().equals("1"));
+        assert (adapter.tasks.get(0).getPosition() == 0);
         assert (adapter.tasks.get(1).getTask().equals("2"));
         assert (adapter.tasks.get(1).getPosition() == 1);
 
@@ -142,12 +142,12 @@ public class IntegrationTests {
             TaskList list1 = sharedData.clientStub.addNewList("1", null);
             DataManager.add(sharedData, "0");
             Thread.sleep(DELAY);
-            DataManager.editList(sharedData, adapter.tasks.getFirst(), "0");
+            DataManager.editList(sharedData, adapter.tasks.get(0), "0");
             Thread.sleep(DELAY);
 
             //check original entry is being edited
-            assert (pickAdapter.tasks.getFirst().getListPosition() == 0);
-            assert (pickAdapter.tasks.getFirst().getList() == list0.getId());
+            assert (pickAdapter.tasks.get(0).getListPosition() == 0);
+            assert (pickAdapter.tasks.get(0).getList() == list0.getId());
 
             DataManager.add(sharedData, "1");
             Thread.sleep(DELAY);
@@ -320,13 +320,13 @@ public class IntegrationTests {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
         sharedData.mode = Mode.DROP;
         DataManager.add(sharedData, "0");
-        DataManager.setTask(sharedData, adapter.tasks.getFirst(), "1");
+        DataManager.setTask(sharedData, adapter.tasks.get(0), "1");
 
-        assert (adapter.tasks.getFirst().getTask().equals("1"));
+        assert (adapter.tasks.get(0).getTask().equals("1"));
 
         List<Task> tasksDB = sharedData.clientStub.loadTasks();
 
-        assert (tasksDB.getFirst().getTask().equals("1"));
+        assert (tasksDB.get(0).getTask().equals("1"));
     }
 
 
@@ -336,15 +336,15 @@ public class IntegrationTests {
         sharedData.mode = Mode.DROP;
 
         DataManager.add(sharedData, "0");
-        DataManager.setFocus(sharedData, adapter.tasks.getFirst(), true);
+        DataManager.setFocus(sharedData, adapter.tasks.get(0), true);
 
-        assert (adapter.tasks.getFirst().getFocus());
-        assert (!adapter.tasks.getFirst().getDropped());
+        assert (adapter.tasks.get(0).getFocus());
+        assert (!adapter.tasks.get(0).getDropped());
 
         List<Task> tasksDB = sharedData.clientStub.loadTasks();
 
-        assert (tasksDB.getFirst().getFocus());
-        assert (!tasksDB.getFirst().getDropped());
+        assert (tasksDB.get(0).getFocus());
+        assert (!tasksDB.get(0).getDropped());
 
         List<Task> tasksFocus = sharedData.clientStub.loadFocus();
 
@@ -358,13 +358,13 @@ public class IntegrationTests {
         sharedData.mode = Mode.DROP;
 
         DataManager.add(sharedData, "0");
-        DataManager.setDropped(sharedData, adapter.tasks.getFirst(), false);
+        DataManager.setDropped(sharedData, adapter.tasks.get(0), false);
 
-        assert (!adapter.tasks.getFirst().getDropped());
+        assert (!adapter.tasks.get(0).getDropped());
 
         List<Task> tasksDB = sharedData.clientStub.loadTasks();
 
-        assert (!tasksDB.getFirst().getDropped());
+        assert (!tasksDB.get(0).getDropped());
 
         List<Task> tasksFocus = sharedData.clientStub.loadDropped();
 
@@ -379,22 +379,22 @@ public class IntegrationTests {
 
         LocalDate date = LocalDate.now();
         DataManager.add(sharedData, "0");
-        DataManager.editReminderDate(sharedData, adapter.tasks.getFirst(), date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        DataManager.editReminderDate(sharedData, adapter.tasks.get(0), date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 
-        assert (adapter.tasks.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
+        assert (adapter.tasks.get(0).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
         assert (sharedData.clientStub.loadDropped().isEmpty());
 
         List<Task> tasksDB = sharedData.clientStub.loadTasks();
 
-        assert (tasksDB.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
+        assert (tasksDB.get(0).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(date));
 
-        DataManager.editReminderDate(sharedData, adapter.tasks.getFirst(), null);
+        DataManager.editReminderDate(sharedData, adapter.tasks.get(0), null);
 
-        assert (adapter.tasks.getFirst().getReminderDate() == null);
+        assert (adapter.tasks.get(0).getReminderDate() == null);
 
         tasksDB = sharedData.clientStub.loadTasks();
 
-        assert (tasksDB.getFirst().getReminderDate() == null);
+        assert (tasksDB.get(0).getReminderDate() == null);
     }
 
     @Test
@@ -403,22 +403,22 @@ public class IntegrationTests {
         sharedData.mode = Mode.DROP;
         String recurrence = "m1";
         DataManager.add(sharedData, "0");
-        DataManager.editRecurrence(sharedData, adapter.tasks.getFirst(), recurrence);
+        DataManager.editRecurrence(sharedData, adapter.tasks.get(0), recurrence);
 
-        assert (adapter.tasks.getFirst().getRecurrence().equals(recurrence));
+        assert (adapter.tasks.get(0).getRecurrence().equals(recurrence));
         assert (sharedData.clientStub.loadDropped().isEmpty());
 
         List<Task> tasksDB = sharedData.clientStub.loadTasks();
 
-        assert (tasksDB.getFirst().getRecurrence().equals(recurrence));
+        assert (tasksDB.get(0).getRecurrence().equals(recurrence));
 
-        DataManager.editRecurrence(sharedData, adapter.tasks.getFirst(), null);
+        DataManager.editRecurrence(sharedData, adapter.tasks.get(0), null);
 
-        assert (adapter.tasks.getFirst().getRecurrence() == null);
+        assert (adapter.tasks.get(0).getRecurrence() == null);
 
         tasksDB = sharedData.clientStub.loadTasks();
 
-        assert (tasksDB.getFirst().getRecurrence() == null);
+        assert (tasksDB.get(0).getRecurrence() == null);
     }
 
     @Test
@@ -428,7 +428,7 @@ public class IntegrationTests {
             DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
             sharedData.mode = Mode.DROP;
             DataManager.add(sharedData, "0");
-            DataManager.editList(sharedData, adapter.tasks.getFirst(), "0");
+            DataManager.editList(sharedData, adapter.tasks.get(0), "0");
             DataManager.editListColor(sharedData, 0L, "BLUE");
 
             if ((!DataManager.getListColor(sharedData, 0L).equals("BLUE")))
@@ -446,7 +446,7 @@ public class IntegrationTests {
         DropTaskListAdapter adapter = new DropTaskListAdapter(sharedData);
         sharedData.mode = Mode.DROP;
         DataManager.add(sharedData, "0");
-        DataManager.editList(sharedData, adapter.tasks.getFirst(), "0");
+        DataManager.editList(sharedData, adapter.tasks.get(0), "0");
 
         List<String> lists = DataManager.getListsAsString(sharedData);
 
@@ -505,7 +505,7 @@ public class IntegrationTests {
         tasksToPick = DataManager.getTasksToPick(sharedData);
 
         assert (tasksToPick.size() == 1);
-        assert (tasksToPick.getFirst().getTask().equals("0"));
+        assert (tasksToPick.get(0).getTask().equals("0"));
     }
 
     //tests whether ArrayList<Integer> recurringButRemovedFromToday (see documentation in FocusTaskListAdapter.java, Data.java, DbHelper.java)
@@ -522,7 +522,7 @@ public class IntegrationTests {
             //add first element, save and assert results upon load
             List<Long> recurring = db.getTaskManager().loadRecurring();
             assert (recurring.size() == 1);
-            assert (recurring.getFirst() == 0);
+            assert (recurring.get(0) == 0);
 
             DataManager.addToRecurringButRemoved(sharedData, 1);
             DataManager.addToRecurringButRemoved(sharedData, 2);
@@ -634,14 +634,14 @@ public class IntegrationTests {
         for (int i = 0; i < tests.length; i++) {
 
             //set reminder date
-            DataManager.editReminderDate(sharedData, adapter.tasks.getFirst(), tests[i].atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            DataManager.editRecurrence(sharedData, adapter.tasks.getFirst(), intervals[i]);
+            DataManager.editReminderDate(sharedData, adapter.tasks.get(0), tests[i].atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            DataManager.editRecurrence(sharedData, adapter.tasks.get(0), intervals[i]);
 
             //TODO today cannot be passed anymore
-            //DataManager.setRecurring(sharedData, adapter.tasks.getFirst(), today[i]);
+            //DataManager.setRecurring(sharedData, adapter.tasks.get(0), today[i]);
 
             //assert results
-            assert (adapter.tasks.getFirst().getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(results[i]));
+            assert (adapter.tasks.get(0).getReminderDate().atZone(ZoneId.systemDefault()).toLocalDate().equals(results[i]));
 
         }
 
