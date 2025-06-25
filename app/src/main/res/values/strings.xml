@@ -26,6 +26,9 @@
     <string name="drop">Drop</string>
     <string name="mode_file">mode</string>
     <string name="db_test">"TEST.db"</string>
+    <string name="settings">settings</string>
+    <string name="options">options</string>
+    <string name="user">user</string>
 
     <!-- Strings used for spinner for choosing time interval of repeats -->
     <string-array name="time_interval">

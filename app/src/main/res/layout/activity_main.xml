@@ -83,18 +83,70 @@
     <include layout="@layout/focus"/>
     <include layout="@layout/lists"/>
 
+    <!-- Main FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/fabMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
         android:backgroundTint="@color/header_text"
+        android:src="@drawable/ic_action_menu"
+        app:tint="@color/white"
+        app:borderWidth="0dp"
+        app:rippleColor="@color/color_primary"
+        android:contentDescription="@string/options" />
+
+    <!-- Help FAB -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabHelp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:backgroundTint="@color/header_text"
         android:src="@drawable/ic_action_help"
         app:tint="@color/white"
         app:borderWidth="0dp"
         app:rippleColor="@color/color_primary"
-        android:contentDescription="@string/help" />
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="100dp"
+        android:visibility="gone"
+        android:contentDescription="@string/help"
+        />
+
+    <!-- Settings FAB  -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:backgroundTint="@color/header_text"
+        android:src="@drawable/ic_action_settings"
+        app:tint="@color/white"
+        app:borderWidth="0dp"
+        app:rippleColor="@color/color_primary"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="190dp"
+        android:visibility="gone"
+        android:contentDescription="@string/settings"
+        />
+
+    <!-- User FAB  -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:backgroundTint="@color/header_text"
+        android:src="@drawable/ic_person"
+        app:tint="@color/white"
+        app:borderWidth="0dp"
+        app:rippleColor="@color/color_primary"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="280dp"
+        android:visibility="gone"
+        android:contentDescription="@string/user"
+        />
 
 
         

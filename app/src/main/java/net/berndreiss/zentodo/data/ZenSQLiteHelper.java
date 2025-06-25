@@ -1,5 +1,6 @@
 package net.berndreiss.zentodo.data;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -33,7 +34,7 @@ public class ZenSQLiteHelper extends SQLiteOpenHelper {
     public ZenSQLiteHelper(Context context, String databaseName){
         super(context, databaseName == null ? MainActivity.DATABASE_NAME : databaseName,null, MainActivity.DATABASE_VERSION);
         this.context = context;
-        this.database = new Database(new TaskManager(this), new UserManager(this), new ListManager(this), new DatabaseOps(this));
+        this.database = new Database(new TaskManager(this), new UserManager(this), new ListManager(this), new MetadataManager(this));
         Optional<User> user = database.getUserManager().getUser(0L);
         if (user.isPresent()) {
             List<Profile> profiles = getUserManager().getProfiles(0);
@@ -137,6 +138,21 @@ public class ZenSQLiteHelper extends SQLiteOpenHelper {
                 ")";
         db.execSQL(query);
 
+        query = "CREATE TABLE METADATA (" +
+                "ID INTEGER PRIMARY KEY, " +
+                "LAST_USER INTEGER," +
+                "TIME_DELAY INTEGER," +
+                "VERSION TEXT" +
+                ")";
+        db.execSQL(query);
+
+        ContentValues values = new ContentValues();
+        values.put("ID", 0);
+        values.put("LAST_USER", 0);
+        values.put("TIME_DELAY", 0);
+        values.put("VERSION", "1.0");
+        db.insert("METADATA", null, values);
+
         query = "CREATE INDEX IDX_FOCUS ON TASKS(FOCUS)";
         db.execSQL(query);
         query = "CREATE INDEX IDX_DROPPED ON TASKS(DROPPED)";
@@ -222,7 +238,7 @@ public class ZenSQLiteHelper extends SQLiteOpenHelper {
      * Get the DatabaseOpsI casted as DatabaseOps.
      * @return the SQLite database operations class instance
      */
-    public DatabaseOps getDatabaseOps(){
-        return (DatabaseOps) database.getDatabaseOps();
+    public MetadataManager getDatabaseOps(){
+        return (MetadataManager) database.getDatabaseOps();
     }
 }

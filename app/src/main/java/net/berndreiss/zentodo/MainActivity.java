@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 
 import net.berndreiss.zentodo.adapters.DropTaskListAdapter;
-import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import net.berndreiss.zentodo.adapters.FocusTaskListAdapter;
 import net.berndreiss.zentodo.adapters.ListsListAdapter;
@@ -18,12 +17,15 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.InputFilter;
 import android.view.MotionEvent;
 import android.view.View;
 
 import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.databinding.ActivityMainBinding;
+import net.berndreiss.zentodo.util.ClientStub;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -34,6 +36,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.function.Consumer;
 
 
 /**
@@ -70,17 +75,24 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout focus;//Layout to show tasks to do today
     private LinearLayout lists;//Layout for all lists with tasks in it
 
+    //TODO add user fab
     //the following Buttons are components of the toolbar to switch between the different layouts
     private Button toolbarPick;
     private Button toolbarDrop;
     private Button toolbarFocus;
     private Button toolbarLists;
 
-    //floating action button on the bottom right corner
-    private FloatingActionButton fab;
+    //floating action buttons on the bottom right corner
+    private FloatingActionButton fabMain;
+    private FloatingActionButton fabHelp;
+    private FloatingActionButton fabSettings;
+    private FloatingActionButton fabUser;
 
     //Object for data shared across the whole application
     private SharedData sharedData;
+
+    //TODO comment
+    private boolean isFabMenuOpen = false;
 
     @Override
     protected void onDestroy(){
@@ -105,11 +117,20 @@ public class MainActivity extends AppCompatActivity {
         toolbarFocus = findViewById(R.id.toolbar_focus);
         toolbarLists = findViewById(R.id.toolbar_lists);
 
-        //Floating action button that shows help on press
-        fab = findViewById(R.id.fab);
+        //Floating action button that shows options on press
+        fabMain = findViewById(R.id.fabMain);
         //the fab will be gone by default and only be shown when user interacts with the app.
         //This is achieved via OnTouchListeners on the RecyclerViews (see class ShowFab in this file).
-        fab.setVisibility(View.GONE);
+        fabMain.setVisibility(View.VISIBLE);
+
+        //Floating action button that shows help on press
+        fabHelp = findViewById(R.id.fabHelp);
+        //Floating action button that shows settings on press
+        fabSettings = findViewById(R.id.fabSettings);
+        //Floating action button that shows user settings on press
+        fabUser = findViewById(R.id.fabUser);
+
+        fabMain.setOnClickListener((View _) ->toggleFabMenu());
 
         //OnClickListeners for buttons in toolbar which show according layout onClick
         toolbarPick.setOnClickListener(_ -> {
@@ -124,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarFocus.setOnClickListener(_ -> {
             closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
             showFocus();//show Focus layout
-        });
+        }); findViewById(R.id.fabSettings);
 
         toolbarLists.setOnClickListener(_ -> {
             closeKeyboard();//closes keyboard that might still be opened from editText in Drop layout
@@ -135,6 +156,16 @@ public class MainActivity extends AppCompatActivity {
         sharedData = new SharedData(this);
 
         //initialize client stub
+        sharedData.clientStub = new ClientStub( sharedData.database.getDatabase());
+        //Communicating important messages to the user (e.g., "User logged in", "There was a problem
+        //sending data to the server" etc.)
+        Consumer<String> messagePrinter = message -> {
+            Looper.prepare();
+            new Handler(Looper.getMainLooper()).post(()-> Toast.makeText(sharedData.context, message, Toast.LENGTH_LONG).show());
+        };
+        sharedData.clientStub.setMessagePrinter(messagePrinter);
+        //The uiOperationHandler handles the interaction with the views
+        sharedData.clientStub.addOperationHandler(sharedData.uiOperationHandler);
 
         try {
             //DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
@@ -154,6 +185,18 @@ public class MainActivity extends AppCompatActivity {
         showDrop();
     }
 
+    private void toggleFabMenu() {
+        if (isFabMenuOpen) {
+            fabHelp.hide();
+            fabSettings.hide();
+            fabUser.hide();
+        } else {
+            fabHelp.show();
+            fabSettings.show();
+            fabUser.show();
+        }
+        isFabMenuOpen = !isFabMenuOpen;
+    }
     /**
      * Initialize the PICK view.
      * @param sharedData the shared data object
@@ -248,7 +291,9 @@ public class MainActivity extends AppCompatActivity {
         //enable components of Pick layout (setVisibility = VISIBLE)
         enableLayout(pick);
         //set fab to show help according to layout
-        fab.setOnClickListener(Helper.getPickListener(this));
+        fabHelp.setOnClickListener(Helper.getPickListener(this));
+        //does not harmonize with the pick button
+        fabMain.hide();
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(focus);
@@ -334,7 +379,8 @@ public class MainActivity extends AppCompatActivity {
         //enable all components of Drop layout (setVisibility = VISIBLE)
         enableLayout(drop);
         //set fab to show help according to layout
-        fab.setOnClickListener(Helper.getDropListener(this));
+        fabHelp.setOnClickListener(Helper.getDropListener(this));
+        fabMain.show();
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(pick);
         disableLayout(focus);
@@ -392,7 +438,8 @@ public class MainActivity extends AppCompatActivity {
         //enable all components in the Focus layout (setVisibility = VISIBLE)
         enableLayout(focus);
         //set fab to show help according to layout
-        fab.setOnClickListener(Helper.getFocusListener(this));
+        fabHelp.setOnClickListener(Helper.getFocusListener(this));
+        fabMain.show();
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(lists);
@@ -447,7 +494,8 @@ public class MainActivity extends AppCompatActivity {
         //enable all components in the Lists layout (setVisibility = VISIBLE)
         enableLayout(lists);
         //set fab to show help according to layout
-        fab.setOnClickListener(Helper.getListListener(this));
+        fabHelp.setOnClickListener(Helper.getListListener(this));
+        fabMain.show();
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(pick);
@@ -529,8 +577,8 @@ public class MainActivity extends AppCompatActivity {
         @SuppressLint("ClickableViewAccessibility")
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            fab.setVisibility(View.VISIBLE);
-            fab.postDelayed(() -> fab.setVisibility(View.GONE), 3000);
+            fabMain.setVisibility(View.GONE);
+            fabMain.postDelayed(() -> fabMain.setVisibility(View.VISIBLE), 3000);
             return false;
         }
     }

@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * Manages data manipulation in the application.
@@ -46,21 +45,9 @@ public class DataManager {
      * @throws InterruptedException thrown when there are problems logging the user in
      */
     public static void initClientStub(SharedData sharedData, String email) throws InterruptedException {
-        sharedData.clientStub = new ClientStub( sharedData.database.getDatabase());
-        //Communicating important messages to the user (e.g., "User logged in", "There was a problem
-        //sending data to the server" etc.)
-        Consumer<String> messagePrinter = message -> {
-            Looper.prepare();
-            new Handler(Looper.getMainLooper()).post(()-> Toast.makeText(sharedData.context, message, Toast.LENGTH_LONG).show());
-        };
-        //TODO change this
-        //sharedData.clientStub.setMessagePrinter(messagePrinter);
-        sharedData.clientStub.setMessagePrinter(System.out::println);
-        //The uiOperationHandler handles the interaction with the views
-        sharedData.clientStub.addOperationHandler(sharedData.uiOperationHandler);
-        //Start the client stub in a new thread since Android does not allow network interactions on
         if (email == null)
             return;
+        //Start client stub activity in a new thread since Android does not allow network interactions on
         //the main thread
         Thread thread = new Thread(() -> {
             try {

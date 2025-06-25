@@ -403,4 +403,10 @@ public class UIOperationHandler implements ClientOperationHandlerI {
         //TODO implement
         return null;
     }
+
+    @Override
+    public List<User> getUsers() {
+        //IGNORED
+        return Collections.emptyList();
+    }
 }
