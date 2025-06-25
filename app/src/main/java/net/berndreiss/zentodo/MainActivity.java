@@ -81,9 +81,11 @@ public class MainActivity extends AppCompatActivity {
     private Button toolbarDrop;
     private Button toolbarFocus;
     private Button toolbarLists;
+    private Button toolbarOptions;
+    private LinearLayout toolbarOptionsContainer;
+    private View grayOverlay;
 
     //floating action buttons on the bottom right corner
-    private FloatingActionButton fabMain;
     private FloatingActionButton fabHelp;
     private FloatingActionButton fabSettings;
     private FloatingActionButton fabUser;
@@ -116,12 +118,9 @@ public class MainActivity extends AppCompatActivity {
         toolbarPick = findViewById(R.id.toolbar_pick);
         toolbarFocus = findViewById(R.id.toolbar_focus);
         toolbarLists = findViewById(R.id.toolbar_lists);
-
-        //Floating action button that shows options on press
-        fabMain = findViewById(R.id.fabMain);
-        //the fab will be gone by default and only be shown when user interacts with the app.
-        //This is achieved via OnTouchListeners on the RecyclerViews (see class ShowFab in this file).
-        fabMain.setVisibility(View.VISIBLE);
+        toolbarOptions = findViewById(R.id.toolbar_options);
+        toolbarOptionsContainer = findViewById(R.id.toolbar_options_container);
+        grayOverlay = findViewById(R.id.gray_overlay);
 
         //Floating action button that shows help on press
         fabHelp = findViewById(R.id.fabHelp);
@@ -130,7 +129,11 @@ public class MainActivity extends AppCompatActivity {
         //Floating action button that shows user settings on press
         fabUser = findViewById(R.id.fabUser);
 
-        fabMain.setOnClickListener((View _) ->toggleFabMenu());
+        toolbarOptions.setOnClickListener((View _) ->toggleFabMenu());
+        toolbarOptions.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
+        toolbarOptionsContainer.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
+        toolbarOptions.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
+        toolbarOptions.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
 
         //OnClickListeners for buttons in toolbar which show according layout onClick
         toolbarPick.setOnClickListener(_ -> {
@@ -187,10 +190,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void toggleFabMenu() {
         if (isFabMenuOpen) {
+            grayOverlay.setVisibility(View.GONE);
+            toolbarOptions.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
+            toolbarOptionsContainer.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary));
+            toolbarOptions.setTextColor(ContextCompat.getColor(this, R.color.color_primary_variant));
+            toolbarOptions.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary_variant));
             fabHelp.hide();
             fabSettings.hide();
             fabUser.hide();
         } else {
+            grayOverlay.setVisibility(View.VISIBLE);
+            toolbarOptions.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary_accent));
+            toolbarOptionsContainer.setBackgroundColor(ContextCompat.getColor(this, R.color.color_primary_accent));
+            toolbarOptions.setTextColor(ContextCompat.getColor(this, R.color.color_primary));
+            toolbarOptions.getCompoundDrawables()[1].setTint(ContextCompat.getColor(this, R.color.color_primary));
             fabHelp.show();
             fabSettings.show();
             fabUser.show();
@@ -292,8 +305,6 @@ public class MainActivity extends AppCompatActivity {
         enableLayout(pick);
         //set fab to show help according to layout
         fabHelp.setOnClickListener(Helper.getPickListener(this));
-        //does not harmonize with the pick button
-        fabMain.hide();
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(focus);
@@ -380,7 +391,6 @@ public class MainActivity extends AppCompatActivity {
         enableLayout(drop);
         //set fab to show help according to layout
         fabHelp.setOnClickListener(Helper.getDropListener(this));
-        fabMain.show();
         //disable components of all other layouts (setVisibility = GONE)
         disableLayout(pick);
         disableLayout(focus);
@@ -439,7 +449,6 @@ public class MainActivity extends AppCompatActivity {
         enableLayout(focus);
         //set fab to show help according to layout
         fabHelp.setOnClickListener(Helper.getFocusListener(this));
-        fabMain.show();
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(lists);
@@ -495,7 +504,6 @@ public class MainActivity extends AppCompatActivity {
         enableLayout(lists);
         //set fab to show help according to layout
         fabHelp.setOnClickListener(Helper.getListListener(this));
-        fabMain.show();
         //disable all components in all other layouts (setVisibility = GONE)
         disableLayout(drop);
         disableLayout(pick);
@@ -577,8 +585,8 @@ public class MainActivity extends AppCompatActivity {
         @SuppressLint("ClickableViewAccessibility")
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            fabMain.setVisibility(View.GONE);
-            fabMain.postDelayed(() -> fabMain.setVisibility(View.VISIBLE), 3000);
+            //fabMain.setVisibility(View.GONE);
+            //fabMain.postDelayed(() -> fabMain.setVisibility(View.VISIBLE), 3000);
             return false;
         }
     }

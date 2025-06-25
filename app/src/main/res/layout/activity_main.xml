@@ -13,7 +13,8 @@
 
        <LinearLayout
            android:layout_width="match_parent"
-           android:layout_height="@dimen/toolbar_height">
+           android:layout_height="@dimen/toolbar_height"
+           android:background="@color/color_primary">
 
            <android.widget.Button
                android:id="@+id/toolbar_pick"
@@ -72,6 +73,24 @@
                android:drawableTop="@drawable/ic_action_lists"
                />
 
+           <LinearLayout
+               android:id="@+id/toolbar_options_container"
+               android:layout_weight=".5"
+               android:layout_width="0dp"
+               android:layout_height="match_parent">
+           <android.widget.Button
+               android:id="@+id/toolbar_options"
+               android:shape="rectangle"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:layout_marginLeft="0dp"
+               android:layout_marginRight="0dp"
+               android:layout_marginTop="12dp"
+               style="?android:borderlessButtonStyle"
+               android:drawableTop="@drawable/ic_more_vert"
+               />
+       </LinearLayout>
+
        </LinearLayout>
 
 
@@ -82,34 +101,28 @@
     <include layout="@layout/drop" />
     <include layout="@layout/focus"/>
     <include layout="@layout/lists"/>
-
-    <!-- Main FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabMain"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/header_text"
-        android:src="@drawable/ic_action_menu"
-        app:tint="@color/white"
-        app:borderWidth="0dp"
-        app:rippleColor="@color/color_primary"
-        android:contentDescription="@string/options" />
+    <View
+        android:id="@+id/gray_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#BF000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"/>
 
     <!-- Help FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabHelp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
+        android:layout_gravity="end|top"
         android:backgroundTint="@color/header_text"
         android:src="@drawable/ic_action_help"
         app:tint="@color/white"
         app:borderWidth="0dp"
         app:rippleColor="@color/color_primary"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="100dp"
+        android:layout_marginTop="180dp"
         android:visibility="gone"
         android:contentDescription="@string/help"
         />
@@ -119,14 +132,14 @@
         android:id="@+id/fabSettings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
+        android:layout_gravity="end|top"
         android:backgroundTint="@color/header_text"
         android:src="@drawable/ic_action_settings"
         app:tint="@color/white"
         app:borderWidth="0dp"
         app:rippleColor="@color/color_primary"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="190dp"
+        android:layout_marginTop="270dp"
         android:visibility="gone"
         android:contentDescription="@string/settings"
         />
@@ -136,20 +149,19 @@
         android:id="@+id/fabUser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
+        android:layout_gravity="end|top"
         android:backgroundTint="@color/header_text"
         android:src="@drawable/ic_person"
         app:tint="@color/white"
         app:borderWidth="0dp"
         app:rippleColor="@color/color_primary"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="280dp"
+        android:layout_marginTop="360dp"
         android:visibility="gone"
         android:contentDescription="@string/user"
         />
 
 
-        
-        
-    
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

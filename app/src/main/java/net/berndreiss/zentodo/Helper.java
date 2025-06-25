@@ -42,7 +42,10 @@ public class Helper{
             ScrollView scrollView = new ScrollView(context);
             TextView textView = new TextView(context);
             scrollView.addView(textView);
-            textView.setTextColor(Color.parseColor("#000000"));
+            int colorInt =  ContextCompat.getColor(context, R.color.color_primary_accent);
+            textView.setTextColor(colorInt);
+            int colorBackInt = ContextCompat.getColor(context, R.color.color_primary);
+            textView.setBackgroundColor(colorBackInt);
             textView.setText(HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY, s -> {
                         @SuppressLint("DiscouragedApi") int id = context.getResources().getIdentifier(s, "drawable", context.getPackageName());
                         Drawable drawable = ContextCompat.getDrawable(context, id);
