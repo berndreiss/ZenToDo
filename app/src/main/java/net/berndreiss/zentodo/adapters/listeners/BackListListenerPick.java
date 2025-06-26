@@ -35,17 +35,16 @@ public class BackListListenerPick extends BackListListener{
 
         Task task = adapter.tasks.get(position);
 
-        //set to no list if AutoComplete is empty
         if (list.trim().isEmpty() || list.isEmpty()) {
-            //reset to no list
-            DataManager.editList(adapter.sharedData, task, null);
-        } else {
-            //write back otherwise
-            DataManager.editList(adapter.sharedData, task, list);
+            pickAdapter.unSetList(task.getId());
+            task.setList(null);
+        }
+        else {
+            pickAdapter.setList(task.getId(), list);
+            task.setList(0L);
         }
 
         if (task.getReminderDate() == null && !moveToListAdapter.tasks.contains(task)) {
-
             moveToListAdapter.tasks.add(task);
             moveToListAdapter.notifyDataSetChanged();
             moveToListAdapter.itemCountChanged();

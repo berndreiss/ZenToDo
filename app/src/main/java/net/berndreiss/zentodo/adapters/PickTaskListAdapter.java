@@ -20,6 +20,8 @@ import net.berndreiss.zentodo.data.TaskList;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -44,6 +46,8 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
     public PickTaskListAdapter doLaterAdapter;
     public PickTaskListAdapter moveToListAdapter;
     private final boolean checkboxTicked;//Tasks that are in the doNowAdapter are ticked
+    /** Keep track of lists to be assigned on pick. */
+    public Map<Long, String> listMap = new HashMap<>();
 
     public PickTaskListAdapter(SharedData sharedData, boolean checkboxTicked){
         super(sharedData, new ArrayList<>());
@@ -149,6 +153,10 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
         });
 
         holder.setDate.setOnClickListener(new SetDateListenerPick(this, holder, position, pickAdapter, doLaterAdapter, moveToListAdapter));
+        holder.setList.setOnClickListener((View _) ->{
+            holder.autoCompleteList.setText(listMap.getOrDefault(tasks.get(position).getId(), ""));
+            setList(holder);
+        });
         holder.backList.setOnClickListener(new BackListListenerPick(this,holder,position, pickAdapter, moveToListAdapter));
 
         if (tasks.get(position).getList() != null){
@@ -164,6 +172,19 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
         }
     }
 
+    public void setList(long position, String list){
+        pickAdapter.listMap.put(position, list);
+        doNowAdapter.listMap.put(position, list);
+        doLaterAdapter.listMap.put(position, list);
+        moveToListAdapter.listMap.put(position, list);
+    }
+
+    public void unSetList(long position){
+        pickAdapter.listMap.remove(position);
+        doNowAdapter.listMap.remove(position);
+        doLaterAdapter.listMap.remove(position);
+        moveToListAdapter.listMap.remove(position);
+    }
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void reset(){

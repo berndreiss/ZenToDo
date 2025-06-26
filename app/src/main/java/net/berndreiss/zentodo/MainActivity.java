@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.ContactsContract;
 import android.text.InputFilter;
 import android.view.MotionEvent;
 import android.view.View;
@@ -155,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
             showLists();//show Lists layout
         });
 
-        //deleteDatabase(MainActivity.DATABASE_NAME);
+        deleteDatabase(MainActivity.DATABASE_NAME);
         sharedData = new SharedData(this);
 
         //initialize client stub
@@ -171,8 +172,8 @@ public class MainActivity extends AppCompatActivity {
         sharedData.clientStub.addOperationHandler(sharedData.uiOperationHandler);
 
         try {
-            //DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
-            DataManager.initClientStub(sharedData, null);
+            DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
+            //DataManager.initClientStub(sharedData, null);
         } catch (InterruptedException e) {
             //TODO logging
             System.out.println(e.getMessage());
@@ -280,11 +281,12 @@ public class MainActivity extends AppCompatActivity {
                 }
                 //set focus to false for all tasks in tasksToDoLater
                 for (Task t : sharedData.doLaterAdapter.tasks)
-                        DataManager.setFocus(sharedData, t, false);
+                    DataManager.editReminderDate(sharedData, t, t.getReminderDate());
+
 
                 //set focus to false for all tasks in tasksToMoveToList
                 for (Task t : sharedData.moveToListAdapter.tasks)
-                        DataManager.setFocus(sharedData, t, false);
+                    DataManager.editList(sharedData, t, sharedData.moveToListAdapter.listMap.get(t.getId()));
                 //show Focus layout
                 showFocus();
             }

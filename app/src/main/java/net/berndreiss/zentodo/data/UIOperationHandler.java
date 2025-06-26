@@ -371,6 +371,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @Override
     public void updateReminderDate(long task, Instant value) {
+        
     }
 
     @Override

@@ -247,42 +247,49 @@ public class DataManager {
      * Edit the list of a task.
      * @param sharedData the shared data object containing the client stub and the adapter
      * @param task the task id
-     * @param list the list id
+     * @param list the list name
      */
     public static void editList(SharedData sharedData, Task task, String list) {
-        //TODO this needs to be reworked and go through the client stub
-        Optional<TaskList> taskList = sharedData.clientStub.getListByName(list);
-        List<TaskList> listContainer = new ArrayList<>();
-        if (taskList.isEmpty()) {
-            Thread thread = new Thread(() -> {
+        Optional<TaskList> taskList = Optional.empty();
+
+        if (list != null) {
+
+
+            taskList = sharedData.clientStub.getListByName(list);
+            List<TaskList> listContainer = new ArrayList<>();
+            if (taskList.isEmpty()) {
+                Thread thread = new Thread(() -> {
+                    try {
+                        listContainer.add(sharedData.clientStub.addNewList(list, null));
+                    } catch (InvalidActionException e) {
+                        //TODO logging
+                        System.out.println(e.getMessage());
+                    } catch (DuplicateIdException e) {
+                        //TODO logging
+                        System.out.println(e.getMessage());
+                    }
+                });
+                thread.start();
                 try {
-                    listContainer.add(sharedData.clientStub.addNewList(list, null));
-                } catch (InvalidActionException e) {
-                    //TODO logging
-                    System.out.println(e.getMessage());
-                } catch (DuplicateIdException e){
+                    thread.join();
+                } catch (InterruptedException e) {
                     //TODO logging
                     System.out.println(e.getMessage());
                 }
-            });
-            thread.start();
-            try{
-                thread.join();
-            } catch (InterruptedException e){
-                //TODO logging
-                System.out.println(e.getMessage());
+                if (listContainer.isEmpty() || listContainer.get(0) == null)
+                    return;
+                taskList = Optional.of(listContainer.get(0));
             }
-            if (listContainer.isEmpty() || listContainer.get(0) == null)
+            if (task == null || task.getList() != null && task.getList().equals(taskList.get().getId()))
                 return;
-            taskList = Optional.of(listContainer.get(0));
         }
-        if (task == null || task.getList() != null && task.getList().equals(taskList.get().getId()))
-            return;
-
-        final TaskList finalList = taskList.get();
+        final TaskList finalList = taskList.orElse(null);
         Thread thread = new Thread(() -> {
             try {
-                sharedData.clientStub.updateList(task.getId(), finalList.getId());
+                if (finalList != null)
+                    sharedData.clientStub.updateList(task.getId(), finalList.getId());
+                else
+                    sharedData.clientStub.updateList(task.getId(), null);
             } catch (InvalidActionException e){
                 //TODO logging
                 throw new RuntimeException(e);
