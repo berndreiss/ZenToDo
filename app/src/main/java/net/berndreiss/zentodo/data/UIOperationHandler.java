@@ -332,6 +332,8 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                 updateListForAdapter(sharedData.doNowAdapter, task, list);
                 updateListForAdapter(sharedData.doLaterAdapter, task, list);
                 updateListForAdapter(sharedData.moveToListAdapter, task, list);
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> sharedData.pickAdapter.update());
                 break;
             }
             case FOCUS: updateListForAdapter(sharedData.focusAdapter, task, list); break;
@@ -371,7 +373,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @Override
     public void updateReminderDate(long task, Instant value) {
-        
+
     }
 
     @Override
