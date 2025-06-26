@@ -7,6 +7,7 @@ import android.os.Handler;
 import net.berndreiss.zentodo.Mode;
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
+import net.berndreiss.zentodo.exceptions.InvalidActionException;
 import net.berndreiss.zentodo.operations.ClientOperationHandlerI;
 import net.berndreiss.zentodo.util.VectorClock;
 import net.berndreiss.zentodo.util.ZenServerMessage;
@@ -43,6 +44,26 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @Override
     public void updateId(long user, int profile, long task, long newId) {
+        switch (sharedData.mode){
+            case DROP -> updateIdForAdapter(sharedData.dropAdapter, task, newId);
+            case FOCUS -> updateIdForAdapter(sharedData.focusAdapter, task, newId);
+            case LIST -> updateIdForAdapter(sharedData.listAdapter, task, newId);
+            case LIST_NO -> updateIdForAdapter(sharedData.noListAdapter, task, newId);
+            case LIST_ALL -> updateIdForAdapter(sharedData.allTasksAdapter, task, newId);
+            case PICK -> {
+                updateIdForAdapter(sharedData.pickAdapter, task, newId);
+                updateIdForAdapter(sharedData.doLaterAdapter, task, newId);
+                updateIdForAdapter(sharedData.doNowAdapter, task, newId);
+                updateIdForAdapter(sharedData.moveToListAdapter, task, newId);
+            }
+        }
+    }
+
+    private void updateIdForAdapter(TaskListAdapter adapter, long task, long newId){
+        Optional<Task> taskFound = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+        if (taskFound.isEmpty())
+            return;
+        taskFound.get().setId(newId);
     }
 
     @Override
@@ -311,15 +332,53 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @Override
     public void updateTask(long task, String value) {
+        switch (sharedData.mode){
+            case DROP -> updateTaskForAdapter(sharedData.dropAdapter, task, value);
+            case FOCUS -> updateTaskForAdapter(sharedData.focusAdapter, task, value);
+            case LIST -> updateTaskForAdapter(sharedData.listAdapter, task, value);
+            case LIST_NO -> updateTaskForAdapter(sharedData.noListAdapter, task, value);
+            case LIST_ALL -> updateTaskForAdapter(sharedData.allTasksAdapter, task, value);
+            case PICK -> {
+                updateTaskForAdapter(sharedData.pickAdapter, task, value);
+                updateTaskForAdapter(sharedData.doLaterAdapter, task, value);
+                updateTaskForAdapter(sharedData.doNowAdapter, task, value);
+                updateTaskForAdapter(sharedData.moveToListAdapter, task, value);
+            }
+        }
+    }
+
+    private void updateTaskForAdapter(TaskListAdapter adapter, long task, String taskName){
+        Optional<Task> taskFound = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+        if (taskFound.isEmpty())
+            return;
+        taskFound.get().setTask(taskName);
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(adapter::notifyDataSetChanged);
     }
 
     @Override
     public void updateFocus(long task, boolean value) {
     }
 
+    private void updateFocusForAdapter(TaskListAdapter adapter, long task, boolean value){
+        Optional<Task> taskFound = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+        if (taskFound.isEmpty())
+            return;
+        taskFound.get().setFocus(value);
+    }
+
     @Override
     public void updateDropped(long task, boolean value) {
+        //TODO is this handled by the other methods already?
     }
+
+    private void updateDroppedForAdapter(TaskListAdapter adapter, long task, boolean value){
+        Optional<Task> taskFound = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+        if (taskFound.isEmpty())
+            return;
+        taskFound.get().setDropped(value);
+    }
+
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
