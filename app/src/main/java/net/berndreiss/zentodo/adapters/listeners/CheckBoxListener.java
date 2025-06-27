@@ -35,8 +35,6 @@ public class CheckBoxListener extends BasicListener implements View.OnClickListe
             DataManager.setRecurring(adapter.sharedData, task);
             //reset focus in data and tasks
             DataManager.setFocus(adapter.sharedData, task, false);
-            adapter.tasks.remove(position);
-            adapter.notifyItemChanged(position);
         } else {
             DataManager.remove(adapter.sharedData, task);
         }

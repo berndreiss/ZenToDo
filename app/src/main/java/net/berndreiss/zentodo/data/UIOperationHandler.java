@@ -192,6 +192,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                     handler.post(() -> sharedData.pickAdapter.update());
                 }
             }
+            case FOCUS: deleteFromAdapter(sharedData.focusAdapter, id);
         }
     }
 
@@ -533,11 +534,35 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @Override
     public void updateReminderDate(long task, Instant value) {
+        switch (sharedData.mode){
+            case PICK -> addRemoveFromPick(task);
+            case DROP -> removeFromAdapter(sharedData.dropAdapter, task);
+            case FOCUS -> removeFromAdapter(sharedData.focusAdapter, task);
+            case LIST -> updateReminderDateForAdapter(sharedData.listAdapter, task, value);
+        }
+    }
 
+    private void updateReminderDateForAdapter(TaskListAdapter adapter, long task, Instant value){
+        Optional<Task> taskFound = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+        if (taskFound.isEmpty())
+            return;
+        taskFound.get().setReminderDate(value);
     }
 
     @Override
     public void updateRecurrence(long task, String value) {
+        switch (sharedData.mode){
+            case DROP -> removeFromAdapter(sharedData.dropAdapter, task);
+            case FOCUS -> setRecurrenceForAdapter(sharedData.focusAdapter, task, value);
+            case LIST -> setRecurrenceForAdapter(sharedData.listAdapter, task, value);
+            case PICK -> addRemoveFromPick(task);
+        }
+    }
+    private void setRecurrenceForAdapter(TaskListAdapter adapter, long task, String value){
+        Optional<Task> taskFound = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+        if (taskFound.isEmpty())
+            return;
+        taskFound.get().setRecurrence(value);
     }
 
     @Override

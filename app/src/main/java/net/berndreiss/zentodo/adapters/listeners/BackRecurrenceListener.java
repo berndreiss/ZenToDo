@@ -61,8 +61,6 @@ public class BackRecurrenceListener extends BasicListener implements View.OnClic
 
             if (adapter instanceof DropTaskListAdapter || adapter instanceof PickTaskListAdapter) {
                 DataManager.editReminderDate(adapter.sharedData, task, Instant.now());
-                adapter.tasks.remove(position);
-                adapter.notifyDataSetChanged();
                 if (adapter instanceof PickTaskListAdapter)
                     ((PickTaskListAdapter) adapter).itemCountChanged();
                 return;

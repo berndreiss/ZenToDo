@@ -42,13 +42,6 @@ public class NoListTaskListAdapter extends AllTaskListAdapter{
 
                 //write back new list
                 DataManager.editList(sharedData, task, list);
-
-                //remove task from adapter
-                tasks.remove(position);
-
-                //notify adapter
-                notifyDataSetChanged();
-
             }
 
             //return to original row layout
