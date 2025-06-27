@@ -22,7 +22,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Implementation of the DataManagerI interface using SQLite and the ZenSQLiteHelper.
+ * Implementation of the DataManagerI interface handling UI interaction.
+ * Functions not essential for the apps UI are //IGNORED.
  */
 public class UIOperationHandler implements ClientOperationHandlerI {
 
@@ -58,6 +59,12 @@ public class UIOperationHandler implements ClientOperationHandlerI {
         }
     }
 
+    /**
+     * Update the id for if the task is in the adapters task list.
+     * @param adapter the current adapter
+     * @param task the task id
+     * @param newId the new id to set
+     */
     private void updateIdForAdapter(TaskListAdapter adapter, long task, long newId){
         Optional<Task> taskFound = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
         if (taskFound.isEmpty())
@@ -146,6 +153,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     @Override
     public void addNewTask(Task task) {
         final TaskListAdapter adapter;
+        //get the current adapter but ignore FOCUS and LIST since we have a fresh task on our hands
         switch (sharedData.mode){
             case LIST_NO:  adapter = sharedData.noListAdapter; break;
             case LIST_ALL:  adapter = sharedData.allTasksAdapter; break;
@@ -154,10 +162,12 @@ public class UIOperationHandler implements ClientOperationHandlerI {
             default:
                 return;
         }
+        //updating the UI needs to be handled by the main thread
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> {
             adapter.tasks.add(task);
             adapter.notifyDataSetChanged();
+            //in PICK also update the other lists
             if (sharedData.mode == Mode.PICK)
                 sharedData.pickAdapter.update();
         });
@@ -183,11 +193,14 @@ public class UIOperationHandler implements ClientOperationHandlerI {
             case LIST_ALL:  deleteFromAdapter(sharedData.allTasksAdapter, id); break;
             case DROP: deleteFromAdapter(sharedData.dropAdapter, id); break;
             case PICK: {
+                //see if the task is in any of the PICK lists, if so, delete it
                 boolean deleted = deleteFromAdapter(sharedData.pickAdapter, id);
                 if (!deleted) deleted = deleteFromAdapter(sharedData.doNowAdapter, id);
                 if (!deleted) deleted = deleteFromAdapter(sharedData.doLaterAdapter, id);
                 if (!deleted) deleteFromAdapter(sharedData.moveToListAdapter, id);
                 if (deleted){
+                    //update all lists UI
+                    //updating the UI needs to be handled by the main thread
                     Handler handler = new Handler(Looper.getMainLooper());
                     handler.post(() -> sharedData.pickAdapter.update());
                 }
@@ -208,16 +221,19 @@ public class UIOperationHandler implements ClientOperationHandlerI {
         Optional<Task> task = adapter.tasks.stream().filter(t -> t.getId() == id).findFirst();
         if (task.isEmpty())
             return false;
-        handler.post(() -> {
-            adapter.tasks.removeIf(t -> t.getId() == id);
-            adapter.tasks.forEach(t -> {
-                if (t.getPosition() > task.get().getPosition())
-                    t.setPosition(t.getPosition()-1);
-                if (t.getList() != null && Objects.equals(t.getList(), task.get().getList()) && t.getListPosition() > task.get().getListPosition())
-                    t.setListPosition(t.getListPosition()-1);
-            });
-            adapter.notifyDataSetChanged();
+        //remove the task
+        adapter.tasks.removeIf(t -> t.getId() == id);
+        //decrement all positions greater than the task (including list positions)
+        adapter.tasks.forEach(t -> {
+            //decrement position
+            if (t.getPosition() > task.get().getPosition())
+                t.setPosition(t.getPosition()-1);
+            //decrement list position
+            if (t.getList() != null && Objects.equals(t.getList(), task.get().getList()) && t.getListPosition() > task.get().getListPosition())
+                t.setListPosition(t.getListPosition()-1);
         });
+        //updating the UI needs to be handled by the main thread
+        handler.post(adapter::notifyDataSetChanged);
         return true;
     }
 
@@ -282,27 +298,43 @@ public class UIOperationHandler implements ClientOperationHandlerI {
             }
         }
     }
+
+    /**
+     * Swaps a task with another task holding the position (as the field, not the actual position in the list).
+     * @param adapter the current adapter
+     * @param task the task to move
+     * @param position the position the other task has to hold
+     */
     @SuppressLint("NotifyDataSetChanged")
     private void swapInAdapter(TaskListAdapter adapter, long task, int position){
+        //See if we can find both tasks in the adapter
+        Optional<Task> task1 = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+        Optional<Task> task2 = adapter.tasks.stream().filter(t -> t.getPosition() == position).findFirst();
+        //If so get both tasks from the database
+        Optional<Task> updatedTask1 = Optional.empty();
+        if (task1.isPresent())
+            updatedTask1 = sharedData.clientStub.getTask(task);
+        Optional<Task> updatedTask2 = Optional.empty();
+        if (task2.isPresent())
+            updatedTask2 = sharedData.clientStub.getTask(task2.get().getId());
+        //If both tasks (adapter and database) are present remove the existing one from the adapter
+        //and add the one retrieved from the database
+        if (task1.isPresent() && updatedTask1.isPresent()) {
+            adapter.tasks.remove(task1.get());
+            adapter.tasks.add(updatedTask1.get());
+        }
+        if (task2.isPresent() && updatedTask2.isPresent()) {
+            adapter.tasks.remove(task2.get());
+            adapter.tasks.add(updatedTask2.get());
+        }
+        //sort tasks by position
+        adapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+        //updating the UI needs to be handled by the main thread
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() ->{
-            Optional<Task> task1 = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
-            Optional<Task> task2 = adapter.tasks.stream().filter(t -> t.getPosition() == position).findFirst();
-            Optional<Task> updatedTask1 = Optional.empty();
-            Optional<Task> updatedTask2 = Optional.empty();
-            if (task1.isPresent())
-                updatedTask1 = sharedData.clientStub.getTask(task);
-            if (task2.isPresent())
-                updatedTask2 = sharedData.clientStub.getTask(task2.get().getId());
-            if (task1.isPresent() && updatedTask1.isPresent()) {
-                adapter.tasks.remove(task1.get());
-                adapter.tasks.add(updatedTask1.get());
-            }
-            if (task2.isPresent() && updatedTask2.isPresent()) {
-                adapter.tasks.remove(task2.get());
-                adapter.tasks.add(updatedTask2.get());
-            }
-            adapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+            //check whether something is being currently moved in the adapter. If so, do not update.
+            //this leads to problems and when the movement is finished the adapter will be notified
+            //of changes anyways
             if (!sharedData.itemIsInMotion)
                 adapter.notifyDataSetChanged();
         });
@@ -314,8 +346,10 @@ public class UIOperationHandler implements ClientOperationHandlerI {
             swapListEntriesForAdapter(sharedData.listAdapter, list, task, position);
     }
 
+    //TODO CONTINUE DOCUMENTATION
     @SuppressLint("NotifyDataSetChanged")
     private void swapListEntriesForAdapter(TaskListAdapter adapter, long list, long task, int position){
+        //updating the UI needs to be handled by the main thread
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() ->{
             Optional<Task> task1 = adapter.tasks.stream().filter(t -> t.getList() == list).filter(t -> t.getId() == task).findFirst();
@@ -362,6 +396,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
         if (taskFound.isEmpty())
             return;
         taskFound.get().setTask(taskName);
+        //updating the UI needs to be handled by the main thread
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(adapter::notifyDataSetChanged);
     }
@@ -418,6 +453,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                 sharedData.pickAdapter.tasks.remove(taskInList.get());
                 sharedData.pickAdapter.tasks.add(taskFound.get());
                 sharedData.pickAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+                //updating the UI needs to be handled by the main thread
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(() -> sharedData.pickAdapter.update());
                 return;
@@ -427,6 +463,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                 sharedData.doNowAdapter.tasks.remove(taskInList.get());
                 sharedData.doNowAdapter.tasks.add(taskFound.get());
                 sharedData.doNowAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+                //updating the UI needs to be handled by the main thread
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(() -> sharedData.doNowAdapter.update());
                 return;
@@ -436,6 +473,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                 sharedData.doLaterAdapter.tasks.remove(taskInList.get());
                 sharedData.doLaterAdapter.tasks.add(taskFound.get());
                 sharedData.doLaterAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+                //updating the UI needs to be handled by the main thread
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(() -> sharedData.doLaterAdapter.update());
                 return;
@@ -445,6 +483,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                 sharedData.moveToListAdapter.tasks.remove(taskInList.get());
                 sharedData.moveToListAdapter.tasks.add(taskFound.get());
                 sharedData.moveToListAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+                //updating the UI needs to be handled by the main thread
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(() -> sharedData.moveToListAdapter.update());
                 return;
@@ -452,6 +491,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
             //task was in no list -> add to pickAdapter
             sharedData.pickAdapter.tasks.add(taskFound.get());
             sharedData.pickAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+            //updating the UI needs to be handled by the main thread
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(() -> sharedData.pickAdapter.update());
         }
@@ -478,6 +518,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
         if (taskFound.isEmpty())
             return false;
         adapter.tasks.remove(taskFound.get());
+        //updating the UI needs to be handled by the main thread
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(adapter::notifyDataSetChanged);
         return true;
@@ -500,6 +541,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
             case FOCUS: updateListForAdapter(sharedData.focusAdapter, task); break;
             case LIST:
             {
+                //updating the UI needs to be handled by the main thread
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(() -> {
                     Optional<Task> taskFound = sharedData.listAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
@@ -518,6 +560,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @SuppressLint("NotifyDataSetChanged")
     private void updateListForAdapter(TaskListAdapter adapter, long taskId){
+        //updating the UI needs to be handled by the main thread
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> {
             Optional<Task> task = adapter.tasks.stream().filter(t -> t.getId() == taskId).findFirst();

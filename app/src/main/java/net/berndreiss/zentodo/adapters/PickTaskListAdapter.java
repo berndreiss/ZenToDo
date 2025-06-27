@@ -1,7 +1,6 @@
 package net.berndreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
 
@@ -15,28 +14,22 @@ import net.berndreiss.zentodo.adapters.listeners.PickListener;
 import net.berndreiss.zentodo.adapters.listeners.SetDateListenerPick;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
-import net.berndreiss.zentodo.data.TaskList;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  *       Extends TaskListAdapter but does not remove tasks when CheckBox is clicked.
  *       The PickTaskListAdapter actually consists of four distinct adapters:
- *
  *       pickAdapter: contains all tasks that are due today.
  *       doNowAdapter: contains all tasks ticked in any of the three other adapters (and therefore tasks that haven been chosen for today's FOCUS)
  *       doLaterAdapter: contains all tasks for which a reminder date has been set in any of the other adapters
  *       moveToListAdapter: contains all tasks for which a list has been set, but that don't have a reminder date
- *
  *       If the pickAdapter is empty clicking the PickButton in MainActivity sends all ticked tasks to Focus.
  *       Because of that the Focus Button does not have much use in this adapter. Its new
  *       function is to delete tasks (being marked by a delete drawable).
- *
  */
 
 public class PickTaskListAdapter extends TaskListAdapter implements PickListener {
