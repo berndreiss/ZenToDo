@@ -99,7 +99,6 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
         //set Listener for the Focus Button in the menu, item is removed from adapter upon click
         holder.focus.setOnClickListener(view12 -> {
-
             //get task
             Task task = tasks.get(position);
 
@@ -111,12 +110,6 @@ public class FocusTaskListAdapter extends TaskListAdapter {
 
             //write back change to data
             DataManager.setFocus(sharedData, task, false);
-
-            //remove from adapter
-            tasks.remove(position);
-
-            //notify adapter
-            notifyDataSetChanged();
         });
 
         //return DatePickerDialog that writes back to data and removes item from adapter

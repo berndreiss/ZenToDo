@@ -61,6 +61,7 @@ public class BackListListenerPick extends BackListListener{
             pickAdapter.notifyDataSetChanged();
             pickAdapter.itemCountChanged();
         }
+        //TODO handler reminder date set but list chosen
 
         adapter.notifyDataSetChanged();
     }

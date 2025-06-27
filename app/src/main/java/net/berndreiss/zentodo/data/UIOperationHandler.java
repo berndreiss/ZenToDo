@@ -7,7 +7,6 @@ import android.os.Handler;
 import net.berndreiss.zentodo.Mode;
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
-import net.berndreiss.zentodo.exceptions.InvalidActionException;
 import net.berndreiss.zentodo.operations.ClientOperationHandlerI;
 import net.berndreiss.zentodo.util.VectorClock;
 import net.berndreiss.zentodo.util.ZenServerMessage;
@@ -180,25 +179,34 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     @Override
     public void removeTask(long id) {
         switch (sharedData.mode){
-            case LIST_NO:  removeFromAdapter(sharedData.noListAdapter, id); break;
-            case LIST_ALL:  removeFromAdapter(sharedData.allTasksAdapter, id); break;
-            case DROP: removeFromAdapter(sharedData.dropAdapter, id); break;
+            case LIST_NO:  deleteFromAdapter(sharedData.noListAdapter, id); break;
+            case LIST_ALL:  deleteFromAdapter(sharedData.allTasksAdapter, id); break;
+            case DROP: deleteFromAdapter(sharedData.dropAdapter, id); break;
             case PICK: {
-                removeFromAdapter(sharedData.pickAdapter, id);
-                removeFromAdapter(sharedData.doNowAdapter, id);
-                removeFromAdapter(sharedData.doLaterAdapter, id);
-                removeFromAdapter(sharedData.moveToListAdapter, id);
+                boolean deleted = deleteFromAdapter(sharedData.pickAdapter, id);
+                if (deleted) return;
+                deleted = deleteFromAdapter(sharedData.doNowAdapter, id);
+                if (deleted) return;
+                deleted = deleteFromAdapter(sharedData.doLaterAdapter, id);
+                if (deleted) return;
+                deleteFromAdapter(sharedData.moveToListAdapter, id);
             }
         }
     }
 
+    /**
+     * Delete an entry from the data set. Adjusts positions also.
+     * @param adapter the adapter to delete from
+     * @param id the task id
+     * @return true if removed, false otherwise
+     */
     @SuppressLint("NotifyDataSetChanged")
-    private void removeFromAdapter(TaskListAdapter adapter, long id){
+    private boolean deleteFromAdapter(TaskListAdapter adapter, long id){
         Handler handler = new Handler(Looper.getMainLooper());
+        Optional<Task> task = adapter.tasks.stream().filter(t -> t.getId() == id).findFirst();
+        if (task.isEmpty())
+            return false;
         handler.post(() -> {
-            Optional<Task> task = adapter.tasks.stream().filter(t -> t.getId() == id).findFirst();
-            if (task.isEmpty())
-                return;
             adapter.tasks.removeIf(t -> t.getId() == id);
             adapter.tasks.forEach(t -> {
                 if (t.getPosition() > task.get().getPosition())
@@ -208,6 +216,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
             });
             adapter.notifyDataSetChanged();
         });
+        return true;
     }
 
     @Override
@@ -327,7 +336,6 @@ public class UIOperationHandler implements ClientOperationHandlerI {
             if (!sharedData.itemIsInMotion)
                 adapter.notifyDataSetChanged();
         });
-
     }
 
     @Override
@@ -356,46 +364,135 @@ public class UIOperationHandler implements ClientOperationHandlerI {
         handler.post(adapter::notifyDataSetChanged);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void updateFocus(long task, boolean value) {
+        switch(sharedData.mode){
+            case DROP -> {if (value) removeFromAdapter(sharedData.dropAdapter, task);}
+            case FOCUS -> {
+                //remove either way: strictly speaking if value the task should not be in FOCUS
+                //still we make sure to remove it before adding it again as a precaution
+                removeFromAdapter(sharedData.focusAdapter, task);
+                if (value) {
+                    Optional<Task> taskFound = sharedData.clientStub.getTask(task);
+                    if (taskFound.isEmpty())
+                        return;
+                    sharedData.focusAdapter.tasks.add(taskFound.get());
+                    sharedData.focusAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(()-> sharedData.focusAdapter.notifyDataSetChanged());
+                }
+            }
+            case PICK -> addRemoveFromPick(task);
+            case LIST -> updateFocus(sharedData.listAdapter, task, value);
+        }
     }
 
-    private void updateFocusForAdapter(TaskListAdapter adapter, long task, boolean value){
+
+    //TODO simplify this method
+    /**
+     * Add a task to pick if it is to be picked and remove it otherwise. Goes through all relevant
+     * adapters and performs the relevant action.
+     * @param task the task in question
+     */
+    @SuppressLint("NotifyDataSetChanged")
+    private void addRemoveFromPick(long task){
+        List<Task> tasksToPick = sharedData.database.getTaskManager().loadTasksToPick();
+        Optional<Task> taskFound = tasksToPick.stream().filter(t -> t.getId() == task).findFirst();
+        if (taskFound.isEmpty()){
+            boolean removed = removeFromAdapter(sharedData.pickAdapter, task);
+            if (removed) return;
+            removed = removeFromAdapter(sharedData.doNowAdapter, task);
+            if (removed) return;
+            removed = removeFromAdapter(sharedData.doLaterAdapter, task);
+            if (removed) return;
+            removeFromAdapter(sharedData.moveToListAdapter, task);
+        } else{
+            Optional<Task> taskInList = sharedData.pickAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+            if (taskInList.isPresent()){
+                sharedData.pickAdapter.tasks.remove(taskInList.get());
+                sharedData.pickAdapter.tasks.add(taskFound.get());
+                sharedData.pickAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> sharedData.pickAdapter.notifyDataSetChanged());
+                return;
+            }
+            taskInList = sharedData.doNowAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+            if (taskInList.isPresent()){
+                sharedData.doNowAdapter.tasks.remove(taskInList.get());
+                sharedData.doNowAdapter.tasks.add(taskFound.get());
+                sharedData.doNowAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> sharedData.doNowAdapter.notifyDataSetChanged());
+                return;
+            }
+            taskInList = sharedData.doLaterAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+            if (taskInList.isPresent()){
+                sharedData.doLaterAdapter.tasks.remove(taskInList.get());
+                sharedData.doLaterAdapter.tasks.add(taskFound.get());
+                sharedData.doLaterAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> sharedData.doLaterAdapter.notifyDataSetChanged());
+                return;
+            }
+            taskInList = sharedData.moveToListAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+            if (taskInList.isPresent()){
+                sharedData.moveToListAdapter.tasks.remove(taskInList.get());
+                sharedData.moveToListAdapter.tasks.add(taskFound.get());
+                sharedData.moveToListAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> sharedData.moveToListAdapter.notifyDataSetChanged());
+                return;
+            }
+            //task was in no list -> add to pickAdapter
+            sharedData.pickAdapter.tasks.add(taskFound.get());
+            sharedData.pickAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> sharedData.pickAdapter.notifyDataSetChanged());
+        }
+
+
+    }
+
+    private void updateFocus(TaskListAdapter adapter, long task, boolean value){
         Optional<Task> taskFound = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
         if (taskFound.isEmpty())
             return;
         taskFound.get().setFocus(value);
     }
 
-    @Override
-    public void updateDropped(long task, boolean value) {
-        //TODO is this handled by the other methods already?
-    }
-
-    private void updateDroppedForAdapter(TaskListAdapter adapter, long task, boolean value){
+    /**
+     * Remove task from adapter without adjusting positions.
+     * @param adapter the adapter to remove from
+     * @param task the task id
+     * @return true if task was removed, false otherwise
+     */
+    @SuppressLint("NotifyDataSetChanged")
+    private boolean removeFromAdapter(TaskListAdapter adapter, long task){
         Optional<Task> taskFound = adapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
         if (taskFound.isEmpty())
-            return;
-        taskFound.get().setDropped(value);
+            return false;
+        adapter.tasks.remove(taskFound.get());
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(adapter::notifyDataSetChanged);
+        return true;
     }
-
+    @Override
+    public void updateDropped(long task, boolean value) {
+        //IGNORED
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void updateList(long task, Long list) {
         //TODO update color too
         switch (sharedData.mode){
-            case DROP: updateListForAdapter(sharedData.dropAdapter, task, list); break;
+            case DROP: updateListForAdapter(sharedData.dropAdapter, task); break;
             case PICK: {
-                updateListForAdapter(sharedData.pickAdapter, task, list);
-                updateListForAdapter(sharedData.doNowAdapter, task, list);
-                updateListForAdapter(sharedData.doLaterAdapter, task, list);
-                updateListForAdapter(sharedData.moveToListAdapter, task, list);
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(() -> sharedData.pickAdapter.update());
+                addRemoveFromPick(task);
                 break;
             }
-            case FOCUS: updateListForAdapter(sharedData.focusAdapter, task, list); break;
+            case FOCUS: updateListForAdapter(sharedData.focusAdapter, task); break;
             case LIST:
             {
                 Handler handler = new Handler(Looper.getMainLooper());
@@ -415,7 +512,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void updateListForAdapter(TaskListAdapter adapter, long taskId, Long list){
+    private void updateListForAdapter(TaskListAdapter adapter, long taskId){
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> {
             Optional<Task> task = adapter.tasks.stream().filter(t -> t.getId() == taskId).findFirst();

@@ -35,8 +35,6 @@ public class DropTaskListAdapter extends TaskListAdapter{
         holder.focus.setOnClickListener(v -> {
             Task task = tasks.get(position);
             DataManager.setFocus(sharedData, task, !task.getFocus());//change state of focus in task
-            tasks.remove(position);
-            notifyDataSetChanged();
         });
 
         //Remove task from View if list is set
