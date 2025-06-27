@@ -80,9 +80,6 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                 //reset dropped in data and tasks
                 DataManager.setDropped(sharedData, task,false);
 
-                tasks.remove(position);
-
-                notifyItemChanged(position);
             } else {
                 DataManager.remove(sharedData, task);
             }
@@ -133,12 +130,6 @@ public class FocusTaskListAdapter extends TaskListAdapter {
                     if (date.isAfter(LocalDate.now())) {
                         //also set focus to false in data
                         DataManager.setFocus(sharedData, task, false);
-
-                        //remove from adapter
-                        tasks.remove(position);
-
-                        //notify adapter
-                        notifyDataSetChanged();
                     }
 
                 }, taskYear, taskMonth, taskDay);

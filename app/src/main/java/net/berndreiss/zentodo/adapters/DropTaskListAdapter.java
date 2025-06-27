@@ -50,8 +50,6 @@ public class DropTaskListAdapter extends TaskListAdapter{
 
                 //write back
                 DataManager.editList(sharedData, task, list);
-                tasks.remove(position);
-                notifyDataSetChanged();
 
             }
 
@@ -72,8 +70,6 @@ public class DropTaskListAdapter extends TaskListAdapter{
                     Instant dateInstant = date.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
                     DataManager.editReminderDate(sharedData, task, dateInstant);//Write back data
-                    tasks.remove(position);
-                    notifyDataSetChanged();
 
                 }, taskYear, taskMonth, taskDay);
                 return datePickerDialog;

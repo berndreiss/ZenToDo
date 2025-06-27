@@ -390,7 +390,7 @@ public class MainActivity extends AppCompatActivity {
             editText.setText("");
             //add task to Data if it is not empty
             if (!task.trim().isEmpty())
-                sharedData.dropAdapter.add(task);
+                DataManager.add(sharedData, task);
         });
     }
 

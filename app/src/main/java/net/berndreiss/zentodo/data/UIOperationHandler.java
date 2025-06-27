@@ -184,12 +184,13 @@ public class UIOperationHandler implements ClientOperationHandlerI {
             case DROP: deleteFromAdapter(sharedData.dropAdapter, id); break;
             case PICK: {
                 boolean deleted = deleteFromAdapter(sharedData.pickAdapter, id);
-                if (deleted) return;
-                deleted = deleteFromAdapter(sharedData.doNowAdapter, id);
-                if (deleted) return;
-                deleted = deleteFromAdapter(sharedData.doLaterAdapter, id);
-                if (deleted) return;
-                deleteFromAdapter(sharedData.moveToListAdapter, id);
+                if (!deleted) deleted = deleteFromAdapter(sharedData.doNowAdapter, id);
+                if (!deleted) deleted = deleteFromAdapter(sharedData.doLaterAdapter, id);
+                if (!deleted) deleteFromAdapter(sharedData.moveToListAdapter, id);
+                if (deleted){
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(() -> sharedData.pickAdapter.update());
+                }
             }
         }
     }
@@ -399,14 +400,17 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     private void addRemoveFromPick(long task){
         List<Task> tasksToPick = sharedData.database.getTaskManager().loadTasksToPick();
         Optional<Task> taskFound = tasksToPick.stream().filter(t -> t.getId() == task).findFirst();
-        if (taskFound.isEmpty()){
+        //It is possible the task has been assigned a list but has not been removed from DROP yet
+        //therefore, we check for that too
+        if (taskFound.isEmpty() || taskFound.get().getDropped()){
             boolean removed = removeFromAdapter(sharedData.pickAdapter, task);
-            if (removed) return;
-            removed = removeFromAdapter(sharedData.doNowAdapter, task);
-            if (removed) return;
-            removed = removeFromAdapter(sharedData.doLaterAdapter, task);
-            if (removed) return;
-            removeFromAdapter(sharedData.moveToListAdapter, task);
+            if (!removed) removed = removeFromAdapter(sharedData.doNowAdapter, task);
+            if (!removed) removed = removeFromAdapter(sharedData.doLaterAdapter, task);
+            if (!removed) removed = removeFromAdapter(sharedData.moveToListAdapter, task);
+            if (removed) {
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> sharedData.pickAdapter.update());
+            }
         } else{
             Optional<Task> taskInList = sharedData.pickAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
             if (taskInList.isPresent()){
@@ -414,7 +418,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                 sharedData.pickAdapter.tasks.add(taskFound.get());
                 sharedData.pickAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(() -> sharedData.pickAdapter.notifyDataSetChanged());
+                handler.post(() -> sharedData.pickAdapter.update());
                 return;
             }
             taskInList = sharedData.doNowAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
@@ -423,7 +427,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                 sharedData.doNowAdapter.tasks.add(taskFound.get());
                 sharedData.doNowAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(() -> sharedData.doNowAdapter.notifyDataSetChanged());
+                handler.post(() -> sharedData.doNowAdapter.update());
                 return;
             }
             taskInList = sharedData.doLaterAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
@@ -432,7 +436,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                 sharedData.doLaterAdapter.tasks.add(taskFound.get());
                 sharedData.doLaterAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(() -> sharedData.doLaterAdapter.notifyDataSetChanged());
+                handler.post(() -> sharedData.doLaterAdapter.update());
                 return;
             }
             taskInList = sharedData.moveToListAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
@@ -441,14 +445,14 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                 sharedData.moveToListAdapter.tasks.add(taskFound.get());
                 sharedData.moveToListAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(() -> sharedData.moveToListAdapter.notifyDataSetChanged());
+                handler.post(() -> sharedData.moveToListAdapter.update());
                 return;
             }
             //task was in no list -> add to pickAdapter
             sharedData.pickAdapter.tasks.add(taskFound.get());
             sharedData.pickAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
             Handler handler = new Handler(Looper.getMainLooper());
-            handler.post(() -> sharedData.pickAdapter.notifyDataSetChanged());
+            handler.post(() -> sharedData.pickAdapter.update());
         }
 
 
