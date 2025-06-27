@@ -45,7 +45,7 @@ public class SetDateListenerPick extends SetDateListener{
             Instant dateInstant = date.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
             Task t = adapter.tasks.get(position);
-            t.setReminderDate(dateInstant);
+            pickAdapter.setDate(t.getId(), dateInstant);
 
             doLaterAdapter.tasks.add(t);
             doLaterAdapter.notifyDataSetChanged();
@@ -59,7 +59,7 @@ public class SetDateListenerPick extends SetDateListener{
         datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE,adapter.sharedData.context.getResources().getString(R.string.cancel), (dialog, which) -> {
 
             Task t = adapter.tasks.get(position);
-            t.setReminderDate(null);
+            pickAdapter.unSetDate(t.getId());
 
             //change color of reminder date Button marking if Date is set
             adapter.markSet(holder,task);

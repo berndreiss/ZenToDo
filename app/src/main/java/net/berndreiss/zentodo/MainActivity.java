@@ -39,6 +39,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 
@@ -274,19 +277,30 @@ public class MainActivity extends AppCompatActivity {
                 Helper.showPickHelper(this);
             }
             else {
+                //Copy list because it will be changed during loop
+                List<Task> doNowCopy = new ArrayList<>(sharedData.doNowAdapter.tasks);
                 //if checked reset dropped and focus attributes of all task in tasksToDoNow
-                for (Task t : sharedData.doNowAdapter.tasks) {
+                for (Task t : doNowCopy) {
                     DataManager.setFocus(sharedData, t, true);
                     DataManager.setDropped(sharedData, t, false);
                 }
                 //set focus to false for all tasks in tasksToDoLater
-                for (Task t : sharedData.doLaterAdapter.tasks)
-                    DataManager.editReminderDate(sharedData, t, t.getReminderDate());
+                for (long t : sharedData.doLaterAdapter.dateMap.keySet()) {
+                    Optional<Task> task = sharedData.clientStub.getTask(t);
+                    if (task.isEmpty())
+                        continue;
+                    DataManager.editReminderDate(sharedData, task.get(), sharedData.doLaterAdapter.dateMap.get(t));
+                    //DataManager.setFocus(sharedData, t, false);
+                }
 
 
                 //set focus to false for all tasks in tasksToMoveToList
-                for (Task t : sharedData.moveToListAdapter.tasks)
-                    DataManager.editList(sharedData, t, sharedData.moveToListAdapter.listMap.get(t.getId()));
+                for (long t : sharedData.moveToListAdapter.listMap.keySet()){
+                    Optional<Task> task = sharedData.clientStub.getTask(t);
+                    if (task.isEmpty())
+                        continue;
+                    DataManager.editList(sharedData, task.get(), sharedData.moveToListAdapter.listMap.get(t));
+                }
                 //show Focus layout
                 showFocus();
             }

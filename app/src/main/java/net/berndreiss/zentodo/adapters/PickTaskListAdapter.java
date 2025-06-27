@@ -48,6 +48,8 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
     private final boolean checkboxTicked;//Tasks that are in the doNowAdapter are ticked
     /** Keep track of lists to be assigned on pick. */
     public Map<Long, String> listMap = new HashMap<>();
+    /** Keep track of dates to be assigned on pick. */
+    public Map<Long, Instant> dateMap = new HashMap<>();
 
     public PickTaskListAdapter(SharedData sharedData, boolean checkboxTicked){
         super(sharedData, new ArrayList<>());
@@ -172,6 +174,19 @@ public class PickTaskListAdapter extends TaskListAdapter implements PickListener
         }
     }
 
+    public void setDate(long position, Instant instant){
+        pickAdapter.dateMap.put(position, instant);
+        doNowAdapter.dateMap.put(position, instant);
+        doLaterAdapter.dateMap.put(position, instant);
+        moveToListAdapter.dateMap.put(position, instant);
+    }
+
+    public void unSetDate(long position){
+        pickAdapter.dateMap.remove(position);
+        doNowAdapter.dateMap.remove(position);
+        doLaterAdapter.dateMap.remove(position);
+        moveToListAdapter.dateMap.remove(position);
+    }
     public void setList(long position, String list){
         pickAdapter.listMap.put(position, list);
         doNowAdapter.listMap.put(position, list);
