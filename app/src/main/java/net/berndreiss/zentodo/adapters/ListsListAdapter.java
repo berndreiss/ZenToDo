@@ -225,6 +225,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
             } else {
 
+                sharedData.mode = Mode.LIST;
                 //get list name
                 String list = holder.button.getText().toString();
 

@@ -12,7 +12,6 @@ import net.berndreiss.zentodo.data.TaskList;
 
 import java.util.List;
 
-//TODO UI updates do not work
 /**
  *       Extends TaskListAdapter but removes tasks when list is changed. Also removes item when
  *       CheckBox is clicked regardless of whether task is recurring or not. Also upon swap
@@ -24,7 +23,6 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
     public ListTaskListAdapter(SharedData sharedData, TaskList taskList, List<Task> tasks){
         super(sharedData, tasks);
-        sharedData.mode = Mode.LIST;
         sharedData.listAdapter = this;
         this.taskList = taskList;
     }
