@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import net.berndreiss.zentodo.Mode;
 import net.berndreiss.zentodo.R;
 import net.berndreiss.zentodo.SharedData;
-import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomItemTouchHelperCallback;
 import net.berndreiss.zentodo.adapters.recyclerViewHelper.CustomListItemTouchHelperCallback;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
@@ -32,7 +31,6 @@ import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 

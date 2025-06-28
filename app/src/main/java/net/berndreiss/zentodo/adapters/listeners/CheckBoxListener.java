@@ -7,8 +7,6 @@ import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
 
-import java.time.LocalDate;
-
 /**
  *
  *  Implements listener for checkBox of a task.

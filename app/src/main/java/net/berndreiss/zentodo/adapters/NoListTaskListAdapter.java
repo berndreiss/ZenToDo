@@ -1,17 +1,14 @@
 package net.berndreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 
 import androidx.annotation.NonNull;
 
 import net.berndreiss.zentodo.SharedData;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
-import net.berndreiss.zentodo.data.TaskList;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  *       Extends AllTaskListAdapter but when list is changed task is removed from adapter.

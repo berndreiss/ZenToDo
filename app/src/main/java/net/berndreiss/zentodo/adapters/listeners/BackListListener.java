@@ -1,14 +1,10 @@
 package net.berndreiss.zentodo.adapters.listeners;
 
-import android.os.UserHandle;
 import android.view.View;
 
 import net.berndreiss.zentodo.adapters.TaskListAdapter;
 import net.berndreiss.zentodo.data.DataManager;
 import net.berndreiss.zentodo.data.Task;
-import net.berndreiss.zentodo.data.TaskList;
-
-import java.util.Optional;
 
 /**
  *
