@@ -479,7 +479,8 @@ public class UIOperationHandler implements ClientOperationHandlerI {
      */
     @SuppressLint("NotifyDataSetChanged")
     private void addRemoveFromPick(long task){
-        List<Task> tasksToPick = sharedData.database.getTaskManager().loadTasksToPick();
+        User user = sharedData.clientStub.getUser();
+        List<Task> tasksToPick = sharedData.database.getTaskManager().loadTasksToPick(user.getId(), user.getProfile());
         Optional<Task> taskFound = tasksToPick.stream().filter(t -> t.getId() == task).findFirst();
         //It is possible the task has been assigned a list but has not been removed from DROP yet
         //therefore, we check for that too
@@ -495,22 +496,26 @@ public class UIOperationHandler implements ClientOperationHandlerI {
         } else{
             boolean handled = addTaskIfExists(sharedData.pickAdapter, taskFound.get(), false);
             if (handled) {
-                sharedData.pickAdapter.update();
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> sharedData.pickAdapter.update());
                 return;
             }
             handled = addTaskIfExists(sharedData.doNowAdapter, taskFound.get(), false);
             if (handled) {
-                sharedData.pickAdapter.update();
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> sharedData.pickAdapter.update());
                 return;
             }
             handled = addTaskIfExists(sharedData.doLaterAdapter, taskFound.get(), false);
             if (handled) {
-                sharedData.pickAdapter.update();
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> sharedData.pickAdapter.update());
                 return;
             }
             handled = addTaskIfExists(sharedData.moveToListAdapter, taskFound.get(), false);
             if (handled) {
-                sharedData.pickAdapter.update();
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> sharedData.pickAdapter.update());
                 return;
             }
             //task was in no list -> add to pickAdapter
@@ -587,7 +592,9 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     public void updateList(long task, Long list) {
         //TODO update color too
         switch (sharedData.mode){
-            case DROP: updateListForAdapter(sharedData.dropAdapter, task, true); break;
+            case LIST_NO: removeFromAdapter(sharedData.noListAdapter, task, true); break;
+            case LIST_ALL: updateListForAdapter(sharedData.allTasksAdapter, task, false); break;
+            case DROP: removeFromAdapter(sharedData.dropAdapter, task, true); break;
             case PICK: {
                 addRemoveFromPick(task);
                 break;
@@ -595,19 +602,25 @@ public class UIOperationHandler implements ClientOperationHandlerI {
             case FOCUS: updateListForAdapter(sharedData.focusAdapter, task, true); break;
             case LIST:
             {
+                //remove the task from the list if present (should strictly speaking only be
+                //necessary if list==null, but remove it anyways as a safety precaution)
+                Optional<Task> taskFound = sharedData.listAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
+                taskFound.ifPresent(value -> sharedData.listAdapter.tasks.remove(value));
+                //if list==null we update the UI and are done
+                if (list == null){
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(() -> sharedData.listAdapter.notifyDataSetChanged());
+                    return;
+                }
+                //get the task from the database to also have the list position
+                Optional<Task> newTask = sharedData.clientStub.getTask(task);
+                //if the task does not exist or the list is not the one opened, return
+                if (newTask.isEmpty() || list != sharedData.listAdapter.taskList.getId())
+                    return;
+                sharedData.listAdapter.tasks.add(newTask.get());
                 //updating the UI needs to be handled by the main thread
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(() -> {
-                    Optional<Task> taskFound = sharedData.listAdapter.tasks.stream().filter(t -> t.getId() == task).findFirst();
-                    if (taskFound.isEmpty())
-                        return;
-                    Optional<Task> newTask = sharedData.clientStub.getTask(task);
-                    if (newTask.isEmpty())
-                        return;
-                    sharedData.listAdapter.tasks.remove(taskFound.get());
-                    sharedData.listAdapter.tasks.add(newTask.get());
-                    sharedData.listAdapter.notifyDataSetChanged();
-                });
+                handler.post(() -> sharedData.listAdapter.notifyDataSetChanged());
             }
         }
     }
@@ -686,6 +699,17 @@ public class UIOperationHandler implements ClientOperationHandlerI {
 
     @Override
     public void updateListColor(long list, String color) {
+
+        //set header color to chosen color or default if white is chosen
+        //if (color.startsWith("ffffff", 3)) {
+
+            //this.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
+
+        //} else {
+
+            //this.layout.setBackgroundColor(Color.parseColor(color));
+
+        //}
         //TODO implement
     }
 

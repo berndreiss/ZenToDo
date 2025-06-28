@@ -251,10 +251,7 @@ public class DataManager {
      */
     public static void editList(SharedData sharedData, Task task, String list) {
         Optional<TaskList> taskList = Optional.empty();
-
         if (list != null) {
-
-
             taskList = sharedData.clientStub.getListByName(list);
             List<TaskList> listContainer = new ArrayList<>();
             if (taskList.isEmpty()) {
@@ -475,6 +472,7 @@ public class DataManager {
      * @return a list of tasks for picking
      */
     public static List<Task> getTasksToPick(SharedData sharedData) {
-        return sharedData.database.getTaskManager().loadTasksToPick();
+        User user = sharedData.clientStub.getUser();
+        return sharedData.database.getTaskManager().loadTasksToPick(user.getId(), user.getProfile());
     }
 }

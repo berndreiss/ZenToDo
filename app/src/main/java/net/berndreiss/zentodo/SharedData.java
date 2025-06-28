@@ -29,19 +29,29 @@ public class SharedData {
     /** The current mode */
     public Mode mode;
 
-    //The adapters fill the RecyclerViews of layouts above and are all derived from TaskListAdapter
-    //for more information on the implementation see the according java files in adapters
+    //The adapters hold all tasks and fill the RecyclerViews of the different layouts .
+    //All derived from TaskListAdapter; for more information on the implementation see the according
+    //.java files in adapters
+    /** The adapter for the general list in the PICK view */
     public PickTaskListAdapter pickAdapter;
+    /** The adapter for the do-now-list in the PICK view */
     public PickTaskListAdapter doNowAdapter;
+    /** The adapter for the do-later-list in the PICK view */
     public PickTaskListAdapter doLaterAdapter;
+    /** The adapter for the move-to-list-list in the PICK view */
     public PickTaskListAdapter moveToListAdapter;
+    /** The adapter for the DROP view */
     public DropTaskListAdapter dropAdapter;
+    /** The adapter for the FOCUS view */
     public TaskListAdapter focusAdapter;
+    /** The adapter for the LISTS overview view */
     public ListsListAdapter listsListAdapter;
+    /** The adapter for the LISTS view for a specific list */
     public ListTaskListAdapter listAdapter;
-    public ListTaskListAdapter listsTaskListAdapter;//adapter for items in lists (items can be moved and get removed when list of task is changed)
-    public AllTaskListAdapter allTasksAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed)
-    public NoListTaskListAdapter noListAdapter;//adapter for showing all tasks (items can't be moved and do not get removed when list of task is changed) TODO implement own adapter for removing items when list is changed
+    /** The adapter for the "ALL TASKS" list in the LISTS view */
+    public AllTaskListAdapter allTasksAdapter;
+    /** The adapter for the "No List" list in the LISTS view */
+    public NoListTaskListAdapter noListAdapter;
     public boolean itemIsInMotion = false;
 
     public SharedData(Context context){

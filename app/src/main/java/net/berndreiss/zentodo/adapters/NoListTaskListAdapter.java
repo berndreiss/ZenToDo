@@ -24,28 +24,17 @@ public class NoListTaskListAdapter extends AllTaskListAdapter{
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
         super.onBindViewHolder(holder,position);
-
         //set Listener to change list of task, if the new list is not empty also remove task from adapter
         holder.backList.setOnClickListener(v -> {
-
             //get id of task
             Task task = tasks.get(position);
-
             //get name of new list
             String list = holder.autoCompleteList.getText().toString();
-
             //if old and new list differ write back data and remove item from adapter
             if (!list.isEmpty()) {
-
                 //write back new list
                 DataManager.editList(sharedData, task, list);
             }
-
-            //return to original row layout
-            setOriginal(holder);
-
         });
-
     }
-
 }

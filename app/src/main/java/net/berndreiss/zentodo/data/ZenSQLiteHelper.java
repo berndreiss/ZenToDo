@@ -17,6 +17,7 @@ import java.util.Optional;
 /**
  * A helper for interaction with the SQLite database.
  * Defines the database schema and database updates.
+ * The actual implementation of the Database interface is stored in the field "database".
  */
 public class ZenSQLiteHelper extends SQLiteOpenHelper {
 
@@ -163,7 +164,6 @@ public class ZenSQLiteHelper extends SQLiteOpenHelper {
         db.execSQL(query);
         query = "CREATE INDEX IDX_POSITION ON TASKS(POSITION)";
         db.execSQL(query);
-        //TODO ADD METADATA TABLE WITH VERSION AND TIMEDELAY
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
@@ -235,10 +235,10 @@ public class ZenSQLiteHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Get the DatabaseOpsI casted as DatabaseOps.
+     * Get the MetadataManagerI casted as MetadataManager.
      * @return the SQLite database operations class instance
      */
     public MetadataManager getDatabaseOps(){
-        return (MetadataManager) database.getDatabaseOps();
+        return (MetadataManager) database.getMetadataManager();
     }
 }

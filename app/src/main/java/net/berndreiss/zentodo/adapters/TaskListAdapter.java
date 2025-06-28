@@ -420,6 +420,10 @@ public abstract class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapt
             holder.focus.setBackground(ContextCompat.getDrawable(sharedData.context, R.drawable.button_alt));
     }
 
+    public void updateListColor(){
+        //TODO implement
+    }
+
     /**
      * Reset the adapter.
      */

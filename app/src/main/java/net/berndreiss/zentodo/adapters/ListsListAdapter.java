@@ -3,6 +3,7 @@ package net.berndreiss.zentodo.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,7 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -84,37 +86,16 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                     .setOnColorSelectedListener(selectedColor -> {
                     })
                     .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
-
-
                         //get selected color and encode it as hex
                         String color = Integer.toHexString(selectedColor);
-
                         if (color.length() == 6)
                             color = "00" + color;
-
                         color = "#" + color;
-
                         headerColor = color;
-
-                        //set header color to chosen color or default if white is chosen
-                        if (color.startsWith("ffffff", 3)) {
-
-                            this.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
-
-                        } else {
-
-                            this.layout.setBackgroundColor(Color.parseColor(color));
-
-                        }
-                        DataManager.editListColor(sharedData, list, color);
-                        sharedData.listsTaskListAdapter.notifyDataSetChanged();
-
                     })
                     .setNegativeButton("no color", (dialog, which) -> {
                         this.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
-                        DataManager.editListColor(sharedData, list, ListTaskListAdapter.DEFAULT_COLOR);
-                        sharedData.listsTaskListAdapter.notifyDataSetChanged();
-
+                        DataManager.editListColor(sharedData, list, null);
                     })
                     .build()
                     .show());
@@ -135,6 +116,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
         this.headerColor = standardColor;
     }
+
 
     //get View for ListView
     @NonNull
@@ -238,9 +220,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                     recyclerView.setAdapter(sharedData.noListAdapter);
 
                 }else{
-
                     sharedData.noListAdapter.notifyDataSetChanged();
-
                 }
 
             } else {
@@ -276,30 +256,27 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 listTasks.addAll(sharedData.clientStub.loadList(lists.get(position).getId()));
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
-                if(sharedData.listsTaskListAdapter==null){
+                if(sharedData.listAdapter==null){
+                    Optional<TaskList> taskList = sharedData.clientStub.getListByName(list);
+                    if (taskList.isEmpty()) {
+                        String message = "No list was found for initializing the list view";
+                        Log.e("ZenToDo", message);
+                        throw new RuntimeException(message);
+                    }
                     //initialize and set adapter
-                    sharedData.listsTaskListAdapter = new ListTaskListAdapter(sharedData, list, listTasks);
-                    recyclerView.setAdapter(sharedData.listsTaskListAdapter);
-
+                    sharedData.listAdapter = new ListTaskListAdapter(sharedData, taskList.get(), listTasks);
+                    recyclerView.setAdapter(sharedData.listAdapter);
                     //allows items to be moved and reordered in RecyclerView
-                    ItemTouchHelper.Callback callback = new CustomListItemTouchHelperCallback(sharedData.listsTaskListAdapter, recyclerView);
-
+                    ItemTouchHelper.Callback callback = new CustomListItemTouchHelperCallback(sharedData.listAdapter, recyclerView);
                     //create ItemTouchHelper and assign to RecyclerView
                     ItemTouchHelper iTouchHelper = new ItemTouchHelper(callback);
                     iTouchHelper.attachToRecyclerView(recyclerView);
-
                 }
-                else{
-                    sharedData.listsTaskListAdapter.notifyDataSetChanged();
-                }
-
-
-
+                else
+                    sharedData.listAdapter.notifyDataSetChanged();
             }
             recyclerView.setLayoutManager(new LinearLayoutManager(sharedData.context));
-
         });
-
         return convertView;
     }
 
@@ -318,7 +295,6 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     public void reset(){
         //hide header (will be shown when list is chosen)
         setHeaderGone();
-
         //clear ArrayList for Lists, add current tasks from data and notify adapter (in case they have been altered in another layout)
         lists.clear();
         lists.addAll(DataManager.getLists(sharedData));

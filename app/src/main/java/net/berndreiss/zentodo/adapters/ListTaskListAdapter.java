@@ -1,7 +1,6 @@
 package net.berndreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 
 import androidx.annotation.NonNull;
 
@@ -12,8 +11,8 @@ import net.berndreiss.zentodo.data.Task;
 import net.berndreiss.zentodo.data.TaskList;
 
 import java.util.List;
-import java.util.Optional;
 
+//TODO UI updates do not work
 /**
  *       Extends TaskListAdapter but removes tasks when list is changed. Also removes item when
  *       CheckBox is clicked regardless of whether task is recurring or not. Also upon swap
@@ -23,7 +22,7 @@ import java.util.Optional;
 
 public class ListTaskListAdapter extends TaskListAdapter{
 
-    public ListTaskListAdapter(SharedData sharedData, String taskList, List<Task> tasks){
+    public ListTaskListAdapter(SharedData sharedData, TaskList taskList, List<Task> tasks){
         super(sharedData, tasks);
         sharedData.mode = Mode.LIST;
         sharedData.listAdapter = this;
@@ -32,66 +31,27 @@ public class ListTaskListAdapter extends TaskListAdapter{
 
     /** TODO DESCRIBE */
     public static String DEFAULT_COLOR = "#00ffffff";
-    public String taskList;
+    public TaskList taskList;
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter.ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
 
-        //set CheckBoxListener that ignores if task is recurring
-        holder.checkBox.setOnClickListener(view -> {
-
-            //get task
+        holder.backList.setOnClickListener(_ -> {
+            //Get id of task
             Task task = tasks.get(position);
-
-            //remove from data
-            DataManager.remove(sharedData, task);
-
-            //notify adapter
-            notifyDataSetChanged();
-        });
-
-        //set Listener to change list of task, if the new list differs from the old also remove task from adapter
-        holder.backList.setOnClickListener(view161 -> {
-
-            //get id of task
-            Task task = tasks.get(position);
-
-            //get name of new list
+            //get new list name
             String list = holder.autoCompleteList.getText().toString();
-
-            //get name of old list
-            Optional<TaskList> oldTaskList = sharedData.database.getListManager().getList(tasks.get(position).getList());
-
-            String oldList = oldTaskList.isEmpty() ? "" : oldTaskList.get().getName();
-
-            //if old and new list differ write back data and remove item from adapter
-            if (!list.equals(oldList)) {
-
-                //set to null if AutoComplete is empty, write back otherwise
-                if (list.trim().isEmpty())
-                    DataManager.editList(sharedData, task, null);
-
-                else
-                    DataManager.editList(sharedData, task, list);
-
-                //remove task from adapter
-                tasks.remove(position);
-
-                //notify adapter
-                notifyDataSetChanged();
-
-
+            //set to no list if AutoComplete is empty
+            if (list.trim().isEmpty() || list.isEmpty()) {
+                //reset to no list
+                DataManager.editList(sharedData, task, null);
+            } else {
+                //write back otherwise
+                DataManager.editList(sharedData, task, list);
             }
-
-            //return to original row layout
-            setOriginal(holder);
-
-
         });
-
-
     }
 
     //write item movement to data and notify adapter: tasks can be dragged and dropped. Additionally write back list positions.

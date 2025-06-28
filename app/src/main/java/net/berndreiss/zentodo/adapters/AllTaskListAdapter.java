@@ -1,7 +1,6 @@
 package net.berndreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 
 import androidx.annotation.NonNull;
 
@@ -29,18 +28,11 @@ public class AllTaskListAdapter extends TaskListAdapter{
 
         //set CheckBoxListener that ignores if task is recurring
         holder.checkBox.setOnClickListener(view -> {
-
             //get task
             Task task = tasks.get(position);
-
             //remove from data
             DataManager.remove(sharedData, task);
-
-            //notify adapter
-            notifyDataSetChanged();
         });
-
-
     }
 
     @Override

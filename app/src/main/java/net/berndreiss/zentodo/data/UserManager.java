@@ -3,7 +3,6 @@ package net.berndreiss.zentodo.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import net.berndreiss.zentodo.exceptions.DuplicateUserIdException;
 import net.berndreiss.zentodo.exceptions.InvalidUserActionException;
@@ -22,19 +21,20 @@ import java.util.Optional;
  */
 public class UserManager implements UserManagerI{
 
-    private final ZenSQLiteHelper zenSqLiteHelper;
+    /** The SQLite helper */
+    private final ZenSQLiteHelper zenSQLiteHelper;
 
     /**
      * Create new instance of UserManager.
-     * @param zenSqLiteHelper the helper for interacting with the database
+     * @param zenSQLiteHelper the helper for interacting with the database
      */
-    public UserManager(ZenSQLiteHelper zenSqLiteHelper){
-        this.zenSqLiteHelper = zenSqLiteHelper;
+    public UserManager(ZenSQLiteHelper zenSQLiteHelper){
+        this.zenSQLiteHelper = zenSQLiteHelper;
     }
 
     @Override
     public synchronized void addToQueue(User user, ZenServerMessage message) {
-        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         StringBuilder sb = new StringBuilder();
         sb.append("{");
@@ -54,20 +54,15 @@ public class UserManager implements UserManagerI{
 
     @Override
     public List<ZenServerMessage> getQueued(long userId) {
-        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT TYPE, ARGUMENTS, CLOCK, TIMESTAMP FROM QUEUE WHERE USER_ID=?", new String[]{String.valueOf(userId)});
         cursor.moveToFirst();
         List<ZenServerMessage> result = new ArrayList<>();
         while (!cursor.isAfterLast()){
             OperationType type = OperationType.values()[cursor.getInt(0)];
-            Log.v("GET QUEUE", String.valueOf(type));
             String argsString = cursor.getString(1);
-            Log.v("GET QUEUE", String.valueOf(argsString));
             VectorClock clock = new VectorClock(cursor.getString(2));
-            Log.v("GET QUEUE", String.valueOf(clock.jsonify()));
             Instant timeStamp = Instant.ofEpochMilli(cursor.getLong(3));
-            Log.v("GET QUEUE", String.valueOf(timeStamp));
-
             String[] argsSplit = argsString.substring(1, argsString.length()-1).split(",");
 
             List<Object> args = new ArrayList<>(Arrays.asList(argsSplit));
@@ -81,13 +76,13 @@ public class UserManager implements UserManagerI{
 
     @Override
     public synchronized void clearQueue(long userId) {
-        SQLiteDatabase db= zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db= zenSQLiteHelper.getWritableDatabase();
         db.delete("QUEUE", "", null);
     }
 
     @Override
     public synchronized User addUser(long id, String email, String userName, Integer device) throws DuplicateUserIdException, InvalidUserActionException {
-        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getWritableDatabase();
         if (getUser(id).isPresent())
             throw new DuplicateUserIdException("User with id already exists: id " + id);
         if (getUserByEmail(email).isPresent())
@@ -124,7 +119,7 @@ public class UserManager implements UserManagerI{
         Optional<User> user = getUser(userId);
         if (user.isEmpty())
             throw new InvalidUserActionException("User does not exist");
-        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM PROFILES WHERE USER = ?", new String[]{String.valueOf(userId)});
         int count = 0;
         if (cursor.moveToFirst())
@@ -152,7 +147,7 @@ public class UserManager implements UserManagerI{
     public synchronized void removeUser(long userId) throws InvalidUserActionException {
         if (userId == 0)
             throw new InvalidUserActionException("Cannot delete default user.");
-        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getWritableDatabase();
         db.delete("USERS", "ID=?", new String[]{String.valueOf(userId)});
         db.delete("PROFILES", "USER=?", new String[]{String.valueOf(userId)});
         db.delete("TASKS", "USER = ?", new String[]{String.valueOf(userId)});
@@ -165,7 +160,7 @@ public class UserManager implements UserManagerI{
             throw new InvalidUserActionException("Cannot remove default profile of default user.");
         if (getProfiles(userId).size() == 1)
             throw new InvalidUserActionException("Cannot remove last profile of user.");
-        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getReadableDatabase();
         db.delete("TASKS", "USER = ? AND PROFILE = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
         db.delete("PROFILES", "USER = ? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
         db.delete("PROFILE_LIST", "USER = ? AND PROFILE = ?", new String[]{
@@ -175,7 +170,7 @@ public class UserManager implements UserManagerI{
 
     @Override
     public Optional<User> getUser(long id){
-        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM USERS WHERE ID=?", new String[]{String.valueOf(id)});
         List<User> users = getListOfUsers(cursor);
         cursor.close();
@@ -185,7 +180,7 @@ public class UserManager implements UserManagerI{
     }
     @Override
     public Optional<User> getUserByEmail(String email) {
-        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM USERS WHERE MAIL=?", new String[]{email});
         List<User> users = getListOfUsers(cursor);
         cursor.close();
@@ -201,7 +196,7 @@ public class UserManager implements UserManagerI{
         Optional<User> user = getUser(userId);
         if (user.isEmpty())
             return Optional.empty();
-        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM PROFILES WHERE USER=? AND ID = ?", new String[]{String.valueOf(userId), String.valueOf(id)});
         List<Profile> profiles = getListOfProfiles(cursor, user.get());
         cursor.close();
@@ -214,7 +209,7 @@ public class UserManager implements UserManagerI{
 
     @Override
     public synchronized void enableUser(long userId) {
-        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("ENABLED", 1);
         db.update("USERS", values, "ID=?", new String[]{String.valueOf(userId)});
@@ -222,7 +217,7 @@ public class UserManager implements UserManagerI{
 
     @Override
     public synchronized void setDevice(long userId, int id) {
-        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("DEVICE", id);
         db.update("USERS", values, "ID=?", new String[]{String.valueOf(userId)});
@@ -230,7 +225,7 @@ public class UserManager implements UserManagerI{
 
     @Override
     public synchronized void setClock(long userId, VectorClock vectorClock) {
-        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put("CLOCK", vectorClock.jsonify());
             db.update("USERS", values, "ID=?", new String[]{String.valueOf(userId)});
@@ -238,19 +233,18 @@ public class UserManager implements UserManagerI{
 
     @Override
     public Optional<String> getToken(long user) {
-        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getReadableDatabase();
             try(Cursor cursor = db.rawQuery("SELECT TOKEN FROM TOKENS WHERE USER=?", new String[]{String.valueOf(user)})) {
                 cursor.moveToFirst();
                 if (cursor.isAfterLast())
                     return Optional.empty();
                 return Optional.of(cursor.getString(0));
             }
-
     }
 
     @Override
     public synchronized void setToken(long user, String token) {
-        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("USER", user);
         values.put("TOKEN", token);
@@ -259,7 +253,7 @@ public class UserManager implements UserManagerI{
 
     @Override
     public synchronized void updateUserName(Long userId, String name) {
-        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("NAME", name);
         db.update("USERS", values, "ID = ?", new String[]{String.valueOf(userId)});
@@ -269,7 +263,7 @@ public class UserManager implements UserManagerI{
     public synchronized void updateEmail(Long userId, String mail) throws InvalidUserActionException {
         if (getUserByEmail(mail).isPresent() || userId == null)
             throw new InvalidUserActionException("User with mail already exists.");
-        SQLiteDatabase db = zenSqLiteHelper.getWritableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("MAIL", mail);
         db.update("USERS", values, "ID = ?", new String[]{String.valueOf(userId)});
@@ -277,7 +271,7 @@ public class UserManager implements UserManagerI{
 
     @Override
     public List<User> getUsers() {
-        SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
+        SQLiteDatabase db = zenSQLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM USERS", null);
         List<User> users = getListOfUsers(cursor);
         cursor.close();
@@ -286,7 +280,7 @@ public class UserManager implements UserManagerI{
 
     @Override
     public List<Profile> getProfiles(long userId) {
-        SQLiteDatabase database = zenSqLiteHelper.getReadableDatabase();
+        SQLiteDatabase database = zenSQLiteHelper.getReadableDatabase();
         Cursor cursorU = database.rawQuery("SELECT * FROM USERS WHERE ID = ?", new String[]{String.valueOf(userId)});
         List<User> users = getListOfUsers(cursorU);
         cursorU.close();
