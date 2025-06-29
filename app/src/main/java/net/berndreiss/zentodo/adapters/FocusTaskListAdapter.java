@@ -187,6 +187,8 @@ public class FocusTaskListAdapter extends TaskListAdapter {
         //clear ArrayList for Focus, add current tasks from data and notify adapter (in case they have been altered in another layout)
         tasks.clear();
         tasks.addAll(DataManager.getFocus(sharedData));
+        for (Task t: tasks)
+            t.setFocus(true);
         notifyDataSetChanged();
 
     }

@@ -460,10 +460,11 @@ public class UIOperationHandler implements ClientOperationHandlerI {
                         return;
                     sharedData.focusAdapter.tasks.add(taskFound.get());
                     sharedData.focusAdapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
-                    //updating the UI needs to be handled by the main thread
-                    Handler handler = new Handler(Looper.getMainLooper());
-                    handler.post(()-> sharedData.focusAdapter.notifyDataSetChanged());
                 }
+                //TODO this does not have to happen every time!
+                //updating the UI needs to be handled by the main thread
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(()-> sharedData.focusAdapter.notifyDataSetChanged());
             }
             case PICK -> addRemoveFromPick(task);
             case LIST -> updateFocus(sharedData.listAdapter, task, value);

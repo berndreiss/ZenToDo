@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarDrop.setOnClickListener(_ -> showDrop());
         toolbarFocus.setOnClickListener(_ -> showFocus());
         toolbarLists.setOnClickListener(_ -> showLists());
-        deleteDatabase(DATABASE_NAME);
+        //deleteDatabase(DATABASE_NAME);
         //Initialize shared data object -> also initializes the database and the UI operation handler
         sharedData = new SharedData(this);
         //initialize client stub -> handles all data related operations including interaction with
@@ -170,11 +170,12 @@ public class MainActivity extends AppCompatActivity {
         initializePick(sharedData);
         initializeFocus(sharedData);
         initializeLists(sharedData);
+        /*
         try {
             DataManager.initClientStub(sharedData, "bd_reiss@yahoo.de");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        }
+        }*/
         //Drop is shown when app starts
         showDrop();
     }
