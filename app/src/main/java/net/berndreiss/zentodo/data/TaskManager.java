@@ -509,7 +509,7 @@ public class TaskManager implements TaskManagerI {
         SQLiteDatabase db = zenSqLiteHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE USER=? AND PROFILE=? AND " +
                 "RECURRENCE IS NULL AND (FOCUS>0 OR " +
-                "(REMINDER_DATE IS NULL AND (DROPPED>0 OR LIST=NULL)) OR " +
+                "(REMINDER_DATE IS NULL AND (DROPPED>0 OR LIST IS NULL)) OR " +
                 "(REMINDER_DATE IS NOT NULL AND REMINDER_DATE<=" + epoch + ")) ORDER BY POSITION", new String[]{
                         String.valueOf(user),
                         String.valueOf(profile)
