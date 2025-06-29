@@ -2,6 +2,7 @@ package net.berndreiss.zentodo.data;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import net.berndreiss.zentodo.SharedData;
@@ -474,5 +475,20 @@ public class DataManager {
     public static List<Task> getTasksToPick(SharedData sharedData) {
         User user = sharedData.clientStub.getUser();
         return sharedData.database.getTaskManager().loadTasksToPick(user.getId(), user.getProfile());
+    }
+
+    /**
+     * Remove a list.
+     * @param sharedData the shared data object
+     * @param taskList the list to be remove
+     */
+    public static void removeList(SharedData sharedData, TaskList taskList) {
+        Thread thread = new Thread(() -> sharedData.clientStub.dbHandler.getListManager().removeList(taskList.getId()));
+        thread.start();
+        try{
+            thread.join();
+        } catch (InterruptedException e){
+            Log.e("ZenToDo", "Error removing list", e);
+        }
     }
 }

@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputFilter;
-import android.view.MotionEvent;
 import android.view.View;
 
 import net.berndreiss.zentodo.data.Task;
@@ -38,7 +37,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -152,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
         toolbarDrop.setOnClickListener(_ -> showDrop());
         toolbarFocus.setOnClickListener(_ -> showFocus());
         toolbarLists.setOnClickListener(_ -> showLists());
+        deleteDatabase(DATABASE_NAME);
         //Initialize shared data object -> also initializes the database and the UI operation handler
         sharedData = new SharedData(this);
         //initialize client stub -> handles all data related operations including interaction with
@@ -478,8 +477,9 @@ public class MainActivity extends AppCompatActivity {
         //Items that show the list your currently in as a header and the button for choosing a color
         LinearLayout headerLayout = findViewById(R.id.header);
         TextView headerTextView = findViewById(R.id.text_view_lists_header);
-        Button headerButton = findViewById(R.id.button_header);
-        sharedData.listsListAdapter = new ListsListAdapter(sharedData, listView, recyclerView, headerLayout, headerTextView, headerButton);
+        Button headerButton = findViewById(R.id.button_list_color);
+        Button deleteButton = findViewById(R.id.button_list_delete);
+        sharedData.listsListAdapter = new ListsListAdapter(sharedData, listView, recyclerView, headerLayout, headerTextView, headerButton, deleteButton);
         //set adapter
         listView.setAdapter(sharedData.listsListAdapter);
     }

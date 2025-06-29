@@ -1,7 +1,10 @@
 package net.berndreiss.zentodo.adapters;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -61,22 +64,24 @@ public class ListsListAdapter extends ArrayAdapter<String> {
     private class Header{
         LinearLayout layout;
         TextView headerText;
-        long list;
         Button colorButton;
+        Button deleteButton;
 
         @SuppressLint("NotifyDataSetChanged")
-        Header(SharedData sharedData, LinearLayout layout, TextView headerText, Button colorButton){
+        Header(LinearLayout layout, TextView headerText, Button colorButton, Button deleteButton){
             this.layout = layout;
             this.headerText = headerText;
             this.colorButton = colorButton;
+            this.deleteButton = deleteButton;
 
             //set header invisible before list is chosen
             this.layout.setVisibility(View.GONE);
             this.headerText.setVisibility(View.GONE);
             this.colorButton.setVisibility(View.GONE);
+            this.deleteButton.setVisibility(View.GONE);
 
             //set color choosing dialog
-            this.colorButton.setOnClickListener(view -> ColorPickerDialogBuilder
+            this.colorButton.setOnClickListener(_ -> ColorPickerDialogBuilder
                     .with(sharedData.context)
                     .setTitle("Choose color")
                     .initialColor(Color.parseColor(headerColor))
@@ -95,16 +100,40 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                     })
                     .setNegativeButton("no color", (dialog, which) -> {
                         this.layout.setBackgroundColor(ContextCompat.getColor(sharedData.context, R.color.header_background));
-                        DataManager.editListColor(sharedData, list, null);
+                        DataManager.editListColor(sharedData, sharedData.listAdapter.taskList.getId(), null);
                     })
                     .build()
                     .show());
+            this.deleteButton.setOnClickListener(_ ->{
+                AlertDialog.Builder builder = new AlertDialog.Builder(sharedData.context);
+                builder.setTitle("Delete List");
+                builder.setMessage("Do you want to delete the list " + sharedData.listAdapter.taskList.getName() + "?");
 
+                builder.setPositiveButton("YES", (_, _) -> {
+                    AlertDialog.Builder subBuilder = new AlertDialog.Builder(sharedData.context);
+                    subBuilder.setTitle("Delete List");
+                    subBuilder.setMessage("Do you want to delete the tasks in this list too? (WARNING: they can NOT be restored after this!)");
+                    subBuilder.setPositiveButton("YES", (_, _) -> {
+                        //copy list since it will be altered during removing
+                        List<Task> listCopy = sharedData.listAdapter.tasks;
+                        for (Task t: listCopy)
+                            DataManager.remove(sharedData, t);
+                    });
+                    subBuilder.setNegativeButton("NO", (_, _) -> {});
+                    AlertDialog dialog = subBuilder.create();
+                    dialog.show();
+
+                    DataManager.removeList(sharedData, sharedData.listAdapter.taskList);
+
+                });
+                builder.setNegativeButton("cancel", ((_, _) -> {}));
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            });
         }
 
     }
-
-    public ListsListAdapter(SharedData sharedData, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button headerButton){
+    public ListsListAdapter(SharedData sharedData, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button colorButton, Button deleteButton){
         super(sharedData.context, R.layout.lists_row, DataManager.getListsAsString(sharedData));
         this.sharedData=sharedData;
         this.lists = DataManager.getLists(sharedData);
@@ -112,7 +141,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         this.recyclerView = recyclerView;
         recyclerView.setVisibility(View.GONE);
 
-        header = new Header(sharedData, headerLayout, headerTextView, headerButton);
+        header = new Header(headerLayout, headerTextView,  colorButton, deleteButton);
 
         this.headerColor = standardColor;
     }
@@ -157,6 +186,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             header.layout.setVisibility(View.VISIBLE);
             header.headerText.setVisibility(View.VISIBLE);
             header.colorButton.setVisibility(View.VISIBLE);
+            header.deleteButton.setVisibility(View.VISIBLE);
 
             //set RecyclerView VISIBLE and ListView GONE
             recyclerView.setVisibility(View.VISIBLE);
@@ -180,6 +210,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 headerColor = standardColor;
 
                 header.colorButton.setVisibility(View.GONE);
+                header.deleteButton.setVisibility(View.GONE);
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if (sharedData.allTasksAdapter == null) {
@@ -211,6 +242,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 headerColor = standardColor;
 
                 header.colorButton.setVisibility(View.GONE);
+                header.deleteButton.setVisibility(View.GONE);
 
                 //initialize adapter if it is null, notifyDataSetChanged otherwise
                 if (sharedData.noListAdapter == null) {
@@ -288,6 +320,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         header.layout.setVisibility(View.GONE);
         header.headerText.setVisibility(View.GONE);
         header.colorButton.setVisibility(View.GONE);
+        header.deleteButton.setVisibility(View.GONE);
     }
 
     /**

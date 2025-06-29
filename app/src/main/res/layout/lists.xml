@@ -19,6 +19,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <android.widget.Button
+                android:id="@+id/button_list_color"
+                android:shape="rectangle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:paddingEnd="20dp"
+                style="?android:borderlessButtonStyle"
+                android:drawableEnd="@drawable/ic_action_color"
+                tools:ignore="RtlSymmetry" />
             <TextView
                 android:id="@+id/text_view_lists_header"
                 android:shape="rectangle"
@@ -31,9 +44,8 @@
                 android:textSize="20sp"
                 android:padding="10dp"
                 android:gravity="center"/>
-
             <android.widget.Button
-                android:id="@+id/button_header"
+                android:id="@+id/button_list_delete"
                 android:shape="rectangle"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -43,8 +55,9 @@
                 android:layout_gravity="center"
                 android:paddingEnd="20dp"
                 style="?android:borderlessButtonStyle"
-                android:drawableEnd="@drawable/ic_action_color"
+                android:drawableEnd="@drawable/ic_action_delete"
                 tools:ignore="RtlSymmetry" />
+
         </LinearLayout>
 
         <ListView
