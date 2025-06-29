@@ -479,7 +479,7 @@ public class MainActivity extends AppCompatActivity {
         TextView headerTextView = findViewById(R.id.text_view_lists_header);
         Button headerButton = findViewById(R.id.button_list_color);
         Button deleteButton = findViewById(R.id.button_list_delete);
-        sharedData.listsListAdapter = new ListsListAdapter(sharedData, listView, recyclerView, headerLayout, headerTextView, headerButton, deleteButton);
+        sharedData.listsListAdapter = new ListsListAdapter(sharedData, listView, recyclerView, headerLayout, headerTextView, headerButton, deleteButton, this::showLists);
         //set adapter
         listView.setAdapter(sharedData.listsListAdapter);
     }

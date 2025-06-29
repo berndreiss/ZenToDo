@@ -592,8 +592,8 @@ public class UIOperationHandler implements ClientOperationHandlerI {
     public void updateList(long task, Long list) {
         //TODO update color too
         switch (sharedData.mode){
-            case LIST_NO: removeFromAdapter(sharedData.noListAdapter, task, true); break;
-            case LIST_ALL: updateListForAdapter(sharedData.allTasksAdapter, task, false); break;
+            case LIST_NO: if (list!=null)removeFromAdapter(sharedData.noListAdapter, task, true); break;
+            case LIST_ALL: updateListForAdapter(sharedData.allTasksAdapter, task, true); break;
             case DROP: removeFromAdapter(sharedData.dropAdapter, task, true); break;
             case PICK: {
                 addRemoveFromPick(task);
@@ -642,6 +642,7 @@ public class UIOperationHandler implements ClientOperationHandlerI {
         if (newTask.isEmpty())
             return;
         adapter.tasks.remove(taskFound.get());
+        adapter.tasks.add(newTask.get());
         //sort by position
         adapter.tasks.sort(Comparator.comparingInt(Task::getPosition));
         if (notify) {

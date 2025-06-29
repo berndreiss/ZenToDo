@@ -68,7 +68,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         Button deleteButton;
 
         @SuppressLint("NotifyDataSetChanged")
-        Header(LinearLayout layout, TextView headerText, Button colorButton, Button deleteButton){
+        Header(LinearLayout layout, TextView headerText, Button colorButton, Button deleteButton, Runnable returnFunction){
             this.layout = layout;
             this.headerText = headerText;
             this.colorButton = colorButton;
@@ -110,6 +110,11 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                 builder.setMessage("Do you want to delete the list " + sharedData.listAdapter.taskList.getName() + "?");
 
                 builder.setPositiveButton("YES", (_, _) -> {
+                    if (sharedData.listAdapter.tasks.isEmpty()){
+                        DataManager.removeList(sharedData, sharedData.listAdapter.taskList);
+                        returnFunction.run();
+                        return;
+                    }
                     AlertDialog.Builder subBuilder = new AlertDialog.Builder(sharedData.context);
                     subBuilder.setTitle("Delete List");
                     subBuilder.setMessage("Do you want to delete the tasks in this list too? (WARNING: they can NOT be restored after this!)");
@@ -118,12 +123,16 @@ public class ListsListAdapter extends ArrayAdapter<String> {
                         List<Task> listCopy = sharedData.listAdapter.tasks;
                         for (Task t: listCopy)
                             DataManager.remove(sharedData, t);
+                        DataManager.removeList(sharedData, sharedData.listAdapter.taskList);
+                        returnFunction.run();
                     });
-                    subBuilder.setNegativeButton("NO", (_, _) -> {});
+                    subBuilder.setNegativeButton("NO", (_, _) -> {
+                        DataManager.removeList(sharedData, sharedData.listAdapter.taskList);
+                        returnFunction.run();
+                    });
                     AlertDialog dialog = subBuilder.create();
                     dialog.show();
 
-                    DataManager.removeList(sharedData, sharedData.listAdapter.taskList);
 
                 });
                 builder.setNegativeButton("cancel", ((_, _) -> {}));
@@ -133,7 +142,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         }
 
     }
-    public ListsListAdapter(SharedData sharedData, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button colorButton, Button deleteButton){
+    public ListsListAdapter(SharedData sharedData, ListView listView, RecyclerView recyclerView, LinearLayout headerLayout, TextView headerTextView, Button colorButton, Button deleteButton, Runnable showLists){
         super(sharedData.context, R.layout.lists_row, DataManager.getListsAsString(sharedData));
         this.sharedData=sharedData;
         this.lists = DataManager.getLists(sharedData);
@@ -141,7 +150,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         this.recyclerView = recyclerView;
         recyclerView.setVisibility(View.GONE);
 
-        header = new Header(headerLayout, headerTextView,  colorButton, deleteButton);
+        header = new Header(headerLayout, headerTextView,  colorButton, deleteButton, showLists);
 
         this.headerColor = standardColor;
     }

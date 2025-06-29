@@ -37,12 +37,6 @@ public class BackListListener extends BasicListener implements View.OnClickListe
             DataManager.editList(adapter.sharedData, task, list);
         }
 
-        //change Color of setList Button to mark if list is set
-        adapter.markSet(holder,adapter.tasks.get(position));
-
-        //notify adapter
-        adapter.notifyItemChanged(position);
-
         //return to original row layout
         adapter.setOriginal(holder);
     }
