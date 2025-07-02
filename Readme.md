@@ -1,4 +1,4 @@
-ZenToDo
+##ZenToDo
 
 A simple ToDo-List that let's you focus on what's really important.
 
