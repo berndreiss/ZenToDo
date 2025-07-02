@@ -1,4 +1,4 @@
-## ZenToDo
+# ZenToDo
 
 A simple ToDo-List that let's you focus on what's really important.
 
@@ -6,14 +6,14 @@ This project implements a hands-on ToDo-List for Android. The idea is simple: yo
 
 The App contains the following main layouts:
 
-# DROP
+## DROP
 
 Add new tasks, so you don't have to worry about them.
 
 ![image](https://github.com/user-attachments/assets/09ddf8bd-fe7e-43f9-96f1-9001c5027c17)
 
 
-# PICK
+## PICK
 
 Presents all tasks that are due today and lets you pick which ones to get done
 
@@ -21,14 +21,14 @@ Presents all tasks that are due today and lets you pick which ones to get done
 ![image](https://github.com/user-attachments/assets/0c9b03a7-ddb5-47f9-aa4d-656e461f90ba)
 
 
-# FOCUS
+## FOCUS
 
 Presents all tasks that you picked including a color mode, that marks all tasks belonging to one list in the same color
 
 ![image](https://github.com/user-attachments/assets/e244d813-a7b2-45d0-9b3f-cdc74c1873aa)
 
 
-# LISTS
+## LISTS
 
 Shows all the lists and according tasks including a list called "All Tasks" which shows ALL tasks in increasing order of due date, in case you want to change anything
 
