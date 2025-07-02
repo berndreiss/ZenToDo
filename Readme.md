@@ -28,7 +28,7 @@ The App contains the following main layouts:
 ![image](https://github.com/user-attachments/assets/27c3373e-0c51-4b47-b71e-00cedd3308d3)
 ![image](https://github.com/user-attachments/assets/545ae7f7-6ae2-4a64-9d62-9c8f447002f4)
 
-You also have different options for a given task, sending them directly to FOCUS, editing the task, setting a reminder date, making them recurrenct or adding them to a list.
+You also have different additional options for a given task: sending them directly to FOCUS, editing the task, setting a reminder date, making them recurrenct or adding them to a list.
 
 ![image](https://github.com/user-attachments/assets/59693df6-5690-40eb-a5e4-ed56a3f25885)
 
